@@ -21,7 +21,7 @@
         <img src="https://img.shields.io/github/last-commit/WeslayCodes/BoarBot/main?logo=github&label=last%20release" alt="Last Release Date">
     </a>
 </p>
-
+dummy
 <p align="center">
   <a href="https://boarbot.dev">Website</a>
   •
