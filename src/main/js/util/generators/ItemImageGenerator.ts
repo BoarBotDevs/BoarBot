@@ -142,7 +142,6 @@ export class ItemImageGenerator {
         fs.writeFileSync(tempAnimBasePath, this.buffer);
 
         const scriptOptions = {
-            pythonPath: 'py',
             args: [
                 JSON.stringify(this.config.pathConfig),
                 JSON.stringify(this.config.numberConfig),
@@ -231,7 +230,6 @@ export class ItemImageGenerator {
         const script = this.config.pathConfig.userOverlayScript;
 
         const scriptOptions = {
-            pythonPath: 'py',
             args: [
                 JSON.stringify(this.config.pathConfig),
                 JSON.stringify(this.config.colorConfig),
