@@ -330,6 +330,12 @@ export default class CollectionSubcommand implements Subcommand {
 
                 // User wants to send a gift in powerup view
                 case collComponents.gift.customId: {
+                    const isBanned = await InteractionUtils.handleBanned(interaction, this.config);
+                    if (isBanned) return;
+    
+                    await interaction.deferReply({ ephemeral: true });
+                    this.interaction = interaction;
+                    
                     await this.doGift();
                     break;
                 }
