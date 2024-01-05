@@ -276,7 +276,7 @@ export class BoarGift {
         const isFestiveWeek = curDate.getMonth() === 11 && curDate.getDate() >= 24;
 
         // Gives powerup if santa boar gotten outside festive week
-        if (outcome === 0 && subOutcome === 1 && !isFestiveWeek) {
+        if (outcome === 0 && subOutcome === 0 && !isFestiveWeek) {
             outcome = 2;
             subOutcome = this.getOutcome(outcome);
         }
