@@ -130,9 +130,12 @@ export class CollectionImageGenerator {
             ? moment(this.boarUser.stats.general.lastDaily).fromNow()
             : strConfig.unavailable;
 
-        const bigFont = `${nums.fontBig}px ${strConfig.fontName}`;
-        const mediumFont = `${nums.fontMedium}px ${strConfig.fontName}`;
+        const lastDailyColor = Date.now() - this.boarUser.stats.general.lastDaily > nums.oneDay
+            ? colorConfig.error
+            : colorConfig.green;
+
         const smallFont = `${nums.fontSmallMedium}px ${strConfig.fontName}`;
+        const smallestFont = `${nums.fontSmallest}px ${strConfig.fontName}`;
 
         const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
@@ -141,36 +144,38 @@ export class CollectionImageGenerator {
         await this.drawTopBar(ctx);
 
         await CanvasUtils.drawText(
-            ctx, strConfig.collScoreLabel, nums.collScoreLabelPos, mediumFont, 'center', colorConfig.font
+            ctx, strConfig.collScoreLabel, nums.collScoreLabelPos, smallFont, 'center', colorConfig.font
         );
         await CanvasUtils.drawText(
-            ctx, '$' + scoreString, nums.collScorePos, smallFont, 'center', colorConfig.bucks
+            ctx, '$' + scoreString, nums.collScorePos, smallestFont, 'center', colorConfig.bucks
         );
 
         await CanvasUtils.drawText(
-            ctx, strConfig.collTotalLabel, nums.collTotalLabelPos, mediumFont, 'center', colorConfig.font
+            ctx, strConfig.collTotalLabel, nums.collTotalLabelPos, smallFont, 'center', colorConfig.font
         );
-        await CanvasUtils.drawText(ctx, totalString, nums.collTotalPos, smallFont, 'center', colorConfig.font);
+        await CanvasUtils.drawText(ctx, totalString, nums.collTotalPos, smallestFont, 'center', colorConfig.silver);
 
         await CanvasUtils.drawText(
-            ctx, strConfig.collUniquesLabel, nums.collUniquesLabelPos, mediumFont, 'center', colorConfig.font
+            ctx, strConfig.collUniquesLabel, nums.collUniquesLabelPos, smallFont, 'center', colorConfig.font
         );
-        await CanvasUtils.drawText(ctx, uniqueString, nums.collUniquePos, smallFont, 'center', colorConfig.font);
+        await CanvasUtils.drawText(ctx, uniqueString, nums.collUniquePos, smallestFont, 'center', colorConfig.silver);
 
         await CanvasUtils.drawText(
-            ctx, strConfig.collDailiesLabel, nums.collDailiesLabelPos, mediumFont, 'center', colorConfig.font
+            ctx, strConfig.collDailiesLabel, nums.collDailiesLabelPos, smallFont, 'center', colorConfig.font
         );
-        await CanvasUtils.drawText(ctx, dailiesString, nums.collDailiesPos, smallFont, 'center', colorConfig.font);
+        await CanvasUtils.drawText(ctx, dailiesString, nums.collDailiesPos, smallestFont, 'center', colorConfig.silver);
 
         await CanvasUtils.drawText(
-            ctx, strConfig.collStreakLabel, nums.collStreakLabelPos, mediumFont, 'center', colorConfig.font
+            ctx, strConfig.collStreakLabel, nums.collStreakLabelPos, smallFont, 'center', colorConfig.font
         );
-        await CanvasUtils.drawText(ctx, streakString, nums.collStreakPos, smallFont, 'center', colorConfig.font);
+        await CanvasUtils.drawText(ctx, streakString, nums.collStreakPos, smallestFont, 'center', colorConfig.silver);
 
         await CanvasUtils.drawText(
-            ctx, strConfig.collLastDailyLabel, nums.collLastDailyLabelPos, bigFont, 'center', colorConfig.font
+            ctx, strConfig.collLastDailyLabel, nums.collLastDailyLabelPos, smallFont, 'center', colorConfig.font
         );
-        await CanvasUtils.drawText(ctx, lastDailyString, nums.collLastDailyPos, bigFont, 'center', colorConfig.font);
+        await CanvasUtils.drawText(
+            ctx, lastDailyString, nums.collLastDailyPos, smallFont, 'center', lastDailyColor
+        );
 
         this.normalBase = canvas.toBuffer('image/png');
     }
@@ -192,7 +197,6 @@ export class CollectionImageGenerator {
         const colorConfig = this.config.colorConfig;
 
         const boarsFolder = pathConfig.boars;
-        const collectionOverlay = pathConfig.collAssets + pathConfig.collOverlay;
 
         const boarsPerPage = nums.collBoarsPerPage;
 
@@ -217,15 +221,17 @@ export class CollectionImageGenerator {
                 nums.collBoarStartY + Math.floor(i / nums.collBoarCols) * nums.collBoarSpacingY
             ] as [number, number];
 
+            ctx.font = smallestFont;
+
+            const boarAmt = curBoars[i].num.toLocaleString();
+            const rectangleWidth = ctx.measureText(boarAmt).width + 20;
+
             const lineStartPos = [
-                nums.collRarityStartX + (i % nums.collBoarCols) * nums.collBoarSpacingX,
-                nums.collRarityStartY + Math.floor(i / nums.collBoarCols) * nums.collBoarSpacingY
+                boarImagePos[0] + rectangleWidth, boarImagePos[1]
             ] as [number, number];
 
             const lineEndPos = [
-                nums.collRarityStartX + nums.collRarityEndDiff + (i % nums.collBoarCols) * nums.collBoarSpacingX,
-                nums.collRarityStartY - nums.collRarityEndDiff +
-                Math.floor(i / nums.collBoarCols) * nums.collBoarSpacingY
+                boarImagePos[0] + rectangleWidth, boarImagePos[1] + nums.collRarityHeight
             ] as [number, number];
 
             const boarFile = curBoars[i].staticFile
@@ -233,6 +239,13 @@ export class CollectionImageGenerator {
                 : boarsFolder + curBoars[i].file;
 
             ctx.drawImage(await Canvas.loadImage(boarFile), ...boarImagePos, ...nums.collBoarSize);
+
+            await CanvasUtils.drawRect(ctx, boarImagePos, [rectangleWidth, nums.collRarityHeight], colorConfig.dark);
+
+            await CanvasUtils.drawText(
+                ctx, boarAmt, [boarImagePos[0] + 10, boarImagePos[1] + 40], smallestFont, 'left', colorConfig.font
+            );
+
             await CanvasUtils.drawLine(
                 ctx, lineStartPos, lineEndPos, nums.collRarityWidth, curBoars[i].color
             );
@@ -258,7 +271,6 @@ export class CollectionImageGenerator {
             ctx.drawImage(await Canvas.loadImage(boarFile), ...nums.collFavBoarPos, ...nums.collFavBoarSize);
         }
 
-        ctx.drawImage(await Canvas.loadImage(collectionOverlay), ...nums.originPos, ...nums.collImageSize);
         await CanvasUtils.drawText(
             ctx,
             strConfig.collFavLabel,
@@ -816,9 +828,8 @@ export class CollectionImageGenerator {
         const nums = this.config.numberConfig;
         const colorConfig = this.config.colorConfig;
 
-        const noClan = pathConfig.collAssets + pathConfig.clanNone;
-
-        const userTag = this.boarUser.user.username.substring(0, nums.maxUsernameLength);
+        const userCollection = this.boarUser.user.displayName.substring(0, nums.maxUsernameLength) +
+            strConfig.collUserExtra;
         let userAvatar;
 
         try {
@@ -834,37 +845,53 @@ export class CollectionImageGenerator {
 
         const mediumFont = `${nums.fontMedium}px ${strConfig.fontName}`;
 
-        ctx.drawImage(userAvatar, ...nums.collUserAvatarPos, ...nums.collUserAvatarSize);
-        await CanvasUtils.drawText(ctx, userTag, nums.collUserTagPos, mediumFont, 'left', colorConfig.font);
+        await CanvasUtils.drawCircleImage(ctx, userAvatar, nums.collUserAvatarPos, nums.collUserAvatarWidth);
+        await CanvasUtils.drawText(ctx, userCollection, nums.collUserTagPos, mediumFont, 'center', colorConfig.font);
         await CanvasUtils.drawText(
-            ctx, strConfig.collDateLabel, nums.collDateLabelPos, mediumFont, 'left', colorConfig.font
+            ctx, strConfig.collDateLabel, nums.collDateLabelPos, mediumFont, 'center', colorConfig.font
         );
-        await CanvasUtils.drawText(ctx, firstDate, nums.collDatePos, mediumFont, 'left', colorConfig.font);
-        ctx.drawImage(await Canvas.loadImage(noClan), ...nums.collClanPos, ...nums.collClanSize);
+        await CanvasUtils.drawText(ctx, firstDate, nums.collDatePos, mediumFont, 'center', colorConfig.font);
 
         // Draws badge information if the user has badges
 
-        let numBadges = 0;
+        const validBadges = [] as string[];
         for (let i=0; i<Object.keys(this.boarUser.itemCollection.badges).length; i++) {
             const badgeID = Object.keys(this.boarUser.itemCollection.badges)[i];
 
             if (!this.boarUser.itemCollection.badges[badgeID].possession) continue;
-
-            const badgesFolder = pathConfig.badges;
-            const badgeXY = [
-                nums.collBadgeStart + numBadges * nums.collBadgeSpacing, nums.collBadgeY
-            ] as [number, number];
-            const badgeFile = badgesFolder + this.config.itemConfigs.badges[badgeID].file;
-
-            ctx.drawImage(await Canvas.loadImage(badgeFile), ...badgeXY, ...nums.collBadgeSize);
-
-            numBadges++;
+            validBadges.push(badgeID);
         }
 
-        if (numBadges === 0) {
+        if (validBadges.length === 0) {
             await CanvasUtils.drawText(
-                ctx, strConfig.collNoBadges, nums.collNoBadgePos, mediumFont, 'left', colorConfig.font
+                ctx, strConfig.collNoBadges, nums.collNoBadgePos, mediumFont, 'center', colorConfig.font
             );
+        }
+
+        let curBadgeStartX = nums.collBadgeStart;
+        for (let i=0; i<validBadges.length; i++) {
+            const validBadge = validBadges[i];
+
+            // Sets starting X of current row (11 in each row)
+            if (i === 0) {
+                curBadgeStartX = nums.collBadgeStart - (nums.collBadgeSpacing / 2 * (validBadges.length - 1));
+                ctx.beginPath();
+                ctx.roundRect(
+                    curBadgeStartX - nums.border,
+                    nums.collBadgeY - nums.border,
+                    nums.border * 2 + (validBadges.length - 1) * (nums.collBadgeSpacing) + nums.collBadgeSize[0],
+                    nums.border * 2 + nums.collBadgeSize[1],
+                    nums.border
+                );
+                ctx.fillStyle = this.config.colorConfig.mid;
+                ctx.fill();
+            }
+
+            const badgesFolder = pathConfig.badges;
+            const badgeXY = [curBadgeStartX + i * nums.collBadgeSpacing, nums.collBadgeY] as [number, number];
+            const badgeFile = badgesFolder + this.config.itemConfigs.badges[validBadge].file;
+
+            ctx.drawImage(await Canvas.loadImage(badgeFile), ...badgeXY, ...nums.collBadgeSize);
         }
     }
 

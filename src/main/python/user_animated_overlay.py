@@ -110,11 +110,10 @@ for frame in ImageSequence.Iterator(item_image):
 
     if gifter_user_tag != '' and gifter_avatar_url != '':
         new_frame_draw.rounded_rectangle(
-            xy=(
-                box_x, to_box_y,
-                box_x+text_small_medium.getlength('To')+text_box_extra,
-                to_box_y+box_height
-            ), radius=num_config['border'], fill=color_config['dark']
+            xy=(box_x, to_box_y, box_x+text_small_medium.getlength('To')+text_box_extra, to_box_y+box_height),
+            radius=num_config['border'],
+            fill=color_config['mid'],
+            corners=(False, True, True, False)
         )
         new_frame_draw.text(
             to_pos, 'To', font_color, font=text_small_medium, anchor='ls'
@@ -122,10 +121,11 @@ for frame in ImageSequence.Iterator(item_image):
 
         new_frame_draw.rounded_rectangle(
             xy=(
-                box_x, from_box_y,
-                box_x+text_small_medium.getlength('From')+text_box_extra,
-                from_box_y+box_height
-            ), radius=num_config['border'], fill=color_config['dark']
+                box_x, from_box_y, box_x+text_small_medium.getlength('From')+text_box_extra, from_box_y+box_height
+            ),
+            radius=num_config['border'],
+            fill=color_config['mid'],
+            corners=(False, True, True, False)
         )
         new_frame_draw.text(
             from_pos, 'From', font_color, font=text_small_medium, anchor='ls'
@@ -133,10 +133,14 @@ for frame in ImageSequence.Iterator(item_image):
 
         new_frame_draw.rounded_rectangle(
             xy=(
-                box_x, gifter_box_y,
+                box_x,
+                gifter_box_y,
                 box_x+text_small_medium.getlength(gifter_user_tag)+user_box_extra,
                 gifter_box_y+box_height
-            ), radius=num_config['border'], fill=color_config['dark']
+            ),
+            radius=num_config['border'],
+            fill=color_config['mid'],
+            corners=(False, True, True, False)
         )
         new_frame_draw.text(
             gifter_tag_pos, gifter_user_tag.encode('utf-16').decode('utf-16'),
@@ -147,10 +151,14 @@ for frame in ImageSequence.Iterator(item_image):
 
     new_frame_draw.rounded_rectangle(
         xy=(
-            box_x, user_box_y,
+            box_x,
+            user_box_y,
             box_x+text_small_medium.getlength(user_tag)+user_box_extra,
             user_box_y+box_height
-        ), radius=num_config['border'], fill=color_config['dark']
+        ),
+        radius=num_config['border'],
+        fill=color_config['mid'],
+        corners=(False, True, True, False)
     )
     new_frame_draw.text(
         user_tag_pos, user_tag.encode('utf-16').decode('utf-16'), font_color, font=text_small_medium, anchor='ls'
@@ -159,10 +167,14 @@ for frame in ImageSequence.Iterator(item_image):
     if score != '' and score != '0' and gifter_user_tag == '':
         new_frame_draw.rounded_rectangle(
             xy=(
-                box_x, bucks_box_y,
+                box_x,
+                bucks_box_y,
                 box_x+text_small_medium.getlength('+$' + score)+text_box_extra,
                 bucks_box_y+box_height
-            ), radius=num_config['border'], fill=color_config['dark']
+            ),
+            radius=num_config['border'],
+            fill=color_config['mid'],
+            corners=(False, True, True, False)
         )
         new_frame_draw.text(
             bucks_pos, '+', font_color, font=text_small_medium, anchor='ls'

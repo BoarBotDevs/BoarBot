@@ -286,10 +286,13 @@ export class ItemImageGenerator {
 
             ctx.beginPath();
             ctx.roundRect(
-                nums.itemBoxX, nums.itemBoxOneY,
-                ctx.measureText('To').width + nums.itemTextBoxExtra, nums.itemBoxHeight, nums.border
+                nums.itemBoxX,
+                nums.itemBoxOneY,
+                ctx.measureText('To').width + nums.itemTextBoxExtra,
+                nums.itemBoxHeight,
+                [0, nums.border, nums.border, 0]
             );
-            ctx.fillStyle = this.config.colorConfig.dark;
+            ctx.fillStyle = this.config.colorConfig.mid;
             ctx.fill();
 
             await CanvasUtils.drawText(
@@ -307,9 +310,9 @@ export class ItemImageGenerator {
                 nums.itemBoxThreeY,
                 ctx.measureText('From').width + nums.itemTextBoxExtra,
                 nums.itemBoxHeight,
-                nums.border
+                [0, nums.border, nums.border, 0]
             );
-            ctx.fillStyle = this.config.colorConfig.dark;
+            ctx.fillStyle = this.config.colorConfig.mid;
             ctx.fill();
 
             await CanvasUtils.drawText(
@@ -327,9 +330,9 @@ export class ItemImageGenerator {
                 nums.itemBoxFourY,
                 ctx.measureText(this.giftingUserTag).width + nums.itemUserBoxExtra,
                 nums.itemBoxHeight,
-                nums.border
+                [0, nums.border, nums.border, 0]
             );
-            ctx.fillStyle = this.config.colorConfig.dark;
+            ctx.fillStyle = this.config.colorConfig.mid;
             ctx.fill();
 
             await CanvasUtils.drawText(
@@ -355,9 +358,9 @@ export class ItemImageGenerator {
             userBoxY,
             ctx.measureText(this.userTag).width + nums.itemUserBoxExtra,
             nums.itemBoxHeight,
-            nums.border
+            [0, nums.border, nums.border, 0]
         );
-        ctx.fillStyle = this.config.colorConfig.dark;
+        ctx.fillStyle = this.config.colorConfig.mid;
         ctx.fill();
 
         await CanvasUtils.drawText(
@@ -388,9 +391,9 @@ export class ItemImageGenerator {
                 nums.itemBoxTwoY,
                 ctx.measureText('+$' + score).width + nums.itemTextBoxExtra,
                 nums.itemBoxHeight,
-                nums.border
+                [0, nums.border, nums.border, 0]
             );
-            ctx.fillStyle = this.config.colorConfig.dark;
+            ctx.fillStyle = this.config.colorConfig.mid;
             ctx.fill();
 
             await CanvasUtils.drawText(

@@ -53,7 +53,6 @@ export class PathConfig {
 
     // Image/asset file names for collection images
 
-    public readonly collOverlay = '' as string;
     public readonly collUnderlay = '' as string;
     public readonly collDetailOverlay = '' as string;
     public readonly collDetailUnderlay = '' as string;
@@ -63,7 +62,6 @@ export class PathConfig {
     public readonly collPowerUnderlay3 = '' as string;
     public readonly collEnhanceUnderlay = '' as string;
     public readonly collGiftUnderlay = '' as string;
-    public readonly clanNone = '' as string;
     public readonly cellNone = '' as string;
     public readonly cellCommon = '' as string;
     public readonly cellUncommon = '' as string;

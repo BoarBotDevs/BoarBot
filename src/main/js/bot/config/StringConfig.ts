@@ -63,6 +63,7 @@ export class StringConfig {
 
     public readonly collNoBadges = '' as string;
     public readonly collDateLabel = '' as string;
+    public readonly collUserExtra = '' as string;
     public readonly collScoreLabel = '' as string;
     public readonly collTotalLabel = '' as string;
     public readonly collUniquesLabel = '' as string;

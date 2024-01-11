@@ -194,9 +194,9 @@ export default class DailySubcommand implements Subcommand {
         // Sends all images of boars gotten
         for (let i=0; i<attachments.length; i++) {
             if (i === 0) {
-                await this.interaction.editReply({ files: [attachments[i]] })
+                await this.interaction.editReply({ files: [attachments[i]] });
             } else {
-                await this.interaction.followUp({ files: [attachments[i]] })
+                await this.interaction.followUp({ files: [attachments[i]] });
             }
         }
 

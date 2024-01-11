@@ -91,10 +91,8 @@ export class NumberConfig {
     public readonly collBoarsPerPage = 0 as number;
     public readonly collImageSize = [0, 0] as [number, number];
     public readonly collUserAvatarPos = [0, 0] as [number, number];
-    public readonly collUserAvatarSize = [0, 0] as [number, number];
+    public readonly collUserAvatarWidth = 0 as number;
     public readonly collUserTagPos = [0, 0] as [number, number];
-    public readonly collClanPos = [0, 0] as [number, number];
-    public readonly collClanSize = [0, 0] as [number, number];
     public readonly collDateLabelPos = [0, 0] as [number, number];
     public readonly collDatePos = [0, 0] as [number, number];
     public readonly collNoBadgePos = [0, 0] as [number, number];
@@ -185,7 +183,7 @@ export class NumberConfig {
     public readonly collBoarSize = [0, 0] as [number, number];
     public readonly collRarityStartX = 0 as number;
     public readonly collRarityStartY = 0 as number;
-    public readonly collRarityEndDiff = 0 as number;
+    public readonly collRarityHeight = 0 as number;
     public readonly collRarityWidth = 0 as number;
     public readonly collLastBoarPos = [0, 0] as [number, number];
     public readonly collLastBoarSize = [0, 0] as [number, number];
