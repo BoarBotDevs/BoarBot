@@ -1,4 +1,4 @@
-import Canvas from 'canvas';
+import {Canvas, loadImage, CanvasRenderingContext2D} from 'skia-canvas';
 import {BotConfig} from '../../bot/config/BotConfig';
 import {BoarUtils} from '../boar/BoarUtils';
 import {CanvasUtils} from './CanvasUtils';
@@ -137,10 +137,10 @@ export class CollectionImageGenerator {
         const smallFont = `${nums.fontSmallMedium}px ${strConfig.fontName}`;
         const smallestFont = `${nums.fontSmallest}px ${strConfig.fontName}`;
 
-        const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
+        const canvas = new Canvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
         await this.drawTopBar(ctx);
 
         await CanvasUtils.drawText(
@@ -177,7 +177,7 @@ export class CollectionImageGenerator {
             ctx, lastDailyString, nums.collLastDailyPos, smallFont, 'center', lastDailyColor
         );
 
-        this.normalBase = canvas.toBuffer('image/png');
+        this.normalBase = await canvas.png;
     }
 
     /**
@@ -207,10 +207,10 @@ export class CollectionImageGenerator {
 
         const curBoars = this.allBoars.slice(page * boarsPerPage, (page+1)*boarsPerPage);
 
-        const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
+        const canvas = new Canvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(this.normalBase), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(this.normalBase), ...nums.originPos, ...nums.collImageSize);
 
         ctx.drawImage(canvas, ...nums.originPos, ...nums.collImageSize);
 
@@ -238,7 +238,7 @@ export class CollectionImageGenerator {
                 ? boarsFolder + curBoars[i].staticFile
                 : boarsFolder + curBoars[i].file;
 
-            ctx.drawImage(await Canvas.loadImage(boarFile), ...boarImagePos, ...nums.collBoarSize);
+            ctx.drawImage(await loadImage(boarFile), ...boarImagePos, ...nums.collBoarSize);
 
             await CanvasUtils.drawRect(ctx, boarImagePos, [rectangleWidth, nums.collRarityHeight], colorConfig.dark);
 
@@ -258,7 +258,7 @@ export class CollectionImageGenerator {
                 ? boarsFolder + lastBoarDetails.staticFile
                 : boarsFolder + lastBoarDetails.file;
 
-            ctx.drawImage(await Canvas.loadImage(boarFile), ...nums.collLastBoarPos, ...nums.collLastBoarSize);
+            ctx.drawImage(await loadImage(boarFile), ...nums.collLastBoarPos, ...nums.collLastBoarSize);
         }
 
         // Draws favorite boar and rarity
@@ -268,7 +268,7 @@ export class CollectionImageGenerator {
                 ? boarsFolder + favoriteBoarDetails.staticFile
                 : boarsFolder + favoriteBoarDetails.file;
 
-            ctx.drawImage(await Canvas.loadImage(boarFile), ...nums.collFavBoarPos, ...nums.collFavBoarSize);
+            ctx.drawImage(await loadImage(boarFile), ...nums.collFavBoarPos, ...nums.collFavBoarSize);
         }
 
         await CanvasUtils.drawText(
@@ -292,7 +292,7 @@ export class CollectionImageGenerator {
                 : colorConfig['rarity' + lastBoarRarity[0]]
         );
 
-        return new AttachmentBuilder(canvas.toBuffer('image/png'), { name:`${strConfig.defaultImageName}.png` });
+        return new AttachmentBuilder(await canvas.png, { name:`${strConfig.defaultImageName}.png` });
     }
 
     /**
@@ -307,10 +307,10 @@ export class CollectionImageGenerator {
 
         const mediumFont = `${nums.fontMedium}px ${strConfig.fontName}`;
 
-        const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
+        const canvas = new Canvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
         await this.drawTopBar(ctx);
 
         await CanvasUtils.drawText(
@@ -334,7 +334,7 @@ export class CollectionImageGenerator {
             ctx, strConfig.collDescriptionLabel, nums.collDescriptionLabelPos, mediumFont, 'center', colorConfig.font
         );
 
-        this.detailedBase = canvas.toBuffer('image/png');
+        this.detailedBase = await canvas.png;
     }
 
     /**
@@ -372,12 +372,12 @@ export class CollectionImageGenerator {
         const lastObtainedDate = new Date(curBoar.lastObtained)
             .toLocaleString('en-US', { month:'long', day:'numeric', year:'numeric' });
 
-        const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
+        const canvas = new Canvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(this.detailedBase), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(this.detailedBase), ...nums.originPos, ...nums.collImageSize);
         ctx.drawImage(canvas, ...nums.originPos, ...nums.collImageSize);
-        ctx.drawImage(await Canvas.loadImage(boarFile), ...nums.collIndivBoarPos, ...nums.collIndivBoarSize);
+        ctx.drawImage(await loadImage(boarFile), ...nums.collIndivBoarPos, ...nums.collIndivBoarSize);
 
         // Shows a star when on a favorite boar
 
@@ -392,7 +392,7 @@ export class CollectionImageGenerator {
                 nums.collIndivFavHeight
             ] as [number, number];
 
-            ctx.drawImage(await Canvas.loadImage(favoriteFile), ...favoritePos, ...nums.collIndivFavSize);
+            ctx.drawImage(await loadImage(favoriteFile), ...favoritePos, ...nums.collIndivFavSize);
         }
 
         await CanvasUtils.drawText(
@@ -432,9 +432,9 @@ export class CollectionImageGenerator {
             [colorConfig.silver]
         );
 
-        ctx.drawImage(await Canvas.loadImage(collectionOverlay), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(collectionOverlay), ...nums.originPos, ...nums.collImageSize);
 
-        return new AttachmentBuilder(canvas.toBuffer('image/png'), { name:`${strConfig.defaultImageName}.png` });
+        return new AttachmentBuilder(await canvas.png, { name:`${strConfig.defaultImageName}.png` });
     }
 
     /**
@@ -515,10 +515,10 @@ export class CollectionImageGenerator {
         const gifts = Math.min(powerupItemsData.gift.numTotal, nums.maxSmallPow).toLocaleString();
         const clones = Math.min(powerupItemsData.clone.numTotal, nums.maxSmallPow).toLocaleString();
 
-        const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
+        const canvas = new Canvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
         await this.drawTopBar(ctx);
 
         await CanvasUtils.drawText(
@@ -606,10 +606,10 @@ export class CollectionImageGenerator {
         });
 
         chargeStr += ` Charge! (${powerupItemsData.enhancer.numTotal}/${nums.maxEnhancers})`;
-        ctx.drawImage(await Canvas.loadImage(cellImagePath), ...nums.collCellPos, ...nums.collCellSize);
+        ctx.drawImage(await loadImage(cellImagePath), ...nums.collCellPos, ...nums.collCellSize);
         await CanvasUtils.drawText(ctx, chargeStr, nums.collChargePos, mediumFont, 'center', chargeColor);
 
-        this.powerupsBase = canvas.toBuffer('image/png');
+        this.powerupsBase = await canvas.png;
     }
 
     /**
@@ -639,10 +639,10 @@ export class CollectionImageGenerator {
         const giftsOpened = Math.min(powerupItemsData.gift.numOpened as number, nums.maxPowBase).toLocaleString();
         const giftsMost = Math.min(powerupItemsData.gift.highestTotal, nums.maxPowBase).toLocaleString();
 
-        const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
+        const canvas = new Canvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
         await this.drawTopBar(ctx);
 
         await CanvasUtils.drawText(
@@ -692,7 +692,7 @@ export class CollectionImageGenerator {
         );
         await CanvasUtils.drawText(ctx, giftsMost, nums.collMostGiftsPos, smallMedium, 'center', colorConfig.font);
 
-        this.powerupsBase = canvas.toBuffer('image/png');
+        this.powerupsBase = await canvas.png;
     }
 
     /**
@@ -732,10 +732,10 @@ export class CollectionImageGenerator {
             }
         }
 
-        const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
+        const canvas = new Canvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(collectionUnderlay), ...nums.originPos, ...nums.collImageSize);
         await this.drawTopBar(ctx);
 
         await CanvasUtils.drawText(
@@ -787,7 +787,7 @@ export class CollectionImageGenerator {
             );
         }
 
-        this.powerupsBase = canvas.toBuffer('image/png');
+        this.powerupsBase = await canvas.png;
     }
 
     /**
@@ -804,16 +804,16 @@ export class CollectionImageGenerator {
         const nums = this.config.numberConfig;
         const collectionOverlay = this.config.pathConfig.collAssets + this.config.pathConfig.collPowerOverlay;
 
-        const canvas = Canvas.createCanvas(nums.collImageSize[0], nums.collImageSize[1]);
+        const canvas = new Canvas(nums.collImageSize[0], nums.collImageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(this.powerupsBase), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(this.powerupsBase), ...nums.originPos, ...nums.collImageSize);
         ctx.drawImage(canvas, ...nums.originPos, ...nums.collImageSize);
 
-        ctx.drawImage(await Canvas.loadImage(collectionOverlay), ...nums.originPos, ...nums.collImageSize);
+        ctx.drawImage(await loadImage(collectionOverlay), ...nums.originPos, ...nums.collImageSize);
 
         return new AttachmentBuilder(
-            canvas.toBuffer('image/png'), { name:`${this.config.stringConfig.defaultImageName}.png` }
+            await canvas.png, { name:`${this.config.stringConfig.defaultImageName}.png` }
         );
     }
 
@@ -822,7 +822,7 @@ export class CollectionImageGenerator {
      *
      * @param ctx - CanvasRenderingContext2D
      */
-    public async drawTopBar(ctx: Canvas.CanvasRenderingContext2D): Promise<void> {
+    public async drawTopBar(ctx: CanvasRenderingContext2D): Promise<void> {
         const strConfig = this.config.stringConfig;
         const pathConfig = this.config.pathConfig;
         const nums = this.config.numberConfig;
@@ -833,9 +833,9 @@ export class CollectionImageGenerator {
         let userAvatar;
 
         try {
-            userAvatar = await Canvas.loadImage(this.boarUser.user.displayAvatarURL({ extension: 'png' }));
+            userAvatar = await loadImage(this.boarUser.user.displayAvatarURL({ extension: 'png' }));
         } catch {
-            userAvatar = await Canvas.loadImage(pathConfig.otherAssets + pathConfig.noAvatar);
+            userAvatar = await loadImage(pathConfig.otherAssets + pathConfig.noAvatar);
         }
 
         const firstDate = this.boarUser.stats.general.firstDaily > 0
@@ -891,7 +891,7 @@ export class CollectionImageGenerator {
             const badgeXY = [curBadgeStartX + i * nums.collBadgeSpacing, nums.collBadgeY] as [number, number];
             const badgeFile = badgesFolder + this.config.itemConfigs.badges[validBadge].file;
 
-            ctx.drawImage(await Canvas.loadImage(badgeFile), ...badgeXY, ...nums.collBadgeSize);
+            ctx.drawImage(await loadImage(badgeFile), ...badgeXY, ...nums.collBadgeSize);
         }
     }
 
@@ -920,14 +920,14 @@ export class CollectionImageGenerator {
         const nextRarityColor = colorConfig['rarity' + (nextRarityIndex + 1)];
         const scoreLost = (this.allBoars[page].rarity[1].enhancersNeeded * 5).toLocaleString();
 
-        const canvas = Canvas.createCanvas(...nums.enhanceImageSize);
+        const canvas = new Canvas(...nums.enhanceImageSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(confirmUnderlay), ...nums.originPos, ...nums.enhanceImageSize);
+        ctx.drawImage(await loadImage(confirmUnderlay), ...nums.originPos, ...nums.enhanceImageSize);
 
-        ctx.drawImage(await Canvas.loadImage(cellImagePath), ...nums.enhanceCellPos, ...nums.enhanceCellSize);
+        ctx.drawImage(await loadImage(cellImagePath), ...nums.enhanceCellPos, ...nums.enhanceCellSize);
 
-        ctx.drawImage(await Canvas.loadImage(boarImagePath), ...nums.enhanceBoarPos, ...nums.enhanceBoarSize);
+        ctx.drawImage(await loadImage(boarImagePath), ...nums.enhanceBoarPos, ...nums.enhanceBoarSize);
 
         await CanvasUtils.drawText(
             ctx, nextRarityName.toUpperCase(), nums.enhanceRarityPos, mediumFont, 'center', nextRarityColor
@@ -947,7 +947,7 @@ export class CollectionImageGenerator {
         );
 
         return new AttachmentBuilder(
-            canvas.toBuffer('image/png'), { name:`${this.config.stringConfig.defaultImageName}.png` }
+            await canvas.png, { name:`${this.config.stringConfig.defaultImageName}.png` }
         );
     }
 
@@ -963,10 +963,10 @@ export class CollectionImageGenerator {
 
         const fontBig = `${nums.fontBig}px ${strConfig.fontName}`;
 
-        const canvas = Canvas.createCanvas(...nums.giftImageSize);
+        const canvas = new Canvas(...nums.giftImageSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(giftUnderlay), ...nums.originPos, ...nums.giftImageSize);
+        ctx.drawImage(await loadImage(giftUnderlay), ...nums.originPos, ...nums.giftImageSize);
 
         CanvasUtils.drawText(
             ctx,
@@ -979,7 +979,7 @@ export class CollectionImageGenerator {
         );
 
         return new AttachmentBuilder(
-            canvas.toBuffer('image/png'), { name:`${this.config.stringConfig.defaultImageName}.png` }
+            await canvas.png, { name:`${this.config.stringConfig.defaultImageName}.png` }
         );
     }
 }

@@ -1,4 +1,4 @@
-import Canvas from 'canvas';
+import {Canvas, Image, loadImage, CanvasRenderingContext2D} from 'skia-canvas';
 
 /**
  * {@link CanvasUtils CanvasUtils.ts}
@@ -23,8 +23,8 @@ export class CanvasUtils {
      * @param wrap - Whether to wrap the text
      * @param width - Width to wrap/shrink at
      */
-    public static drawText(
-        ctx: Canvas.CanvasRenderingContext2D,
+    public static async drawText(
+        ctx: CanvasRenderingContext2D,
         text: string,
         pos: [number, number],
         font: string,
@@ -34,7 +34,7 @@ export class CanvasUtils {
         wrap = false,
         coloredContents = [''],
         secondaryColors = [color]
-    ): number {
+    ): Promise<number> {
         ctx.font = font;
         ctx.textAlign = align;
         ctx.textBaseline = 'alphabetic';
@@ -126,7 +126,7 @@ export class CanvasUtils {
                     coloredContents[lastIndex] = coloredContents[lastIndex].substring(numCharsToColor).trimEnd();
                 }
 
-                this.drawColoredText(
+                await this.drawColoredText(
                     ctx,
                     line,
                     'center',
@@ -146,9 +146,9 @@ export class CanvasUtils {
                 font = (parseInt(font)-1) + font.substring(font.indexOf('px'));
                 ctx.font = font;
             }
-            this.drawColoredText(ctx, text, align, pos, replaceIndexes, coloredContents, color, secondaryColors);
+            await this.drawColoredText(ctx, text, align, pos, replaceIndexes, coloredContents, color, secondaryColors);
         } else {
-            this.drawColoredText(ctx, text, align, pos, replaceIndexes, coloredContents, color, secondaryColors);
+            await this.drawColoredText(ctx, text, align, pos, replaceIndexes, coloredContents, color, secondaryColors);
         }
 
         return heightDiff;
@@ -167,8 +167,8 @@ export class CanvasUtils {
      * @param secondaryColors - Secondary colors
      * @private
      */
-    private static drawColoredText(
-        ctx: Canvas.CanvasRenderingContext2D,
+    private static async drawColoredText(
+        ctx: CanvasRenderingContext2D,
         text: string,
         align: string,
         pos: [number, number],
@@ -176,7 +176,7 @@ export class CanvasUtils {
         coloredContents: string[],
         color: string,
         secondaryColors: string[]
-    ): void {
+    ): Promise<void> {
         const priorNormText = [] as string[];
         let textEnd = '';
 
@@ -194,7 +194,7 @@ export class CanvasUtils {
 
         if (align === 'center') {
             for (let i=0; i<replaceIndexes.length; i++) {
-                this.applyTextGradient(
+                await this.applyTextGradient(
                     ctx, priorNormText[i], [
                         pos[0] - ctx.measureText(text.substring(replaceIndexes[i])).width / 2 + (i > 0
                             ? ctx.measureText(text.substring(0, replaceIndexes[i-1]) + coloredContents[i-1]).width / 2
@@ -205,7 +205,7 @@ export class CanvasUtils {
 
                 if (replaceIndexes[i] === -1) break;
 
-                this.applyTextGradient(
+                await this.applyTextGradient(
                     ctx, coloredContents[i], [
                         pos[0] + ctx.measureText(text.substring(0, replaceIndexes[i])).width / 2 - ctx.measureText(
                             text.substring(replaceIndexes[i] + coloredContents[i].length)
@@ -215,7 +215,7 @@ export class CanvasUtils {
                 );
             }
 
-            this.applyTextGradient(
+            await this.applyTextGradient(
                 ctx, textEnd, [
                     pos[0] + ctx.measureText(
                         text.substring(
@@ -228,18 +228,18 @@ export class CanvasUtils {
             );
         } else if (align === 'left') {
             for (let i=0; i<replaceIndexes.length; i++) {
-                this.applyTextGradient(ctx, priorNormText[i], pos, color);
+                await this.applyTextGradient(ctx, priorNormText[i], pos, color);
 
                 if (replaceIndexes[i] === -1) break;
 
-                this.applyTextGradient(
+                await this.applyTextGradient(
                     ctx, coloredContents[i], [
                         pos[0] + ctx.measureText(text.substring(0, replaceIndexes[i])).width, pos[1]
                     ], secondaryColors[i]
                 );
             }
 
-            this.applyTextGradient(
+            await this.applyTextGradient(
                 ctx, textEnd, [
                     pos[0] + ctx.measureText(
                         text.substring(
@@ -252,20 +252,20 @@ export class CanvasUtils {
             );
         } else {
             for (let i=0; i<replaceIndexes.length; i++) {
-                this.applyTextGradient(ctx, priorNormText[i], [
+                await this.applyTextGradient(ctx, priorNormText[i], [
                     pos[0] - ctx.measureText(text).width, pos[1]
                 ], color);
 
                 if (replaceIndexes[i] === -1) break;
 
-                this.applyTextGradient(
+                await this.applyTextGradient(
                     ctx, coloredContents[i], [
                         pos[0] - ctx.measureText(text.substring(0, replaceIndexes[i])).width, pos[1]
                     ], secondaryColors[i]
                 );
             }
 
-            this.applyTextGradient(
+            await this.applyTextGradient(
                 ctx, textEnd, [
                     pos[0] - ctx.measureText(
                         text.substring(
@@ -279,9 +279,9 @@ export class CanvasUtils {
         }
     }
 
-    private static applyTextGradient(
-        ctx: Canvas.CanvasRenderingContext2D, text: string, pos: [number, number], color: string
-    ): void {
+    private static async applyTextGradient(
+        ctx: CanvasRenderingContext2D, text: string, pos: [number, number], color: string
+    ): Promise<void> {
         if (text.length === 0) return;
 
         if (!color.includes(',')) {
@@ -290,7 +290,7 @@ export class CanvasUtils {
             return;
         }
 
-        const canvas = Canvas.createCanvas(ctx.canvas.width, ctx.canvas.height);
+        const canvas = new Canvas(ctx.canvas.width, ctx.canvas.height);
         const newCtx = canvas.getContext('2d');
 
         newCtx.font = ctx.font;
@@ -321,7 +321,7 @@ export class CanvasUtils {
 
         const gradient = newCtx.createLinearGradient(...gradStartPos, ...gradEndPos);
         gradColors.forEach((gradColor, index) => {
-            gradient.addColorStop(index / (gradColors.length-1), gradColor);
+            gradient.addColorStop(index / Math.max(gradColors.length-1, 1), gradColor);
         });
 
         newCtx.fillStyle = gradient;
@@ -330,9 +330,9 @@ export class CanvasUtils {
             (ctx.measureText('Sp').actualBoundingBoxAscent + ctx.measureText('Sp').actualBoundingBoxDescent)
         );
 
-        Canvas.loadImage(canvas.toBuffer('image/png')).then((img) => {
-            ctx.drawImage(img, 0, 0);
-        });
+        const buffer = await canvas.png;
+        const img = await loadImage(buffer);
+        ctx.drawImage(img, 0, 0);
     }
 
     /**
@@ -344,8 +344,8 @@ export class CanvasUtils {
      * @param diameter - Diameter of circle
      */
     public static drawCircleImage(
-        ctx: Canvas.CanvasRenderingContext2D,
-        img: Canvas.Image,
+        ctx: CanvasRenderingContext2D,
+        img: Image,
         pos: number[],
         diameter: number
     ): void {
@@ -370,7 +370,7 @@ export class CanvasUtils {
      * @param color - Color of the line
      */
     public static drawLine(
-        ctx: Canvas.CanvasRenderingContext2D,
+        ctx: CanvasRenderingContext2D,
         pos1: [number, number],
         pos2: [number, number],
         width: number,
@@ -383,7 +383,7 @@ export class CanvasUtils {
         const gradColors = color.split(',');
         const gradient = ctx.createLinearGradient(...pos1, ...pos2);
         gradColors.forEach((gradColor, index) => {
-            gradient.addColorStop(index / (gradColors.length-1), gradColor);
+            gradient.addColorStop(index / Math.max(gradColors.length-1, 1), gradColor);
         });
 
         ctx.strokeStyle = gradient;
@@ -403,7 +403,7 @@ export class CanvasUtils {
      * @param color - Color of rectangle
      */
     public static drawRect(
-        ctx: Canvas.CanvasRenderingContext2D,
+        ctx: CanvasRenderingContext2D,
         pos: [number, number],
         size: [number, number],
         color: string
@@ -411,7 +411,7 @@ export class CanvasUtils {
         const gradColors = color.split(',');
         const gradient = ctx.createLinearGradient(...pos, pos[0] + size[0], pos[1] + size[1]);
         gradColors.forEach((gradColor, index) => {
-            gradient.addColorStop(index / (gradColors.length-1), gradColor);
+            gradient.addColorStop(index / Math.max(gradColors.length-1, 1), gradColor);
         });
 
         ctx.fillStyle = gradient;

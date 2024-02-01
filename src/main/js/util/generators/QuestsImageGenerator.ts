@@ -1,5 +1,5 @@
 import {BotConfig} from '../../bot/config/BotConfig';
-import Canvas from 'canvas';
+import {Canvas, loadImage} from 'skia-canvas';
 import {CanvasUtils} from './CanvasUtils';
 import {AttachmentBuilder} from 'discord.js';
 import {BoarUser} from '../boar/BoarUser';
@@ -49,10 +49,10 @@ export class QuestsImageGenerator {
             ? nums.questFullAmt - boarUser.stats.quests.claimed[boarUser.stats.quests.claimed.length-1]
             : nums.questFullAmt;
 
-        const canvas = Canvas.createCanvas(...nums.questImgSize);
+        const canvas = new Canvas(...nums.questImgSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(questsUnderlay), ...nums.originPos);
+        ctx.drawImage(await loadImage(questsUnderlay), ...nums.originPos);
 
         await CanvasUtils.drawText(
             ctx, `${startDayStr} - ${endDayStr}`, nums.questDatesPos, fontMedium, 'center', colorConfig.font
@@ -175,7 +175,7 @@ export class QuestsImageGenerator {
                     [questRewardLeft.toLocaleString()],
                     [colorConfig.powerup]
                 );
-                ctx.drawImage(await Canvas.loadImage(powRewardImgPath), ...powRewardImgPos, ...nums.questRewardImgSize);
+                ctx.drawImage(await loadImage(powRewardImgPath), ...powRewardImgPos, ...nums.questRewardImgSize);
                 fullComplete = false;
             } else if (questRewardLeft > 0) {
                 const powRewardImgPath = pathConfig.powerups + powConfigs[questConfig.higherReward].file;
@@ -192,10 +192,10 @@ export class QuestsImageGenerator {
                     [questRewardLeft.toLocaleString()],
                     [colorConfig.powerup]
                 );
-                ctx.drawImage(await Canvas.loadImage(powRewardImgPath), ...powRewardImgPos, ...nums.questRewardImgSize);
+                ctx.drawImage(await loadImage(powRewardImgPath), ...powRewardImgPos, ...nums.questRewardImgSize);
                 fullComplete = false;
             } else {
-                ctx.drawImage(await Canvas.loadImage(checkImgPath), ...powRewardImgPos, ...nums.questRewardImgSize);
+                ctx.drawImage(await loadImage(checkImgPath), ...powRewardImgPos, ...nums.questRewardImgSize);
             }
 
             index++;
@@ -223,13 +223,13 @@ export class QuestsImageGenerator {
             );
         } else {
             ctx.drawImage(
-                await Canvas.loadImage(checkImgPath), ...nums.questCompleteCheckPos, ...nums.questRewardImgSize
+                await loadImage(checkImgPath), ...nums.questCompleteCheckPos, ...nums.questRewardImgSize
             );
             await CanvasUtils.drawText(
                 ctx, strConfig.questFullyComplete, nums.questCompleteStrPos, fontBig, 'center', colorConfig.green
             );
         }
 
-        return new AttachmentBuilder(canvas.toBuffer('image/png'), { name: `${strConfig.defaultImageName}.png` });
+        return new AttachmentBuilder(await canvas.png, { name: `${strConfig.defaultImageName}.png` });
     }
 }

@@ -1,7 +1,7 @@
 import {PromptTypeConfig} from '../../bot/config/prompts/PromptTypeConfig';
 import {PromptConfig} from '../../bot/config/prompts/PromptConfig';
 import {BotConfig} from '../../bot/config/BotConfig';
-import Canvas from 'canvas';
+import {Canvas, loadImage, CanvasRenderingContext2D} from 'skia-canvas';
 import {CanvasUtils} from './CanvasUtils';
 import {AttachmentBuilder} from 'discord.js';
 import {BoarBotApp} from '../../BoarBotApp';
@@ -42,7 +42,7 @@ export class PowerupImageGenerator {
             coloredContent.push(prompt.name);
         }
 
-        const canvas = Canvas.createCanvas(...nums.eventSpawnSize);
+        const canvas = new Canvas(...nums.eventSpawnSize);
         const ctx = canvas.getContext('2d');
 
         await this.makeBaseHeaderFooter(ctx, powerupTypeID, strConfig.eventTitle.replace('%@', 'POWERUP'), config);
@@ -61,7 +61,7 @@ export class PowerupImageGenerator {
         );
 
         return new AttachmentBuilder(
-            canvas.toBuffer('image/png'), { name: `${config.stringConfig.defaultImageName}.png` }
+            await canvas.png, { name: `${config.stringConfig.defaultImageName}.png` }
         );
     }
 
@@ -91,7 +91,7 @@ export class PowerupImageGenerator {
 
         const font = `${nums.fontBig}px ${strConfig.fontName}`;
 
-        const canvas = Canvas.createCanvas(...nums.eventSpawnSize);
+        const canvas = new Canvas(...nums.eventSpawnSize);
         const ctx = canvas.getContext('2d');
 
         await this.makeBaseHeaderFooter(
@@ -161,12 +161,12 @@ export class PowerupImageGenerator {
         }
 
         return new AttachmentBuilder(
-            canvas.toBuffer('image/png'), { name: `${config.stringConfig.defaultImageName}.png` }
+            await canvas.png, { name: `${config.stringConfig.defaultImageName}.png` }
         );
     }
 
     private static async makeBaseHeaderFooter(
-        ctx: Canvas.CanvasRenderingContext2D, powerupTypeID: string, title: string, config: BotConfig
+        ctx: CanvasRenderingContext2D, powerupTypeID: string, title: string, config: BotConfig
     ): Promise<void> {
         const strConfig = config.stringConfig;
         const pathConfig = config.pathConfig;
@@ -181,14 +181,14 @@ export class PowerupImageGenerator {
             ? powerupType.pluralName
             : powerupType.name);
 
-        ctx.drawImage(await Canvas.loadImage(pathConfig.otherAssets + pathConfig.eventUnderlay), ...nums.originPos);
+        ctx.drawImage(await loadImage(pathConfig.otherAssets + pathConfig.eventUnderlay), ...nums.originPos);
 
         await CanvasUtils.drawText(
             ctx, title, nums.eventTitlePos, fontTitle, 'center', colorConfig.powerup, nums.eventTitleWidth, true
         );
 
         ctx.drawImage(
-            await Canvas.loadImage(pathConfig.otherAssets + pathConfig.powerup),
+            await loadImage(pathConfig.otherAssets + pathConfig.powerup),
             ...nums.eventCornerImgPos1, ...nums.eventCornerImgSize
         );
 
@@ -196,7 +196,7 @@ export class PowerupImageGenerator {
         ctx.scale(-1, 1);
 
         ctx.drawImage(
-            await Canvas.loadImage(pathConfig.otherAssets + pathConfig.powerup),
+            await loadImage(pathConfig.otherAssets + pathConfig.powerup),
             ...nums.eventCornerImgPos2, ...nums.eventCornerImgSize
         );
 

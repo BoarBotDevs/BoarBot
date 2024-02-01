@@ -1,4 +1,4 @@
-import Canvas from 'canvas';
+import {Canvas, loadImage} from 'skia-canvas';
 import {BotConfig} from '../../bot/config/BotConfig';
 import {AttachmentBuilder} from 'discord.js';
 import {CanvasUtils} from './CanvasUtils';
@@ -127,10 +127,10 @@ export class MarketImageGenerator {
 
         const font = `${nums.fontMedium}px ${strConfig.fontName}`;
 
-        const canvas = Canvas.createCanvas(...nums.marketSize);
+        const canvas = new Canvas(...nums.marketSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(underlay), ...nums.originPos);
+        ctx.drawImage(await loadImage(underlay), ...nums.originPos);
 
         const curShowing = this.itemPricing.slice(page*nums.marketPerPage, (page+1) * nums.marketPerPage);
 
@@ -145,10 +145,10 @@ export class MarketImageGenerator {
                 nums.marketOverImgStart[1] + Math.floor(i / nums.marketOverCols) * nums.marketOverIncY
             ] as [number, number];
 
-            ctx.drawImage(await Canvas.loadImage(file), ...imagePos, ...nums.marketOverImgSize);
+            ctx.drawImage(await loadImage(file), ...imagePos, ...nums.marketOverImgSize);
         }
 
-        ctx.drawImage(await Canvas.loadImage(overlay), ...nums.originPos);
+        ctx.drawImage(await loadImage(overlay), ...nums.originPos);
 
         for (let i=0; i<curShowing.length; i++) {
             const item = curShowing[i];
@@ -210,7 +210,7 @@ export class MarketImageGenerator {
             );
         }
 
-        return new AttachmentBuilder(canvas.toBuffer('image/png'), { name: `${strConfig.defaultImageName}.png` });
+        return new AttachmentBuilder(await canvas.png, { name: `${strConfig.defaultImageName}.png` });
     }
 
     public async makeBuySellImage(page: number, edition: number) {
@@ -305,12 +305,12 @@ export class MarketImageGenerator {
         const mediumFont = `${nums.fontMedium}px ${strConfig.fontName}`;
         const smallMediumFont = `${nums.fontSmallMedium}px ${strConfig.fontName}`;
 
-        const canvas = Canvas.createCanvas(...nums.marketSize);
+        const canvas = new Canvas(...nums.marketSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(underlay), ...nums.originPos);
+        ctx.drawImage(await loadImage(underlay), ...nums.originPos);
 
-        ctx.drawImage(await Canvas.loadImage(file), ...nums.marketBSImgPos, ...nums.marketBSImgSize);
+        ctx.drawImage(await loadImage(file), ...nums.marketBSImgPos, ...nums.marketBSImgSize);
 
         await CanvasUtils.drawText(ctx, rarityName.toUpperCase(), nums.marketBSRarityPos, mediumFont, 'center', rarityColor);
         await CanvasUtils.drawText(
@@ -359,9 +359,9 @@ export class MarketImageGenerator {
             ctx, sellOrderVolume.toLocaleString(), nums.marketBSSellOrdPos, smallMediumFont, 'center', colorConfig.font
         );
 
-        ctx.drawImage(await Canvas.loadImage(overlay), ...nums.originPos);
+        ctx.drawImage(await loadImage(overlay), ...nums.originPos);
 
-        return new AttachmentBuilder(canvas.toBuffer('image/png'), { name: `${strConfig.defaultImageName}.png` });
+        return new AttachmentBuilder(await canvas.png, { name: `${strConfig.defaultImageName}.png` });
     }
 
     public async makeOrdersImage(page: number) {
@@ -420,12 +420,12 @@ export class MarketImageGenerator {
         const mediumFont = `${nums.fontMedium}px ${strConfig.fontName}`;
         const smallMediumFont = `${nums.fontSmallMedium}px ${strConfig.fontName}`;
 
-        const canvas = Canvas.createCanvas(...nums.marketSize);
+        const canvas = new Canvas(...nums.marketSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(underlay), ...nums.originPos);
+        ctx.drawImage(await loadImage(underlay), ...nums.originPos);
 
-        ctx.drawImage(await Canvas.loadImage(file), ...nums.marketOrdImgPos, ...nums.marketOrdImgSize);
+        ctx.drawImage(await loadImage(file), ...nums.marketOrdImgPos, ...nums.marketOrdImgSize);
 
         await CanvasUtils.drawText(
             ctx,
@@ -494,6 +494,6 @@ export class MarketImageGenerator {
             ctx, claimText, nums.marketOrdClaimPos, smallMediumFont, 'center', claimColor, nums.marketOrdClaimWidth
         );
 
-        return new AttachmentBuilder(canvas.toBuffer('image/png'), { name: `${strConfig.defaultImageName}.png` });
+        return new AttachmentBuilder(await canvas.png, { name: `${strConfig.defaultImageName}.png` });
     }
 }

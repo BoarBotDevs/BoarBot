@@ -1,17 +1,16 @@
 {
   "dependencies": {
-    "@napi-rs/canvas": "^0.1.44",
     "@types/adm-zip": "^0.5.0",
     "adm-zip": "^0.5.10",
     "axios": "^1.5.1",
     "basic-ftp": "^5.0.3",
-    "canvas": "^2.11.2",
     "child_process": "^1.0.2",
     "cron": "^2.4.4",
     "discord.js": "^14.5.0",
     "dotenv": "^16.0.3",
     "moment": "^2.29.4",
     "python-shell": "^5.0.0",
+    "skia-canvas": "^1.0.1",
     "typescript": "^5.2.2"
   },
   "devDependencies": {

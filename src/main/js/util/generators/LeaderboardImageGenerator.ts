@@ -1,4 +1,4 @@
-import Canvas from 'canvas';
+import {Canvas, loadImage} from 'skia-canvas';
 import {BotConfig} from '../../bot/config/BotConfig';
 import {CanvasUtils} from './CanvasUtils';
 import {
@@ -130,10 +130,10 @@ export class LeaderboardImageGenerator {
         const bigFont = `${nums.fontBig}px ${strConfig.fontName}`;
         const mediumFont = `${nums.fontMedium}px ${strConfig.fontName}`;
 
-        const canvas = Canvas.createCanvas(...nums.collImageSize);
+        const canvas = new Canvas(...nums.collImageSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(underlay), ...nums.originPos);
+        ctx.drawImage(await loadImage(underlay), ...nums.originPos);
 
         await CanvasUtils.drawText(
             ctx,
@@ -220,6 +220,6 @@ export class LeaderboardImageGenerator {
             );
         }
 
-        return new AttachmentBuilder(canvas.toBuffer('image/png'), { name: `${strConfig.defaultImageName}.png` })
+        return new AttachmentBuilder(await canvas.png, { name: `${strConfig.defaultImageName}.png` })
     }
 }

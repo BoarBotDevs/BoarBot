@@ -1,6 +1,6 @@
 import {BotConfig} from '../config/BotConfig';
 import fs from 'fs';
-import {registerFont} from 'canvas';
+import {FontLibrary} from 'skia-canvas';
 import moment from 'moment/moment';
 import {LogDebug} from '../../util/logging/LogDebug';
 
@@ -230,7 +230,7 @@ export class ConfigHandler {
     public loadFonts(): void {
         try {
             const mcFont = this.config.pathConfig.fontAssets + this.config.pathConfig.mainFont;
-            registerFont(mcFont, { family: this.config.stringConfig.fontName });
+            FontLibrary.use(this.config.stringConfig.fontName, mcFont);
         } catch {
             LogDebug.handleError('Unable to load custom font. Verify its path in \'config.json\'.');
             return;

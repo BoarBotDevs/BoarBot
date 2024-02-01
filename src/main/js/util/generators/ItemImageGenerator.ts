@@ -1,4 +1,4 @@
-import Canvas from 'canvas';
+import {Canvas, loadImage} from 'skia-canvas';
 import {BotConfig} from '../../bot/config/BotConfig';
 import {BoarUtils} from '../boar/BoarUtils';
 import {PythonShell} from 'python-shell';
@@ -190,19 +190,19 @@ export class ItemImageGenerator {
         const fontName = strConfig.fontName;
         const mediumFont = `${nums.fontMedium}px ${fontName}`;
 
-        const canvas = Canvas.createCanvas(imageSize[0], imageSize[1]);
+        const canvas = new Canvas(imageSize[0], imageSize[1]);
         const ctx = canvas.getContext('2d');
 
         CanvasUtils.drawRect(ctx, origin, imageSize, colorConfig[this.colorKey]);
         ctx.globalCompositeOperation = 'destination-in';
-        ctx.drawImage(await Canvas.loadImage(underlayPath), ...origin, ...imageSize);
+        ctx.drawImage(await loadImage(underlayPath), ...origin, ...imageSize);
         ctx.globalCompositeOperation = 'source-over';
 
-        ctx.drawImage(await Canvas.loadImage(backplatePath), ...origin);
+        ctx.drawImage(await loadImage(backplatePath), ...origin);
         if (makeWithBoar) {
-            ctx.drawImage(await Canvas.loadImage(this.imageFilePath), ...mainPos, ...mainSize);
+            ctx.drawImage(await loadImage(this.imageFilePath), ...mainPos, ...mainSize);
         }
-        ctx.drawImage(await Canvas.loadImage(overlay), ...origin);
+        ctx.drawImage(await loadImage(overlay), ...origin);
 
         await CanvasUtils.drawText(ctx, this.title, nums.itemTitlePos, mediumFont, 'center', colorConfig.font);
         await CanvasUtils.drawText(
@@ -218,7 +218,7 @@ export class ItemImageGenerator {
             [colorConfig[this.colorKey]]
         );
 
-        this.buffer = canvas.toBuffer('image/png');
+        this.buffer = await canvas.png;
     }
 
     /**
@@ -274,10 +274,10 @@ export class ItemImageGenerator {
 
         let userBoxY = nums.itemBoxOneY;
 
-        const canvas = Canvas.createCanvas(imageSize[0], imageSize[1]);
+        const canvas = new Canvas(imageSize[0], imageSize[1]);
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(await Canvas.loadImage(this.tempPath), ...origin, ...imageSize);
+        ctx.drawImage(await loadImage(this.tempPath), ...origin, ...imageSize);
 
         ctx.font = smallMediumFont;
 
@@ -346,7 +346,7 @@ export class ItemImageGenerator {
 
             CanvasUtils.drawCircleImage(
                 ctx,
-                await Canvas.loadImage(this.giftingUserAvatar),
+                await loadImage(this.giftingUserAvatar),
                 [nums.itemUserAvatarX, nums.itemBoxFourY + nums.itemUserAvatarYOffset],
                 nums.itemUserAvatarWidth
             );
@@ -375,9 +375,9 @@ export class ItemImageGenerator {
         let userAvatar;
 
         try {
-            userAvatar = await Canvas.loadImage(this.userAvatar);
+            userAvatar = await loadImage(this.userAvatar);
         } catch {
-            userAvatar = await Canvas.loadImage(this.config.pathConfig.otherAssets + this.config.pathConfig.noAvatar);
+            userAvatar = await loadImage(this.config.pathConfig.otherAssets + this.config.pathConfig.noAvatar);
         }
 
         CanvasUtils.drawCircleImage(
@@ -410,6 +410,6 @@ export class ItemImageGenerator {
             );
         }
 
-        this.buffer = canvas.toBuffer('image/png');
+        this.buffer = await canvas.png;
     }
 }
