@@ -1,5 +1,7 @@
 package dev.boarbot.bot.config;
 
+import dev.boarbot.bot.config.commands.CommandConfig;
+import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +24,7 @@ public class BotConfig {
     /**
      * All user IDs associated with developers
      */
-    private String[] devs = new String[0];
+    private String[] devs = {};
 
     /**
      * The text channel ID the bot sends certain logs to
@@ -107,7 +109,7 @@ public class BotConfig {
     /**
      * Array of {@link RarityConfig rarity configurations}
      */
-    private RarityConfig[] rarityConfigs = new RarityConfig[0];
+    private RarityConfig[] rarityConfigs = {};
 
     /**
      * {@link ColorConfig Color configurations} used by the bot

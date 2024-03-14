@@ -13,6 +13,7 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+@ToString
 public class PathConfig {
     // Path of folder storing all {@link Listener listeners}
     private String listeners = "";

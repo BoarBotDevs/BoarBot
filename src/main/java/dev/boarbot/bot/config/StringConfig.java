@@ -2,6 +2,7 @@ package dev.boarbot.bot.config;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * {@link StringConfig StringConfig.java}
@@ -12,6 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 public class StringConfig {
     // General interaction responses
 
@@ -207,7 +209,7 @@ public class StringConfig {
     private String notificationSuccessReply = "";
     private String notificationDailyReady = "";
     private String notificationStopStr = "";
-    private String[] notificationExtras = new String[0];
+    private String[] notificationExtras = {};
     private String notificationServerPing = "";
 
     // Leaderboard strings
@@ -246,5 +248,5 @@ public class StringConfig {
     private String githubImg = "";
     private String supportLink = "";
     private String supportStr = "";
-    private String[] spookMessages = new String[0];
+    private String[] spookMessages = {};
 }

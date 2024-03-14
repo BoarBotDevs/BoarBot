@@ -2,6 +2,7 @@ package dev.boarbot;
 
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.BoarBot;
+import lombok.Getter;
 
 /**
  * {@link BoarBotApp BoarBotApp.java}
@@ -11,9 +12,9 @@ import dev.boarbot.bot.BoarBot;
  * @copyright WeslayCodes & Contributors 2023
  */
 public class BoarBotApp {
-    private static Bot bot;
+    @Getter private static Bot bot;
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
         bot = new BoarBot();
 
         if (args.length != 0 && args[0].equals("deploy-prod")) {
@@ -26,9 +27,5 @@ public class BoarBotApp {
         if (args.length != 0 && args[0].equals("deploy-commands")) {
             System.out.println("Command Deploy");
         }
-    }
-
-    public static Bot getBot() {
-        return bot;
     }
 }
