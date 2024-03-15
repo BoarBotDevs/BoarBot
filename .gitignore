@@ -26,4 +26,4 @@ src/main/java/dev/boarbot/util/boar/GuessInterpreter.ts
 /target
 /logs
 /database
-config.json
+src/main/resources/config.json
