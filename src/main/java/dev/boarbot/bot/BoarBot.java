@@ -3,6 +3,7 @@ package dev.boarbot.bot;
 import com.google.gson.Gson;
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.listeners.CommandListener;
 import dev.boarbot.listeners.StopMessageListener;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -10,9 +11,15 @@ import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.utils.data.DataObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 @Log4j2
@@ -41,6 +48,7 @@ public class BoarBot implements Bot {
         return jda;
     }
 
+    @Override
     public void loadConfig() {
         try {
             log.info("Attempting to load 'config.json' from resources.");
@@ -66,5 +74,37 @@ public class BoarBot implements Bot {
     @Override
     public BotConfig getConfig() {
         return config;
+    }
+
+    @Override
+    public void deployCommands() throws IllegalAccessException {
+        CommandConfig[] commandData = config.getCommandConfig();
+
+        List<SlashCommandData> globalCommands = new ArrayList<>();
+        List<SlashCommandData> guildCommands = new ArrayList<>();
+
+        for (CommandConfig command : commandData) {
+            Integer defaultPerms = command.getDefault_member_permissions();
+
+            if (defaultPerms != null && defaultPerms == 0) {
+                guildCommands.add(
+                    SlashCommandData.fromData(DataObject.fromJson(command.toString()))
+                );
+
+                continue;
+            }
+
+            globalCommands.add(
+                SlashCommandData.fromData(DataObject.fromJson(command.toString()))
+            );
+        }
+
+        Guild devGuild = jda.getGuildById(env.get("GUILD_ID"));
+
+        if (devGuild != null) {
+            devGuild.updateCommands().addCommands(guildCommands).queue();
+        }
+
+        jda.updateCommands().addCommands(globalCommands).queue();
     }
 }

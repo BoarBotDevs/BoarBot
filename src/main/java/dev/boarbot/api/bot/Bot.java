@@ -8,4 +8,5 @@ public interface Bot {
     JDA getJDA();
     void loadConfig();
     BotConfig getConfig();
+    void deployCommands() throws IllegalAccessException;
 }

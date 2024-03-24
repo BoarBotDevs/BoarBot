@@ -1,5 +1,6 @@
 package dev.boarbot.bot.config;
 
+import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import lombok.Getter;
@@ -98,7 +99,7 @@ public class BotConfig {
     /**
      * Collection of {@link CommandConfig command configurations} the bot uses
      */
-    private CommandConfig commandConfig = new CommandConfig();
+    private CommandConfig[] commandConfig = {};
 
     /**
      * Collection of sets of item configurations
