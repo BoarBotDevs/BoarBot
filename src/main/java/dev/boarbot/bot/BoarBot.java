@@ -62,4 +62,9 @@ public class BoarBot implements Bot {
             System.exit(-1);
         }
     }
+
+    @Override
+    public BotConfig getConfig() {
+        return config;
+    }
 }

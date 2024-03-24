@@ -1,6 +1,5 @@
 package dev.boarbot.bot.config;
 
-import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import lombok.Getter;

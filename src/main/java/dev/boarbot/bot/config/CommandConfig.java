@@ -1,8 +1,11 @@
-package dev.boarbot.bot.config.commands;
+package dev.boarbot.bot.config;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@link CommandConfig CommandConfig.java}
@@ -19,15 +22,15 @@ public class CommandConfig {
     /**
      * {@link CommandConfig Command information} for {@link dev.boarbot.commands.BoarCommands BoarCommands}
      */
-    public BoarCommandsConfig boar = new BoarCommandsConfig();
+    public Map<String, Object> boar = new HashMap<>();
 
     /**
      * {@link CommandConfig Command information} for {@link dev.boarbot.commands.BoarDevCommands BoarDevCommands}
      */
-    public BoarDevCommandsConfig boarDev = new BoarDevCommandsConfig();
+    public Map<String, Object> boarDev = new HashMap<>();
 
     /**
      * {@link CommandConfig Command information} for {@link dev.boarbot.commands.BoarManageCommands BoarManageCommands}
      */
-    public BoarManageCommandsConfig boarManage = new BoarManageCommandsConfig();
+    public Map<String, Object> boarManage = new HashMap<>();
 }
