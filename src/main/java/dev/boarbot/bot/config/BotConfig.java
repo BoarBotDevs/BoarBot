@@ -99,7 +99,7 @@ public class BotConfig {
     /**
      * Collection of {@link CommandConfig command configurations} the bot uses
      */
-    private CommandConfig[] commandConfig = {};
+    private Map<String, CommandConfig> commandConfig = new HashMap<>();
 
     /**
      * Collection of sets of item configurations

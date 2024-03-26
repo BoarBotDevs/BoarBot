@@ -5,6 +5,8 @@ import lombok.Setter;
 import lombok.ToString;
 import net.dv8tion.jda.api.interactions.commands.Command;
 
+import java.util.Arrays;
+
 /**
  * {@link SubcommandConfig SubcommandConfig.java}
  *
@@ -18,10 +20,12 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 public class SubcommandConfig {
     public String name = "";
     public String description = "";
+    public String location = "";
 
     // Arguments the command uses
     public SubcommandArgsConfig[] options;
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 

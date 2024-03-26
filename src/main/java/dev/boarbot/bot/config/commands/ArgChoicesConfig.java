@@ -18,6 +18,7 @@ public class ArgChoicesConfig<T> {
     public String name = "";
     public T value;
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 

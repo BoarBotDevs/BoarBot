@@ -3,6 +3,9 @@ package dev.boarbot.bot.config.prompts;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * {@link PromptTypeConfig PromptTypeConfig.java}
  *
@@ -13,10 +16,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PromptTypeConfig {
-    // TODO: Rework prompts then implement this
-
     private String name = "";
     private String description = "";
     private int rightStyle = 0;
     private int wrongStyle = 0;
+    private Map<String, IndivPromptConfig> prompts = new HashMap<>();
 }

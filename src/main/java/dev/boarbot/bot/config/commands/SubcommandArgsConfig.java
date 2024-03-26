@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Arrays;
+
 /**
  * {@link SubcommandArgsConfig SubcommandArgsConfig.java}
  *
@@ -22,6 +24,7 @@ public class SubcommandArgsConfig {
     public Boolean autocomplete = false;
     public ArgChoicesConfig<?>[] choices;
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
