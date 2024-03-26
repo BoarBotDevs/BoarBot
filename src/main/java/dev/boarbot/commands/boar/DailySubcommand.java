@@ -14,7 +14,7 @@ public class DailySubcommand extends Subcommand {
     }
 
     @Override
-    public void execute() {
+    public void execute() throws InterruptedException {
         BoarUser boarUser;
 
         try {

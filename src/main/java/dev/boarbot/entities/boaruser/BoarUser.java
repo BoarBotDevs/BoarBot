@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.NumberConfig;
+import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.prompts.PromptTypeConfig;
 import dev.boarbot.entities.boaruser.collectibles.CollectedPowerup;
 import dev.boarbot.entities.boaruser.stats.GeneralStats;
@@ -31,21 +32,19 @@ public class BoarUser {
     public BoarUser(User user, boolean createFile) throws IOException {
         this.user = user;
 
-        BoarUserData userData = refreshUserData(createFile);
+        refreshUserData(createFile);
 
         boolean shouldFixData = createFile || this.data.getStats().getGeneral().getFirstDaily() > 0 ||
             this.data.getStats().getGeneral().getTotalBoars() > 0 ||
             !this.data.getItemCollection().getBadges().isEmpty();
 
         if (shouldFixData) {
-            fixUserData(userData);
+            fixUserData();
         }
     }
 
-    public BoarUserData refreshUserData(boolean createFile) throws IOException {
-        BoarUserData userData = getUserData(createFile);
-        this.data = userData;
-        return userData;
+    public void refreshUserData(boolean createFile) throws IOException {
+        this.data = getUserData(createFile);
     }
 
     private BoarUserData getUserData(boolean createFile) throws IOException {
@@ -76,7 +75,7 @@ public class BoarUser {
         return g.fromJson(userDataJSON.toString(), BoarUserData.class);
     }
 
-    private void fixUserData(BoarUserData userData) throws IOException {
+    private void fixUserData() throws IOException {
         String userFile = config.getPathConfig().getDatabaseFolder() +
             config.getPathConfig().getUserDataFolder() + this.user.getId() + ".json";
 
@@ -151,13 +150,13 @@ public class BoarUser {
 
         if (powerupData.get("enhancer") == null) {
             powerupData.put("enhancer", new CollectedPowerup());
-            powerupData.get("enhancer").setRaritiesUsed(new Integer[7]);
+            powerupData.get("enhancer").setRaritiesUsed(new Integer[]{0,0,0,0,0,0,0});
         }
 
         if (powerupData.get("clone") == null) {
             powerupData.put("clone", new CollectedPowerup());
             powerupData.get("clone").setNumSuccess(0);
-            powerupData.get("clone").setRaritiesUsed(new Integer[10]);
+            powerupData.get("clone").setRaritiesUsed(new Integer[]{0,0,0,0,0,0,0,0,0,0});
         }
 
         // TODO: Fix raritiesUsed in all user files
@@ -200,9 +199,56 @@ public class BoarUser {
 
         // TODO: Remove unbanTime from all user files
 
+        int uniques = 0;
+
+        for (String boarID : this.data.getItemCollection().getBoars().keySet()) {
+            boolean hasBoar = this.data.getItemCollection().getBoars().get(boarID).getNum() > 0;
+            RarityConfig[] rarityConfigs = this.config.getRarityConfigs();
+            boolean isSpecial = Arrays.asList(rarityConfigs[rarityConfigs.length - 1].getBoars()).contains(boarID);
+
+            if (hasBoar && !isSpecial) {
+                uniques++;
+            }
+        }
+
+        genStats.setMultiplier(uniques + genStats.getHighestStreak());
+        genStats.setMultiplier(Math.min(genStats.getMultiplier(), nums.getMaxPowBase()));
+
+        long visualMulti = genStats.getMultiplier() + 1;
+        int numMiraclesActive = powerupData.get("miracle").getNumActive();
+
+        for (int i=0; i<numMiraclesActive; i++) {
+            visualMulti += Math.min((long) Math.ceil(visualMulti * 0.1), nums.getMiracleIncreaseMax());
+        }
+
+        visualMulti--;
+
+        genStats.setHighestMulti(Math.max(visualMulti, genStats.getHighestMulti()));
+        genStats.setBoarScore(Math.max(0, Math.min(genStats.getBoarScore(), nums.getMaxScore())));
+
         Gson g = new Gson();
         BufferedWriter writer = new BufferedWriter(new FileWriter(userFile));
         writer.write(g.toJson(this.data));
         writer.close();
+    }
+
+    public void updateUserData() throws IOException {
+        BoarUserData userData = this.getUserData(false);
+
+        // TODO: Quest stuff
+
+        Map<String, CollectedPowerup> powerupData = this.data.getItemCollection().getPowerups();
+        Map<String, CollectedPowerup> filePowerupData = userData.getItemCollection().getPowerups();
+
+        for (String powerupID : powerupData.keySet()) {
+            powerupData.get(powerupID).setHighestTotal(
+                Math.max(powerupData.get(powerupID).getNumTotal(), powerupData.get(powerupID).getHighestTotal())
+            );
+            powerupData.get(powerupID).setNumClaimed(
+                Math.max(0, powerupData.get(powerupID).getNumTotal() - filePowerupData.get(powerupID).getNumTotal())
+            );
+        }
+
+        this.fixUserData();
     }
 }

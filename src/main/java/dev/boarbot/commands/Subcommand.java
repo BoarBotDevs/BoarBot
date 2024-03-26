@@ -19,5 +19,5 @@ public abstract class Subcommand {
         this.user = event.getUser();
     }
 
-    public abstract void execute();
+    public abstract void execute() throws InterruptedException;
 }

@@ -15,8 +15,8 @@ public class GeneralStats {
     private long firstDaily = 0;
     private int boarStreak = 0;
     private int highestStreak = 0;
-    private long multiplier = 1;
-    private long highestMulti = 1;
+    private long multiplier = 0;
+    private long highestMulti = 0;
     private boolean notificationsOn = false;
     private String notificationChannel = "";
     private Integer spook2Stage;

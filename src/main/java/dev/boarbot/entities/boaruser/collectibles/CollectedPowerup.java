@@ -8,7 +8,7 @@ import lombok.Setter;
 public class CollectedPowerup {
     private long numTotal = 0;
     private long highestTotal = 0;
-    private int numClaimed = 0;
+    private long numClaimed = 0;
     private int numUsed = 0;
     private Integer numActive;
     private Integer numOpened;
