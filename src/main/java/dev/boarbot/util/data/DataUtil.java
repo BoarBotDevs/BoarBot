@@ -13,12 +13,26 @@ import java.io.IOException;
 
 @Log4j2
 public abstract class DataUtil {
+    protected String filePath;
+
     protected final BotConfig config = BoarBotApp.getBot().getConfig();
     protected final PathConfig pathConfig = this.config.getPathConfig();
 
     public abstract Object refreshData(boolean update);
     public abstract Object getData();
     public abstract void saveData() throws IOException;
+
+    protected String createFile(String filePath, Object data) {
+        try {
+            saveData();
+            log.info("Successfully created file %s.".formatted(filePath));
+        } catch (IOException e) {
+            log.error("Failed to create file %s.".formatted(filePath));
+            System.exit(-1);
+        }
+
+        return new Gson().toJson(data);
+    }
 
     protected void saveData(String filePath, Object data) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));

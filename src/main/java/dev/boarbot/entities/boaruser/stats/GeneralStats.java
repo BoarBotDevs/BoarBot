@@ -21,6 +21,6 @@ public class GeneralStats {
     private String notificationChannel = "";
     private Integer spook2Stage;
     private Integer spook3Stage;
-    private Integer[] spookEditions;
-    private Boolean[] truths;
+    private int[] spookEditions;
+    private boolean[] truths;
 }

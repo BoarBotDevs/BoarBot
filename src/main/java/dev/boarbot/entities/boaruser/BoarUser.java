@@ -22,21 +22,31 @@ import java.util.*;
 public class BoarUser {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
-    @Getter private final User user;
+    @Getter private User user;
+    private String userID;
     @Getter private BoarUserData data = new BoarUserData();
 
     public BoarUser(User user) throws IOException {
-        this(user, false);
+        doConstruct(user, user.getId(), false);
+    }
+
+    public BoarUser(String userID) throws IOException {
+        doConstruct(null, userID, false);
     }
 
     public BoarUser(User user, boolean createFile) throws IOException {
+        doConstruct(user, user.getId(), createFile);
+    }
+
+    private void doConstruct(User user, String userID, boolean createFile) throws IOException {
         this.user = user;
+        this.userID = userID;
 
         refreshUserData(createFile);
 
         boolean shouldFixData = createFile || this.data.getStats().getGeneral().getFirstDaily() > 0 ||
-            this.data.getStats().getGeneral().getTotalBoars() > 0 ||
-            !this.data.getItemCollection().getBadges().isEmpty();
+                this.data.getStats().getGeneral().getTotalBoars() > 0 ||
+                !this.data.getItemCollection().getBadges().isEmpty();
 
         if (shouldFixData) {
             fixUserData();
@@ -50,7 +60,7 @@ public class BoarUser {
     private BoarUserData getUserData(boolean createFile) throws IOException {
         StringBuilder userDataJSON = new StringBuilder();
         String userFile = config.getPathConfig().getDatabaseFolder() +
-            config.getPathConfig().getUserDataFolder() + this.user.getId() + ".json";
+            config.getPathConfig().getUserDataFolder() + userID + ".json";
 
         File file = new File(userFile);
         Gson g = new Gson();
@@ -64,7 +74,10 @@ public class BoarUser {
             userDataJSON.append(g.toJson(this.data));
 
             if (createFile) {
-                log.info("New user! - [%s] (%s)".formatted(this.user.getName(), this.user.getId()));
+                log.info(
+                    "New user! - [%s] (%s)".formatted(
+                        this.user == null ? "N/A" : this.user.getName(), this.userID
+                ));
 
                 BufferedWriter writer = new BufferedWriter(new FileWriter(userFile));
                 writer.write(userDataJSON.toString());
@@ -77,7 +90,7 @@ public class BoarUser {
 
     private void fixUserData() throws IOException {
         String userFile = config.getPathConfig().getDatabaseFolder() +
-            config.getPathConfig().getUserDataFolder() + this.user.getId() + ".json";
+            config.getPathConfig().getUserDataFolder() + this.userID + ".json";
 
         Set<String> boarGottenIDs = this.data.getItemCollection().getBoars().keySet();
         long beginningOfDay = LocalDate.now()
@@ -150,13 +163,13 @@ public class BoarUser {
 
         if (powerupData.get("enhancer") == null) {
             powerupData.put("enhancer", new CollectedPowerup());
-            powerupData.get("enhancer").setRaritiesUsed(new Integer[]{0,0,0,0,0,0,0});
+            powerupData.get("enhancer").setRaritiesUsed(new int[]{0,0,0,0,0,0,0});
         }
 
         if (powerupData.get("clone") == null) {
             powerupData.put("clone", new CollectedPowerup());
             powerupData.get("clone").setNumSuccess(0);
-            powerupData.get("clone").setRaritiesUsed(new Integer[]{0,0,0,0,0,0,0,0,0,0});
+            powerupData.get("clone").setRaritiesUsed(new int[]{0,0,0,0,0,0,0,0,0,0});
         }
 
         // TODO: Fix raritiesUsed in all user files

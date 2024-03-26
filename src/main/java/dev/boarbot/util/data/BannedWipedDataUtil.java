@@ -15,8 +15,6 @@ import java.util.Map;
 public class BannedWipedDataUtil extends DataUtil {
     private Map<String, Long> data;
 
-    private final String filePath;
-
     public BannedWipedDataUtil(boolean isBannedFile) {
         this(isBannedFile, false);
     }
@@ -49,15 +47,7 @@ public class BannedWipedDataUtil extends DataUtil {
         }
 
         if (dataJson == null) {
-            dataJson = g.toJson(this.data);
-
-            try {
-                saveData();
-                log.info("Successfully created file %s.".formatted(this.filePath));
-            } catch (IOException e) {
-                log.error("Failed to create file %s.".formatted(this.filePath));
-                System.exit(-1);
-            }
+            dataJson = createFile(this.filePath, this.data);
         }
 
         this.data = g.fromJson(dataJson, mapType);

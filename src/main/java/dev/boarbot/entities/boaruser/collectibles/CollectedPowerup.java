@@ -15,5 +15,5 @@ public class CollectedPowerup {
     private Long curOut;
     private Long lastOpened;
     private Integer numSuccess;
-    private Integer[] raritiesUsed;
+    private int[] raritiesUsed;
 }
