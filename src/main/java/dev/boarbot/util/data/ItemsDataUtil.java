@@ -2,6 +2,9 @@ package dev.boarbot.util.data;
 
 import com.google.gson.Gson;
 import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.collectibles.CollectedPowerup;
+import dev.boarbot.entities.boaruser.stats.GeneralStats;
 import dev.boarbot.util.data.types.BuySellData;
 import dev.boarbot.util.data.types.ItemData;
 import dev.boarbot.util.data.types.ItemsData;
@@ -31,7 +34,6 @@ public class ItemsDataUtil extends DataUtil {
 
         this.data = new ItemsData();
 
-        Gson g = new Gson();
         String dataJson = null;
 
         try {
@@ -48,7 +50,7 @@ public class ItemsDataUtil extends DataUtil {
             dataJson = createFile(this.filePath, this.data);
         }
 
-        this.data = g.fromJson(dataJson, ItemsData.class);
+        this.data = new Gson().fromJson(dataJson, ItemsData.class);
 
         if (update) {
             updateData();
@@ -62,7 +64,7 @@ public class ItemsDataUtil extends DataUtil {
         Map<String, ItemData> powerupData = this.data.getPowerups();
 
         for (String powerupID : powerupConfig.keySet()) {
-            powerupData.computeIfAbsent(powerupID, key -> new ItemData());
+            powerupData.putIfAbsent(powerupID, new ItemData());
         }
 
         for (String powerupID : powerupData.keySet()) {
@@ -73,8 +75,71 @@ public class ItemsDataUtil extends DataUtil {
             ItemData powItemData = powerupData.get(powerupID);
 
             for (BuySellData buyOrder : powItemData.getBuyers()) {
+                BoarUser boarUser;
 
+                try {
+                    boarUser = new BoarUser(buyOrder.getUserID());
+                } catch (IOException exception) {
+                    log.error("Failed to get user (%s) data.".formatted(buyOrder.getUserID()), exception);
+                    continue;
+                }
+
+                CollectedPowerup curPowerup = boarUser.getData().getItemCollection().getPowerups().get(powerupID);
+                GeneralStats genStats = boarUser.getData().getStats().getGeneral();
+
+                curPowerup.setNumTotal(
+                    curPowerup.getNumTotal() + buyOrder.getFilledAmount() - buyOrder.getClaimedAmount()
+                );
+
+                genStats.setBoarScore(
+                    genStats.getBoarScore() + (long) (buyOrder.getNum() - buyOrder.getFilledAmount()) *
+                        buyOrder.getPrice()
+                );
+
+                try {
+                    boarUser.updateUserData();
+                } catch (IOException exception) {
+                    log.error("Failed to update user (%s) data.".formatted(buyOrder.getUserID()), exception);
+                }
             }
+
+            for (BuySellData sellOrder : powItemData.getSellers()) {
+                BoarUser boarUser;
+
+                try {
+                    boarUser = new BoarUser(sellOrder.getUserID());
+                } catch (IOException exception) {
+                    log.error("Failed to get user (%s) data.".formatted(sellOrder.getUserID()), exception);
+                    continue;
+                }
+
+                CollectedPowerup curPowerup = boarUser.getData().getItemCollection().getPowerups().get(powerupID);
+                GeneralStats genStats = boarUser.getData().getStats().getGeneral();
+
+                curPowerup.setNumTotal(
+                    curPowerup.getNumTotal() + sellOrder.getNum() - sellOrder.getFilledAmount()
+                );
+
+                genStats.setBoarScore(
+                    genStats.getBoarScore() + (long) (sellOrder.getFilledAmount() - sellOrder.getClaimedAmount()) *
+                        sellOrder.getPrice()
+                );
+
+                try {
+                    boarUser.updateUserData();
+                } catch (IOException exception) {
+                    log.error("Failed to update user (%s) data.".formatted(sellOrder.getUserID()), exception);
+                }
+            }
+
+            powerupData.remove(powerupID);
+        }
+
+        try {
+            saveData();
+        } catch (IOException exception) {
+            log.error("Failed to update file %s.".formatted(filePath), exception);
+            System.exit(-1);
         }
     }
 

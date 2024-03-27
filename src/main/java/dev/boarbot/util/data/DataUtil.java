@@ -26,8 +26,8 @@ public abstract class DataUtil {
         try {
             saveData();
             log.info("Successfully created file %s.".formatted(filePath));
-        } catch (IOException e) {
-            log.error("Failed to create file %s.".formatted(filePath));
+        } catch (IOException exception) {
+            log.error("Failed to create file %s.".formatted(filePath), exception);
             System.exit(-1);
         }
 

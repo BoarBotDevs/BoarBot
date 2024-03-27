@@ -75,9 +75,8 @@ public class BoarUser {
 
             if (createFile) {
                 log.info(
-                    "New user! - [%s] (%s)".formatted(
-                        this.user == null ? "N/A" : this.user.getName(), this.userID
-                ));
+                    "New user! - [%s] (%s)".formatted(this.user == null ? "N/A" : this.user.getName(), this.userID)
+                );
 
                 BufferedWriter writer = new BufferedWriter(new FileWriter(userFile));
                 writer.write(userDataJSON.toString());
@@ -128,7 +127,7 @@ public class BoarUser {
 
         // Adds prompt data to user file if it doesn't exist
         for (String promptType : promptTypes.keySet()) {
-            promptData.computeIfAbsent(promptType, key -> new HashMap<>());
+            promptData.putIfAbsent(promptType, new HashMap<>());
         }
 
         // Removes prompt or prompt type from data if not in config
@@ -239,9 +238,8 @@ public class BoarUser {
         genStats.setHighestMulti(Math.max(visualMulti, genStats.getHighestMulti()));
         genStats.setBoarScore(Math.max(0, Math.min(genStats.getBoarScore(), nums.getMaxScore())));
 
-        Gson g = new Gson();
         BufferedWriter writer = new BufferedWriter(new FileWriter(userFile));
-        writer.write(g.toJson(this.data));
+        writer.write(new Gson().toJson(this.data));
         writer.close();
     }
 

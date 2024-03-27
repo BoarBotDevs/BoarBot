@@ -36,7 +36,6 @@ public class BannedWipedDataUtil extends DataUtil {
 
         this.data = new HashMap<>();
 
-        Gson g = new Gson();
         Type mapType = new TypeToken<Map<String, Long>>() {}.getType();
         String dataJson = null;
 
@@ -50,7 +49,7 @@ public class BannedWipedDataUtil extends DataUtil {
             dataJson = createFile(this.filePath, this.data);
         }
 
-        this.data = g.fromJson(dataJson, mapType);
+        this.data = new Gson().fromJson(dataJson, mapType);
         return this.data;
     }
 

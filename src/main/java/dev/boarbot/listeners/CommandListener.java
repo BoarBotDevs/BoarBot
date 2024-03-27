@@ -44,8 +44,13 @@ public class CommandListener extends ListenerAdapter implements Runnable {
                 this.event.getName() + this.event.getSubcommandName()
             ).newInstance(this.event);
             subcommand.execute();
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        } catch (Exception exception) {
+            log.error(
+                "Something went wrong when running '/%s $s'.".formatted(
+                    this.event.getName(), this.event.getSubcommandName()
+                ),
+                exception
+            );
         }
     }
 }

@@ -20,7 +20,7 @@ public class DailySubcommand extends Subcommand {
         try {
             boarUser = new BoarUser(this.user, true);
         } catch (IOException exception) {
-            log.error("Failed to create boar user");
+            log.error("Failed to create user (%s) file.".formatted(this.user.getId()), exception);
             return;
         }
 

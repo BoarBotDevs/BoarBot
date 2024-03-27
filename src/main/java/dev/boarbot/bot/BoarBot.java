@@ -69,7 +69,7 @@ public class BoarBot implements Bot {
             this.config = g.fromJson(jsonStr.toString(), BotConfig.class);
 
             log.info("Successfully loaded config.");
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException exception) {
             log.error("Unable to find 'config.json' in resources.");
             System.exit(-1);
         }
