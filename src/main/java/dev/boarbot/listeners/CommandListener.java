@@ -46,7 +46,7 @@ public class CommandListener extends ListenerAdapter implements Runnable {
             subcommand.execute();
         } catch (Exception exception) {
             log.error(
-                "Something went wrong when running '/%s $s'.".formatted(
+                "Something went wrong when running '/%s %s'.".formatted(
                     this.event.getName(), this.event.getSubcommandName()
                 ),
                 exception
