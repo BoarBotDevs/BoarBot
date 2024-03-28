@@ -23,7 +23,7 @@ public class BoarUser {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
     @Getter private User user;
-    private String userID;
+    @Getter private String userID;
     @Getter private BoarUserData data = new BoarUserData();
 
     public BoarUser(User user) throws IOException {

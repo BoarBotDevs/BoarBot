@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserBoardData {
-    private String username;
-    private Long value;
+public class GithubData {
+    private String lastURL = "";
 }
