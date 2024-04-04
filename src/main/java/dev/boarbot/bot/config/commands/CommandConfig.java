@@ -17,10 +17,10 @@ import java.util.Map;
 @Getter
 @Setter
 public class CommandConfig {
-    public String name = "";
-    public String description = "";
-    public Integer default_member_permissions;
-    public Map<String, SubcommandConfig> subcommands = new HashMap<>();
+    private String name = "";
+    private String description = "";
+    private Integer default_member_permissions;
+    private Map<String, SubcommandConfig> subcommands = new HashMap<>();
 
     @Override
     public String toString() {

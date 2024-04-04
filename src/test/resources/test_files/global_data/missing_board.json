@@ -1,0 +1,32 @@
+{
+  "bucks": {
+    "topUser": "184439280980983808",
+    "userData": {
+      "184439280980983808": {
+        "username": "weslay.",
+        "value": 1000
+      }
+    }
+  },
+  "multiplier": {
+    "userData": {}
+  },
+  "fastest": {
+    "userData": {}
+  },
+  "uniques": {
+    "userData": {}
+  },
+  "uniquesSB": {
+    "userData": {}
+  },
+  "streak": {
+    "userData": {}
+  },
+  "giftsUsed": {
+    "userData": {}
+  },
+  "attempts": {
+    "userData": {}
+  }
+}

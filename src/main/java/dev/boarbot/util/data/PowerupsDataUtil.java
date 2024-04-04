@@ -22,6 +22,7 @@ public class PowerupsDataUtil extends DataUtil {
         this.data = refreshData(update);
     }
 
+    @Override
     public PowerupData refreshData(boolean update) {
         createGlobalFolder();
 

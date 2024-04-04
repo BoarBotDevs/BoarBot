@@ -9,6 +9,8 @@ import dev.boarbot.bot.config.prompts.PromptTypeConfig;
 import dev.boarbot.entities.boaruser.collectibles.CollectedPowerup;
 import dev.boarbot.entities.boaruser.stats.GeneralStats;
 import dev.boarbot.entities.boaruser.stats.PromptStats;
+import dev.boarbot.entities.boaruser.stats.QuestStats;
+import dev.boarbot.util.data.types.QuestData;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.entities.User;
@@ -91,7 +93,7 @@ public class BoarUser {
         String userFile = config.getPathConfig().getDatabaseFolder() +
             config.getPathConfig().getUserDataFolder() + this.userID + ".json";
 
-        Set<String> boarGottenIDs = this.data.getItemCollection().getBoars().keySet();
+        Set<String> boarGottenIDs = new HashSet<>(this.data.getItemCollection().getBoars().keySet());
         long beginningOfDay = LocalDate.now()
             .atStartOfDay()
             .toInstant(ZoneOffset.UTC)
@@ -111,7 +113,7 @@ public class BoarUser {
                 genStats.getTotalBoars() - this.data.getItemCollection().getBoars().get(boarID).getNum()
             );
 
-            this.getData().getItemCollection().getBoars().remove(boarID);
+            this.data.getItemCollection().getBoars().remove(boarID);
 
             if (genStats.getLastBoar().equals(boarID)) {
                 genStats.setLastBoar("");
@@ -131,13 +133,13 @@ public class BoarUser {
         }
 
         // Removes prompt or prompt type from data if not in config
-        for (String promptType : promptData.keySet()) {
+        for (String promptType : new HashSet<>(promptData.keySet())) {
             if (promptTypes.get(promptType) == null) {
                 promptData.remove(promptType);
                 continue;
             }
 
-            for (String promptID : promptData.get(promptType).keySet()) {
+            for (String promptID : new HashSet<>(promptData.get(promptType).keySet())) {
                 if (promptTypes.get(promptType).getPrompts().get(promptID) == null) {
                     promptData.get(promptType).remove(promptID);
                 }
@@ -146,7 +148,13 @@ public class BoarUser {
 
         // TODO: Add quest data to all user files
 
-        // TODO: Check quests from global quests file
+        QuestData questData = new QuestData();
+        QuestStats questStats = this.data.getStats().getQuests();
+
+        if (questStats.getQuestWeekStart() != questData.getQuestsStartTimestamp()) {
+            questStats = new QuestStats();
+            questStats.setQuestWeekStart(questData.getQuestsStartTimestamp());
+        }
 
         Map<String, CollectedPowerup> powerupData = this.data.getItemCollection().getPowerups();
 
@@ -246,10 +254,53 @@ public class BoarUser {
     public void updateUserData() throws IOException {
         BoarUserData userData = this.getUserData(false);
 
-        // TODO: Quest stuff
+        QuestData questData = new QuestData();
+        QuestStats questStats = this.data.getStats().getQuests();
+        List<String> curQuestIDs = Arrays.asList(questData.getCurQuestIDs());
+
+        int dailyQuestIndex = curQuestIDs.indexOf("daily");
+        int cloneBoarsIndex = curQuestIDs.indexOf("cloneBoars");
+        int cloneRarityIndex = curQuestIDs.indexOf("cloneRarity");
+        int sendGiftsIndex = curQuestIDs.indexOf("sendGifts");
+        int openGiftsIndex = curQuestIDs.indexOf("openGifts");
+        int powParticipateIndex = curQuestIDs.indexOf("powParticipate");
 
         Map<String, CollectedPowerup> powerupData = this.data.getItemCollection().getPowerups();
         Map<String, CollectedPowerup> filePowerupData = userData.getItemCollection().getPowerups();
+        GeneralStats genStats = this.data.getStats().getGeneral();
+        GeneralStats fileGenStats = userData.getStats().getGeneral();
+
+        if (dailyQuestIndex >= 0) {
+            questStats.getProgress()[dailyQuestIndex] += genStats.getNumDailies() - fileGenStats.getNumDailies();
+        }
+
+        if (cloneBoarsIndex >= 0) {
+            questStats.getProgress()[cloneBoarsIndex] += powerupData.get("clone").getNumSuccess() -
+                filePowerupData.get("clone").getNumSuccess();
+        }
+
+        int[] cloneRarities = powerupData.get("clone").getRaritiesUsed();
+        int[] fileCloneRarities = filePowerupData.get("clone").getRaritiesUsed();
+
+        if (cloneRarityIndex >= 0) {
+            questStats.getProgress()[cloneRarityIndex] += cloneRarities[cloneRarityIndex / 2 + 2] -
+                fileCloneRarities[cloneRarityIndex / 2 + 2];
+        }
+
+        if (sendGiftsIndex >= 0) {
+            questStats.getProgress()[sendGiftsIndex] += powerupData.get("gift").getNumUsed() -
+                filePowerupData.get("gift").getNumUsed();
+        }
+
+        if (openGiftsIndex >= 0) {
+            questStats.getProgress()[openGiftsIndex] += powerupData.get("gift").getNumOpened() -
+                filePowerupData.get("gift").getNumOpened();
+        }
+
+        if (powParticipateIndex >= 0) {
+            questStats.getProgress()[powParticipateIndex] += this.data.getStats().getPowerups().getAttempts() -
+                userData.getStats().getPowerups().getAttempts();
+        }
 
         for (String powerupID : powerupData.keySet()) {
             powerupData.get(powerupID).setHighestTotal(

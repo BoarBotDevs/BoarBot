@@ -8,6 +8,7 @@ import dev.boarbot.bot.config.commands.SubcommandConfig;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.CommandListener;
 import dev.boarbot.listeners.StopMessageListener;
+import dev.boarbot.util.data.DataUtil;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.JDA;
@@ -31,25 +32,31 @@ public class BoarBot implements Bot {
     private JDA jda;
     private BotConfig config;
     private final Map<String, Constructor<? extends Subcommand>> subcommands = new HashMap<>();
+    private BotType botType;
 
     @Override
-    public void create() {
+    public void create(BotType type) {
+        this.botType = type;
+
         loadConfig();
 
-        jda = JDABuilder.createDefault(env.get("TOKEN"))
-            .addEventListeners(
-                new StopMessageListener(),
-                new CommandListener()
-            )
+        this.jda = JDABuilder.createDefault(this.env.get("TOKEN"))
+            .addEventListeners(new StopMessageListener(), new CommandListener())
             .setActivity(Activity.customStatus("/boar help | boarbot.dev"))
             .build();
 
         registerSubcommands();
+        DataUtil.updateAllData();
+    }
+
+    @Override
+    public BotType getBotType() {
+        return this.botType;
     }
 
     @Override
     public JDA getJDA() {
-        return jda;
+        return this.jda;
     }
 
     @Override
@@ -57,7 +64,11 @@ public class BoarBot implements Bot {
         try {
             log.info("Attempting to load 'config.json' from resources.");
 
-            File file = new File("src/main/resources/config.json");
+            String configFile = "src/%s/resources/config.json".formatted(
+                this.botType == BotType.TEST ? "test" : "main"
+            );
+
+            File file = new File(configFile);
             Scanner reader = new Scanner(file);
             StringBuilder jsonStr = new StringBuilder();
             Gson g = new Gson();
@@ -77,12 +88,12 @@ public class BoarBot implements Bot {
 
     @Override
     public BotConfig getConfig() {
-        return config;
+        return this.config;
     }
 
     @Override
     public void deployCommands() {
-        Map<String, CommandConfig> commandData = config.getCommandConfig();
+        Map<String, CommandConfig> commandData = this.config.getCommandConfig();
 
         List<SlashCommandData> globalCommands = new ArrayList<>();
         List<SlashCommandData> guildCommands = new ArrayList<>();
@@ -103,13 +114,13 @@ public class BoarBot implements Bot {
             );
         }
 
-        Guild devGuild = jda.getGuildById(env.get("GUILD_ID"));
+        Guild devGuild = this.jda.getGuildById(this.env.get("GUILD_ID"));
 
         if (devGuild != null) {
-            devGuild.updateCommands().addCommands(guildCommands).queue();
+            devGuild.updateCommands().addCommands(guildCommands).complete();
         }
 
-        jda.updateCommands().addCommands(globalCommands).queue();
+        this.jda.updateCommands().addCommands(globalCommands).complete();
     }
 
     @Override

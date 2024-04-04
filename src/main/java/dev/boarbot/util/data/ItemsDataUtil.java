@@ -1,6 +1,7 @@
 package dev.boarbot.util.data;
 
 import com.google.gson.Gson;
+import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.collectibles.CollectedPowerup;
@@ -13,7 +14,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
+import java.util.*;
 
 @Log4j2
 public class ItemsDataUtil extends DataUtil {
@@ -29,6 +30,7 @@ public class ItemsDataUtil extends DataUtil {
         this.data = refreshData(update);
     }
 
+    @Override
     public ItemsData refreshData(boolean update) {
         createGlobalFolder();
 
@@ -67,7 +69,7 @@ public class ItemsDataUtil extends DataUtil {
             powerupData.putIfAbsent(powerupID, new ItemData());
         }
 
-        for (String powerupID : powerupData.keySet()) {
+        for (String powerupID : new HashSet<>(powerupData.keySet())) {
             if (powerupConfig.containsKey(powerupID)) {
                 continue;
             }
@@ -84,15 +86,10 @@ public class ItemsDataUtil extends DataUtil {
                     continue;
                 }
 
-                CollectedPowerup curPowerup = boarUser.getData().getItemCollection().getPowerups().get(powerupID);
                 GeneralStats genStats = boarUser.getData().getStats().getGeneral();
 
-                curPowerup.setNumTotal(
-                    curPowerup.getNumTotal() + buyOrder.getFilledAmount() - buyOrder.getClaimedAmount()
-                );
-
                 genStats.setBoarScore(
-                    genStats.getBoarScore() + (long) (buyOrder.getNum() - buyOrder.getFilledAmount()) *
+                    genStats.getBoarScore() + (long) (buyOrder.getNum() - buyOrder.getClaimedAmount()) *
                         buyOrder.getPrice()
                 );
 
@@ -113,15 +110,10 @@ public class ItemsDataUtil extends DataUtil {
                     continue;
                 }
 
-                CollectedPowerup curPowerup = boarUser.getData().getItemCollection().getPowerups().get(powerupID);
                 GeneralStats genStats = boarUser.getData().getStats().getGeneral();
 
-                curPowerup.setNumTotal(
-                    curPowerup.getNumTotal() + sellOrder.getNum() - sellOrder.getFilledAmount()
-                );
-
                 genStats.setBoarScore(
-                    genStats.getBoarScore() + (long) (sellOrder.getFilledAmount() - sellOrder.getClaimedAmount()) *
+                    genStats.getBoarScore() + (long) (sellOrder.getNum() - sellOrder.getClaimedAmount()) *
                         sellOrder.getPrice()
                 );
 
@@ -135,11 +127,42 @@ public class ItemsDataUtil extends DataUtil {
             powerupData.remove(powerupID);
         }
 
+        orderGlobalBoars();
+
         try {
             saveData();
         } catch (IOException exception) {
             log.error("Failed to update file %s.".formatted(filePath), exception);
             System.exit(-1);
+        }
+    }
+
+    private void orderGlobalBoars() {
+        String[] boarIDs = this.data.getBoars().keySet().toArray(new String[0]);
+
+        RarityConfig[] orderedRarities = Arrays.copyOfRange(
+            this.config.getRarityConfigs(), 0, this.config.getRarityConfigs().length-1
+        );
+        Arrays.sort(orderedRarities, Comparator.comparingDouble(rarity -> rarity.weight));
+
+        for (RarityConfig rarity : orderedRarities) {
+            List<String> orderedBoars = new ArrayList<>();
+            String[] boarsOfRarity = rarity.boars;
+
+            for (int i=0; i<boarIDs.length; i++) {
+                String curBoarID = boarIDs[i];
+                ItemData curBoarData = this.data.getBoars().get(curBoarID);
+
+                if (!Arrays.asList(boarsOfRarity).contains(curBoarID) || orderedBoars.contains(curBoarID)) {
+                    continue;
+                }
+
+                this.data.getBoars().remove(curBoarID);
+                this.data.getBoars().put(curBoarID, curBoarData);
+
+                orderedBoars.add(curBoarID);
+                i--;
+            }
         }
     }
 

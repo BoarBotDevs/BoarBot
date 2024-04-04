@@ -18,12 +18,12 @@ import java.util.Arrays;
 @Getter
 @Setter
 public class SubcommandConfig {
-    public String name = "";
-    public String description = "";
-    public String location = "";
+    private String name = "";
+    private String description = "";
+    private String location = "";
 
     // Arguments the command uses
-    public SubcommandArgsConfig[] options;
+    private SubcommandArgsConfig[] options;
 
     @Override
     public String toString() {

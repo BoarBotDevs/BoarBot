@@ -15,8 +15,8 @@ import lombok.ToString;
 @Getter
 @Setter
 public class ArgChoicesConfig<T> {
-    public String name = "";
-    public T value;
+    private String name = "";
+    private T value;
 
     @Override
     public String toString() {

@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.WeekFields;
+import java.util.HashSet;
 import java.util.Set;
 
 @Log4j2
@@ -27,6 +28,7 @@ public class QuestsDataUtil extends DataUtil {
         this.data = refreshData(update);
     }
 
+    @Override
     public QuestData refreshData(boolean update) {
         createGlobalFolder();
 
@@ -58,8 +60,7 @@ public class QuestsDataUtil extends DataUtil {
         int oneDay = this.config.getNumberConfig().getOneDay();
 
         if (this.data.getQuestsStartTimestamp() + oneDay * 7L < curTime) {
-            Set<String> questIDs = this.config.getQuestConfig().keySet();
-
+            Set<String> questIDs = new HashSet<>(this.config.getQuestConfig().keySet());
             LocalDateTime date = Instant.ofEpochMilli(curTime + 60000).atOffset(ZoneOffset.UTC).toLocalDateTime();
             int dayOfWeekNum = date.get(WeekFields.SUNDAY_START.dayOfWeek()) - 1;
             long startOfDay = date.toLocalDate().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();

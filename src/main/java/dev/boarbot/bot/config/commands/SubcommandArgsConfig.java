@@ -17,12 +17,12 @@ import java.util.Arrays;
 @Getter
 @Setter
 public class SubcommandArgsConfig {
-    public String name = "";
-    public int type = -1;
-    public String description = "";
-    public Boolean required = false;
-    public Boolean autocomplete = false;
-    public ArgChoicesConfig<?>[] choices;
+    private String name = "";
+    private int type = -1;
+    private String description = "";
+    private Boolean required = false;
+    private Boolean autocomplete = false;
+    private ArgChoicesConfig<?>[] choices;
 
     @Override
     public String toString() {

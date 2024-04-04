@@ -1,0 +1,2575 @@
+{
+  "powerups": {
+    "miracle": {
+      "buyers": [
+        {
+          "userID": "305364733798776843",
+          "num": 8,
+          "price": 35,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705974137791,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "413010174123442178",
+          "num": 40,
+          "price": 29,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705938945254,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "796823642410319932",
+          "num": 5,
+          "price": 28,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705756241238,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "881385608046592051",
+          "num": 22,
+          "price": 22,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1700200413412,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "350692720588881920",
+          "num": 100,
+          "price": 20,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705847475129,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "881385608046592051",
+          "num": 50,
+          "price": 14,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1700881800618,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "766563726467661824",
+          "num": 5,
+          "price": 11,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1700201014202,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "701182787616768021",
+          "num": 24,
+          "price": 39,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705616090107,
+          "filledAmount": 24,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "350692720588881920",
+          "num": 25,
+          "price": 58,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1706006074517,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "481499906784100352",
+          "num": 240,
+          "price": 60,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705199526642,
+          "filledAmount": 50,
+          "claimedAmount": 50
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "gift": {
+      "buyers": [
+        {
+          "userID": "471756223365251073",
+          "num": 1,
+          "price": 30,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1700234619851,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "935063337220333638",
+          "num": 1,
+          "price": 22,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701060679068,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "611968735099617291",
+          "num": 1,
+          "price": 20,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1700813281058,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1022578387048476793",
+          "num": 150,
+          "price": 14,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1704370808709,
+          "filledAmount": 15,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "772715433357738005",
+          "num": 60,
+          "price": 12,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1702803966368,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "719232564295893103",
+          "num": 100,
+          "price": 12,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705782702289,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "701182787616768021",
+          "num": 21,
+          "price": 11,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705616218472,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "730090182715375666",
+          "num": 1,
+          "price": 11,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705743672055,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1119773161848836097",
+          "num": 1,
+          "price": 10,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701823364403,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "375692575883001866",
+          "num": 1,
+          "price": 10,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705439399418,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "601855360457900032",
+          "num": 1,
+          "price": 27,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1700346965717,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "enhancer": {
+      "buyers": [
+        {
+          "userID": "172780979344113665",
+          "num": 5,
+          "price": 94,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1704675307828,
+          "filledAmount": 5,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "561273426749161482",
+          "num": 19,
+          "price": 91,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1706049449366,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "781970805398700073",
+          "num": 1,
+          "price": 90,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1706041911254,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "413010174123442178",
+          "num": 30,
+          "price": 80,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705938973263,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "538724292704206858",
+          "num": 30,
+          "price": 70,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1704825263663,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "262809139812630528",
+          "num": 2,
+          "price": 60,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703549212409,
+          "filledAmount": 2,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "741642041662111826",
+          "num": 5,
+          "price": 80,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1699898577227,
+          "filledAmount": 5,
+          "claimedAmount": 3
+        },
+        {
+          "userID": "627018533523554305",
+          "num": 2,
+          "price": 90,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705797999670,
+          "filledAmount": 2,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "350692720588881920",
+          "num": 14,
+          "price": 120,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1706006126589,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "713601534264344639",
+          "num": 7,
+          "price": 140,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705535786468,
+          "filledAmount": 7,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "781970805398700073",
+          "num": 30,
+          "price": 180,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703197406290,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "481499906784100352",
+          "num": 7,
+          "price": 189,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705973744373,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "554746401725218830",
+          "num": 30,
+          "price": 190,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705540853987,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "987205176140116000",
+          "num": 1,
+          "price": 200,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705214284872,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "561273426749161482",
+          "num": 18,
+          "price": 200,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705873334050,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "clone": {
+      "buyers": [
+        {
+          "userID": "731112152991268945",
+          "num": 1,
+          "price": 35,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701432188569,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "611968735099617291",
+          "num": 1,
+          "price": 20,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1700813318246,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1119773161848836097",
+          "num": 4,
+          "price": 15,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703299846523,
+          "filledAmount": 4,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "315308047423766529",
+          "num": 3,
+          "price": 12,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701907386494,
+          "filledAmount": 3,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1103757732152090674",
+          "num": 3,
+          "price": 12,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1706049601636,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1046453952599834778",
+          "num": 1,
+          "price": 10,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701821315314,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1119773161848836097",
+          "num": 5,
+          "price": 10,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703813370123,
+          "filledAmount": 4,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "936512644309983293",
+          "num": 5,
+          "price": 10,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705230529749,
+          "filledAmount": 5,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "350692720588881920",
+          "num": 500,
+          "price": 6,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1706006297145,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "945340843995308042",
+          "num": 2,
+          "price": 16,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1700634868452,
+          "filledAmount": 2,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "701182787616768021",
+          "num": 1,
+          "price": 28,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705616141754,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "481499906784100352",
+          "num": 10,
+          "price": 30,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705973884438,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "184439280980983808",
+          "num": 1,
+          "price": 34,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1704269873548,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "350692720588881920",
+          "num": 28,
+          "price": 35,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705718114761,
+          "filledAmount": 22,
+          "claimedAmount": 22
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    }
+  },
+  "boars": {
+    "gamebreaker": {
+      "curEdition": 11,
+      "buyers": [
+        {
+          "userID": "1174087252570276023",
+          "num": 1,
+          "price": 2,
+          "editions": [
+            1
+          ],
+          "editionDates": [],
+          "listTime": 1704587802813,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "440144870670204929",
+          "num": 1,
+          "price": 1,
+          "editions": [
+            1
+          ],
+          "editionDates": [],
+          "listTime": 1704343388824,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "bacteria": {
+      "curEdition": 86,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "underwear": {
+      "curEdition": 8,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "spooky": {
+      "curEdition": 20,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "trophy": {
+      "curEdition": 15,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "boargalos": {
+      "curEdition": 1,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "supernova": {
+      "curEdition": 12,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "creator": {
+      "curEdition": 12,
+      "buyers": [
+        {
+          "userID": "936512644309983293",
+          "num": 1,
+          "price": 101,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705230341369,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1163853644563759115",
+          "num": 1,
+          "price": 100,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705130084637,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "gigachad": {
+      "curEdition": 14,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "duck": {
+      "curEdition": 10,
+      "buyers": [
+        {
+          "userID": "629944866578759710",
+          "num": 1,
+          "price": 320,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1702282257875,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1119773161848836097",
+          "num": 1,
+          "price": 250,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701823381636,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "828144331981586432",
+          "num": 1,
+          "price": 161,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1702554815414,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "rickroll": {
+      "curEdition": 39,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "539315904434143253",
+          "num": 1,
+          "price": 1602,
+          "editions": [
+            22
+          ],
+          "editionDates": [
+            1702475534337
+          ],
+          "listTime": 1702512894513,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "morbius": {
+      "curEdition": 47,
+      "buyers": [
+        {
+          "userID": "828144331981586432",
+          "num": 1,
+          "price": 125,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1702555199515,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "santa": {
+      "curEdition": 13,
+      "buyers": [
+        {
+          "userID": "474651314605916191",
+          "num": 1,
+          "price": 200,
+          "editions": [
+            14
+          ],
+          "editionDates": [],
+          "listTime": 1704484824333,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "474651314605916191",
+          "num": 1,
+          "price": 100,
+          "editions": [
+            15
+          ],
+          "editionDates": [],
+          "listTime": 1704483194089,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "413010174123442178",
+          "num": 1,
+          "price": 12000,
+          "editions": [
+            12
+          ],
+          "editionDates": [
+            1703968570880
+          ],
+          "listTime": 1705912353582,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "imposter": {
+      "curEdition": 51,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "curious": {
+      "curEdition": 34,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "dante": {
+      "curEdition": 38,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "pixel": {
+      "curEdition": 53,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "cowboy": {
+      "curEdition": 86,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "realistic": {
+      "curEdition": 94,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "871137016123895870",
+          "num": 1,
+          "price": 421,
+          "editions": [
+            68
+          ],
+          "editionDates": [
+            1703277342327
+          ],
+          "listTime": 1703708811186,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "farmer": {
+      "curEdition": 80,
+      "buyers": [
+        {
+          "userID": "910944850633965608",
+          "num": 1,
+          "price": 360,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705463271083,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "super": {
+      "curEdition": 12,
+      "buyers": [
+        {
+          "userID": "1123040598757232681",
+          "num": 1,
+          "price": 850,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1702600166886,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "beachbum": {
+      "curEdition": 87,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "hyperion": {
+      "curEdition": 65,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "fairy": {
+      "curEdition": 85,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "unicorn": {
+      "curEdition": 89,
+      "buyers": [
+        {
+          "userID": "828144331981586432",
+          "num": 1,
+          "price": 19,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701121962235,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "284721671347240970",
+          "num": 1,
+          "price": 19,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701673138430,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "ballerina": {
+      "curEdition": 76,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "obama": {
+      "curEdition": 80,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "minimumwage": {
+      "curEdition": 163,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "backrooms": {
+      "curEdition": 134,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "jumpscare": {
+      "curEdition": 170,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "sleepy": {
+      "curEdition": 172,
+      "buyers": [
+        {
+          "userID": "836420377051136000",
+          "num": 1,
+          "price": 150,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703824032427,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "boartist": {
+      "curEdition": 153,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "grimreaper": {
+      "curEdition": 146,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "drip": {
+      "curEdition": 29,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "newborn": {
+      "curEdition": 170,
+      "buyers": [
+        {
+          "userID": "539315904434143253",
+          "num": 1,
+          "price": 100,
+          "editions": [
+            86
+          ],
+          "editionDates": [
+            1699836596926
+          ],
+          "listTime": 1704256337429,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "volcano": {
+      "curEdition": 176,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "radioactive": {
+      "curEdition": 124,
+      "buyers": [
+        {
+          "userID": "719232564295893103",
+          "num": 1,
+          "price": 220,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705782734282,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "629944866578759710",
+          "num": 1,
+          "price": 150,
+          "editions": [
+            50
+          ],
+          "editionDates": [
+            1699494747538
+          ],
+          "listTime": 1703585704508,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "billionaire": {
+      "curEdition": 121,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "mushroom": {
+      "curEdition": 134,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "633493900366970880",
+          "num": 1,
+          "price": 200,
+          "editions": [
+            62
+          ],
+          "editionDates": [
+            1700438411703
+          ],
+          "listTime": 1700452174388,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "creepy": {
+      "curEdition": 295,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "629944866578759710",
+          "num": 1,
+          "price": 69,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703585762034,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "robot": {
+      "curEdition": 287,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "491632125829840896",
+          "num": 1,
+          "price": 120,
+          "editions": [
+            66
+          ],
+          "editionDates": [
+            1693599787056
+          ],
+          "listTime": 1705194115748,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "coffee": {
+      "curEdition": 284,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "1103757732152090674",
+          "num": 1,
+          "price": 70,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705595088505,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "moon": {
+      "curEdition": 267,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "443170073025314837",
+          "num": 1,
+          "price": 60,
+          "editions": [
+            98
+          ],
+          "editionDates": [
+            1697155250024
+          ],
+          "listTime": 1700188445628,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "wizard": {
+      "curEdition": 305,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "aurora": {
+      "curEdition": 322,
+      "buyers": [
+        {
+          "userID": "860023171070689311",
+          "num": 1,
+          "price": 70,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703846388573,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "808297082523353095",
+          "num": 5,
+          "price": 70,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705406066761,
+          "filledAmount": 2,
+          "claimedAmount": 2
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "kuudra": {
+      "curEdition": 226,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "mlg": {
+      "curEdition": 284,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "1113480131542007819",
+          "num": 1,
+          "price": 50,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701528970630,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "1135212078429392928",
+          "num": 1,
+          "price": 50,
+          "editions": [
+            90
+          ],
+          "editionDates": [
+            1695873961122
+          ],
+          "listTime": 1701529223033,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "hammer": {
+      "curEdition": 239,
+      "buyers": [
+        {
+          "userID": "731112152991268945",
+          "num": 1,
+          "price": 50,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701431900796,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "860023171070689311",
+          "num": 1,
+          "price": 223,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703846504228,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "tornado": {
+      "curEdition": 195,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "1014538876976640071",
+          "num": 1,
+          "price": 35,
+          "editions": [
+            96
+          ],
+          "editionDates": [
+            1701122067089
+          ],
+          "listTime": 1701122095350,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "413010174123442178",
+          "num": 1,
+          "price": 80,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705792816752,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "broccoli": {
+      "curEdition": 191,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "skateboard": {
+      "curEdition": 237,
+      "buyers": [
+        {
+          "userID": "629944866578759710",
+          "num": 1,
+          "price": 170,
+          "editions": [
+            85
+          ],
+          "editionDates": [
+            1700124483814
+          ],
+          "listTime": 1702015334653,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "713601534264344639",
+          "num": 2,
+          "price": 49,
+          "editions": [
+            12
+          ],
+          "editionDates": [
+            1695910512728
+          ],
+          "listTime": 1705336927530,
+          "filledAmount": 2,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "481499906784100352",
+          "num": 2,
+          "price": 74,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705449724583,
+          "filledAmount": 1,
+          "claimedAmount": 1
+        },
+        {
+          "userID": "413010174123442178",
+          "num": 1,
+          "price": 79,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705995482752,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "clown": {
+      "curEdition": 472,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "869639385186992178",
+          "num": 1,
+          "price": 35,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705796949878,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "sphere": {
+      "curEdition": 561,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "614889781352202317",
+          "num": 1,
+          "price": 35,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705191707523,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "killer": {
+      "curEdition": 524,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "1103757732152090674",
+          "num": 2,
+          "price": 33,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705595156583,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "614889781352202317",
+          "num": 1,
+          "price": 35,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705191729130,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "fish": {
+      "curEdition": 507,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "869639385186992178",
+          "num": 1,
+          "price": 40,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705962915688,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "kiwi": {
+      "curEdition": 529,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "802734672064151562",
+          "num": 2,
+          "price": 45,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705276927245,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "stormy": {
+      "curEdition": 493,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "600327082006020108",
+          "num": 2,
+          "price": 33,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705790083809,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "869639385186992178",
+          "num": 2,
+          "price": 35,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705540827334,
+          "filledAmount": 1,
+          "claimedAmount": 1
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "golden": {
+      "curEdition": 522,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "keyboard": {
+      "curEdition": 520,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "869639385186992178",
+          "num": 2,
+          "price": 32,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705540846072,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "802734672064151562",
+          "num": 1,
+          "price": 34,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1704853804255,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "595548042917183489",
+          "num": 2,
+          "price": 50,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1701207499206,
+          "filledAmount": 2,
+          "claimedAmount": 1
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "pirate": {
+      "curEdition": 470,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "869639385186992178",
+          "num": 2,
+          "price": 38,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705540877645,
+          "filledAmount": 1,
+          "claimedAmount": 1
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "sanglier": {
+      "curEdition": 383,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "motherboard": {
+      "curEdition": 406,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "802734672064151562",
+          "num": 1,
+          "price": 45,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1704677627565,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "coin": {
+      "curEdition": 394,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "mosaic": {
+      "curEdition": 404,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "carrot": {
+      "curEdition": 1116,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "buff": {
+      "curEdition": 1066,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "chocolate": {
+      "curEdition": 1159,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "emo": {
+      "curEdition": 1112,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "869639385186992178",
+          "num": 5,
+          "price": 8,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705962884354,
+          "filledAmount": 4,
+          "claimedAmount": 4
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "matrix": {
+      "curEdition": 1119,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "960352857960358008",
+          "num": 1,
+          "price": 20,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703422975097,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "soda": {
+      "curEdition": 1137,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "lightbulb": {
+      "curEdition": 1078,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "minion": {
+      "curEdition": 878,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "sketch": {
+      "curEdition": 1113,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "police": {
+      "curEdition": 832,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "chalk": {
+      "curEdition": 850,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "bacon": {
+      "curEdition": 819,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "origami": {
+      "curEdition": 775,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "baseball": {
+      "curEdition": 853,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "normal": {
+      "curEdition": 5018,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "explosionless": {
+      "curEdition": 4937,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "tiny": {
+      "curEdition": 4945,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "bor": {
+      "curEdition": 5554,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "1123040598757232681",
+          "num": 1,
+          "price": 3,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703644560135,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "lowquality": {
+      "curEdition": 4910,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "chef": {
+      "curEdition": 2110,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "869639385186992178",
+          "num": 2,
+          "price": 10,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705974538887,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "recursive": {
+      "curEdition": 2173,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "dog": {
+      "curEdition": 2232,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "ascii": {
+      "curEdition": 2159,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "barber": {
+      "curEdition": 2094,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "robber": {
+      "curEdition": 2170,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "341537625871613952",
+          "num": 2,
+          "price": 6,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705067157193,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "barbarian": {
+      "curEdition": 1651,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "trash": {
+      "curEdition": 2228,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "tree": {
+      "curEdition": 2197,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "ice": {
+      "curEdition": 649,
+      "buyers": [
+        {
+          "userID": "828144331981586432",
+          "num": 1,
+          "price": 10,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703846090946,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [
+        {
+          "userID": "909106189562961931",
+          "num": 1,
+          "price": 30,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1704069530173,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "snowflake": {
+      "curEdition": 663,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "963721972758511657",
+          "num": 1,
+          "price": 10,
+          "editions": [
+            25
+          ],
+          "editionDates": [
+            1703413159530
+          ],
+          "listTime": 1703413255821,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "739960802890612911",
+          "num": 1,
+          "price": 15,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703808777585,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "405199824150069259",
+          "num": 1,
+          "price": 20,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1704148216519,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "ornament": {
+      "curEdition": 628,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "1048508796827353108",
+          "num": 1,
+          "price": 10,
+          "editions": [
+            19
+          ],
+          "editionDates": [
+            1703413287564
+          ],
+          "listTime": 1703413326169,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "716464609506230312",
+          "num": 2,
+          "price": 40,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1703898919236,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "elf": {
+      "curEdition": 622,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "1133317720373477446",
+          "num": 1,
+          "price": 10,
+          "editions": [
+            22
+          ],
+          "editionDates": [
+            1703413445195
+          ],
+          "listTime": 1703413472882,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "peppermint": {
+      "curEdition": 605,
+      "buyers": [],
+      "sellers": [
+        {
+          "userID": "1054310507642884101",
+          "num": 1,
+          "price": 10,
+          "editions": [
+            20
+          ],
+          "editionDates": [
+            1703413515145
+          ],
+          "listTime": 1703413540482,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "749566634301063219",
+          "num": 1,
+          "price": 18,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705592510458,
+          "filledAmount": 1,
+          "claimedAmount": 0
+        },
+        {
+          "userID": "869639385186992178",
+          "num": 1,
+          "price": 30,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705962860034,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "ghost": {
+      "curEdition": 601,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "pumpkin": {
+      "curEdition": 573,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "spider": {
+      "curEdition": 626,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "vampire": {
+      "curEdition": 572,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "zombie": {
+      "curEdition": 605,
+      "buyers": [],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "witch": {
+      "curEdition": 71,
+      "buyers": [
+        {
+          "userID": "719232564295893103",
+          "num": 1,
+          "price": 40,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705783038383,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "candy": {
+      "curEdition": 70,
+      "buyers": [
+        {
+          "userID": "719232564295893103",
+          "num": 1,
+          "price": 40,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705783058836,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "tombstone": {
+      "curEdition": 60,
+      "buyers": [
+        {
+          "userID": "719232564295893103",
+          "num": 1,
+          "price": 40,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705783077039,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "mummy": {
+      "curEdition": 75,
+      "buyers": [
+        {
+          "userID": "719232564295893103",
+          "num": 1,
+          "price": 40,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705783095894,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    },
+    "fortune": {
+      "curEdition": 71,
+      "buyers": [
+        {
+          "userID": "719232564295893103",
+          "num": 1,
+          "price": 40,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1705783131778,
+          "filledAmount": 0,
+          "claimedAmount": 0
+        }
+      ],
+      "sellers": [],
+      "bestBuyPrice": 0,
+      "lastBestBuyPrice": 0,
+      "bestBuyUser": "",
+      "bestSellPrice": 0,
+      "lastBestSellPrice": 0,
+      "bestSellUser": ""
+    }
+  }
+}

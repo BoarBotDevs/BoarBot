@@ -17,9 +17,7 @@ import lombok.extern.log4j.Log4j2;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Log4j2
 public class BoardsDataUtil extends DataUtil {
@@ -35,6 +33,7 @@ public class BoardsDataUtil extends DataUtil {
         this.data = refreshData(update);
     }
 
+    @Override
     public Map<String, BoardData> refreshData(boolean update) {
         createGlobalFolder();
 
@@ -51,10 +50,10 @@ public class BoardsDataUtil extends DataUtil {
 
         if (dataJson == null) {
             ArgChoicesConfig<?>[] choices = this.config.getCommandConfig()
-                .get("boar").getSubcommands().get("top").getOptions()[0].choices;
+                .get("boar").getSubcommands().get("top").getOptions()[0].getChoices();
 
             for (ArgChoicesConfig<?> choice : choices) {
-                String boardID = (String) choice.value;
+                String boardID = (String) choice.getValue();
                 this.data.put(boardID, new BoardData());
             }
 
@@ -72,16 +71,16 @@ public class BoardsDataUtil extends DataUtil {
 
     private void updateData() {
         ArgChoicesConfig<?>[] choices = this.config.getCommandConfig()
-            .get("boar").getSubcommands().get("top").getOptions()[0].choices;
-        String[] choiceValues = (String[]) Arrays.stream(choices).map(choice -> choice.value).toArray();
+            .get("boar").getSubcommands().get("top").getOptions()[0].getChoices();
+        List<?> choiceValues = Arrays.stream(choices).map(ArgChoicesConfig::getValue).toList();
 
         for (ArgChoicesConfig<?> choice : choices) {
-            String boardID = (String) choice.value;
+            String boardID = choice.getValue().toString();
             this.data.putIfAbsent(boardID, new BoardData());
         }
 
-        for (String boardID : this.data.keySet()) {
-            if (Arrays.asList(choiceValues).contains(boardID)) {
+        for (String boardID : new HashSet<>(this.data.keySet())) {
+            if (!choiceValues.contains(boardID)) {
                 this.data.remove(boardID);
             }
         }

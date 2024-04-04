@@ -31,6 +31,7 @@ public class BannedWipedDataUtil extends DataUtil {
         this.data = refreshData(update);
     }
 
+    @Override
     public Map<String, Long> refreshData(boolean update) {
         createGlobalFolder();
 

@@ -24,7 +24,7 @@ public abstract class DataUtil {
 
     protected String createFile(String filePath, Object data) {
         try {
-            saveData();
+            saveData(filePath, data);
             log.info("Successfully created file %s.".formatted(filePath));
         } catch (IOException exception) {
             log.error("Failed to create file %s.".formatted(filePath), exception);
@@ -51,5 +51,14 @@ public abstract class DataUtil {
             log.error("Something went wrong when creating global folder at %s!".formatted(globalFolderPath));
             System.exit(-1);
         }
+    }
+
+    public static void updateAllData() {
+        new ItemsDataUtil(true);
+        new BoardsDataUtil(true);
+        new BannedWipedDataUtil(true, true);
+        new BannedWipedDataUtil(false, true);
+        new PowerupsDataUtil(true);
+        new QuestsDataUtil(true);
     }
 }
