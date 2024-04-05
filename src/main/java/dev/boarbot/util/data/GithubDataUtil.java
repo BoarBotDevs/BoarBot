@@ -15,8 +15,8 @@ public final class GithubDataUtil {
     public static GithubData getGithubData() throws IOException {
         BotConfig config = BoarBotApp.getBot().getConfig();
 
-        String githubFilePath = config.getPathConfig().getDatabaseFolder() + config.getPathConfig().getGlobalDataFolder() +
-            config.getPathConfig().getGithubFileName();
+        String githubFilePath = config.getPathConfig().getDatabaseFolder() +
+            config.getPathConfig().getGlobalDataFolder() + config.getPathConfig().getGithubFileName();
         Gson g = new Gson();
 
         try {

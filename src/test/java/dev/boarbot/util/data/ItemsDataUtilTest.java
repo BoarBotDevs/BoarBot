@@ -85,7 +85,7 @@ public class ItemsDataUtilTest {
         BoarUserData wrongUserData = new Gson().fromJson(wrongUserJson, BoarUserData.class);
 
         assertEquals(
-            wrongUserData.getStats().getGeneral().getBoarScore() + 5,
+            wrongUserData.getStats().getGeneral().getBoarScore() + 13,
             new BoarUser("test_user").getData().getStats().getGeneral().getBoarScore(),
             "User data not updated properly"
         );

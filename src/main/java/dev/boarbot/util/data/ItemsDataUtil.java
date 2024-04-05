@@ -113,7 +113,7 @@ public class ItemsDataUtil extends DataUtil {
                 GeneralStats genStats = boarUser.getData().getStats().getGeneral();
 
                 genStats.setBoarScore(
-                    genStats.getBoarScore() + (long) (sellOrder.getNum() - sellOrder.getClaimedAmount()) *
+                    genStats.getBoarScore() + (long) (sellOrder.getFilledAmount() - sellOrder.getClaimedAmount()) *
                         sellOrder.getPrice()
                 );
 

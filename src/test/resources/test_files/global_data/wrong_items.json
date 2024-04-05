@@ -569,13 +569,23 @@
           "listTime": 1,
           "filledAmount": 1,
           "claimedAmount": 1
+        },
+        {
+          "userID": "test_user",
+          "num": 1,
+          "price": 4,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1,
+          "filledAmount": 0,
+          "claimedAmount": 0
         }
       ],
       "sellers": [
         {
           "userID": "test_user",
           "num": 1,
-          "price": 4,
+          "price": 8,
           "editions": [],
           "editionDates": [],
           "listTime": 1,
@@ -585,12 +595,22 @@
         {
           "userID": "test_user",
           "num": 1,
-          "price": 8,
+          "price": 16,
           "editions": [],
           "editionDates": [],
           "listTime": 1,
           "filledAmount": 1,
           "claimedAmount": 1
+        },
+        {
+          "userID": "test_user",
+          "num": 1,
+          "price": 32,
+          "editions": [],
+          "editionDates": [],
+          "listTime": 1,
+          "filledAmount": 0,
+          "claimedAmount": 0
         }
       ],
       "bestBuyPrice": 0,
