@@ -112,7 +112,7 @@ public class BotConfig {
     private RarityConfig[] rarityConfigs = {};
 
     /**
-     * {@link ColorConfig Color configurations} used by the bot
+     * Color configurations used by the bot
      */
-    private ColorConfig colorConfig = new ColorConfig();
+    private Map<String, String> colorConfig = new HashMap<>();
 }

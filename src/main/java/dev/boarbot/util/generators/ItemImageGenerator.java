@@ -3,6 +3,7 @@ package dev.boarbot.util.generators;
 import dev.boarbot.bot.config.*;
 import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.ImageUtil;
 import lombok.Getter;
@@ -12,7 +13,9 @@ import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 public class ItemImageGenerator {
     private final BotConfig config;
@@ -58,7 +61,7 @@ public class ItemImageGenerator {
             IndivItemConfig boarInfo = this.config.getItemConfig().getBoars().get(itemID);
             this.itemName = boarInfo.name;
             this.filePath = this.config.getPathConfig().getBoars() + boarInfo.file;
-            this.colorKey = "rarity" + BoarUtil.findRarityIndex(itemID, config);
+            this.colorKey = "rarity" + (BoarUtil.findRarityIndex(itemID, config) + 1);
         }
 
         this.giftingUser = giftingUser;
@@ -142,7 +145,7 @@ public class ItemImageGenerator {
         StringConfig strConfig = this.config.getStringConfig();
         NumberConfig nums = this.config.getNumberConfig();
         PathConfig pathConfig = this.config.getPathConfig();
-        ColorConfig colorConfig = this.config.getColorConfig();
+        Map<String, String> colorConfig = this.config.getColorConfig();
 
         String itemAssetsFolder = pathConfig.getItemAssets();
         String underlayPath = itemAssetsFolder + pathConfig.getItemUnderlay();
@@ -157,7 +160,7 @@ public class ItemImageGenerator {
         this.generatedImage = new BufferedImage(imageSize[0], imageSize[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = this.generatedImage.createGraphics();
 
-        GraphicsUtil.drawRect(g2d, origin, imageSize, colorConfig.getRarity10());
+        GraphicsUtil.drawRect(g2d, origin, imageSize, colorConfig.get(colorKey));
         g2d.setComposite(AlphaComposite.DstIn);
         GraphicsUtil.drawImage(g2d, underlayPath, origin, imageSize);
         g2d.setComposite(AlphaComposite.SrcOver);
@@ -166,6 +169,8 @@ public class ItemImageGenerator {
         if (makeWithItem) {
             GraphicsUtil.drawImage(g2d, this.filePath, mainPos, mainSize);
         }
+
+        GraphicsUtil.drawText(g2d, "test %%rarity3%% test1 %%dark%% test2", origin, Align.CENTER, colorConfig.get(colorKey), config);
     }
 
     private void addStaticUser() {
