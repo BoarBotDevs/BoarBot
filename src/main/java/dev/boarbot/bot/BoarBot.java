@@ -19,10 +19,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.data.DataObject;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.List;
 
 @Log4j2
 public class BoarBot implements Bot {
@@ -30,7 +32,10 @@ public class BoarBot implements Bot {
         .filename(".env")
         .load();
     private JDA jda;
+
     private BotConfig config;
+    private Font font;
+
     private final Map<String, Constructor<? extends Subcommand>> subcommands = new HashMap<>();
     private BotType botType;
 
@@ -79,6 +84,16 @@ public class BoarBot implements Bot {
 
             this.config = g.fromJson(jsonStr.toString(), BotConfig.class);
 
+            File fontFile = new File(
+                this.config.getPathConfig().getFontAssets() + this.config.getPathConfig().getMainFont()
+            );
+
+            try {
+                this.font = Font.createFont(Font.TRUETYPE_FONT, fontFile);
+            } catch (Exception exception) {
+                log.error("There was a problem when creating font from font file %s".formatted(fontFile.getPath()));
+            }
+
             log.info("Successfully loaded config.");
         } catch (FileNotFoundException exception) {
             log.error("Unable to find 'config.json' in resources.");
@@ -89,6 +104,11 @@ public class BoarBot implements Bot {
     @Override
     public BotConfig getConfig() {
         return this.config;
+    }
+
+    @Override
+    public Font getFont() {
+        return this.font;
     }
 
     @Override

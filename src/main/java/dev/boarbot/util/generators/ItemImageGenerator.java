@@ -6,6 +6,7 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.ImageUtil;
+import dev.boarbot.util.graphics.TextDrawer;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.User;
@@ -170,7 +171,23 @@ public class ItemImageGenerator {
             GraphicsUtil.drawImage(g2d, this.filePath, mainPos, mainSize);
         }
 
-        GraphicsUtil.drawText(g2d, "test %%rarity3%% test1 %%dark%% test2", origin, Align.CENTER, colorConfig.get(colorKey), config);
+        TextDrawer textDrawer = new TextDrawer(
+            g2d,
+            this.title,
+            nums.getItemTitlePos(),
+            Align.CENTER,
+            colorConfig.get("font"),
+            nums.getFontMedium(),
+            config
+        );
+
+        textDrawer.drawText();
+
+        textDrawer.setText(this.itemName);
+        textDrawer.setPos(nums.getItemNamePos());
+        textDrawer.setColorStr(colorConfig.get(this.colorKey));
+
+        textDrawer.drawText();
     }
 
     private void addStaticUser() {
