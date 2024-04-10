@@ -1,7 +1,5 @@
 package dev.boarbot.util.graphics;
 
-import dev.boarbot.bot.config.BotConfig;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.File;

@@ -78,13 +78,25 @@ public class TextDrawer {
             this.drawTextLine(String.join(" ", this.words), 0, this.pos);
 
             this.g2d.setColor(null);
+
             return;
         }
 
         if (!this.wrap) {
-            // Shrink text to fit width
+            String parsedText = String.join(" ", this.words);
 
+            while (this.g2d.getFontMetrics().stringWidth(parsedText) > this.width) {
+                Font curFont = this.g2d.getFont();
+                this.g2d.setFont(curFont.deriveFont(curFont.getSize() - 1f));
+            }
+
+            int[] newPos = new int[]{this.pos[0], this.pos[1] + this.g2d.getFontMetrics().getAscent() / 2};
+
+            this.drawTextLine(parsedText, 0, newPos);
+
+            this.g2d.setFont(this.g2d.getFont().deriveFont(this.fontSize));
             this.g2d.setColor(null);
+
             return;
         }
 

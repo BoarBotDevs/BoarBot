@@ -186,6 +186,7 @@ public class ItemImageGenerator {
         textDrawer.setText(this.itemName);
         textDrawer.setPos(nums.getItemNamePos());
         textDrawer.setColorStr(colorConfig.get(this.colorKey));
+        textDrawer.setWidth(mainSize[0]);
 
         textDrawer.drawText();
     }
