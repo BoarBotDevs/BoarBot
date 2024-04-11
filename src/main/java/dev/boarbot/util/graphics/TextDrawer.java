@@ -90,7 +90,10 @@ public class TextDrawer {
                 this.g2d.setFont(curFont.deriveFont(curFont.getSize() - 1f));
             }
 
-            int[] newPos = new int[]{this.pos[0], this.pos[1] + this.g2d.getFontMetrics().getAscent() / 2};
+            int[] newPos = new int[]{
+                this.pos[0],
+                this.pos[1] + (this.g2d.getFontMetrics().getAscent() + this.g2d.getFontMetrics().getDescent()) / 2
+            };
 
             this.drawTextLine(parsedText, 0, newPos);
 
@@ -100,7 +103,45 @@ public class TextDrawer {
             return;
         }
 
-        // Wrap text to fit width
+        List<String> lines = new ArrayList<>();
+        List<Integer> lineStarts = new ArrayList<>();
+
+        lineStarts.add(0);
+
+        StringBuilder curLine = new StringBuilder();
+        int curIndex = 0;
+
+        FontMetrics fm = this.g2d.getFontMetrics();
+        double newY = this.pos[1];
+        double lineHeight = (fm.getAscent() + fm.getDescent()) * 1.1;
+
+        for (String word : this.words) {
+            if (fm.stringWidth(curLine + word) < this.width) {
+                curLine.append(word).append(" ");
+                curIndex += word.length();
+                continue;
+            }
+
+            lines.add(curLine.deleteCharAt(curLine.length()-1).toString());
+            lineStarts.add(curIndex);
+
+            curLine.setLength(0);
+            curLine.append(word).append(" ");
+        }
+
+        if (!curLine.isEmpty()) {
+            lines.add(curLine.deleteCharAt(curLine.length()-1).toString());
+        } else {
+            lines.removeLast();
+        }
+
+        newY -= lineHeight * (lines.size()-1) / 2;
+
+        for (int i=0; i<lines.size(); i++) {
+            int[] newPos = new int[]{this.pos[0], (int) newY};
+            this.drawTextLine(lines.get(i), lineStarts.get(i), newPos);
+            newY += lineHeight;
+        }
 
         this.g2d.setColor(null);
     }

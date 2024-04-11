@@ -27,7 +27,7 @@ public class DailySubcommand extends Subcommand {
         }
 
         ItemImageGenerator itemGen = new ItemImageGenerator(
-            this.config, this.event.getUser(), "Daily Boar!", "creepy"
+            this.config, this.event.getUser(), "Daily Boar!", "ascii"
         );
 
         FileUpload image;

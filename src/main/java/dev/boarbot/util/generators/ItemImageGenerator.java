@@ -143,7 +143,6 @@ public class ItemImageGenerator {
     }
 
     private void generateStatic(boolean makeWithItem) throws IOException {
-        StringConfig strConfig = this.config.getStringConfig();
         NumberConfig nums = this.config.getNumberConfig();
         PathConfig pathConfig = this.config.getPathConfig();
         Map<String, String> colorConfig = this.config.getColorConfig();
@@ -192,6 +191,21 @@ public class ItemImageGenerator {
     }
 
     private void addStaticUser() {
+        NumberConfig nums = this.config.getNumberConfig();
+        Map<String, String> colorConfig = this.config.getColorConfig();
 
+        int[] origin = nums.getOriginPos();
+        int[] imageSize = nums.getItemImageSize();
+
+        int userBoxY = nums.getItemBoxOneY();
+
+        Graphics2D g2d = this.generatedImage.createGraphics();
+        TextDrawer textDrawer = new TextDrawer(
+            g2d, "", origin, Align.LEFT, colorConfig.get("font"), nums.getFontMedium(), config
+        );
+
+        if (this.giftingUser != null) {
+            userBoxY = nums.getItemBoxTwoY();
+        }
     }
 }
