@@ -42,13 +42,31 @@ public abstract class DataUtil {
         writer.close();
     }
 
-    protected void createGlobalFolder() {
+    protected void createDatabaseFolders() {
         String globalFolderPath = this.pathConfig.getDatabaseFolder() + this.pathConfig.getGlobalDataFolder();
         File globalFolder = new File(globalFolderPath);
         boolean madeGlobalFolder = globalFolder.mkdirs();
 
+        String guildFolderPath = this.pathConfig.getDatabaseFolder() + this.pathConfig.getGuildDataFolder();
+        File guildFolder = new File(guildFolderPath);
+        boolean madeGuildFolder = guildFolder.mkdirs();
+
+        String usersFolderPath = this.pathConfig.getDatabaseFolder() + this.pathConfig.getUserDataFolder();
+        File usersFolder = new File(usersFolderPath);
+        boolean madeUsersFolder = usersFolder.mkdirs();
+
         if (!globalFolder.exists() && !madeGlobalFolder) {
             log.error("Something went wrong when creating global folder at %s!".formatted(globalFolderPath));
+            System.exit(-1);
+        }
+
+        if (!guildFolder.exists() && !madeGuildFolder) {
+            log.error("Something went wrong when creating guilds folder at %s!".formatted(guildFolderPath));
+            System.exit(-1);
+        }
+
+        if (!usersFolder.exists() && !madeUsersFolder) {
+            log.error("Something went wrong when creating users folder at %s!".formatted(usersFolderPath));
             System.exit(-1);
         }
     }

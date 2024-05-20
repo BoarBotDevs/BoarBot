@@ -6,54 +6,47 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TextDrawer {
-    private final Graphics2D g2d;
+    private final BotConfig config = BoarBotApp.getBot().getConfig();
+
+    @Getter @Setter private Graphics2D g2d;
 
     @Getter @Setter private String text;
     @Getter @Setter private int[] pos;
     @Getter @Setter private Align align;
-    @Getter @Setter private String colorStr;
+    @Getter @Setter private String colorVal;
     @Getter private float fontSize;
-    @Getter @Setter private BotConfig config;
     @Getter @Setter private int width;
     @Getter @Setter private boolean wrap;
 
     private final List<String> words = new ArrayList<>();
-    private final List<Color> colorsList = new ArrayList<>();
+    private final List<String> colorValsList = new ArrayList<>();
     private final List<Integer> colorSwapIndexes = new ArrayList<>();
 
     public TextDrawer(
-        Graphics2D g2d, String text, int[] pos, Align align, String colorStr, float fontSize, BotConfig config
+        Graphics2D g2d, String text, int[] pos, Align align, String colorVal, float fontSize
     ) {
-        this(g2d, text, pos, align, colorStr, fontSize, config, -1, false);
+        this(g2d, text, pos, align, colorVal, fontSize, -1, false);
     }
 
     public TextDrawer(
-        Graphics2D g2d, String text, int[] pos, Align align, String colorStr, float fontSize, BotConfig config, int width
+        Graphics2D g2d, String text, int[] pos, Align align, String colorVal, float fontSize, int width
     ) {
-        this(g2d, text, pos, align, colorStr, fontSize, config, width, false);
+        this(g2d, text, pos, align, colorVal, fontSize, width, false);
     }
 
     public TextDrawer(
-        Graphics2D g2d,
-        String text,
-        int[] pos,
-        Align align,
-        String colorStr,
-        float fontSize,
-        BotConfig config,
-        int width,
-        boolean wrap
+        Graphics2D g2d, String text, int[] pos, Align align, String colorVal, float fontSize, int width, boolean wrap
     ) {
         this.g2d = g2d;
         this.text = text;
         this.pos = pos;
         this.align = align;
-        this.colorStr = colorStr;
-        this.config = config;
+        this.colorVal = colorVal;
         this.width = width;
         this.wrap = wrap;
 
@@ -65,21 +58,18 @@ public class TextDrawer {
         this.g2d.setFont(BoarBotApp.getBot().getFont().deriveFont(fontSize));
     }
 
-    public void drawText() {
+    public double drawText() {
         this.words.clear();
-        this.colorsList.clear();
+        this.colorValsList.clear();
         this.colorSwapIndexes.clear();
 
         parseText();
 
-        this.g2d.setColor(this.colorsList.getFirst());
-
         if (this.width == -1) {
             this.drawTextLine(String.join(" ", this.words), 0, this.pos);
 
-            this.g2d.setColor(null);
-
-            return;
+            FontMetrics fm = this.g2d.getFontMetrics();
+            return (fm.getAscent() + fm.getDescent()) * 1.1;
         }
 
         if (!this.wrap) {
@@ -97,10 +87,12 @@ public class TextDrawer {
 
             this.drawTextLine(parsedText, 0, newPos);
 
-            this.g2d.setFont(this.g2d.getFont().deriveFont(this.fontSize));
-            this.g2d.setColor(null);
+            FontMetrics fm = this.g2d.getFontMetrics();
+            double lineHeight = (fm.getAscent() + fm.getDescent()) * 1.1;
 
-            return;
+            this.g2d.setFont(this.g2d.getFont().deriveFont(this.fontSize));
+
+            return lineHeight;
         }
 
         List<String> lines = new ArrayList<>();
@@ -116,7 +108,7 @@ public class TextDrawer {
         double lineHeight = (fm.getAscent() + fm.getDescent()) * 1.1;
 
         for (String word : this.words) {
-            if (fm.stringWidth(curLine + word) < this.width) {
+            if (curLine.isEmpty() || fm.stringWidth(curLine + word) <= this.width) {
                 curLine.append(word).append(" ");
                 curIndex += word.length();
                 continue;
@@ -124,6 +116,8 @@ public class TextDrawer {
 
             lines.add(curLine.deleteCharAt(curLine.length()-1).toString());
             lineStarts.add(curIndex);
+
+            curIndex += word.length();
 
             curLine.setLength(0);
             curLine.append(word).append(" ");
@@ -143,11 +137,11 @@ public class TextDrawer {
             newY += lineHeight;
         }
 
-        this.g2d.setColor(null);
+        return lineHeight * (lines.size()-1);
     }
 
     private void parseText() {
-        this.colorsList.add(Color.decode(this.colorStr));
+        this.colorValsList.add(this.colorVal);
 
         char[] textArray = this.text.toCharArray();
         int startCurColorTag = -1;
@@ -170,9 +164,9 @@ public class TextDrawer {
 
             if (isEndColorTag) {
                 String colorKey = this.text.substring(startCurColorTag, i);
-                Color curColor = Color.decode(this.config.getColorConfig().get(colorKey));
+                String curColorVal = this.config.getColorConfig().get(colorKey);
 
-                this.colorsList.add(curColor);
+                this.colorValsList.add(curColorVal);
 
                 startCurColorTag = -1;
                 i += 2;
@@ -224,7 +218,7 @@ public class TextDrawer {
 
             if (notLastColor && actualIndex >= this.colorSwapIndexes.get(curColorIndex)) {
                 adjustedPos[0] = getPosAdjust(pos[0], textLine, startCurSegment);
-                drawSegment(textLine.substring(startCurSegment, i), this.colorsList.get(curColorIndex), adjustedPos);
+                drawSegment(textLine.substring(startCurSegment, i), this.colorValsList.get(curColorIndex), adjustedPos);
 
                 curColorIndex++;
                 startCurSegment = i;
@@ -236,7 +230,7 @@ public class TextDrawer {
         }
 
         adjustedPos[0] = getPosAdjust(pos[0], textLine, startCurSegment);
-        drawSegment(textLine.substring(startCurSegment), this.colorsList.get(curColorIndex), adjustedPos);
+        drawSegment(textLine.substring(startCurSegment), this.colorValsList.get(curColorIndex), adjustedPos);
     }
 
     private int getPosAdjust(int x, String textLine, int startSegment) {
@@ -252,9 +246,46 @@ public class TextDrawer {
         }
     }
 
-    private void drawSegment(String segment, Color color, int[] pos) {
-        this.g2d.setColor(color);
-        this.g2d.drawString(segment, pos[0], pos[1]);
+    private void drawSegment(String segment, String colorStr, int[] pos) {
+        String[] gradStringColors = colorStr.split(",");
+
+        if (gradStringColors.length > 1) {
+            List<Color> gradColors = new ArrayList<>();
+            FontMetrics fm = this.g2d.getFontMetrics();
+
+            for (String gradStringColor : gradStringColors) {
+                gradColors.add(Color.decode(gradStringColor));
+            }
+
+            float[] colorStops = new float[gradStringColors.length];
+
+            for (int i=0; i<colorStops.length; i++) {
+                colorStops[i] = i / Math.max(colorStops.length-1, 1f);
+            }
+
+            BufferedImage textImage = new BufferedImage(
+                fm.stringWidth(segment), fm.getAscent() + fm.getDescent(), BufferedImage.TYPE_INT_ARGB
+            );
+            Graphics2D textG2D = textImage.createGraphics();
+
+            textG2D.setFont(this.g2d.getFont().deriveFont(this.fontSize));
+
+            textG2D.drawString(segment, 0, fm.getAscent());
+            textG2D.setComposite(AlphaComposite.SrcIn);
+
+            LinearGradientPaint paint = new LinearGradientPaint(
+                0, 0, textImage.getWidth(), textImage.getHeight(), colorStops, gradColors.toArray(new Color[0])
+            );
+
+            textG2D.setPaint(paint);
+            textG2D.fillRect(0, 0, textImage.getWidth(), textImage.getHeight());
+
+            this.g2d.drawImage(textImage, pos[0], pos[1] - fm.getAscent(), null);
+        } else {
+            this.g2d.setColor(Color.decode(colorStr));
+            this.g2d.drawString(segment, pos[0], pos[1]);
+        }
+
         this.g2d.setColor(null);
     }
 }

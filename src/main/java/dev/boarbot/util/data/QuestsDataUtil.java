@@ -30,7 +30,7 @@ public class QuestsDataUtil extends DataUtil {
 
     @Override
     public QuestData refreshData(boolean update) {
-        createGlobalFolder();
+        createDatabaseFolders();
 
         this.data = new QuestData();
 

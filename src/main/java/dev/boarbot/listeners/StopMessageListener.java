@@ -1,7 +1,6 @@
 package dev.boarbot.listeners;
 
 import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +29,7 @@ public class StopMessageListener extends ListenerAdapter implements Runnable {
 
         if (ignoreMsg) return;
 
-        if (event.getMessage().getContentDisplay().trim().equalsIgnoreCase("stop")) {
+        if (this.event.getMessage().getContentDisplay().trim().equalsIgnoreCase("stop")) {
             System.out.println("DISABLE NOTIFICATIONS");
         }
     }

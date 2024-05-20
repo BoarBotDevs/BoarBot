@@ -1,11 +1,11 @@
 package dev.boarbot.util.data;
 
 import com.google.gson.Gson;
+import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
-import dev.boarbot.entities.boaruser.collectibles.CollectedPowerup;
-import dev.boarbot.entities.boaruser.stats.GeneralStats;
+import dev.boarbot.entities.boaruser.data.stats.GeneralStats;
 import dev.boarbot.util.data.types.BuySellData;
 import dev.boarbot.util.data.types.ItemData;
 import dev.boarbot.util.data.types.ItemsData;
@@ -32,7 +32,7 @@ public class ItemsDataUtil extends DataUtil {
 
     @Override
     public ItemsData refreshData(boolean update) {
-        createGlobalFolder();
+        createDatabaseFolders();
 
         this.data = new ItemsData();
 
@@ -139,18 +139,14 @@ public class ItemsDataUtil extends DataUtil {
 
     private void orderGlobalBoars() {
         String[] boarIDs = this.data.getBoars().keySet().toArray(new String[0]);
+        RarityConfig[] rarities = this.config.getRarityConfigs().values().toArray(new RarityConfig[0]);
 
-        RarityConfig[] orderedRarities = Arrays.copyOfRange(
-            this.config.getRarityConfigs(), 0, this.config.getRarityConfigs().length-1
-        );
-        Arrays.sort(orderedRarities, Comparator.comparingDouble(rarity -> rarity.weight));
+        for (int i=rarities.length-1; i>0; i--) {
+            Set<String> orderedBoars = new HashSet<>();
+            String[] boarsOfRarity = rarities[i].boars;
 
-        for (RarityConfig rarity : orderedRarities) {
-            List<String> orderedBoars = new ArrayList<>();
-            String[] boarsOfRarity = rarity.boars;
-
-            for (int i=0; i<boarIDs.length; i++) {
-                String curBoarID = boarIDs[i];
+            for (int j=0; j<boarIDs.length; j++) {
+                String curBoarID = boarIDs[j];
                 ItemData curBoarData = this.data.getBoars().get(curBoarID);
 
                 if (!Arrays.asList(boarsOfRarity).contains(curBoarID) || orderedBoars.contains(curBoarID)) {
@@ -161,9 +157,50 @@ public class ItemsDataUtil extends DataUtil {
                 this.data.getBoars().put(curBoarID, curBoarData);
 
                 orderedBoars.add(curBoarID);
-                i--;
+                j--;
             }
         }
+    }
+
+    public static synchronized void updateGlobalBoarData(
+        List<String> boarIDs, List<String> boarRarityKeys, List<Integer> boarEditions, List<Integer> firstEditions
+    ) throws IOException {
+        Map<String, RarityConfig> rarityConfigMap = BoarBotApp.getBot().getConfig().getRarityConfigs();
+        ItemsDataUtil itemsDataUtil = new ItemsDataUtil();
+        ItemsData itemsData = itemsDataUtil.getData();
+
+        for (int i=0; i<boarIDs.size(); i++) {
+            String boarID = boarIDs.get(i);
+            RarityConfig boarRarity = rarityConfigMap.get(boarRarityKeys.get(i));
+            boolean givesSpecial = boarRarity.givesSpecial;
+
+            if (!itemsData.getBoars().containsKey(boarID)) {
+                itemsData.getBoars().put(boarID, new ItemData());
+                itemsData.getBoars().get(boarID).setCurEdition(0);
+
+                int lastBuySell = boarRarity.baseScore == 1 ? 4 : boarRarity.baseScore;
+                itemsData.getBoars().get(boarID).setLastBestBuyPrice(lastBuySell);
+                itemsData.getBoars().get(boarID).setLastBestSellPrice(lastBuySell);
+
+                if (givesSpecial) {
+                    if (!itemsData.getBoars().containsKey("bacteria")) {
+                        itemsData.getBoars().put("bacteria", new ItemData());
+                        itemsData.getBoars().get("bacteria").setCurEdition(0);
+                    }
+
+                    int firstEdition = itemsData.getBoars().get("bacteria").getCurEdition() + 1;
+                    itemsData.getBoars().get("bacteria").setCurEdition(firstEdition);
+                    firstEditions.add(firstEdition);
+                }
+            }
+
+            int boarEdition = itemsData.getBoars().get(boarID).getCurEdition() + 1;
+            itemsData.getBoars().get(boarID).setCurEdition(boarEdition);
+            boarEditions.add(boarEdition);
+        }
+
+        itemsDataUtil.orderGlobalBoars();
+        itemsDataUtil.saveData();
     }
 
     @Override

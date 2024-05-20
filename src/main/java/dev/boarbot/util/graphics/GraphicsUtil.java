@@ -1,9 +1,11 @@
 package dev.boarbot.util.graphics;
 
-import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
-import java.io.File;
+import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +41,29 @@ public final class GraphicsUtil {
         g2d.setColor(null);
     }
 
-    public static void drawImage(Graphics2D g2d, String filePath, int[] pos, int[] size) throws IOException {
-        g2d.drawImage(ImageIO.read(new File(filePath)), pos[0], pos[1], size[0], size[1], null);
+    public static void drawImage(
+        Graphics2D g2d, String path, int[] pos, int[] size
+    ) throws IOException, URISyntaxException {
+        Image image;
+
+        if (path.startsWith("http")) {
+            image = new ImageIcon(new URI(path).toURL()).getImage();
+        } else {
+            image = new ImageIcon(path).getImage();
+        }
+
+        g2d.drawImage(image, pos[0], pos[1], size[0], size[1], null);
+    }
+
+    public static void drawCircleImage(
+        Graphics2D g2d, String path, int[] pos, int diameter
+    ) throws IOException, URISyntaxException {
+        g2d.setClip(new RoundRectangle2D.Double(
+            pos[0], pos[1], diameter, diameter, diameter, diameter
+        ));
+
+        drawImage(g2d, path, pos, new int[]{diameter, diameter});
+
+        g2d.setClip(null);
     }
 }

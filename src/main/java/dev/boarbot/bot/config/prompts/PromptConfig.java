@@ -1,6 +1,6 @@
 package dev.boarbot.bot.config.prompts;
 
-import dev.boarbot.bot.config.components.RowConfig;
+import dev.boarbot.bot.config.components.ComponentConfig;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,5 +18,5 @@ import java.util.Map;
 @Setter
 public class PromptConfig {
     private Map<String, PromptTypeConfig> types = new HashMap<>();
-    private RowConfig[] rows = {};
+    private ComponentConfig[] rows = {};
 }

@@ -5,8 +5,10 @@ import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.commands.SubcommandConfig;
+import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.CommandListener;
+import dev.boarbot.listeners.ComponentListener;
 import dev.boarbot.listeners.StopMessageListener;
 import dev.boarbot.util.data.DataUtil;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -36,7 +38,11 @@ public class BoarBot implements Bot {
     private BotConfig config;
     private Font font;
 
+    private final Map<String, byte[]> cacheMap = new HashMap<>();
+
     private final Map<String, Constructor<? extends Subcommand>> subcommands = new HashMap<>();
+    private final Map<String, Interactive> interactives = new HashMap<>();
+
     private BotType botType;
 
     @Override
@@ -46,7 +52,7 @@ public class BoarBot implements Bot {
         loadConfig();
 
         this.jda = JDABuilder.createDefault(this.env.get("TOKEN"))
-            .addEventListeners(new StopMessageListener(), new CommandListener())
+            .addEventListeners(new StopMessageListener(), new CommandListener(), new ComponentListener())
             .setActivity(Activity.customStatus("/boar help | boarbot.dev"))
             .build();
 
@@ -112,6 +118,11 @@ public class BoarBot implements Bot {
     }
 
     @Override
+    public Map<String, byte[]> getCacheMap() {
+        return this.cacheMap;
+    }
+
+    @Override
     public void deployCommands() {
         Map<String, CommandConfig> commandData = this.config.getCommandConfig();
 
@@ -174,5 +185,10 @@ public class BoarBot implements Bot {
     @Override
     public Map<String, Constructor<? extends Subcommand>> getSubcommands() {
         return this.subcommands;
+    }
+
+    @Override
+    public Map<String, Interactive> getInteractives() {
+        return this.interactives;
     }
 }

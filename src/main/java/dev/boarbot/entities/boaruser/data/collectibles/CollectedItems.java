@@ -1,6 +1,5 @@
-package dev.boarbot.entities.boaruser.collectibles;
+package dev.boarbot.entities.boaruser.data.collectibles;
 
-import dev.boarbot.bot.config.commands.SubcommandConfig;
 import lombok.Getter;
 import lombok.Setter;
 

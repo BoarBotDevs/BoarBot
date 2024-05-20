@@ -5,10 +5,10 @@ import com.google.gson.reflect.TypeToken;
 import dev.boarbot.bot.config.commands.ArgChoicesConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
-import dev.boarbot.entities.boaruser.collectibles.CollectedBoar;
-import dev.boarbot.entities.boaruser.collectibles.CollectedItems;
-import dev.boarbot.entities.boaruser.stats.GeneralStats;
-import dev.boarbot.entities.boaruser.stats.PowerupStats;
+import dev.boarbot.entities.boaruser.data.collectibles.CollectedBoar;
+import dev.boarbot.entities.boaruser.data.collectibles.CollectedItems;
+import dev.boarbot.entities.boaruser.data.stats.GeneralStats;
+import dev.boarbot.entities.boaruser.data.stats.PowerupStats;
 import dev.boarbot.util.data.types.BoardData;
 import dev.boarbot.util.data.types.UserBoardData;
 import dev.boarbot.util.json.JsonUtil;
@@ -35,7 +35,7 @@ public class BoardsDataUtil extends DataUtil {
 
     @Override
     public Map<String, BoardData> refreshData(boolean update) {
-        createGlobalFolder();
+        createDatabaseFolders();
 
         this.data = new HashMap<>();
 

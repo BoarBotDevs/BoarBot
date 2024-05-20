@@ -1,7 +1,7 @@
-package dev.boarbot.entities.boaruser;
+package dev.boarbot.entities.boaruser.data;
 
-import dev.boarbot.entities.boaruser.collectibles.CollectedItems;
-import dev.boarbot.entities.boaruser.stats.UserStats;
+import dev.boarbot.entities.boaruser.data.collectibles.CollectedItems;
+import dev.boarbot.entities.boaruser.data.stats.UserStats;
 import lombok.Getter;
 import lombok.Setter;
 

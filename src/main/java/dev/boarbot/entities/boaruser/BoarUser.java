@@ -6,10 +6,15 @@ import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.NumberConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.prompts.PromptTypeConfig;
-import dev.boarbot.entities.boaruser.collectibles.CollectedPowerup;
-import dev.boarbot.entities.boaruser.stats.GeneralStats;
-import dev.boarbot.entities.boaruser.stats.PromptStats;
-import dev.boarbot.entities.boaruser.stats.QuestStats;
+import dev.boarbot.entities.boaruser.data.collectibles.CollectedBoar;
+import dev.boarbot.entities.boaruser.data.collectibles.CollectedPowerup;
+import dev.boarbot.entities.boaruser.data.BoarUserData;
+import dev.boarbot.entities.boaruser.data.stats.GeneralStats;
+import dev.boarbot.entities.boaruser.data.stats.PromptStats;
+import dev.boarbot.entities.boaruser.data.stats.QuestStats;
+import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.data.ItemsDataUtil;
+import dev.boarbot.util.data.QuestsDataUtil;
 import dev.boarbot.util.data.types.QuestData;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -17,6 +22,7 @@ import net.dv8tion.jda.api.entities.User;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
@@ -24,31 +30,33 @@ import java.util.*;
 public class BoarUser {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
-    @Getter private User user;
-    @Getter private String userID;
+    @Getter private final User user;
+    @Getter private final String userID;
     @Getter private BoarUserData data = new BoarUserData();
 
+    private volatile int numRefs = 1;
+
     public BoarUser(User user) throws IOException {
-        doConstruct(user, user.getId(), false);
+        this(user, user.getId(), false);
     }
 
     public BoarUser(String userID) throws IOException {
-        doConstruct(null, userID, false);
+        this(null, userID, false);
     }
 
     public BoarUser(User user, boolean createFile) throws IOException {
-        doConstruct(user, user.getId(), createFile);
+        this(user, user.getId(), createFile);
     }
 
-    private void doConstruct(User user, String userID, boolean createFile) throws IOException {
+    public BoarUser(User user, String userID, boolean createFile) throws IOException {
         this.user = user;
         this.userID = userID;
 
         refreshUserData(createFile);
 
         boolean shouldFixData = createFile || this.data.getStats().getGeneral().getFirstDaily() > 0 ||
-                this.data.getStats().getGeneral().getTotalBoars() > 0 ||
-                !this.data.getItemCollection().getBadges().isEmpty();
+            this.data.getStats().getGeneral().getTotalBoars() > 0 ||
+            !this.data.getItemCollection().getBadges().isEmpty();
 
         if (shouldFixData) {
             fixUserData();
@@ -223,8 +231,8 @@ public class BoarUser {
 
         for (String boarID : this.data.getItemCollection().getBoars().keySet()) {
             boolean hasBoar = this.data.getItemCollection().getBoars().get(boarID).getNum() > 0;
-            RarityConfig[] rarityConfigs = this.config.getRarityConfigs();
-            boolean isSpecial = Arrays.asList(rarityConfigs[rarityConfigs.length - 1].getBoars()).contains(boarID);
+            Map<String, RarityConfig> rarityConfigs = this.config.getRarityConfigs();
+            boolean isSpecial = Arrays.asList(rarityConfigs.get("special").getBoars()).contains(boarID);
 
             if (hasBoar && !isSpecial) {
                 uniques++;
@@ -312,5 +320,117 @@ public class BoarUser {
         }
 
         this.fixUserData();
+    }
+
+    public List<Integer> addBoars(List<String> boarIDs, List<Integer> scores) throws IOException {
+        List<String> boarRarityKeys = new ArrayList<>();
+
+        for (String boarID : boarIDs) {
+            boarRarityKeys.add(BoarUtil.findRarityKey(boarID));
+        }
+
+        List<Integer> boarEditions = new ArrayList<>();
+        List<Integer> firstEditions = new ArrayList<>();
+
+        ItemsDataUtil.updateGlobalBoarData(boarIDs, boarRarityKeys, boarEditions, firstEditions);
+        this.addBoarData(boarIDs, boarRarityKeys, scores, boarEditions);
+
+        return firstEditions;
+    }
+
+    private synchronized void addBoarData(
+        List<String> boarIDs, List<String> boarRarityKeys, List<Integer> scores, List<Integer> boarEditions
+    ) throws IOException {
+        NumberConfig nums = this.config.getNumberConfig();
+
+        QuestsDataUtil questsDataUtil = new QuestsDataUtil();
+        QuestData questData = questsDataUtil.getData();
+
+        this.refreshUserData(false);
+
+        GeneralStats genStats = this.data.getStats().getGeneral();
+
+        for (int i=0; i<boarIDs.size(); i++) {
+            int collectBoarIndex = Arrays.asList(questData.getCurQuestIDs()).indexOf("collectBoar");
+            int collectBucksIndex = Arrays.asList(questData.getCurQuestIDs()).indexOf("collectBucks");
+
+            String boarID = boarIDs.get(i);
+            String boarRarityKey = boarRarityKeys.get(i);
+
+            if (collectBucksIndex != -1) {
+                this.data.getStats().getQuests().getProgress()[collectBucksIndex] += scores.get(i);
+            }
+
+            boolean commonMatch = collectBoarIndex / 2 == 0 && boarRarityKey.equals("common");
+            boolean uncommonMatch = collectBoarIndex / 2 == 1 && boarRarityKey.equals("uncommon");
+            boolean rareMatch = collectBoarIndex / 2 == 2 && boarRarityKey.equals("rare");
+            boolean epicMatch = collectBoarIndex / 2 == 3 && boarRarityKey.equals("epic");
+
+            if (collectBoarIndex != -1 && (commonMatch || uncommonMatch || rareMatch || epicMatch)) {
+                this.data.getStats().getQuests().getProgress()[collectBoarIndex]++;
+            }
+
+            if (!this.data.getItemCollection().getBoars().containsKey(boarID)) {
+                this.data.getItemCollection().getBoars().put(boarID, new CollectedBoar());
+                this.data.getItemCollection().getBoars().get(boarID).setFirstObtained(
+                    LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+                );
+            }
+
+            CollectedBoar boarToAdd = this.data.getItemCollection().getBoars().get(boarID);
+            long curTime = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
+
+            boarToAdd.setNum(boarToAdd.getNum()+1);
+            boarToAdd.setLastObtained(curTime);
+
+            if (boarEditions.get(i) <= nums.getMaxTrackedEditions() || boarRarityKey.equals("special")) {
+                boarToAdd.getEditions().add(boarEditions.get(i));
+                boarToAdd.getEditions().sort(Integer::compareTo);
+
+                boarToAdd.getEditionDates().add(curTime);
+                boarToAdd.getEditionDates().sort(Long::compareTo);
+            }
+
+            genStats.setLastBoar(boarID);
+            genStats.setBoarScore(genStats.getBoarScore() + scores.get(i));
+        }
+
+        genStats.setTotalBoars(genStats.getTotalBoars() + boarIDs.size());
+
+        this.orderBoars();
+        this.updateUserData();
+    }
+
+    private void orderBoars() {
+        String[] boarIDs = this.data.getItemCollection().getBoars().keySet().toArray(new String[0]);
+        RarityConfig[] rarities = this.config.getRarityConfigs().values().toArray(new RarityConfig[0]);
+
+        for (int i=rarities.length-1; i>0; i--) {
+            Set<String> orderedBoars = new HashSet<>();
+            String[] boarsOfRarity = rarities[i].boars;
+
+            for (int j=0; j<boarIDs.length; j++) {
+                String curBoarID = boarIDs[j];
+                CollectedBoar curBoarData = this.data.getItemCollection().getBoars().get(curBoarID);
+
+                if (!Arrays.asList(boarsOfRarity).contains(curBoarID) || orderedBoars.contains(curBoarID)) {
+                    continue;
+                }
+
+                this.data.getItemCollection().getBoars().remove(curBoarID);
+                this.data.getItemCollection().getBoars().put(curBoarID, curBoarData);
+
+                orderedBoars.add(curBoarID);
+                j--;
+            }
+        }
+    }
+
+    public synchronized void incRefs() {
+        this.numRefs++;
+    }
+
+    public synchronized void decRefs() {
+        this.numRefs--;
     }
 }

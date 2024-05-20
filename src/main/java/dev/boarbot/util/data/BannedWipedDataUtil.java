@@ -33,7 +33,7 @@ public class BannedWipedDataUtil extends DataUtil {
 
     @Override
     public Map<String, Long> refreshData(boolean update) {
-        createGlobalFolder();
+        createDatabaseFolders();
 
         this.data = new HashMap<>();
 

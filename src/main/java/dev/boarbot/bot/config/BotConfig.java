@@ -1,6 +1,7 @@
 package dev.boarbot.bot.config;
 
 import dev.boarbot.bot.config.commands.CommandConfig;
+import dev.boarbot.bot.config.components.ComponentConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import lombok.Getter;
@@ -102,6 +103,11 @@ public class BotConfig {
     private Map<String, CommandConfig> commandConfig = new HashMap<>();
 
     /**
+     * Collection of component configurations the bot uses
+     */
+    private ComponentConfig componentConfig = new ComponentConfig();
+
+    /**
      * Collection of sets of item configurations
      */
     private ItemConfig itemConfig = new ItemConfig();
@@ -109,7 +115,7 @@ public class BotConfig {
     /**
      * Array of {@link RarityConfig rarity configurations}
      */
-    private RarityConfig[] rarityConfigs = {};
+    private Map<String, RarityConfig> rarityConfigs = new HashMap<>();
 
     /**
      * Color configurations used by the bot

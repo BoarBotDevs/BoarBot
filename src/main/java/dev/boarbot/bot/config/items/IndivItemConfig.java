@@ -20,6 +20,7 @@ public class IndivItemConfig {
     public String description = "";
     public String file = "";
     public String staticFile;
+    public String transparentColor;
     public Boolean isSB;
     public String blacklistType;
     public Integer rewardAmt;

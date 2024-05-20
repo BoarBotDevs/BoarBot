@@ -1,4 +1,4 @@
-package dev.boarbot.entities.boaruser.stats;
+package dev.boarbot.entities.boaruser.data.stats;
 
 import lombok.Getter;
 import lombok.Setter;
