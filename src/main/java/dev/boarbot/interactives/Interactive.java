@@ -4,6 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.time.TimeUtil;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -11,8 +12,6 @@ import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteract
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.concurrent.Executors;
 
 @Log4j2
@@ -23,10 +22,8 @@ public abstract class Interactive {
     protected final SlashCommandInteraction interaction;
     protected final User user;
 
-    protected long curStopTime = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() +
-        this.config.getNumberConfig().getCollectorIdle();
-    protected long hardStopTime = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() +
-        this.config.getNumberConfig().getCollectorHardStop();
+    protected long curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getCollectorIdle();
+    protected long hardStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getCollectorHardStop();
     protected long lastEndTime = 0;
 
     public Interactive(SlashCommandInteractionEvent initEvent) {
@@ -57,12 +54,11 @@ public abstract class Interactive {
             return;
         }
 
-        this.curStopTime = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() +
-            this.config.getNumberConfig().getCollectorIdle();
+        this.curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getCollectorIdle();
 
         this.execute(compEvent);
 
-        this.lastEndTime = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
+        this.lastEndTime = TimeUtil.getCurMilli();
     }
 
     public abstract void execute(GenericComponentInteractionCreateEvent compEvent);
@@ -76,7 +72,7 @@ public abstract class Interactive {
             } catch (IOException ignored) {}
         }
 
-        long curTime = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
+        long curTime = TimeUtil.getCurMilli();
 
         if (this.curStopTime <= curTime || this.hardStopTime <= curTime) {
             try {

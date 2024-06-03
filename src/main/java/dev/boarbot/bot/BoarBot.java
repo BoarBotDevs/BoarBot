@@ -3,6 +3,7 @@ package dev.boarbot.bot;
 import com.google.gson.Gson;
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.bot.config.QuestConfig;
 import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.commands.SubcommandConfig;
 import dev.boarbot.interactives.Interactive;
@@ -10,6 +11,7 @@ import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.CommandListener;
 import dev.boarbot.listeners.ComponentListener;
 import dev.boarbot.listeners.StopMessageListener;
+import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.log4j.Log4j2;
@@ -25,6 +27,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
+import java.sql.*;
 import java.util.*;
 import java.util.List;
 
@@ -57,7 +60,6 @@ public class BoarBot implements Bot {
             .build();
 
         registerSubcommands();
-        DataUtil.updateAllData();
     }
 
     @Override
@@ -90,6 +92,10 @@ public class BoarBot implements Bot {
 
             this.config = g.fromJson(jsonStr.toString(), BotConfig.class);
 
+            this.loadIntoDatabase("boars");
+            this.loadIntoDatabase("rarities");
+            this.loadIntoDatabase("quests");
+
             File fontFile = new File(
                 this.config.getPathConfig().getFontAssets() + this.config.getPathConfig().getMainFont()
             );
@@ -103,6 +109,72 @@ public class BoarBot implements Bot {
             log.info("Successfully loaded config.");
         } catch (FileNotFoundException exception) {
             log.error("Unable to find 'config.json' in resources.");
+            System.exit(-1);
+        }
+    }
+
+    private void loadIntoDatabase(String databaseType) {
+        try (
+            Connection connection = DataUtil.getConnection();
+            Statement statement = connection.createStatement()
+        ) {
+            StringBuilder sqlStatement = new StringBuilder();
+
+            String tableColumns = "(boar_id, rarity_id, is_skyblock)";
+
+            if (databaseType.equals("rarities")) {
+                tableColumns = "(rarity_id, prior_rarity_id, base_bucks)";
+            } else if (databaseType.equals("quests")) {
+                tableColumns = "(quest_id, easy_value, medium_value, hard_value, very_hard_value, value_type)";
+            }
+
+            sqlStatement.append("DELETE FROM %s_info;".formatted(databaseType));
+
+            statement.executeUpdate(sqlStatement.toString());
+            sqlStatement.setLength(0);
+
+            sqlStatement.append("INSERT INTO %s_info %s VALUES ".formatted(databaseType, tableColumns));
+
+            switch (databaseType) {
+                case "boars" -> {
+                    for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
+                        int isSB = this.getConfig().getItemConfig().getBoars().get(boarID).getIsSB() ? 1 : 0;
+                        String rarityID = BoarUtil.findRarityKey(boarID);
+
+                        sqlStatement.append("('%s','%s',%d),".formatted(boarID, rarityID, isSB));
+                    }
+                }
+                case "rarities" -> {
+                    String priorRarityID = null;
+                    for (String rarityID : this.getConfig().getRarityConfigs().keySet()) {
+                        int score = this.getConfig().getRarityConfigs().get(rarityID).baseScore;
+
+                        sqlStatement.append("('%s','%s',%d),".formatted(rarityID, priorRarityID, score));
+                        priorRarityID = rarityID;
+                    }
+                }
+                case "quests" -> {
+                    for (String questID : this.getConfig().getQuestConfig().keySet()) {
+                        QuestConfig questConfig = this.getConfig().getQuestConfig().get(questID);
+
+                        sqlStatement.append("('%s','%s','%s','%s','%s','%s'),".formatted(
+                            questID,
+                            questConfig.getQuestVals()[0][0],
+                            questConfig.getQuestVals()[1][0],
+                            questConfig.getQuestVals()[2][0],
+                            questConfig.getQuestVals()[3][0],
+                            questConfig.getValType().toUpperCase()
+                        ));
+                    }
+                }
+            }
+
+            sqlStatement.setLength(sqlStatement.length() - 1);
+            sqlStatement.append(";");
+
+            statement.executeUpdate(sqlStatement.toString());
+        } catch (SQLException exception) {
+            log.error("Something went wrong when loading config data into database.", exception);
             System.exit(-1);
         }
     }

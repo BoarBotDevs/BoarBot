@@ -2,13 +2,11 @@ package dev.boarbot.listeners;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.util.time.TimeUtil;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Log4j2
 public class ComponentListener extends ListenerAdapter implements Runnable {
@@ -33,9 +31,7 @@ public class ComponentListener extends ListenerAdapter implements Runnable {
         Interactive interactive = BoarBotApp.getBot().getInteractives().get(
             initInteractionID + this.event.getUser().getId()
         );
-        long startTime = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
-
-        System.out.println(initInteractionID);
+        long startTime = TimeUtil.getCurMilli();
 
         if (interactive != null) {
             interactive.attemptExecute(this.event, startTime);

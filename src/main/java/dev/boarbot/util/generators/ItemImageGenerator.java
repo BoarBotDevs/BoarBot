@@ -32,7 +32,7 @@ public class ItemImageGenerator {
     @Getter @Setter private String filePath;
     @Getter @Setter private String colorKey;
     @Getter @Setter private User giftingUser;
-    @Getter @Setter private long score;
+    @Getter @Setter private long bucks;
 
     private String transparentColor;
 
@@ -50,7 +50,7 @@ public class ItemImageGenerator {
         this(user, title, itemID, isBadge, giftingUser, -1);
     }
 
-    public ItemImageGenerator(User user, String title, String itemID, boolean isBadge, User giftingUser, long score) {
+    public ItemImageGenerator(User user, String title, String itemID, boolean isBadge, User giftingUser, long bucks) {
         this.user = user;
         this.title = title;
 
@@ -75,7 +75,7 @@ public class ItemImageGenerator {
         }
 
         this.giftingUser = giftingUser;
-        this.score = score;
+        this.bucks = bucks;
     }
 
     public ItemImageGenerator(User user, String title, String itemName, String filePath, String colorKey) {
@@ -89,7 +89,7 @@ public class ItemImageGenerator {
     }
 
     public ItemImageGenerator(
-        User user, String title, String itemName, String filePath, String colorKey, User giftingUser, long score
+        User user, String title, String itemName, String filePath, String colorKey, User giftingUser, long bucks
     ) {
         this.user = user;
         this.title = title;
@@ -99,7 +99,7 @@ public class ItemImageGenerator {
         this.colorKey = colorKey;
 
         this.giftingUser = giftingUser;
-        this.score = score;
+        this.bucks = bucks;
     }
 
     public FileUpload generate() throws IOException, URISyntaxException {
@@ -123,7 +123,8 @@ public class ItemImageGenerator {
                 this.generateStatic(true);
 
                 BoarBotApp.getBot().getCacheMap().put(
-                    "item" + this.itemName + this.colorKey, this.generatedImageByteArray
+                    "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey,
+                    this.generatedImageByteArray
                 );
             }
 
@@ -376,19 +377,19 @@ public class ItemImageGenerator {
             nums.getItemUserAvatarWidth()
         );
 
-        if (this.score >= 0 && this.giftingUser == null) {
+        if (this.bucks >= 0 && this.giftingUser == null) {
             g2d.setPaint(Color.decode(colorConfig.get("mid")));
             g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxTwoY(), nums.getBorder(), nums.getItemBoxHeight());
             g2d.fill(new RoundRectangle2D.Double(
                 nums.getItemBoxX(),
                 nums.getItemBoxTwoY(),
-                fm.stringWidth("+$" + score) + nums.getItemTextBoxExtra(),
+                fm.stringWidth("+$" + bucks) + nums.getItemTextBoxExtra(),
                 nums.getItemBoxHeight(),
                 nums.getBorder() * 2,
                 nums.getBorder() * 2
             ));
 
-            textDrawer.setText("+%%bucks%%$" + score);
+            textDrawer.setText("+%%bucks%%$" + bucks);
             textDrawer.setPos(new int[]{nums.getItemTextX(), nums.getItemBoxTwoY() + nums.getItemTextYOffset()});
             textDrawer.drawText();
         }

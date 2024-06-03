@@ -22,7 +22,7 @@ public class IndivItemConfig {
     public String staticFile;
     public String transparentColor;
     public Boolean isSB;
-    public String blacklistType;
+    public Boolean blacklisted;
     public Integer rewardAmt;
     public OutcomeConfig[] outcomes;
 }

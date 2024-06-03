@@ -5,12 +5,8 @@ import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.PathConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
-import dev.boarbot.entities.boaruser.data.BoarUserData;
-import dev.boarbot.util.data.types.ItemData;
-import dev.boarbot.util.data.types.ItemsData;
 import dev.boarbot.util.json.JsonUtil;
 import dev.boarbot.util.test.TestUtil;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

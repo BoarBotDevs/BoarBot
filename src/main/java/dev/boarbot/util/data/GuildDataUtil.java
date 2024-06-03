@@ -1,49 +1,42 @@
 package dev.boarbot.util.data;
 
-import com.google.gson.Gson;
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.util.data.types.GuildData;
-import dev.boarbot.util.json.JsonUtil;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
-import java.io.*;
-
-public final class GuildDataUtil {
-    public static GuildData getGuildData(String guildID) throws IOException {
-        return getGuildData(guildID, false);
+public class GuildDataUtil {
+    public static boolean isValidChannel(Connection connection, String guildID, String channelID) throws SQLException {
+        ArrayList<String> validChannelIDs = getValidChannelIDs(connection, guildID);
+        return validChannelIDs.contains(channelID);
     }
 
-    public static GuildData getGuildData(String guildID, boolean create) throws IOException {
-        BotConfig config = BoarBotApp.getBot().getConfig();
+    private static ArrayList<String> getValidChannelIDs(Connection connection, String guildID) throws SQLException {
+        ArrayList<String> channelIDs = new ArrayList<>();
 
-        String guildDataPath = config.getPathConfig().getDatabaseFolder() +
-            config.getPathConfig().getGuildDataFolder() + guildID + ".json";
-        Gson g = new Gson();
+        String query = "SELECT channel_one, channel_two, channel_three FROM guilds WHERE guild_id = ?";
 
-        try {
-            String guildJson = JsonUtil.pathToJson(guildDataPath);
-            return g.fromJson(guildJson, GuildData.class);
-        } catch (FileNotFoundException exception) {
-            if (create) {
-                GuildData newData = new GuildData();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, guildID);
 
-                BufferedWriter writer = new BufferedWriter(new FileWriter(guildDataPath));
-                writer.write(g.toJson(newData));
-                writer.close();
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    if (results.getString("channel_one") != null) {
+                        channelIDs.add(results.getString("channel_one"));
+                    }
 
-                return newData;
+                    if (results.getString("channel_two") != null) {
+                        channelIDs.add(results.getString("channel_two"));
+                    }
+
+                    if (results.getString("channel_three") != null) {
+                        channelIDs.add(results.getString("channel_three"));
+                    }
+                }
             }
-
-            throw exception;
         }
-    }
 
-    public void removeGuildFile(String guildDataPath) throws IOException {
-        File guildDataFile = new File(guildDataPath);
-        boolean success = guildDataFile.delete();
-
-        if (!success) {
-            throw new IOException("Failed to delete guild file.");
-        }
+        return channelIDs;
     }
 }

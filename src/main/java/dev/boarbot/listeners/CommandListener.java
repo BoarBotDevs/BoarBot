@@ -39,6 +39,10 @@ public class CommandListener extends ListenerAdapter implements Runnable {
             )
         );
 
+        if (!this.event.isFromGuild()) {
+            return;
+        }
+
         try {
             Subcommand subcommand = subcommands.get(
                 this.event.getName() + this.event.getSubcommandName()
