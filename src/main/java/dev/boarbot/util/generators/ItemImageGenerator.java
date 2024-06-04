@@ -1,7 +1,6 @@
 package dev.boarbot.util.generators;
 
-import com.madgag.gif.fmsware.AnimatedGifEncoder;
-import com.madgag.gif.fmsware.GifDecoder;
+import com.google.gson.Gson;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.*;
 import dev.boarbot.bot.config.items.IndivItemConfig;
@@ -11,6 +10,7 @@ import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.utils.FileUpload;
 
@@ -20,8 +20,10 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URISyntaxException;
+import java.util.Base64;
 import java.util.Map;
 
+@Log4j2
 public class ItemImageGenerator {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
@@ -34,8 +36,6 @@ public class ItemImageGenerator {
     @Getter @Setter private User giftingUser;
     @Getter @Setter private long bucks;
 
-    private String transparentColor;
-
     private byte[] generatedImageByteArray;
 
     public ItemImageGenerator(User user, String title, String itemID) {
@@ -47,7 +47,7 @@ public class ItemImageGenerator {
     }
 
     public ItemImageGenerator(User user, String title, String itemID, boolean isBadge, User giftingUser) {
-        this(user, title, itemID, isBadge, giftingUser, -1);
+        this(user, title, itemID, isBadge, giftingUser, 0);
     }
 
     public ItemImageGenerator(User user, String title, String itemID, boolean isBadge, User giftingUser, long bucks) {
@@ -59,19 +59,11 @@ public class ItemImageGenerator {
             this.itemName = badgeInfo.name;
             this.filePath = this.config.getPathConfig().getBadges() + badgeInfo.file;
             this.colorKey = "badge";
-
-            if (badgeInfo.transparentColor != null) {
-                this.transparentColor = badgeInfo.transparentColor;
-            }
         } else {
             IndivItemConfig boarInfo = this.config.getItemConfig().getBoars().get(itemID);
             this.itemName = boarInfo.name;
             this.filePath = this.config.getPathConfig().getBoars() + boarInfo.file;
             this.colorKey = BoarUtil.findRarityKey(itemID);
-
-            if (boarInfo.transparentColor != null) {
-                this.transparentColor = boarInfo.transparentColor;
-            }
         }
 
         this.giftingUser = giftingUser;
@@ -85,7 +77,7 @@ public class ItemImageGenerator {
     public ItemImageGenerator(
         User user, String title, String itemName, String filePath, String colorKey, User giftingUser
     ) {
-        this(user, title, itemName, filePath, colorKey, giftingUser, -1);
+        this(user, title, itemName, filePath, colorKey, giftingUser, 0);
     }
 
     public ItemImageGenerator(
@@ -135,76 +127,76 @@ public class ItemImageGenerator {
     }
 
     private void generateAnimated() throws IOException {
-        NumberConfig nums = this.config.getNumberConfig();
+        Gson g = new Gson();
 
-        GifDecoder decoder = new GifDecoder();
-        decoder.read(new BufferedInputStream(new FileInputStream(this.filePath)));
-        int numFrames = decoder.getFrameCount();
+        Process pythonProcess = new ProcessBuilder(
+            "python",
+            "src/main/resources/scripts/make_animated_image.py",
+            g.toJson(this.config.getPathConfig()),
+            g.toJson(this.config.getNumberConfig()),
+            this.filePath
+        ).start();
 
-        AnimatedGifEncoder encoder = new AnimatedGifEncoder();
-        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+        BufferedReader stdIn = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
+        BufferedReader stdErr = new BufferedReader(new InputStreamReader(pythonProcess.getErrorStream()));
+        OutputStream stdOut = pythonProcess.getOutputStream();
 
-        this.initGifEncoder(encoder, byteArrayOS);
+        stdOut.write(this.generatedImageByteArray);
+        stdOut.close();
 
-        ByteArrayInputStream byteArrayIS = new ByteArrayInputStream(this.generatedImageByteArray);
-        BufferedImage generatedImage = ImageIO.read(byteArrayIS);
-        Graphics2D g2d = generatedImage.createGraphics();
+        String result = stdIn.readLine();
 
-        int[] mainPos = nums.getItemPos();
-        int[] mainSize = nums.getBigBoarSize();
+        if (result == null) {
+            String tempErrMessage;
+            String errMessage = "";
 
-        for (int i=0; i<numFrames; i++) {
-            BufferedImage frame = decoder.getFrame(i);
-            int delay = decoder.getDelay(i);
+            while ((tempErrMessage = stdErr.readLine()) != null) {
+                errMessage = errMessage.concat(tempErrMessage + "\n");
+            }
 
-            g2d.drawImage(frame, mainPos[0], mainPos[1], mainSize[0], mainSize[1], null);
-
-            encoder.setDelay(delay);
-            encoder.addFrame(generatedImage);
+            log.error(errMessage);
         }
 
-        encoder.finish();
-
-        this.generatedImageByteArray = byteArrayOS.toByteArray();
+        this.generatedImageByteArray = Base64.getDecoder().decode(result);
     }
 
-    private void addAnimatedUser() throws IOException, URISyntaxException {
-        NumberConfig nums = this.config.getNumberConfig();
+    private void addAnimatedUser() throws IOException {
+        Gson g = new Gson();
 
-        GifDecoder decoder = new GifDecoder();
-        decoder.read(new BufferedInputStream(new ByteArrayInputStream(this.generatedImageByteArray)));
-        int numFrames = decoder.getFrameCount();
+        Process pythonProcess = new ProcessBuilder(
+            "python",
+            "src/main/resources/scripts/user_animated_overlay.py",
+            g.toJson(this.config.getPathConfig()),
+            g.toJson(this.config.getColorConfig()),
+            g.toJson(this.config.getNumberConfig()),
+            this.user.getEffectiveAvatarUrl(),
+            this.user.getName(),
+            "%,d".formatted(this.bucks),
+            this.giftingUser == null ? "" : this.giftingUser.getEffectiveAvatarUrl(),
+            this.giftingUser == null ? "" : this.giftingUser.getName()
+        ).start();
 
-        AnimatedGifEncoder encoder = new AnimatedGifEncoder();
-        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+        BufferedReader stdIn = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
+        BufferedReader stdErr = new BufferedReader(new InputStreamReader(pythonProcess.getErrorStream()));
+        OutputStream stdOut = pythonProcess.getOutputStream();
 
-        this.initGifEncoder(encoder, byteArrayOS);
+        stdOut.write(this.generatedImageByteArray);
+        stdOut.close();
 
-        BufferedImage generatedUserImageData = this.generateUserImageData();
+        String result = stdIn.readLine();
 
-        for (int i=0; i<numFrames; i++) {
-            BufferedImage frame = decoder.getFrame(i);
-            Graphics2D g2d = frame.createGraphics();
-            int delay = decoder.getDelay(i);
+        if (result == null) {
+            String tempErrMessage;
+            String errMessage = "";
 
-            g2d.drawImage(generatedUserImageData, nums.getItemBoxX(), nums.getItemBoxOneY(), null);
+            while ((tempErrMessage = stdErr.readLine()) != null) {
+                errMessage = errMessage.concat(tempErrMessage + "\n");
+            }
 
-            encoder.setDelay(delay);
-            encoder.addFrame(frame);
+            log.error(errMessage);
         }
 
-        encoder.finish();
-
-        this.generatedImageByteArray = byteArrayOS.toByteArray();
-    }
-
-    private void initGifEncoder(AnimatedGifEncoder encoder, ByteArrayOutputStream byteArrayOS) {
-        encoder.setRepeat(0);
-        encoder.setDispose(2);
-        encoder.setQuality(20);
-        encoder.setBackground(Color.decode(this.transparentColor));
-        encoder.setTransparent(Color.decode(this.transparentColor));
-        encoder.start(new BufferedOutputStream(byteArrayOS));
+        this.generatedImageByteArray = Base64.getDecoder().decode(result);
     }
 
     private void generateStatic(boolean makeWithItem) throws IOException, URISyntaxException {
@@ -302,7 +294,7 @@ public class ItemImageGenerator {
                 0, Math.min(this.giftingUser.getName().length(), this.config.getNumberConfig().getMaxUsernameLength())
             );
 
-            g2d.setPaint(Color.decode(colorConfig.get("mid")));
+            g2d.setPaint(Color.decode(colorConfig.get("dark")));
             g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxOneY(), nums.getBorder(), nums.getItemBoxHeight());
             g2d.fill(new RoundRectangle2D.Double(
                 nums.getItemBoxX(),
@@ -317,7 +309,7 @@ public class ItemImageGenerator {
             textDrawer.setPos(new int[]{nums.getItemTextX(), nums.getItemBoxOneY() + nums.getItemTextYOffset()});
             textDrawer.drawText();
 
-            g2d.setPaint(Color.decode(colorConfig.get("mid")));
+            g2d.setPaint(Color.decode(colorConfig.get("dark")));
             g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxThreeY(), nums.getBorder(), nums.getItemBoxHeight());
             g2d.fill(new RoundRectangle2D.Double(
                 nums.getItemBoxX(),
@@ -332,7 +324,7 @@ public class ItemImageGenerator {
             textDrawer.setPos(new int[]{nums.getItemTextX(), nums.getItemBoxThreeY() + nums.getItemTextYOffset()});
             textDrawer.drawText();
 
-            g2d.setPaint(Color.decode(colorConfig.get("mid")));
+            g2d.setPaint(Color.decode(colorConfig.get("dark")));
             g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxFourY(), nums.getBorder(), nums.getItemBoxHeight());
             g2d.fill(new RoundRectangle2D.Double(
                 nums.getItemBoxX(),
@@ -355,7 +347,7 @@ public class ItemImageGenerator {
             );
         }
 
-        g2d.setPaint(Color.decode(colorConfig.get("mid")));
+        g2d.setPaint(Color.decode(colorConfig.get("dark")));
         g2d.fillRect(nums.getItemBoxX(), userBoxY, nums.getBorder(), nums.getItemBoxHeight());
         g2d.fill(new RoundRectangle2D.Double(
             nums.getItemBoxX(),
@@ -377,19 +369,21 @@ public class ItemImageGenerator {
             nums.getItemUserAvatarWidth()
         );
 
-        if (this.bucks >= 0 && this.giftingUser == null) {
-            g2d.setPaint(Color.decode(colorConfig.get("mid")));
+        if (this.bucks > 0 && this.giftingUser == null) {
+            String formattedBucks = "%,d".formatted(this.bucks);
+
+            g2d.setPaint(Color.decode(colorConfig.get("dark")));
             g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxTwoY(), nums.getBorder(), nums.getItemBoxHeight());
             g2d.fill(new RoundRectangle2D.Double(
                 nums.getItemBoxX(),
                 nums.getItemBoxTwoY(),
-                fm.stringWidth("+$" + bucks) + nums.getItemTextBoxExtra(),
+                fm.stringWidth("+$" + formattedBucks) + nums.getItemTextBoxExtra(),
                 nums.getItemBoxHeight(),
                 nums.getBorder() * 2,
                 nums.getBorder() * 2
             ));
 
-            textDrawer.setText("+%%bucks%%$" + bucks);
+            textDrawer.setText("+%%bucks%%$" + formattedBucks);
             textDrawer.setPos(new int[]{nums.getItemTextX(), nums.getItemBoxTwoY() + nums.getItemTextYOffset()});
             textDrawer.drawText();
         }
