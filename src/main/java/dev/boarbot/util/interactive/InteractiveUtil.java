@@ -40,7 +40,7 @@ public final class InteractiveUtil {
                     ButtonStyle.fromKey(component.getStyle()),
                     component.getUrl(),
                     component.isDisabled(),
-                    component.getEmoji() == null ? null : Emoji.fromUnicode(component.getEmoji())
+                    InteractiveUtil.parseEmoji(component.getEmoji())
                 );
 
                 madeComponents.add(btn);
@@ -85,5 +85,22 @@ public final class InteractiveUtil {
         }
 
         return null;
+    }
+
+    public static Emoji parseEmoji(String emojiStr) {
+        Emoji emoji = null;
+
+        if (emojiStr != null && emojiStr.contains("<:")) {
+            String emojiName = emojiStr.substring(2, emojiStr.indexOf(":", 2));
+            long emojiID = Long.parseLong(emojiStr.substring(
+                emojiStr.indexOf(":", 2) + 1, emojiStr.indexOf(">")
+            ));
+
+            emoji = Emoji.fromCustom(emojiName, emojiID, false);
+        } else if (emojiStr != null) {
+            emoji = Emoji.fromUnicode(emojiStr);
+        }
+
+        return emoji;
     }
 }

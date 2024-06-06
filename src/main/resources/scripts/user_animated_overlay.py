@@ -5,8 +5,6 @@ import requests
 import json
 import sys
 
-# Inputs from JS
-
 path_config = json.loads(sys.argv[1])
 color_config = json.loads(sys.argv[2])
 num_config = json.loads(sys.argv[3])
@@ -18,28 +16,18 @@ gifter_user_tag = sys.argv[8]
 
 image_bytes = sys.stdin.buffer.read()
 
-# Configured directory paths
-
 item_assets = path_config['itemAssets']
 other_assets = path_config['otherAssets']
 font_assets = path_config['fontAssets']
 
-# Configured asset file paths
-
 circle_mask_path = other_assets + path_config['circleMask']
 font_path = font_assets + path_config['mainFont']
-
-# Configured colors
 
 font_color = color_config['font']
 bucks_color = color_config['bucks']
 
-# Setting font size from configurations
-
 small_medium_font = num_config['fontSmallMedium']
 text_small_medium = ImageFont.truetype(font_path, small_medium_font)
-
-# Setting image positioning and sizes from configurations
 
 avatar_size = (num_config['itemUserAvatarWidth'], num_config['itemUserAvatarWidth'])
 user_box_y = num_config['itemBoxOneY']
@@ -71,8 +59,6 @@ gifter_box_y = num_config['itemBoxFourY']
 bucks_pos = (num_config['itemTextX'], (num_config['itemBoxTwoY'] + num_config['itemTextYOffset']))
 bucks_box_y = num_config['itemBoxTwoY']
 
-# Opening, converting, and resizing asset files
-
 image = Image.open(BytesIO(image_bytes))
 
 circle_mask = Image.open(circle_mask_path).convert('RGBA').resize(avatar_size)
@@ -84,13 +70,9 @@ if gifter_user_tag != '' and gifter_avatar_url != '':
 user_avatar = Image.open(BytesIO(requests.get(avatar_url).content)).convert('RGBA').resize(avatar_size)
 user_avatar.putalpha(ImageChops.multiply(user_avatar.getchannel('A'), circle_mask.getchannel('A')).convert('L'))
 
-# Stores all newly processed frames
 frames = []
 
-# Loops through each animation frame, applying overlays, underlays, and text
 for frame in ImageSequence.Iterator(image):
-    # Places the nameplate image
-
     new_frame = frame.copy().convert('RGBA')
     new_frame_draw = ImageDraw.Draw(new_frame)
 
@@ -170,17 +152,12 @@ for frame in ImageSequence.Iterator(image):
             '$' + score, bucks_color, font=text_small_medium, anchor='ls'
         )
 
-    # Places the user avatar image
-
     new_frame.paste(user_avatar, user_avatar_pos, mask=user_avatar)
 
     frames.append(new_frame)
-
-# Formatting the result to work with JS
 
 output = BytesIO()
 frames[0].save(output, format='GIF', save_all=True, append_images=frames[1:], loop=0, disposal=2)
 img_data = output.getvalue()
 
-# Sends the result to JS
 print(str(base64.b64encode(img_data))[2:-1])

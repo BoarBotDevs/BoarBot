@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -94,7 +93,7 @@ public class ItemImageGenerator {
         this.bucks = bucks;
     }
 
-    public FileUpload generate() throws IOException, URISyntaxException {
+    public byte[] generate() throws IOException, URISyntaxException {
         String extension = this.filePath.split("[.]")[1];
 
         this.generatedImageByteArray = BoarBotApp.getBot().getCacheMap().get("item" + this.itemName + this.colorKey);
@@ -105,7 +104,8 @@ public class ItemImageGenerator {
                 this.generateAnimated();
 
                 BoarBotApp.getBot().getCacheMap().put(
-                    "item" + this.itemName + this.colorKey, this.generatedImageByteArray
+                    "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey,
+                    this.generatedImageByteArray
                 );
             }
 
@@ -123,7 +123,7 @@ public class ItemImageGenerator {
             this.addStaticUser();
         }
 
-        return FileUpload.fromData(this.generatedImageByteArray, "unknown." + extension);
+        return this.generatedImageByteArray;
     }
 
     private void generateAnimated() throws IOException {

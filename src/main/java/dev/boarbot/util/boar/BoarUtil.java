@@ -114,7 +114,7 @@ public final class BoarUtil {
         String lastWeightKey = sortedWeights.keySet().stream().toList().getLast();
         int numBoars = 1;
 
-        for (int i=4; i<7; i++) {
+        for (int i=3; i<6; i++) {
             if (Math.random() < multiplier / Math.pow(10, i)) {
                 numBoars++;
             }

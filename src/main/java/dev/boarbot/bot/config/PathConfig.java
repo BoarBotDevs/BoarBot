@@ -57,6 +57,8 @@ public class PathConfig {
     private String itemOverlay = "";
     private String itemUnderlay = "";
     private String itemBackplate = "";
+    private String itemShadowLeft = "";
+    private String itemShadowRight = "";
 
     // Image/asset file names for collection images
 

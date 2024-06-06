@@ -58,66 +58,69 @@ public class BoarUser {
         Connection connection,
         BoarObtainType obtainType,
         List<Integer> bucksGotten,
-        List<Boolean> bacteriaGotten
+        List<Integer> boarEditions
     ) throws SQLException {
         this.addUser(connection);
 
+        List<String> newBoarIDs = new ArrayList<>();
+
         for (String boarID : boarIDs) {
             String boarAddQuery = """
-                INSERT INTO collected_boars (user_id, boar_id, original_obtain_type) VALUES (?, ?, ?);
+                INSERT INTO collected_boars (user_id, boar_id, original_obtain_type)
+                VALUES (?, ?, ?)
+                RETURNING edition, bucks_gotten;
             """;
+            int curEdition;
 
             try (PreparedStatement boarAddStatement = connection.prepareStatement(boarAddQuery)) {
                 boarAddStatement.setString(1, this.userID);
                 boarAddStatement.setString(2, boarID);
                 boarAddStatement.setString(3, obtainType.toString());
-                boarAddStatement.executeUpdate();
+
+                try (ResultSet results = boarAddStatement.executeQuery()) {
+                    if (results.next()) {
+                        curEdition = results.getInt("edition");
+
+                        newBoarIDs.add(boarID);
+                        boarEditions.add(curEdition);
+                        bucksGotten.add(results.getInt("bucks_gotten"));
+
+                        String rarityKey = BoarUtil.findRarityKey(boarID);
+
+                        if (curEdition == 1 && this.config.getRarityConfigs().get(rarityKey).isGivesSpecial()) {
+                            this.addBacteria(newBoarIDs, connection, bucksGotten, boarEditions);
+                        }
+                    }
+                }
             }
         }
 
-        String boarEditionsQuery = """
-            SELECT edition, bucks_gotten
-            FROM (
-                SELECT unique_id, edition, bucks_gotten
-                FROM collected_boars
-                WHERE user_id = ? AND obtained_timestamp >= current_timestamp(3) - INTERVAL 15 MINUTE
-                ORDER BY unique_id DESC
-                LIMIT ?
-            ) AS SUBQUERY
-            ORDER BY unique_id;
+        boarIDs.clear();
+        boarIDs.addAll(newBoarIDs);
+    }
+
+    private void addBacteria(
+        List<String> newBoarIDs,
+        Connection connection,
+        List<Integer> bucksGotten,
+        List<Integer> boarEditions
+    ) throws SQLException {
+        String insertBacteriaQuery = """
+            INSERT INTO collected_boars (user_id, boar_id, original_obtain_type)
+            VALUES (?, ?, ?)
+            RETURNING edition;
         """;
 
-        try (PreparedStatement boarEditionsStatement = connection.prepareStatement(boarEditionsQuery)) {
-            boarEditionsStatement.setString(1, this.userID);
-            boarEditionsStatement.setInt(2, boarIDs.size());
+        try (PreparedStatement insertBacteriaStatement = connection.prepareStatement(insertBacteriaQuery)) {
+            insertBacteriaStatement.setString(1, this.userID);
+            insertBacteriaStatement.setString(2, "bacteria");
+            insertBacteriaStatement.setString(3, BoarObtainType.OTHER.toString());
 
-            try (ResultSet results = boarEditionsStatement.executeQuery()) {
-                int curBoarIndex = -1;
-
-                while (results.next()) {
-                    curBoarIndex++;
-                    bucksGotten.add(results.getInt("bucks_gotten"));
-
-                    String rarityKey = BoarUtil.findRarityKey(boarIDs.get(curBoarIndex));
-
-                    if (results.getInt("edition") != 1 || !this.config.getRarityConfigs().get(rarityKey).givesSpecial) {
-                        bacteriaGotten.add(false);
-                        continue;
-                    }
-
-                    String insertBacteriaQuery = """
-                        INSERT INTO collected_boars (user_id, boar_id, original_obtain_type) VALUES (?, ?, ?);
-                    """;
-
-                    try (PreparedStatement insertBacteriaStatement = connection.prepareStatement(insertBacteriaQuery)) {
-                        insertBacteriaStatement.setString(1, this.userID);
-                        insertBacteriaStatement.setString(2, "bacteria");
-                        insertBacteriaStatement.setString(3, BoarObtainType.OTHER.toString());
-
-                        insertBacteriaStatement.executeUpdate();
-
-                        bacteriaGotten.add(true);
-                    }
+            try (ResultSet results = insertBacteriaStatement.executeQuery()) {
+                if (results.next()) {
+                    newBoarIDs.add("bacteria");
+                    boarEditions.add(results.getInt("edition"));
+                    bucksGotten.add(0);
                 }
             }
         }

@@ -97,6 +97,8 @@ public class NumberConfig {
     private int itemBoxThreeY = 0;
     private int itemBoxFourY = 0;
     private int itemBoxHeight = 0;
+    private int itemHorizPadding = 0;
+    private int itemShadowWidth = 0;
 
     // Collection image positions, sizes, and values
 

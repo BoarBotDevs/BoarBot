@@ -18,6 +18,7 @@ import lombok.ToString;
 public class RarityConfig {
     public String name = "";
     public String pluralName = "";
+    public String emoji = "";
     public double weight = 0;
     public int baseScore = 0;
     public boolean fromDaily = false;

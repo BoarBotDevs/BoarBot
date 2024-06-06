@@ -4,14 +4,17 @@ import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserAction;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
+import dev.boarbot.interactives.boar.DailyInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.ItemImageGenerator;
+import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.extern.log4j.Log4j2;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -22,7 +25,7 @@ import java.util.List;
 public class DailySubcommand extends Subcommand {
     private List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucksGotten = new ArrayList<>();
-    private final List<Boolean> bacteriaGotten = new ArrayList<>();
+    private final List<Integer> boarEditions = new ArrayList<>();
 
     public DailySubcommand(SlashCommandInteractionEvent event) {
         super(event);
@@ -58,41 +61,50 @@ public class DailySubcommand extends Subcommand {
             long multiplier = boarUser.getMultiplier(connection);
             this.boarIDs = BoarUtil.getRandBoarIDs(multiplier, this.interaction.getGuild().getId(), connection);
 
-            boarUser.addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.bacteriaGotten);
+            boarUser.addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
         } catch (SQLException exception) {
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
         }
     }
 
     private void sendResponse() {
+        List<ItemImageGenerator> itemGens = new ArrayList<>();
+
         for (int i=0; i<this.boarIDs.size(); i++) {
             boolean isFirst = i == 0;
-            String title = isFirst ? "Daily Boar!" : "Extra Boar!";
+            String title = "Extra Boar!";
+
+            if (this.boarIDs.get(i).equals("bacteria")) {
+                title = "First Edition!";
+            } else if (isFirst) {
+                title = "Daily Boar!";
+            }
 
             ItemImageGenerator boarItemGen = new ItemImageGenerator(
                 this.event.getUser(), title, this.boarIDs.get(i), false, null, this.bucksGotten.get(i)
             );
 
-            try {
-                Message boarMessage;
+            itemGens.add(boarItemGen);
+        }
 
-                if (isFirst) {
-                    boarMessage = this.interaction.getHook().editOriginalAttachments(boarItemGen.generate()).complete();
-                } else {
-                    boarMessage = this.interaction.getHook().sendFiles(boarItemGen.generate()).complete();
-                }
+        try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
+            if (itemGens.size() > 1) {
+                DailyInteractive interactive = new DailyInteractive(
+                    this.event, itemGens, this.boarIDs, this.boarEditions
+                );
 
-                if (this.bacteriaGotten.get(i)) {
-                    ItemImageGenerator bacteriaItemGen = new ItemImageGenerator(
-                        this.event.getUser(), "First Edition!", "bacteria"
-                    );
+                MessageEditBuilder editedMsg = new MessageEditBuilder()
+                    .setFiles(imageToSend)
+                    .setComponents(interactive.getCurComponents());
 
-                    boarMessage.replyFiles(bacteriaItemGen.generate()).queue();
-                }
-            } catch (Exception exception) {
-                log.error("Failed to create file from image data!", exception);
+                this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+
                 return;
             }
+
+            this.interaction.getHook().sendFiles(imageToSend).complete();
+        } catch (Exception exception) {
+            log.error("Failed to send daily boar response!", exception);
         }
     }
 }

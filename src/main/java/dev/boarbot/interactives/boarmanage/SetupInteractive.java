@@ -99,7 +99,7 @@ public class SetupInteractive extends Interactive {
         if (this.page == 0) {
             this.page = 1;
 
-            this.updateCurComponents();
+            this.getCurComponents();
 
             Button nextBtn = ((Button) this.curComponents[1].getComponents().get(2)).asDisabled()
                 .withStyle(ButtonStyle.SUCCESS)
@@ -191,18 +191,11 @@ public class SetupInteractive extends Interactive {
         this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
     }
 
-    public void updateCurComponents() {
+    public ActionRow[] getCurComponents() {
         if (this.page == 0) {
             this.curComponents = getFirstComponents();
-            return;
-        }
-
-        this.curComponents = getSecondComponents();
-    }
-
-    public ActionRow[] getCurComponents() {
-        if (this.curComponents.length == 0) {
-            updateCurComponents();
+        } else {
+            this.curComponents = getSecondComponents();
         }
 
         return this.curComponents;

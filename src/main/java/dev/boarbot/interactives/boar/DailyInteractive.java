@@ -1,0 +1,180 @@
+package dev.boarbot.interactives.boar;
+
+import dev.boarbot.bot.config.RarityConfig;
+import dev.boarbot.bot.config.components.IndivComponentConfig;
+import dev.boarbot.interactives.Interactive;
+import dev.boarbot.util.generators.ItemImageGenerator;
+import dev.boarbot.util.generators.ItemImageGrouper;
+import dev.boarbot.util.interactive.InteractiveUtil;
+import dev.boarbot.util.interactive.StopType;
+import lombok.extern.log4j.Log4j2;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Log4j2
+public class DailyInteractive extends Interactive {
+    private int page = 0;
+    private final List<ItemImageGenerator> itemGens;
+    private final List<SelectOption> selectableBoars = new ArrayList<>();
+    private ActionRow[] curComponents = new ActionRow[0];
+
+    private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getDaily();
+
+    public DailyInteractive(
+        SlashCommandInteractionEvent initEvent,
+        List<ItemImageGenerator> itemGens,
+        List<String> boarIDs,
+        List<Integer> boarEditions
+    ) {
+        super(initEvent);
+        this.itemGens = itemGens;
+
+        Map<String, RarityConfig> rarityConfigs = this.config.getRarityConfigs();
+
+        for (int i=0; i<boarIDs.size(); i++) {
+            RarityConfig rarityConfig = rarityConfigs.get(this.itemGens.get(i).getColorKey());
+
+            String description = rarityConfig.name + " Boar";
+
+            if (this.itemGens.get(i).getBucks() > 0) {
+                description += " (+$%,d)".formatted(this.itemGens.get(i).getBucks());
+            }
+
+            boolean isSpecial = this.itemGens.get(i).getColorKey().equals("special");
+
+            if (isSpecial) {
+                description += " (Edition #%,d)".formatted(boarEditions.get(i));
+            }
+
+            String boarName = this.config.getItemConfig().getBoars().get(boarIDs.get(i)).getName();
+            SelectOption boarOption = SelectOption.of(boarName, Integer.toString(i))
+                .withEmoji(InteractiveUtil.parseEmoji(rarityConfig.getEmoji()))
+                .withDescription(description);
+
+            this.selectableBoars.add(boarOption);
+        }
+    }
+
+    @Override
+    public void execute(GenericComponentInteractionCreateEvent compEvent) {
+        compEvent.deferEdit().queue();
+
+        if (!this.initEvent.getUser().getId().equals(compEvent.getUser().getId())) {
+            return;
+        }
+
+        String compID = compEvent.getComponentId().split(",")[1];
+
+        switch (compID) {
+            case "BOAR_SELECT" -> this.page = Integer.parseInt(
+                ((StringSelectInteractionEvent) compEvent).getValues().getFirst()
+            );
+            case "LEFT_FULL" -> this.page = 0;
+            case "LEFT" -> this.page--;
+
+            case "RIGHT" -> this.page++;
+            case "RIGHT_FULL" -> this.page = this.itemGens.size()-1;
+        }
+
+        try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {
+            MessageEditBuilder editedMsg = new MessageEditBuilder()
+                .setFiles(imageToSend)
+                .setComponents(this.getCurComponents());
+
+            this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+        } catch (Exception exception) {
+            log.error("Failed to change daily boar page!", exception);
+        }
+    }
+
+    @Override
+    public void stop(StopType type) {
+        Interactive interactive = this.removeInteractive();
+
+        if (interactive == null) {
+            return;
+        }
+
+        this.interaction.getHook().editOriginalComponents(this.curComponents[0]).complete();
+    }
+
+    public ActionRow[] getCurComponents() {
+        if (this.curComponents.length == 0) {
+            this.curComponents = this.getComponents();
+        }
+
+        SelectMenu boarSelect = (SelectMenu) this.curComponents[0].getComponents().getFirst();
+        Button leftFullBtn = ((Button) this.curComponents[1].getComponents().get(0)).withDisabled(false);
+        Button leftBtn = ((Button) this.curComponents[1].getComponents().get(1)).withDisabled(false);
+        Button rightBtn = ((Button) this.curComponents[1].getComponents().get(2)).withDisabled(false);
+        Button rightFullBtn = ((Button) this.curComponents[1].getComponents().get(3)).withDisabled(false);
+
+        for (int i=0; i<this.selectableBoars.size(); i++) {
+            if (i == page) {
+                this.selectableBoars.set(i, this.selectableBoars.get(i).withDefault(true));
+                continue;
+            }
+
+            this.selectableBoars.set(i, this.selectableBoars.get(i).withDefault(false));
+        }
+
+        boarSelect = new StringSelectMenuImpl(
+            boarSelect.getId(),
+            boarSelect.getPlaceholder(),
+            boarSelect.getMinValues(),
+            boarSelect.getMaxValues(),
+            boarSelect.isDisabled(),
+            this.selectableBoars
+        );
+
+        this.curComponents[0].getComponents().set(0, boarSelect);
+
+        if (this.page == 0) {
+            leftFullBtn = leftFullBtn.asDisabled();
+            leftBtn = leftBtn.asDisabled();
+        }
+
+        if (this.page == this.itemGens.size()-1) {
+            rightFullBtn = rightFullBtn.asDisabled();
+            rightBtn = rightBtn.asDisabled();
+        }
+
+        this.curComponents[1].getComponents().set(0, leftFullBtn);
+        this.curComponents[1].getComponents().set(1, leftBtn);
+        this.curComponents[1].getComponents().set(2, rightBtn);
+        this.curComponents[1].getComponents().set(3, rightFullBtn);
+
+        return this.curComponents;
+    }
+
+    private ActionRow[] getComponents() {
+        List<ItemComponent> boarSelect = InteractiveUtil.makeComponents(
+            this.interaction.getId(), this.COMPONENTS.get("boarSelect")
+        );
+        List<ItemComponent> navRow = InteractiveUtil.makeComponents(
+            this.interaction.getId(),
+            this.COMPONENTS.get("leftFullBtn"),
+            this.COMPONENTS.get("leftBtn"),
+            this.COMPONENTS.get("rightBtn"),
+            this.COMPONENTS.get("rightFullBtn")
+        );
+
+        return new ActionRow[] {
+            ActionRow.of(boarSelect),
+            ActionRow.of(navRow)
+        };
+    }
+}
