@@ -21,6 +21,7 @@ public class BoarUser {
     @Getter private final String userID;
 
     private boolean alreadyAdded = false;
+    private boolean isFirstDaily = false;
 
     private volatile int numRefs = 1;
 
@@ -147,14 +148,46 @@ public class BoarUser {
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
                     Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
-                    canUseDaily = results.getTimestamp("last_daily_timestamp") == null || lastDailyTimestamp.before(
+
+                    canUseDaily = lastDailyTimestamp == null || lastDailyTimestamp.before(
                         new Timestamp(TimeUtil.getLastDailyResetMilli())
                     );
+
+                    this.isFirstDaily = lastDailyTimestamp == null;
                 }
             }
         }
 
+        if (this.isFirstDaily) {
+            String firstDailyQuery = """
+                INSERT IGNORE INTO collected_powerups (user_id, powerup_id)
+                VALUES (?, ?)
+            """;
+
+            try (PreparedStatement statement = connection.prepareStatement(firstDailyQuery)) {
+                statement.setString(1, this.userID);
+                statement.setString(2, "miracle");
+                statement.execute();
+            }
+
+            firstDailyQuery = """
+                UPDATE collected_powerups
+                SET amount = amount + 5
+                WHERE user_id = ? AND powerup_id = ?;
+            """;
+
+            try (PreparedStatement statement = connection.prepareStatement(firstDailyQuery)) {
+                statement.setString(1, this.userID);
+                statement.setString(2, "miracle");
+                statement.execute();
+            }
+        }
+
         return canUseDaily;
+    }
+
+    public boolean isFirstDaily() {
+        return this.isFirstDaily;
     }
 
     public long getMultiplier(Connection connection) throws SQLException {

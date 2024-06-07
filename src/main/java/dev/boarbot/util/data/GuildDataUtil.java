@@ -7,12 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class GuildDataUtil {
-    public static boolean isValidChannel(Connection connection, String guildID, String channelID) throws SQLException {
-        ArrayList<String> validChannelIDs = getValidChannelIDs(connection, guildID);
-        return validChannelIDs.contains(channelID);
-    }
-
-    private static ArrayList<String> getValidChannelIDs(Connection connection, String guildID) throws SQLException {
+    public static ArrayList<String> getValidChannelIDs(Connection connection, String guildID) throws SQLException {
         ArrayList<String> channelIDs = new ArrayList<>();
 
         String query = "SELECT channel_one, channel_two, channel_three FROM guilds WHERE guild_id = ?";

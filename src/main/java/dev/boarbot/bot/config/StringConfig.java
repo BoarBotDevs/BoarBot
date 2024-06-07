@@ -47,7 +47,6 @@ public class StringConfig {
     private String dailyPowFailed = "";
     private String dailyUsed = "";
     private String dailyFirstTime = "";
-    private String dailyBonus = "";
     private String dailyUsedNotify = "";
     private String dailyTitle = "";
     private String firstTitle = "";

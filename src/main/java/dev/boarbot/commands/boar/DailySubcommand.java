@@ -32,6 +32,7 @@ public class DailySubcommand extends Subcommand {
     private final List<Integer> boarEditions = new ArrayList<>();
 
     private boolean notificationsOn = false;
+    private boolean isFirstDaily = false;
 
     public DailySubcommand(SlashCommandInteractionEvent event) {
         super(event);
@@ -88,6 +89,8 @@ public class DailySubcommand extends Subcommand {
                 return;
             }
 
+            this.isFirstDaily = boarUser.isFirstDaily();
+
             long multiplier = boarUser.getMultiplier(connection);
             this.boarIDs = BoarUtil.getRandBoarIDs(multiplier, this.interaction.getGuild().getId(), connection);
 
@@ -131,13 +134,21 @@ public class DailySubcommand extends Subcommand {
                 }
 
                 this.interaction.getHook().editOriginal(editedMsg.build()).complete();
-
-                return;
+            } else {
+                this.interaction.getHook().editOriginalAttachments(imageToSend).complete();
             }
-
-            this.interaction.getHook().sendFiles(imageToSend).complete();
         } catch (Exception exception) {
             log.error("Failed to send daily boar response!", exception);
+        }
+
+        if (this.isFirstDaily) {
+            try {
+                EmbedGenerator embedGen = new EmbedGenerator(this.config.getStringConfig().getDailyFirstTime());
+
+                this.interaction.getHook().sendFiles(embedGen.generate()).complete();
+            } catch (IOException exception) {
+                log.error("Failed to generate first daily reward image.", exception);
+            }
         }
     }
 }
