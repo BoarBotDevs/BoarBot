@@ -31,6 +31,7 @@ public class ItemImageGenerator {
 
     @Getter @Setter private String itemName;
     @Getter @Setter private String filePath;
+    @Getter @Setter private String staticFilePath;
     @Getter @Setter private String colorKey;
     @Getter @Setter private User giftingUser;
     @Getter @Setter private long bucks;
@@ -57,11 +58,15 @@ public class ItemImageGenerator {
             IndivItemConfig badgeInfo = this.config.getItemConfig().getBadges().get(itemID);
             this.itemName = badgeInfo.name;
             this.filePath = this.config.getPathConfig().getBadges() + badgeInfo.file;
+            this.staticFilePath = null;
             this.colorKey = "badge";
         } else {
             IndivItemConfig boarInfo = this.config.getItemConfig().getBoars().get(itemID);
             this.itemName = boarInfo.name;
-            this.filePath = this.config.getPathConfig().getBoars() + boarInfo.file;
+            this.filePath = this.config.getPathConfig().getBoars() + boarInfo.getFile();
+            this.staticFilePath = boarInfo.getStaticFile() != null
+                ? this.config.getPathConfig().getBoars() + boarInfo.getStaticFile()
+                : null;
             this.colorKey = BoarUtil.findRarityKey(itemID);
         }
 
@@ -87,6 +92,7 @@ public class ItemImageGenerator {
 
         this.itemName = itemName;
         this.filePath = filePath;
+        this.staticFilePath = null;
         this.colorKey = colorKey;
 
         this.giftingUser = giftingUser;
@@ -94,23 +100,33 @@ public class ItemImageGenerator {
     }
 
     public byte[] generate() throws IOException, URISyntaxException {
+        return this.generate(false);
+    }
+
+    public byte[] generate(boolean forceStatic) throws IOException, URISyntaxException {
         String extension = this.filePath.split("[.]")[1];
 
-        this.generatedImageByteArray = BoarBotApp.getBot().getCacheMap().get("item" + this.itemName + this.colorKey);
+        if (extension.equals("gif") && !forceStatic) {
+            this.generatedImageByteArray = BoarBotApp.getBot().getCacheMap().get(
+                "animitem" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey
+            );
 
-        if (extension.equals("gif")) {
             if (this.generatedImageByteArray == null) {
                 this.generateStatic(false);
                 this.generateAnimated();
 
                 BoarBotApp.getBot().getCacheMap().put(
-                    "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey,
+                    "animitem" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey,
                     this.generatedImageByteArray
                 );
             }
 
             this.addAnimatedUser();
         } else {
+            this.generatedImageByteArray = BoarBotApp.getBot().getCacheMap().get(
+                "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey
+            );
+
             if (this.generatedImageByteArray == null) {
                 this.generateStatic(true);
 
@@ -224,7 +240,8 @@ public class ItemImageGenerator {
 
         GraphicsUtil.drawImage(g2d, backplatePath, origin, imageSize);
         if (makeWithItem) {
-            GraphicsUtil.drawImage(g2d, this.filePath, mainPos, mainSize);
+            String filePath = this.staticFilePath != null ? this.staticFilePath : this.filePath;
+            GraphicsUtil.drawImage(g2d, filePath, mainPos, mainSize);
         }
 
         TextDrawer textDrawer = new TextDrawer(
@@ -383,7 +400,7 @@ public class ItemImageGenerator {
                 nums.getBorder() * 2
             ));
 
-            textDrawer.setText("+%%bucks%%$" + formattedBucks);
+            textDrawer.setText("+//bucks//$" + formattedBucks);
             textDrawer.setPos(new int[]{nums.getItemTextX(), nums.getItemBoxTwoY() + nums.getItemTextYOffset()});
             textDrawer.drawText();
         }

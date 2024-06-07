@@ -1,6 +1,8 @@
 package dev.boarbot.commands.boarmanage;
 
 import dev.boarbot.commands.Subcommand;
+import dev.boarbot.interactives.Interactive;
+import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.boarmanage.SetupInteractive;
 import dev.boarbot.util.generators.EmbedGenerator;
 import lombok.extern.log4j.Log4j2;
@@ -18,7 +20,7 @@ public class SetupSubcommand extends Subcommand {
     public void execute() {
         this.interaction.deferReply().setEphemeral(true).queue();
 
-        SetupInteractive interactive = new SetupInteractive(this.event);
+        Interactive interactive = InteractiveFactory.constructInteractive(this.event, SetupInteractive.class);
 
         EmbedGenerator embedGen = new EmbedGenerator(this.config.getStringConfig().getSetupUnfinished1());
         FileUpload embed;
@@ -33,6 +35,10 @@ public class SetupSubcommand extends Subcommand {
         MessageEditBuilder editedMsg = new MessageEditBuilder()
             .setFiles(embed)
             .setComponents(interactive.getCurComponents());
+
+        if (interactive.isStopped()) {
+            return;
+        }
 
         this.interaction.getHook().editOriginal(editedMsg.build()).queue();
     }

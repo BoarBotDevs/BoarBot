@@ -37,7 +37,6 @@ public class StringConfig {
     private String setupExpired = "";
     private String setupUnfinished1 = "";
     private String setupUnfinished2 = "";
-    private String setupFinished1 = "";
     private String setupFinished2 = "";
     private String setupInfoResponse1 = "";
     private String setupInfoResponse2 = "";
@@ -51,7 +50,8 @@ public class StringConfig {
     private String dailyBonus = "";
     private String dailyUsedNotify = "";
     private String dailyTitle = "";
-    private String extraTitle = "";
+    private String firstTitle = "";
+    private String firstBoarID = "";
     private String enhanceTitle = "";
     private String cloneTitle = "";
     private String dailyNoBoarFound = "";
@@ -209,6 +209,7 @@ public class StringConfig {
     private String notificationSuccessReply = "";
     private String notificationDailyReady = "";
     private String notificationStopStr = "";
+    private String notificationDisabledStr = "";
     private String[] notificationExtras = {};
     private String notificationServerPing = "";
 

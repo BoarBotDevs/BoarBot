@@ -1,13 +1,17 @@
 package dev.boarbot.commands.boar;
 
+import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserAction;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.interactives.boar.DailyInteractive;
+import dev.boarbot.interactives.Interactive;
+import dev.boarbot.interactives.InteractiveFactory;
+import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.generators.EmbedGenerator;
 import dev.boarbot.util.generators.ItemImageGenerator;
 import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.time.TimeUtil;
@@ -16,8 +20,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +30,8 @@ public class DailySubcommand extends Subcommand {
     private List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucksGotten = new ArrayList<>();
     private final List<Integer> boarEditions = new ArrayList<>();
+
+    private boolean notificationsOn = false;
 
     public DailySubcommand(SlashCommandInteractionEvent event) {
         super(event);
@@ -43,9 +49,32 @@ public class DailySubcommand extends Subcommand {
         boarUser.doSynchronizedAction(BoarUserAction.DAILY, this);
         boarUser.decRefs();
 
-        if (this.bucksGotten.isEmpty()) {
-            long nextDailyResetSecs = TimeUtil.getNextDailyResetMilli() / 1000;
-            this.interaction.getHook().editOriginal("Daily next available <t:%d:R>".formatted(nextDailyResetSecs)).queue();
+        if (this.boarIDs.isEmpty()) {
+            String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli());
+            dailyResetDistance = dailyResetDistance.substring(dailyResetDistance.indexOf(' ')+1);
+
+            String replyStr = this.config.getStringConfig().getDailyUsed().formatted(dailyResetDistance);
+
+            MessageEditBuilder editedMsg = new MessageEditBuilder();
+
+            if (!this.notificationsOn) {
+                Interactive interactive = InteractiveFactory.constructInteractive(
+                    this.event, DailyNotifyInteractive.class
+                );
+                editedMsg.setComponents(interactive.getCurComponents());
+
+                replyStr += " " + this.config.getStringConfig().getDailyUsedNotify();
+            }
+
+            try {
+                EmbedGenerator embedGen = new EmbedGenerator(replyStr);
+                editedMsg.setFiles(embedGen.generate());
+
+                this.interaction.getHook().editOriginal(editedMsg.build()).queue();
+            } catch (IOException exception) {
+                log.error("Failed to generate next daily reset image.", exception);
+            }
+
             return;
         }
 
@@ -55,6 +84,7 @@ public class DailySubcommand extends Subcommand {
     public void doDaily(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             if (!this.config.isUnlimitedBoars() && !boarUser.canUseDaily(connection)) {
+                this.notificationsOn = boarUser.getNotificationStatus(connection);
                 return;
             }
 
@@ -68,16 +98,15 @@ public class DailySubcommand extends Subcommand {
     }
 
     private void sendResponse() {
+        StringConfig strConfig = this.config.getStringConfig();
+
         List<ItemImageGenerator> itemGens = new ArrayList<>();
 
         for (int i=0; i<this.boarIDs.size(); i++) {
-            boolean isFirst = i == 0;
-            String title = "Extra Boar!";
+            String title = strConfig.getDailyTitle();
 
-            if (this.boarIDs.get(i).equals("bacteria")) {
-                title = "First Edition!";
-            } else if (isFirst) {
-                title = "Daily Boar!";
+            if (this.boarIDs.get(i).equals(strConfig.getFirstBoarID())) {
+                title = strConfig.getFirstTitle();
             }
 
             ItemImageGenerator boarItemGen = new ItemImageGenerator(
@@ -89,13 +118,17 @@ public class DailySubcommand extends Subcommand {
 
         try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
             if (itemGens.size() > 1) {
-                DailyInteractive interactive = new DailyInteractive(
+                Interactive interactive = InteractiveFactory.constructDailyInteractive(
                     this.event, itemGens, this.boarIDs, this.boarEditions
                 );
 
                 MessageEditBuilder editedMsg = new MessageEditBuilder()
                     .setFiles(imageToSend)
                     .setComponents(interactive.getCurComponents());
+
+                if (interactive.isStopped()) {
+                    return;
+                }
 
                 this.interaction.getHook().editOriginal(editedMsg.build()).complete();
 

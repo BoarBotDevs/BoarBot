@@ -88,7 +88,7 @@ public class BoarUser {
                         String rarityKey = BoarUtil.findRarityKey(boarID);
 
                         if (curEdition == 1 && this.config.getRarityConfigs().get(rarityKey).isGivesSpecial()) {
-                            this.addBacteria(newBoarIDs, connection, bucksGotten, boarEditions);
+                            this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions);
                         }
                     }
                 }
@@ -99,26 +99,31 @@ public class BoarUser {
         boarIDs.addAll(newBoarIDs);
     }
 
-    private void addBacteria(
+    private void addFirstBoar(
         List<String> newBoarIDs,
         Connection connection,
         List<Integer> bucksGotten,
         List<Integer> boarEditions
     ) throws SQLException {
-        String insertBacteriaQuery = """
+        String insertFirstQuery = """
             INSERT INTO collected_boars (user_id, boar_id, original_obtain_type)
             VALUES (?, ?, ?)
             RETURNING edition;
         """;
+        String firstBoarID = this.config.getStringConfig().getFirstBoarID();
 
-        try (PreparedStatement insertBacteriaStatement = connection.prepareStatement(insertBacteriaQuery)) {
-            insertBacteriaStatement.setString(1, this.userID);
-            insertBacteriaStatement.setString(2, "bacteria");
-            insertBacteriaStatement.setString(3, BoarObtainType.OTHER.toString());
+        if (!this.config.getItemConfig().getBoars().containsKey(firstBoarID)) {
+            return;
+        }
 
-            try (ResultSet results = insertBacteriaStatement.executeQuery()) {
+        try (PreparedStatement insertFirstStatement = connection.prepareStatement(insertFirstQuery)) {
+            insertFirstStatement.setString(1, this.userID);
+            insertFirstStatement.setString(2, firstBoarID);
+            insertFirstStatement.setString(3, BoarObtainType.OTHER.toString());
+
+            try (ResultSet results = insertFirstStatement.executeQuery()) {
                 if (results.next()) {
-                    newBoarIDs.add("bacteria");
+                    newBoarIDs.add(firstBoarID);
                     boarEditions.add(results.getInt("edition"));
                     bucksGotten.add(0);
                 }
@@ -180,6 +185,53 @@ public class BoarUser {
         }
 
         return multiplier;
+    }
+
+    public void enableNotifications(Connection connection, String channelID) throws SQLException {
+        String query = """
+            UPDATE users
+            SET notifications_on = true, notification_channel = ?
+            WHERE user_id = ?
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, channelID);
+            statement.setString(2, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public void disableNotifications(Connection connection) throws SQLException {
+        String query = """
+            UPDATE users
+            SET notifications_on = false, notification_channel = null
+            WHERE user_id = ?
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public boolean getNotificationStatus(Connection connection) throws SQLException {
+        String query = """
+            SELECT notifications_on
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return results.getBoolean("notifications_on");
+                }
+            }
+        }
+
+        return false;
     }
 
     public synchronized void incRefs() {

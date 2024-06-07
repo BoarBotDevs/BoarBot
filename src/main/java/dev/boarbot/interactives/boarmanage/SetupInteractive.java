@@ -85,7 +85,7 @@ public class SetupInteractive extends Interactive {
         Button nextBtn = ((Button) this.curComponents[1].getComponents().get(2)).withDisabled(false);
         this.curComponents[1].getComponents().set(2, nextBtn);
 
-        this.embedGen.setStr(strConfig.getSetupFinished2() + (this.isSb ? "%%green%%Yes" : "%%error%%No"));
+        this.embedGen.setStr(strConfig.getSetupFinished2() + (this.isSb ? "//green//Yes" : "//error//No"));
         this.embedGen.setColor(colorConfig.get("font"));
 
         this.editedMsg.setFiles(this.embedGen.generate()).setComponents(this.curComponents);
@@ -111,6 +111,11 @@ public class SetupInteractive extends Interactive {
             this.embedGen.setColor(colorConfig.get("font"));
 
             this.editedMsg.setFiles(this.embedGen.generate()).setComponents(this.curComponents);
+
+            if (this.isStopped) {
+                return;
+            }
+
             this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
 
             return;
@@ -141,6 +146,7 @@ public class SetupInteractive extends Interactive {
         StringConfig strConfig = this.config.getStringConfig();
         Map<String, String> colorConfig = this.config.getColorConfig();
         Interactive interactive = this.removeInteractive();
+        this.isStopped = true;
 
         if (interactive == null) {
             return;
@@ -191,6 +197,7 @@ public class SetupInteractive extends Interactive {
         this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
     }
 
+    @Override
     public ActionRow[] getCurComponents() {
         if (this.page == 0) {
             this.curComponents = getFirstComponents();

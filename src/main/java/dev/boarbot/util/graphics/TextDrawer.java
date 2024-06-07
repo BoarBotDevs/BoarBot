@@ -154,8 +154,8 @@ public class TextDrawer {
             char curChar = textArray[i];
 
             boolean inColorTag = startCurColorTag != -1;
-            boolean isStartColorTag = i < textArray.length-1 && curChar == '%' && textArray[i+1] == '%' && !inColorTag;
-            boolean isEndColorTag = i < textArray.length-1 && curChar == '%' && textArray[i+1] == '%' && inColorTag;
+            boolean isStartColorTag = i < textArray.length-1 && curChar == '/' && textArray[i+1] == '/' && !inColorTag;
+            boolean isEndColorTag = i < textArray.length-1 && curChar == '/' && textArray[i+1] == '/' && inColorTag;
 
             if (isStartColorTag) {
                 startCurColorTag = i += 2;

@@ -34,11 +34,11 @@ public final class ItemImageGrouper {
         String extension = itemGens.get(page).getFilePath().split("[.]")[1];
 
         if (page != 0) {
-            leftImageBytes = itemGens.get(page-1).generate();
+            leftImageBytes = itemGens.get(page-1).generate(true);
         }
 
         if (page != itemGens.size()-1) {
-            rightImageBytes = itemGens.get(page+1).generate();
+            rightImageBytes = itemGens.get(page+1).generate(true);
         }
 
         if (leftImageBytes == null && rightImageBytes == null) {

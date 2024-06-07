@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -25,8 +26,9 @@ public abstract class Interactive {
     protected long curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getCollectorIdle();
     protected long hardStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getCollectorHardStop();
     protected long lastEndTime = 0;
+    protected boolean isStopped = false;
 
-    public Interactive(SlashCommandInteractionEvent initEvent) {
+    protected Interactive(SlashCommandInteractionEvent initEvent) {
         this.initEvent = initEvent;
         this.interaction = initEvent.getInteraction();
         this.user = initEvent.getUser();
@@ -36,8 +38,8 @@ public abstract class Interactive {
         if (duplicateInteractiveKey != null) {
             try {
                 BoarBotApp.getBot().getInteractives().get(duplicateInteractiveKey).stop(StopType.EXPIRED);
-            } catch (IOException exception) {
-                log.error("Failed to create file from image data!", exception);
+            } catch (Exception exception) {
+                log.error("Something went wrong when terminating interactive!", exception);
                 return;
             }
         }
@@ -62,6 +64,7 @@ public abstract class Interactive {
     }
 
     public abstract void execute(GenericComponentInteractionCreateEvent compEvent);
+    public abstract ActionRow[] getCurComponents();
 
     private void tryStop(long waitTime) {
         try {
@@ -69,7 +72,7 @@ public abstract class Interactive {
         } catch (InterruptedException exception) {
             try {
                 this.stop(StopType.EXPIRED);
-            } catch (IOException ignored) {}
+            } catch (Exception ignored) {}
         }
 
         long curTime = TimeUtil.getCurMilli();
@@ -77,21 +80,26 @@ public abstract class Interactive {
         if (this.curStopTime <= curTime || this.hardStopTime <= curTime) {
             try {
                 this.stop(StopType.EXPIRED);
-            } catch (IOException ignored) {}
+            } catch (Exception ignored) {}
         } else {
             long newWaitTime = Math.min(this.curStopTime - curTime, this.hardStopTime - curTime);
             this.tryStop(newWaitTime);
         }
     }
 
-    public void stop(StopType type) throws IOException {
+    public void stop(StopType type) throws IOException, InterruptedException {
         Interactive interactive = this.removeInteractive();
+        this.isStopped = true;
 
         if (interactive == null) {
             return;
         }
 
         this.interaction.getHook().editOriginalComponents().complete();
+    }
+
+    public boolean isStopped() {
+        return this.isStopped;
     }
 
     public Interactive removeInteractive() {

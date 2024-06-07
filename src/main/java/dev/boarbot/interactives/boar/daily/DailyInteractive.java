@@ -1,4 +1,4 @@
-package dev.boarbot.interactives.boar;
+package dev.boarbot.interactives.boar.daily;
 
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
@@ -28,8 +28,11 @@ import java.util.Map;
 public class DailyInteractive extends Interactive {
     private int page = 0;
     private final List<ItemImageGenerator> itemGens;
-    private final List<SelectOption> selectableBoars = new ArrayList<>();
+    private List<SelectOption> selectableBoars;
     private ActionRow[] curComponents = new ActionRow[0];
+
+    private final List<String> boarIDs;
+    private final List<Integer> boarEditions;
 
     private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getDaily();
 
@@ -41,8 +44,15 @@ public class DailyInteractive extends Interactive {
     ) {
         super(initEvent);
         this.itemGens = itemGens;
+        this.boarIDs = boarIDs;
+        this.boarEditions = boarEditions;
 
+        this.makeSelectOptions(boarIDs, boarEditions);
+    }
+
+    private void makeSelectOptions(List<String> boarIDs, List<Integer> boarEditions) {
         Map<String, RarityConfig> rarityConfigs = this.config.getRarityConfigs();
+        List<SelectOption> selectableBoars = new ArrayList<>();
 
         for (int i=0; i<boarIDs.size(); i++) {
             RarityConfig rarityConfig = rarityConfigs.get(this.itemGens.get(i).getColorKey());
@@ -64,8 +74,10 @@ public class DailyInteractive extends Interactive {
                 .withEmoji(InteractiveUtil.parseEmoji(rarityConfig.getEmoji()))
                 .withDescription(description);
 
-            this.selectableBoars.add(boarOption);
+            selectableBoars.add(boarOption);
         }
+
+        this.selectableBoars = selectableBoars;
     }
 
     @Override
@@ -94,6 +106,10 @@ public class DailyInteractive extends Interactive {
                 .setFiles(imageToSend)
                 .setComponents(this.getCurComponents());
 
+            if (this.isStopped) {
+                return;
+            }
+
             this.interaction.getHook().editOriginal(editedMsg.build()).complete();
         } catch (Exception exception) {
             log.error("Failed to change daily boar page!", exception);
@@ -103,14 +119,33 @@ public class DailyInteractive extends Interactive {
     @Override
     public void stop(StopType type) {
         Interactive interactive = this.removeInteractive();
+        this.isStopped = true;
 
         if (interactive == null) {
             return;
         }
 
-        this.interaction.getHook().editOriginalComponents(this.curComponents[0]).complete();
+        if (this.curComponents.length == 0) {
+            this.makeSelectOptions(this.boarIDs, this.boarEditions);
+        }
+
+        if (this.interaction.getHook().retrieveOriginal().complete().isEdited()) {
+            this.interaction.getHook().editOriginalComponents(this.curComponents[0]).queue();
+            return;
+        }
+
+        try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {
+            MessageEditBuilder editedMsg = new MessageEditBuilder()
+                .setFiles(imageToSend)
+                .setComponents(this.getCurComponents()[0]);
+
+            this.interaction.getHook().editOriginal(editedMsg.build()).queue();
+        } catch (Exception exception) {
+            log.error("Failed to change daily boar page!", exception);
+        }
     }
 
+    @Override
     public ActionRow[] getCurComponents() {
         if (this.curComponents.length == 0) {
             this.curComponents = this.getComponents();
