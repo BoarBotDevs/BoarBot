@@ -43,32 +43,35 @@ public class StopMessageListener extends ListenerAdapter implements Runnable {
             return;
         }
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.event.getAuthor());
-        boolean notificationsOn = false;
+        try {
+            BoarUser boarUser = BoarUserFactory.getBoarUser(this.event.getAuthor());
+            boolean notificationsOn;
 
-        try (Connection connection = DataUtil.getConnection()) {
-            notificationsOn = boarUser.getNotificationStatus(connection);
-        } catch (SQLException exception) {
-            log.error("An error occurred while getting notification status.", exception);
-        }
-
-        if (!notificationsOn) {
-            return;
-        }
-
-        String[] words = this.event.getMessage().getContentDisplay().split(" ");
-
-        for (String word : words) {
-            if (word.trim().equalsIgnoreCase("stop")) {
-                try (Connection connection = DataUtil.getConnection()) {
-                    boarUser.disableNotifications(connection);
-                    this.event.getMessage().reply(this.config.getStringConfig().getNotificationDisabledStr()).queue();
-                } catch (SQLException exception) {
-                    log.error("An error occurred while disabling notifications.", exception);
-                }
-
-                break;
+            try (Connection connection = DataUtil.getConnection()) {
+                notificationsOn = boarUser.getNotificationStatus(connection);
             }
+
+            if (!notificationsOn) {
+                boarUser.decRefs();
+                return;
+            }
+
+            String[] words = this.event.getMessage().getContentDisplay().split(" ");
+
+            for (String word : words) {
+                if (word.trim().equalsIgnoreCase("stop")) {
+                    try (Connection connection = DataUtil.getConnection()) {
+                        boarUser.setNotifications(connection, null);
+                        boarUser.decRefs();
+
+                        this.event.getMessage().reply(this.config.getStringConfig().getNotificationDisabledStr()).queue();
+                    }
+
+                    break;
+                }
+            }
+        } catch (SQLException exception) {
+            log.error("An error occurred while trying to disable notifications.", exception);
         }
     }
 }

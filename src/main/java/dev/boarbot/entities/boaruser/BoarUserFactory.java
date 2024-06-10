@@ -2,21 +2,22 @@ package dev.boarbot.entities.boaruser;
 
 import net.dv8tion.jda.api.entities.User;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class BoarUserFactory {
     private final static Map<String, BoarUser> boarUsers = new HashMap<>();
 
-    public static BoarUser getBoarUser(User user) {
+    public static BoarUser getBoarUser(User user) throws SQLException {
         return BoarUserFactory.getBoarUser(user, user.getId());
     }
 
-    public static BoarUser getBoarUser(String userID) {
+    public static BoarUser getBoarUser(String userID) throws SQLException {
         return BoarUserFactory.getBoarUser(null, userID);
     }
 
-    private static synchronized BoarUser getBoarUser(User user, String userID) {
+    private static synchronized BoarUser getBoarUser(User user, String userID) throws SQLException {
         if (BoarUserFactory.boarUsers.containsKey(userID)) {
             BoarUser boarUser = BoarUserFactory.boarUsers.get(userID);
             boarUser.incRefs();

@@ -23,8 +23,8 @@ public abstract class Interactive {
     protected final SlashCommandInteraction interaction;
     protected final User user;
 
-    protected long curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getCollectorIdle();
-    protected long hardStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getCollectorHardStop();
+    protected long curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getInteractiveIdle();
+    protected long hardStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getInteractiveHardStop();
     protected long lastEndTime = 0;
     protected boolean isStopped = false;
 
@@ -47,7 +47,7 @@ public abstract class Interactive {
         BoarBotApp.getBot().getInteractives().put(this.interaction.getId() + this.user.getId(), this);
 
         Executors.newSingleThreadExecutor().submit(() -> this.tryStop(
-            this.config.getNumberConfig().getCollectorIdle()
+            this.config.getNumberConfig().getInteractiveIdle()
         ));
     }
 
@@ -56,7 +56,7 @@ public abstract class Interactive {
             return;
         }
 
-        this.curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getCollectorIdle();
+        this.curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getInteractiveIdle();
 
         this.execute(compEvent);
 
@@ -71,7 +71,9 @@ public abstract class Interactive {
             Thread.sleep(waitTime);
         } catch (InterruptedException exception) {
             try {
-                this.stop(StopType.EXPIRED);
+                if (!this.isStopped) {
+                    this.stop(StopType.EXPIRED);
+                }
             } catch (Exception ignored) {}
         }
 
@@ -79,7 +81,9 @@ public abstract class Interactive {
 
         if (this.curStopTime <= curTime || this.hardStopTime <= curTime) {
             try {
-                this.stop(StopType.EXPIRED);
+                if (!this.isStopped) {
+                    this.stop(StopType.EXPIRED);
+                }
             } catch (Exception ignored) {}
         } else {
             long newWaitTime = Math.min(this.curStopTime - curTime, this.hardStopTime - curTime);

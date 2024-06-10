@@ -19,6 +19,7 @@ public class DataUtil {
 
     static {
         hikariConfig.setJdbcUrl("jdbc:mariadb://localhost:3306/boarbot");
+        hikariConfig.setMaximumPoolSize(50);
         hikariConfig.setUsername(DataUtil.env.get("DB_USER"));
         hikariConfig.setPassword(DataUtil.env.get("DB_PASS"));
         ds = new HikariDataSource(hikariConfig);

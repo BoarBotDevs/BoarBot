@@ -43,7 +43,9 @@ public class StringConfig {
 
     // Daily command messages/strings
 
-    private String dailyPowUsed = "";
+    private String dailyPow = "";
+    private String dailyPowAttempt = "";
+    private String dailyPowInvalid = "";
     private String dailyPowFailed = "";
     private String dailyUsed = "";
     private String dailyFirstTime = "";
@@ -235,6 +237,9 @@ public class StringConfig {
 
     // Miscellaneous strings
 
+    private String multiplierName = "";
+    private String multiplierPluralName = "";
+    private String multiplierSymbol = "";
     private String noParentChannel = "";
     private String notValidChannel = "";
     private String defaultSelectPlaceholder = "";

@@ -3,6 +3,7 @@ package dev.boarbot.bot.config;
 import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.components.ComponentConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
+import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import lombok.Getter;
 import lombok.Setter;
@@ -106,6 +107,11 @@ public class BotConfig {
      * Collection of component configurations the bot uses
      */
     private ComponentConfig componentConfig = new ComponentConfig();
+
+    /**
+     * Collection of modal configurations the bot uses
+     */
+    private Map<String, ModalConfig> modalConfig = new HashMap<>();
 
     /**
      * Collection of sets of item configurations

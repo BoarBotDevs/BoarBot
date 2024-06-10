@@ -53,8 +53,8 @@ public class NumberConfig {
 
     // Time constants
 
-    private int collectorIdle = 0;
-    private int collectorHardStop = 0;
+    private int interactiveIdle = 0;
+    private int interactiveHardStop = 0;
     private int orderExpire = 0;
     private int openDelay = 0; // Cooldown for opening gifts
     private int oneDay = 0;

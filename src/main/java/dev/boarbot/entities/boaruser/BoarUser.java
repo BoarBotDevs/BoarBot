@@ -2,9 +2,9 @@ package dev.boarbot.entities.boaruser;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.commands.boar.DailySubcommand;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -23,11 +23,12 @@ public class BoarUser {
     private boolean alreadyAdded = false;
     private boolean isFirstDaily = false;
 
-    private volatile int numRefs = 1;
+    private volatile int numRefs = 0;
 
-    public BoarUser(User user) {
+    public BoarUser(User user) throws SQLException {
         this.user = user;
         this.userID = user.getId();
+        this.incRefs();
     }
 
     private void addUser(Connection connection) throws SQLException {
@@ -48,10 +49,45 @@ public class BoarUser {
         this.alreadyAdded = true;
     }
 
-    public synchronized void doSynchronizedAction(BoarUserAction action, Object callingObject) {
-        switch (action) {
-            case BoarUserAction.DAILY -> ((DailySubcommand) callingObject).doDaily(this);
+    private synchronized void updateUser(Connection connection) throws SQLException {
+        String query = """
+            SELECT last_daily_timestamp
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        boolean resetStreak = false;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
+
+                    resetStreak = lastDailyTimestamp != null && lastDailyTimestamp.before(
+                        new Timestamp(TimeUtil.getLastDailyResetMilli() - this.config.getNumberConfig().getOneDay())
+                    );
+                }
+            }
         }
+
+        if (resetStreak) {
+            query = """
+                UPDATE users
+                SET boar_streak = 0
+                WHERE user_id = ?
+            """;
+
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, this.userID);
+                statement.executeUpdate();
+            }
+        }
+    }
+
+    public synchronized void passSynchronizedAction(Synchronizable callingObject) {
+        callingObject.doSynchronizedAction(this);
     }
 
     public void addBoars(
@@ -64,6 +100,11 @@ public class BoarUser {
         this.addUser(connection);
 
         List<String> newBoarIDs = new ArrayList<>();
+
+        if (this.isFirstDaily) {
+            this.giveFirstBonus(connection);
+        }
+        this.isFirstDaily = false;
 
         for (String boarID : boarIDs) {
             String boarAddQuery = """
@@ -158,32 +199,50 @@ public class BoarUser {
             }
         }
 
-        if (this.isFirstDaily) {
-            String firstDailyQuery = """
-                INSERT IGNORE INTO collected_powerups (user_id, powerup_id)
-                VALUES (?, ?)
-            """;
-
-            try (PreparedStatement statement = connection.prepareStatement(firstDailyQuery)) {
-                statement.setString(1, this.userID);
-                statement.setString(2, "miracle");
-                statement.execute();
-            }
-
-            firstDailyQuery = """
-                UPDATE collected_powerups
-                SET amount = amount + 5
-                WHERE user_id = ? AND powerup_id = ?;
-            """;
-
-            try (PreparedStatement statement = connection.prepareStatement(firstDailyQuery)) {
-                statement.setString(1, this.userID);
-                statement.setString(2, "miracle");
-                statement.execute();
-            }
-        }
-
         return canUseDaily;
+    }
+
+    private void giveFirstBonus(Connection connection) throws SQLException {
+        this.insertPowerupIfNotExist(connection, "miracle");
+        this.insertPowerupIfNotExist(connection, "gift");
+
+        String updateQuery = """
+            UPDATE collected_powerups
+            SET amount = CASE
+                WHEN powerup_id = ? THEN amount + 5
+                WHEN powerup_id = ? THEN amount + 1
+            END
+            WHERE user_id = ? AND powerup_id IN (?, ?);
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setString(1, "miracle");
+            statement.setString(2, "gift");
+            statement.setString(3, this.userID);
+            statement.setString(4, "miracle");
+            statement.setString(5, "gift");
+            statement.execute();
+        }
+    }
+
+    private void insertPowerupIfNotExist(Connection connection, String powerupID) throws SQLException {
+        String query = """
+            INSERT INTO collected_powerups (user_id, powerup_id)
+            SELECT ?, ?
+            WHERE NOT EXISTS (
+                SELECT unique_id
+                FROM collected_powerups
+                WHERE user_id = ? AND powerup_id = ?
+            );
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+            statement.setString(2, powerupID);
+            statement.setString(3, this.userID);
+            statement.setString(4, powerupID);
+            statement.execute();
+        }
     }
 
     public boolean isFirstDaily() {
@@ -191,6 +250,10 @@ public class BoarUser {
     }
 
     public long getMultiplier(Connection connection) throws SQLException {
+        return this.getMultiplier(connection, 0);
+    }
+
+    public long getMultiplier(Connection connection, int extraActive) throws SQLException {
         long multiplier = 0;
 
         String multiplierQuery = """
@@ -205,14 +268,21 @@ public class BoarUser {
             try (ResultSet results = multiplierStatement.executeQuery()) {
                 if (results.next()) {
                     int miraclesActive = results.getInt("miracles_active");
-
                     multiplier = results.getLong("multiplier");
+                    int miracleIncreaseMax = this.config.getNumberConfig().getMiracleIncreaseMax();
 
-                    for (int i=0; i<miraclesActive; i++) {
-                        multiplier += (long) Math.min(
-                            Math.ceil(multiplier * 0.1), this.config.getNumberConfig().getMiracleIncreaseMax()
-                        );
+                    int activesLeft = miraclesActive+extraActive;
+                    for (; activesLeft>0; activesLeft--) {
+                        long amountToAdd = (long) Math.min(Math.ceil(multiplier * 0.1), miracleIncreaseMax);
+
+                        if (amountToAdd == this.config.getNumberConfig().getMiracleIncreaseMax()) {
+                            break;
+                        }
+
+                        multiplier += amountToAdd;
                     }
+
+                    multiplier += (long) activesLeft * miracleIncreaseMax;
                 }
             }
         }
@@ -220,29 +290,17 @@ public class BoarUser {
         return multiplier;
     }
 
-    public void enableNotifications(Connection connection, String channelID) throws SQLException {
+    public void setNotifications(Connection connection, String channelID) throws SQLException {
         String query = """
             UPDATE users
-            SET notifications_on = true, notification_channel = ?
+            SET notifications_on = ?, notification_channel = ?
             WHERE user_id = ?
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, channelID);
-            statement.setString(2, this.userID);
-            statement.executeUpdate();
-        }
-    }
-
-    public void disableNotifications(Connection connection) throws SQLException {
-        String query = """
-            UPDATE users
-            SET notifications_on = false, notification_channel = null
-            WHERE user_id = ?
-        """;
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, this.userID);
+            statement.setBoolean(1, channelID != null);
+            statement.setString(2, channelID);
+            statement.setString(3, this.userID);
             statement.executeUpdate();
         }
     }
@@ -267,8 +325,80 @@ public class BoarUser {
         return false;
     }
 
-    public synchronized void incRefs() {
+    public int getPowerupAmount(Connection connection, String powerupID) throws SQLException {
+        String query = """
+            SELECT amount
+            FROM collected_powerups
+            WHERE user_id = ? AND powerup_id = ?;
+        """;
+
+        int amount = 0;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+            statement.setString(2, powerupID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    amount = results.getInt("amount");
+                }
+            }
+        }
+
+        return amount;
+    }
+
+    public void usePowerup(Connection connection, String powerupID, int amount) throws SQLException {
+        String query = """
+            UPDATE collected_powerups
+            SET amount = amount - ?, amount_used = amount_used + ?
+            WHERE user_id = ? AND powerup_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, amount);
+            statement.setInt(2, amount);
+            statement.setString(3, this.userID);
+            statement.setString(4, powerupID);
+            statement.executeUpdate();
+        }
+    }
+
+    public void activateMiracles(Connection connection, int amount) throws SQLException {
+        String query = """
+            UPDATE users
+            SET miracles_active = miracles_active + ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, amount);
+            statement.setString(2, this.userID);
+            statement.executeUpdate();
+        }
+
+        this.usePowerup(connection, "miracle", amount);
+    }
+
+    public void useActiveMiracles(Connection connection) throws SQLException {
+        String query = """
+            UPDATE users
+            SET miracles_active = 0
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public synchronized void incRefs() throws SQLException {
         this.numRefs++;
+
+        try (Connection connection = DataUtil.getConnection()) {
+            this.updateUser(connection);
+        }
     }
 
     public synchronized void decRefs() {

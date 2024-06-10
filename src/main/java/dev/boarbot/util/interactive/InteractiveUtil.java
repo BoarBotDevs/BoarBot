@@ -2,6 +2,7 @@ package dev.boarbot.util.interactive;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
+import dev.boarbot.bot.config.components.SelectOptionConfig;
 import dev.boarbot.interactives.Interactive;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -10,9 +11,13 @@ import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 import net.dv8tion.jda.internal.interactions.component.EntitySelectMenuImpl;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
+import net.dv8tion.jda.internal.interactions.component.TextInputImpl;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -21,6 +26,14 @@ import java.util.List;
 public final class InteractiveUtil {
     public static List<ItemComponent> makeComponents(String id, IndivComponentConfig... components) {
         return InteractiveUtil.makeComponents(id, "", components);
+    }
+
+    public static List<ItemComponent> makeComponents(String id, List<IndivComponentConfig> components) {
+        return InteractiveUtil.makeComponents(id, "", components.toArray(new IndivComponentConfig[0]));
+    }
+
+    public static List<ItemComponent> makeComponents(String id, String extra, List<IndivComponentConfig> components) {
+        return InteractiveUtil.makeComponents(id, extra, components.toArray(new IndivComponentConfig[0]));
     }
 
     public static List<ItemComponent> makeComponents(String id, String extra, IndivComponentConfig... components) {
@@ -33,41 +46,73 @@ public final class InteractiveUtil {
         for (IndivComponentConfig component : components) {
             String newCustomID = id + "," + component.getCustom_id() + extra;
 
-            if (component.getType() == 2) {
-                Button btn = new ButtonImpl(
-                    newCustomID,
-                    component.getLabel(),
-                    ButtonStyle.fromKey(component.getStyle()),
-                    component.getUrl(),
-                    component.isDisabled(),
-                    InteractiveUtil.parseEmoji(component.getEmoji())
-                );
+            switch (component.getType()) {
+                case 2 -> {
+                    Button btn = new ButtonImpl(
+                        newCustomID,
+                        component.getLabel(),
+                        ButtonStyle.fromKey(component.getStyle()),
+                        component.getUrl(),
+                        component.isDisabled(),
+                        InteractiveUtil.parseEmoji(component.getEmoji())
+                    );
 
-                madeComponents.add(btn);
-            } else if (component.getType() == 3) {
-                SelectMenu select = new StringSelectMenuImpl(
-                    newCustomID,
-                    component.getPlaceholder(),
-                    component.getMin_values(),
-                    component.getMax_values(),
-                    component.isDisabled(),
-                    component.getOptions()
-                );
+                    madeComponents.add(btn);
+                }
 
-                madeComponents.add(select);
-            } else if (component.getType() == 8) {
-                SelectMenu select = new EntitySelectMenuImpl(
-                    newCustomID,
-                    component.getPlaceholder(),
-                    component.getMin_values(),
-                    component.getMax_values(),
-                    component.isDisabled(),
-                    Component.Type.CHANNEL_SELECT,
-                    EnumSet.of(ChannelType.TEXT),
-                    new ArrayList<>()
-                );
+                case 3 -> {
+                    List<SelectOption> selectOptions = new ArrayList<>();
 
-                madeComponents.add(select);
+                    if (component.getOptions() != null) {
+                        for (SelectOptionConfig option : component.getOptions()) {
+                            SelectOption newOption = SelectOption.of(option.getLabel(), option.getValue())
+                                .withEmoji(InteractiveUtil.parseEmoji(option.getEmoji()))
+                                .withDescription(option.getDescription());
+                            selectOptions.add(newOption);
+                        }
+                    }
+
+                    SelectMenu select = new StringSelectMenuImpl(
+                        newCustomID,
+                        component.getPlaceholder(),
+                        component.getMin_values(),
+                        component.getMax_values(),
+                        component.isDisabled(),
+                        selectOptions
+                    );
+
+                    madeComponents.add(select);
+                }
+
+                case 4 -> {
+                    TextInput textInput = new TextInputImpl(
+                        component.getCustom_id(),
+                        TextInputStyle.fromKey(component.getStyle()),
+                        component.getLabel(),
+                        component.getMin_length(),
+                        component.getMax_length(),
+                        component.getRequired(),
+                        component.getValue(),
+                        component.getPlaceholder()
+                    );
+
+                    madeComponents.add(textInput);
+                }
+
+                case 8 -> {
+                    SelectMenu select = new EntitySelectMenuImpl(
+                        newCustomID,
+                        component.getPlaceholder(),
+                        component.getMin_values(),
+                        component.getMax_values(),
+                        component.isDisabled(),
+                        Component.Type.CHANNEL_SELECT,
+                        EnumSet.of(ChannelType.TEXT),
+                        new ArrayList<>()
+                    );
+
+                    madeComponents.add(select);
+                }
             }
         }
 

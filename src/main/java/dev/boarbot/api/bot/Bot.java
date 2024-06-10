@@ -4,6 +4,7 @@ import dev.boarbot.bot.BotType;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
+import dev.boarbot.modals.ModalHandler;
 import net.dv8tion.jda.api.JDA;
 
 import java.awt.*;
@@ -22,4 +23,5 @@ public interface Bot {
     void registerSubcommands();
     Map<String, Constructor<? extends Subcommand>> getSubcommands();
     Map<String, Interactive> getInteractives();
+    Map<String, ModalHandler> getModalHandlers();
 }

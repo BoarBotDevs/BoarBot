@@ -3,8 +3,8 @@ package dev.boarbot.commands.boar;
 import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
-import dev.boarbot.entities.boaruser.BoarUserAction;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
+import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
@@ -26,13 +26,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
-public class DailySubcommand extends Subcommand {
+public class DailySubcommand extends Subcommand implements Synchronizable {
     private List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucksGotten = new ArrayList<>();
     private final List<Integer> boarEditions = new ArrayList<>();
 
+    private boolean canDaily = true;
     private boolean notificationsOn = false;
     private boolean isFirstDaily = false;
+    private boolean hasDonePowerup = false;
 
     public DailySubcommand(SlashCommandInteractionEvent event) {
         super(event);
@@ -44,13 +46,18 @@ public class DailySubcommand extends Subcommand {
             return;
         }
 
-        this.interaction.deferReply().queue();
+        try {
+            BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
+            boarUser.passSynchronizedAction(this);
+            boarUser.decRefs();
+        } catch (SQLException exception) {
+            log.error("Failed to get boar user", exception);
+            return;
+        }
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-        boarUser.doSynchronizedAction(BoarUserAction.DAILY, this);
-        boarUser.decRefs();
+        if (!this.canDaily) {
+            this.interaction.deferReply().setEphemeral(true).queue();
 
-        if (this.boarIDs.isEmpty()) {
             String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli());
             dailyResetDistance = dailyResetDistance.substring(dailyResetDistance.indexOf(' ')+1);
 
@@ -79,14 +86,28 @@ public class DailySubcommand extends Subcommand {
             return;
         }
 
-        this.sendResponse();
+        if (!this.boarIDs.isEmpty()) {
+            this.sendResponse();
+        }
     }
 
-    public void doDaily(BoarUser boarUser) {
+    @Override
+    public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             if (!this.config.isUnlimitedBoars() && !boarUser.canUseDaily(connection)) {
+                this.canDaily = false;
                 this.notificationsOn = boarUser.getNotificationStatus(connection);
                 return;
+            }
+
+            if (!this.hasDonePowerup && this.event.getOption("powerup") != null) {
+                this.hasDonePowerup = true;
+                this.sendPowResponse();
+                return;
+            }
+
+            if (!this.hasDonePowerup) {
+                this.interaction.deferReply().complete();
             }
 
             this.isFirstDaily = boarUser.isFirstDaily();
@@ -95,12 +116,50 @@ public class DailySubcommand extends Subcommand {
             this.boarIDs = BoarUtil.getRandBoarIDs(multiplier, this.interaction.getGuild().getId(), connection);
 
             boarUser.addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
+            boarUser.useActiveMiracles(connection);
         } catch (SQLException exception) {
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
         }
     }
 
     private void sendResponse() {
+        List<ItemImageGenerator> itemGens = getItemImageGenerators();
+        MessageEditBuilder editedMsg = new MessageEditBuilder();
+
+        try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
+            editedMsg.setFiles(imageToSend);
+
+            if (itemGens.size() > 1) {
+                Interactive interactive = InteractiveFactory.constructDailyInteractive(
+                    this.event, itemGens, this.boarIDs, this.boarEditions
+                );
+
+                editedMsg.setComponents(interactive.getCurComponents());
+
+                if (interactive.isStopped()) {
+                    return;
+                }
+            } else {
+                editedMsg.setComponents();
+            }
+
+            this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+        } catch (Exception exception) {
+            log.error("Failed to send daily boar response!", exception);
+        }
+
+        if (this.isFirstDaily) {
+            try {
+                EmbedGenerator embedGen = new EmbedGenerator(this.config.getStringConfig().getDailyFirstTime());
+
+                this.interaction.getHook().sendFiles(embedGen.generate()).setEphemeral(true).complete();
+            } catch (IOException exception) {
+                log.error("Failed to generate first daily reward image.", exception);
+            }
+        }
+    }
+
+    private List<ItemImageGenerator> getItemImageGenerators() {
         StringConfig strConfig = this.config.getStringConfig();
 
         List<ItemImageGenerator> itemGens = new ArrayList<>();
@@ -118,37 +177,28 @@ public class DailySubcommand extends Subcommand {
 
             itemGens.add(boarItemGen);
         }
+        return itemGens;
+    }
 
-        try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
-            if (itemGens.size() > 1) {
-                Interactive interactive = InteractiveFactory.constructDailyInteractive(
-                    this.event, itemGens, this.boarIDs, this.boarEditions
-                );
+    private void sendPowResponse() {
+        this.interaction.deferReply().complete();
 
-                MessageEditBuilder editedMsg = new MessageEditBuilder()
-                    .setFiles(imageToSend)
-                    .setComponents(interactive.getCurComponents());
+        try {
+            EmbedGenerator embedGen = new EmbedGenerator(this.config.getStringConfig().getDailyPow());
 
-                if (interactive.isStopped()) {
-                    return;
-                }
+            Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
 
-                this.interaction.getHook().editOriginal(editedMsg.build()).complete();
-            } else {
-                this.interaction.getHook().editOriginalAttachments(imageToSend).complete();
+            MessageEditBuilder editedMsg = new MessageEditBuilder()
+                .setFiles(embedGen.generate())
+                .setComponents(interactive.getCurComponents());
+
+            if (interactive.isStopped()) {
+                return;
             }
-        } catch (Exception exception) {
-            log.error("Failed to send daily boar response!", exception);
-        }
 
-        if (this.isFirstDaily) {
-            try {
-                EmbedGenerator embedGen = new EmbedGenerator(this.config.getStringConfig().getDailyFirstTime());
-
-                this.interaction.getHook().sendFiles(embedGen.generate()).complete();
-            } catch (IOException exception) {
-                log.error("Failed to generate first daily reward image.", exception);
-            }
+            this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+        } catch (IOException exception) {
+            log.error("Failed to generate powerup use image.", exception);
         }
     }
 }

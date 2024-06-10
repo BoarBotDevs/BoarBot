@@ -62,7 +62,8 @@ public class DailyNotifyInteractive extends Interactive {
 
             try (Connection connection = DataUtil.getConnection()) {
                 BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
-                boarUser.enableNotifications(connection, compEvent.getChannelId());
+                boarUser.setNotifications(connection, compEvent.getChannelId());
+                boarUser.decRefs();
             }
         } catch (IOException exception) {
             log.error(

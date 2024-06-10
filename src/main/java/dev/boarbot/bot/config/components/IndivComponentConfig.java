@@ -3,7 +3,6 @@ package dev.boarbot.bot.config.components;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 
 import java.util.List;
 
@@ -12,18 +11,30 @@ import java.util.List;
 @ToString
 public class IndivComponentConfig {
     private int type = 2;
-    private String custom_id;
-    private boolean disabled = false;
 
     // Select menus
-    private String placeholder;
     private Integer min_values;
     private Integer max_values;
-    private List<SelectOption> options;
+    private List<SelectOptionConfig> options;
 
     // Buttons
     private String label;
-    private Integer style;
     private String url;
     private String emoji;
+
+    // Select menus/Buttons
+    private String custom_id;
+    private boolean disabled = false;
+
+    // Text inputs
+    private Integer min_length = 0;
+    private Integer max_length = 4000;
+    private Boolean required = true;
+    private String value;
+
+    // Text inputs/Buttons
+    private Integer style;
+
+    // Text inputs/Select menus
+    private String placeholder;
 }

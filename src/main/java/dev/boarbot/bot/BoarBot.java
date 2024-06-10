@@ -10,7 +10,9 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.CommandListener;
 import dev.boarbot.listeners.ComponentListener;
+import dev.boarbot.listeners.ModalListener;
 import dev.boarbot.listeners.StopMessageListener;
+import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -45,6 +47,7 @@ public class BoarBot implements Bot {
 
     private final Map<String, Constructor<? extends Subcommand>> subcommands = new HashMap<>();
     private final Map<String, Interactive> interactives = new HashMap<>();
+    private final Map<String, ModalHandler> modalHandlers = new HashMap<>();
 
     private BotType botType;
 
@@ -55,7 +58,9 @@ public class BoarBot implements Bot {
         loadConfig();
 
         this.jda = JDABuilder.createDefault(this.env.get("TOKEN"))
-            .addEventListeners(new StopMessageListener(), new CommandListener(), new ComponentListener())
+            .addEventListeners(
+                new StopMessageListener(), new CommandListener(), new ComponentListener(), new ModalListener()
+            )
             .setActivity(Activity.customStatus("/boar help | boarbot.dev"))
             .build();
 
@@ -263,4 +268,7 @@ public class BoarBot implements Bot {
     public Map<String, Interactive> getInteractives() {
         return this.interactives;
     }
+
+    @Override
+    public Map<String, ModalHandler> getModalHandlers() { return this.modalHandlers; }
 }

@@ -50,7 +50,7 @@ public abstract class Subcommand {
             }
 
             if (!isValidChannel) {
-                embedGen.setStr(this.config.getStringConfig().getNotValidChannel());
+                embedGen.setStr(this.config.getStringConfig().getWrongChannel());
                 this.interaction.replyFiles(embedGen.generate()).setEphemeral(true).queue();
                 return false;
             }
