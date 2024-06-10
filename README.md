@@ -17,8 +17,8 @@
     <a href="https://maven.apache.org/">
         <img src="https://img.shields.io/badge/apache-maven-orange.svg" alt="node.js">
     </a>
-    <a href="https://github.com/BoarBotDevs/BoarBot/main">
-        <img src="https://img.shields.io/github/last-commit/WeslayCodes/BoarBot/main?logo=github&label=last%20release" alt="Last Release Date">
+    <a href="https://github.com/BoarBotDevs/BoarBotJE/main">
+        <img src="https://img.shields.io/github/last-commit/BoarBotDevs/BoarBotJE/main?logo=github&label=last%20release" alt="Last Release Date">
     </a>
 </p>
 
