@@ -1,6 +1,8 @@
 package dev.boarbot.interactives;
 
 import dev.boarbot.commands.boar.DailySubcommand;
+import dev.boarbot.interactives.boar.collection.CollectionInteractive;
+import dev.boarbot.interactives.boar.collection.CollectionView;
 import dev.boarbot.interactives.boar.daily.DailyInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.interactives.boar.daily.DailyPowerupInteractive;
@@ -36,5 +38,11 @@ public class InteractiveFactory {
         SlashCommandInteractionEvent initEvent, DailySubcommand callingObj
     ) {
         return new DailyPowerupInteractive(initEvent, callingObj);
+    }
+
+    public static synchronized Interactive constructCollectionInteractive(
+        SlashCommandInteractionEvent initEvent, CollectionView curView
+    ) {
+        return new CollectionInteractive(initEvent, curView);
     }
 }

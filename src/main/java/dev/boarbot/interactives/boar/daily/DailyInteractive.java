@@ -82,23 +82,24 @@ public class DailyInteractive extends Interactive {
 
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
-        compEvent.deferEdit().queue();
+        if (compEvent != null) {
+            compEvent.deferEdit().queue();
 
-        if (!this.initEvent.getUser().getId().equals(compEvent.getUser().getId())) {
-            return;
-        }
+            if (!this.initEvent.getUser().getId().equals(compEvent.getUser().getId())) {
+                return;
+            }
 
-        String compID = compEvent.getComponentId().split(",")[1];
+            String compID = compEvent.getComponentId().split(",")[1];
 
-        switch (compID) {
-            case "BOAR_SELECT" -> this.page = Integer.parseInt(
-                ((StringSelectInteractionEvent) compEvent).getValues().getFirst()
-            );
-            case "LEFT_FULL" -> this.page = 0;
-            case "LEFT" -> this.page--;
-
-            case "RIGHT" -> this.page++;
-            case "RIGHT_FULL" -> this.page = this.itemGens.size()-1;
+            switch (compID) {
+                case "BOAR_SELECT" -> this.page = Integer.parseInt(
+                    ((StringSelectInteractionEvent) compEvent).getValues().getFirst()
+                );
+                case "LEFT_FULL" -> this.page = 0;
+                case "LEFT" -> this.page--;
+                case "RIGHT" -> this.page++;
+                case "RIGHT_FULL" -> this.page = this.itemGens.size()-1;
+            }
         }
 
         try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {

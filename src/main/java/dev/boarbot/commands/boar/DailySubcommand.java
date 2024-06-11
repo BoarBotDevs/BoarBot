@@ -124,34 +124,27 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
     private void sendResponse() {
         List<ItemImageGenerator> itemGens = getItemImageGenerators();
-        MessageEditBuilder editedMsg = new MessageEditBuilder();
 
-        try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
-            editedMsg.setFiles(imageToSend);
+        if (itemGens.size() > 1) {
+            Interactive interactive = InteractiveFactory.constructDailyInteractive(
+                this.event, itemGens, this.boarIDs, this.boarEditions
+            );
+            interactive.execute(null);
+        } else {
+            try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
+                MessageEditBuilder editedMsg = new MessageEditBuilder()
+                    .setFiles(imageToSend)
+                    .setComponents();
 
-            if (itemGens.size() > 1) {
-                Interactive interactive = InteractiveFactory.constructDailyInteractive(
-                    this.event, itemGens, this.boarIDs, this.boarEditions
-                );
-
-                editedMsg.setComponents(interactive.getCurComponents());
-
-                if (interactive.isStopped()) {
-                    return;
-                }
-            } else {
-                editedMsg.setComponents();
+                this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+            } catch (Exception exception) {
+                log.error("Failed to send daily boar response!", exception);
             }
-
-            this.interaction.getHook().editOriginal(editedMsg.build()).complete();
-        } catch (Exception exception) {
-            log.error("Failed to send daily boar response!", exception);
         }
 
         if (this.isFirstDaily) {
             try {
                 EmbedGenerator embedGen = new EmbedGenerator(this.config.getStringConfig().getDailyFirstTime());
-
                 this.interaction.getHook().sendFiles(embedGen.generate()).setEphemeral(true).complete();
             } catch (IOException exception) {
                 log.error("Failed to generate first daily reward image.", exception);

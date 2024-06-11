@@ -10,6 +10,6 @@ import lombok.ToString;
 public class SelectOptionConfig {
     private String label = "";
     private String value = "";
-    private String emoji = "";
-    private String description = "";
+    private String emoji;
+    private String description;
 }
