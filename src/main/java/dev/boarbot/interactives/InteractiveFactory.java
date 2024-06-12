@@ -1,8 +1,8 @@
 package dev.boarbot.interactives;
 
 import dev.boarbot.commands.boar.DailySubcommand;
-import dev.boarbot.interactives.boar.collection.CollectionInteractive;
-import dev.boarbot.interactives.boar.collection.CollectionView;
+import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
+import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
 import dev.boarbot.interactives.boar.daily.DailyInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.interactives.boar.daily.DailyPowerupInteractive;
@@ -10,6 +10,7 @@ import dev.boarbot.interactives.boarmanage.SetupInteractive;
 import dev.boarbot.util.generators.ItemImageGenerator;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class InteractiveFactory {
@@ -40,9 +41,9 @@ public class InteractiveFactory {
         return new DailyPowerupInteractive(initEvent, callingObj);
     }
 
-    public static synchronized Interactive constructCollectionInteractive(
-        SlashCommandInteractionEvent initEvent, CollectionView curView
-    ) {
-        return new CollectionInteractive(initEvent, curView);
+    public static synchronized Interactive constructMegaMenuInteractive(
+        SlashCommandInteractionEvent initEvent, MegaMenuView curView
+    ) throws SQLException {
+        return new MegaMenuInteractive(initEvent, curView);
     }
 }

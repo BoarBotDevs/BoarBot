@@ -15,9 +15,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class NumberConfig {
-    // First pixel of an image location
-    private int[] originPos = {0, 0};
-
     // Font sizes
 
     private int fontHuge = 0;

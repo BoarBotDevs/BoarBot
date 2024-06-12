@@ -1,16 +1,17 @@
-package dev.boarbot.interactives.boar.collection;
+package dev.boarbot.interactives.boar.megamenu;
 
-public enum CollectionView {
+public enum MegaMenuView {
     PROFILE("profile"),
     COLLECTION("collection"),
     COMPENDIUM("compendium"),
     STATS("stats"),
     POWERUPS("powerups"),
-    QUESTS("quests");
+    QUESTS("quests"),
+    BADGES("badges");
 
     private final String type;
 
-    CollectionView(final String type) {
+    MegaMenuView(final String type) {
         this.type = type;
     }
 

@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.User;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class BoarUser {
@@ -84,6 +85,27 @@ public class BoarUser {
                 statement.executeUpdate();
             }
         }
+    }
+
+    public long getLastChanged(Connection connection) throws SQLException {
+        long lastChangedTimestamp = 0;
+        String query = """
+            SELECT last_changed_timestamp
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    lastChangedTimestamp = results.getTimestamp("last_changed_timestamp").getTime();
+                }
+            }
+        }
+
+        return lastChangedTimestamp;
     }
 
     public synchronized void passSynchronizedAction(Synchronizable callingObject) {
@@ -173,6 +195,47 @@ public class BoarUser {
         }
     }
 
+    public Map<String, BoarInfo> getBoarInfo(Connection connection) throws SQLException {
+        Map<String, BoarInfo> boarInfo = new HashMap<>();
+        String query = """
+            SELECT
+                collected_boars.boar_id,
+                COUNT(*) AS amount,
+                rarity_id,
+                MIN(obtained_timestamp) AS first_obtained,
+                MAX(obtained_timestamp) AS last_obtained
+            FROM collected_boars, boars_info
+            WHERE user_id = ? AND collected_boars.boar_id = boars_info.boar_id
+            GROUP BY boar_id;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    boarInfo.put(results.getString("boar_id"), new BoarInfo(
+                        results.getInt("amount"),
+                        results.getString("rarity_id"),
+                        results.getTimestamp("first_obtained").getTime(),
+                        results.getTimestamp("last_obtained").getTime()
+                    ));
+                }
+            }
+        }
+
+        boarInfo = boarInfo.entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByValue())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (oldValue, newValue) -> oldValue, LinkedHashMap::new
+            ));
+
+        return boarInfo;
+    }
+
     public boolean canUseDaily(Connection connection) throws SQLException {
         this.addUser(connection);
 
@@ -247,6 +310,27 @@ public class BoarUser {
 
     public boolean isFirstDaily() {
         return this.isFirstDaily;
+    }
+
+    public long getFirstJoinedTimestamp(Connection connection) throws SQLException {
+        long firstJoinedTimestamp = 0;
+        String query = """
+            SELECT first_joined_timestamp
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    firstJoinedTimestamp = results.getTimestamp("first_joined_timestamp").getTime();
+                }
+            }
+        }
+
+        return firstJoinedTimestamp;
     }
 
     public long getMultiplier(Connection connection) throws SQLException {
@@ -391,6 +475,28 @@ public class BoarUser {
             statement.setString(1, this.userID);
             statement.executeUpdate();
         }
+    }
+
+    public List<String> getCurrentBadges(Connection connection) throws SQLException {
+        String query = """
+            SELECT badge_id
+            FROM collected_badges
+            WHERE user_id = ? AND has_badge = true;
+        """;
+
+        List<String> badgeIDs = new ArrayList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    badgeIDs.add(results.getString("badge_id"));
+                }
+            }
+        }
+
+        return badgeIDs;
     }
 
     public synchronized void incRefs() throws SQLException {

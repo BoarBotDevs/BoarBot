@@ -224,7 +224,7 @@ public class ItemImageGenerator {
         String underlayPath = itemAssetsFolder + pathConfig.getItemUnderlay();
         String backplatePath = itemAssetsFolder + pathConfig.getItemBackplate();
 
-        int[] origin = nums.getOriginPos();
+        int[] origin = {0, 0};
         int[] imageSize = nums.getItemImageSize();
 
         int[] mainPos = nums.getItemPos();
@@ -285,7 +285,7 @@ public class ItemImageGenerator {
         NumberConfig nums = this.config.getNumberConfig();
         Map<String, String> colorConfig = this.config.getColorConfig();
 
-        int[] origin = nums.getOriginPos();
+        int[] origin = {0, 0};
         int[] imageSize = nums.getItemImageSize();
 
         int userBoxY = nums.getItemBoxOneY();
