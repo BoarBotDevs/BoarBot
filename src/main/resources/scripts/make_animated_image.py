@@ -5,7 +5,7 @@ import json
 import sys
 
 path_config = json.loads(sys.argv[1])
-num_config = json.loads(sys.argv[2])
+num_config = json.loads(sys.argv[2]) // TODO: Fix
 main_image_path = sys.argv[3]
 
 temp_bytes = sys.stdin.buffer.read()
@@ -23,7 +23,7 @@ durations = []
 
 for frame in ImageSequence.Iterator(main_image):
     new_frame = Image.new('RGBA', image_size)
-    new_frame.paste(base_image, num_config['originPos'])
+    new_frame.paste(base_image, (0,0))
 
     frame = frame.copy().resize(item_size).convert('RGBA')
     new_frame.paste(frame, item_pos)

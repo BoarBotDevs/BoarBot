@@ -17,6 +17,9 @@ import java.io.IOException;
 public class EmbedGenerator {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
+    private final static int[] ORIGIN = {0, 0};
+    private final static int MAX_WIDTH = 1500;
+
     private String str;
     private String pureStr;
     @Setter private String color;
@@ -48,12 +51,12 @@ public class EmbedGenerator {
         g2d.setFont(this.font);
         FontMetrics fm = g2d.getFontMetrics();
 
-        int width = Math.min(fm.stringWidth(this.pureStr) + nums.getBorder() * 6, nums.getEmbedMaxWidth());
+        int width = Math.min(fm.stringWidth(this.pureStr) + nums.getBorder() * 6, MAX_WIDTH);
 
         TextDrawer textDrawer = new TextDrawer(
             g2d,
             this.str,
-            new int[]{0,0},
+            ORIGIN,
             Align.CENTER,
             this.color,
             nums.getFontBig(),

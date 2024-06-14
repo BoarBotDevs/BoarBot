@@ -3,9 +3,12 @@ package dev.boarbot.bot;
 import com.google.gson.Gson;
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.bot.config.NumberConfig;
+import dev.boarbot.bot.config.PathConfig;
 import dev.boarbot.bot.config.QuestConfig;
 import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.commands.SubcommandConfig;
+import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.CommandListener;
@@ -15,6 +18,7 @@ import dev.boarbot.listeners.StopMessageListener;
 import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.graphics.GraphicsUtil;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.JDA;
@@ -26,6 +30,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.data.DataObject;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
@@ -43,7 +48,8 @@ public class BoarBot implements Bot {
     private BotConfig config;
     private Font font;
 
-    private final Map<String, byte[]> cacheMap = new HashMap<>();
+    private final Map<String, byte[]> byteCacheMap = new HashMap<>();
+    private final Map<String, BufferedImage> imageCacheMap = new HashMap<>();
 
     private final Map<String, Constructor<? extends Subcommand>> subcommands = new HashMap<>();
     private final Map<String, Interactive> interactives = new HashMap<>();
@@ -55,7 +61,11 @@ public class BoarBot implements Bot {
     public void create(BotType type) {
         this.botType = type;
 
-        loadConfig();
+        this.loadConfig();
+        this.loadIntoDatabase("boars");
+        this.loadIntoDatabase("rarities");
+        this.loadIntoDatabase("quests");
+        this.loadCache();
 
         this.jda = JDABuilder.createDefault(this.env.get("TOKEN"))
             .addEventListeners(
@@ -96,10 +106,6 @@ public class BoarBot implements Bot {
             }
 
             this.config = g.fromJson(jsonStr.toString(), BotConfig.class);
-
-            this.loadIntoDatabase("boars");
-            this.loadIntoDatabase("rarities");
-            this.loadIntoDatabase("quests");
 
             File fontFile = new File(
                 this.config.getPathConfig().getFontAssets() + this.config.getPathConfig().getMainFont()
@@ -189,14 +195,81 @@ public class BoarBot implements Bot {
         return this.config;
     }
 
+    private void loadCache() {
+        NumberConfig nums = this.getConfig().getNumberConfig();
+        PathConfig pathConfig = this.getConfig().getPathConfig();
+
+        int[] origin = {0, 0};
+        int[] bigBoarSize = nums.getBigBoarSize();
+        int[] mediumBoarSize = nums.getMediumBoarSize();
+
+        for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
+            IndivItemConfig boarInfo = this.getConfig().getItemConfig().getBoars().get(boarID);
+
+            String filePath = boarInfo.getStaticFile() != null
+                ? pathConfig.getBoars() + boarInfo.getStaticFile()
+                : pathConfig.getBoars() + boarInfo.getFile();
+
+            BufferedImage bigBoarImage = new BufferedImage(bigBoarSize[0], bigBoarSize[1], BufferedImage.TYPE_INT_ARGB);
+            Graphics2D bigBoarGraphics = bigBoarImage.createGraphics();
+
+            BufferedImage mediumBoarImage = new BufferedImage(
+                mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
+            );
+            Graphics2D mediumBoarGraphics = mediumBoarImage.createGraphics();
+
+            try {
+                GraphicsUtil.drawImage(bigBoarGraphics, filePath, origin, bigBoarSize);
+                this.imageCacheMap.put("big" + boarID, bigBoarImage);
+
+                GraphicsUtil.drawImage(mediumBoarGraphics, filePath, origin, mediumBoarSize);
+                this.imageCacheMap.put("medium" + boarID, mediumBoarImage);
+            } catch (Exception exception) {
+                log.error("Failed to generate cache image for %s".formatted(boarID), exception);
+                System.exit(-1);
+            }
+        }
+
+        log.info("Successfully loaded all boar images into cache");
+
+        String rarityBorderPath = pathConfig.getMegaMenuAssets() + pathConfig.getCollRarityBorder();
+
+        for (String rarityID : this.getConfig().getRarityConfigs().keySet()) {
+            String color = this.getConfig().getColorConfig().get(rarityID);
+
+            BufferedImage rarityBorderImage = new BufferedImage(
+                mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
+            );
+            Graphics2D rarityBorderG2D = rarityBorderImage.createGraphics();
+
+            try {
+                GraphicsUtil.drawRect(rarityBorderG2D, origin, mediumBoarSize, color);
+                rarityBorderG2D.setComposite(AlphaComposite.DstIn);
+                GraphicsUtil.drawImage(rarityBorderG2D, rarityBorderPath, origin, mediumBoarSize);
+
+                this.imageCacheMap.put("border" + rarityID, rarityBorderImage);
+            } catch (Exception exception) {
+                log.error("Failed to generate cache image for %s border".formatted(rarityID), exception);
+                System.exit(-1);
+            }
+        }
+
+        log.info("Successfully loaded all rarity borders into cache");
+    }
+
     @Override
     public Font getFont() {
         return this.font;
     }
 
     @Override
-    public Map<String, byte[]> getCacheMap() {
-        return this.cacheMap;
+    public Map<String, byte[]> getByteCacheMap() {
+        return this.byteCacheMap;
+    }
+
+    @Override
+    public Map<String, BufferedImage> getImageCacheMap() {
+        return this.imageCacheMap;
     }
 
     @Override

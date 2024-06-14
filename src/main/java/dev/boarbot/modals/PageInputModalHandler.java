@@ -5,10 +5,10 @@ import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 
-public class MiracleAmountModalHandler extends ModalHandler {
+public class PageInputModalHandler extends ModalHandler {
     private final ModalInteractive receiver;
 
-    public MiracleAmountModalHandler(GenericComponentInteractionCreateEvent compEvent, ModalInteractive receiver) {
+    public PageInputModalHandler(GenericComponentInteractionCreateEvent compEvent, ModalInteractive receiver) {
         super(compEvent);
         this.receiver = receiver;
     }

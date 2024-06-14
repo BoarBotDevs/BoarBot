@@ -8,7 +8,7 @@ import math
 
 # Inputs from JS
 
-num_config = json.loads(sys.argv[1])
+num_config = json.loads(sys.argv[1]) // TODO: Fix
 base_len = json.loads(sys.argv[2])
 middle_len = json.loads(sys.argv[3])
 

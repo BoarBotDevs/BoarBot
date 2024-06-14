@@ -1,4 +1,4 @@
-package dev.boarbot.commands.boar;
+package dev.boarbot.commands.boar.megamenu;
 
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.interactives.Interactive;
@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import java.sql.SQLException;
 
 @Log4j2
-public class CollectionSubcommand extends Subcommand {
-    public CollectionSubcommand(SlashCommandInteractionEvent event) {
+public class ProfileSubcommand extends Subcommand {
+    public ProfileSubcommand(SlashCommandInteractionEvent event) {
         super(event);
     }
 
@@ -25,7 +25,7 @@ public class CollectionSubcommand extends Subcommand {
 
         try {
             Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(
-                this.event, MegaMenuView.COLLECTION
+                this.event, MegaMenuView.PROFILE
             );
             interactive.execute(null);
         } catch (SQLException exception) {

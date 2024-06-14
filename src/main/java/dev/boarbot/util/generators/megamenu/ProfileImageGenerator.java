@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
-public class CollectionImageGenerator extends MegaMenuGenerator {
+public class ProfileImageGenerator extends MegaMenuGenerator {
     public static final int BOARS_PER_PAGE = 15;
 
     private static final int MAX_BOARS = 9999999;
@@ -27,12 +27,12 @@ public class CollectionImageGenerator extends MegaMenuGenerator {
     private static final int AMOUNT_X_OFFSET = 15;
     private static final int AMOUNT_Y_OFFSET = 49;
     private static final int AMOUNT_BOX_WIDTH_OFFSET = 30;
-    private static final int AMOUNT_BOX_HEIGHT = 64;
+    private static final int AMOUNT_BOX_HEIGHT = 59;
 
     private final Map<String, BoarInfo> boarInfos;
 
-    public CollectionImageGenerator(
-        int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate, Map<String, BoarInfo> boarInfos
+    public ProfileImageGenerator(
+            int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate, Map<String, BoarInfo> boarInfos
     ) {
         super(page, boarUser, badgeIDs, firstJoinedDate);
         this.boarInfos = boarInfos;
@@ -57,37 +57,37 @@ public class CollectionImageGenerator extends MegaMenuGenerator {
             int relativeIndex = i - this.page*BOARS_PER_PAGE;
 
             int[] boarPos = {
-                START_X + (relativeIndex % NUM_COLS) * (boarImageSize[0] + this.nums.getBorder()),
-                START_Y + (relativeIndex / NUM_COLS) * (boarImageSize[1] + this.nums.getBorder())
+                    START_X + (relativeIndex % NUM_COLS) * (boarImageSize[0] + this.nums.getBorder()),
+                    START_Y + (relativeIndex / NUM_COLS) * (boarImageSize[1] + this.nums.getBorder())
             };
 
             int[] amountPos = new int[] {boarPos[0] + AMOUNT_X_OFFSET, boarPos[1] + AMOUNT_Y_OFFSET};
             String amount = "%,d".formatted(Math.min(this.boarInfos.get(boarID).amount(), MAX_BOARS));
             TextDrawer textDrawer = new TextDrawer(
-                g2d, amount, amountPos, Align.LEFT, this.colorConfig.get("font"), this.nums.getFontMedium()
+                    g2d, amount, amountPos, Align.LEFT, this.colorConfig.get("font"), this.nums.getFontMedium()
             );
             FontMetrics fm = g2d.getFontMetrics();
             int[] rectangleSize = new int[] {
-                fm.stringWidth(amount) + AMOUNT_BOX_WIDTH_OFFSET + border,
-                AMOUNT_BOX_HEIGHT + border
+                    fm.stringWidth(amount) + AMOUNT_BOX_WIDTH_OFFSET + border,
+                    AMOUNT_BOX_HEIGHT + border
             };
 
             BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get("medium" + boarID);
             g2d.drawImage(boarImage, boarPos[0], boarPos[1], null);
 
             BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get(
-                "border" + this.boarInfos.get(boarID).rarityID()
+                    "border" + this.boarInfos.get(boarID).rarityID()
             );
             g2d.drawImage(rarityBorderImage, boarPos[0], boarPos[1], null);
 
             g2d.setPaint(Color.decode(this.colorConfig.get("dark")));
             g2d.fill(new RoundRectangle2D.Double(
-                boarPos[0]-border,
-                boarPos[1]-border,
-                rectangleSize[0],
-                rectangleSize[1],
-                this.nums.getBorder() * 2,
-                this.nums.getBorder() * 2
+                    boarPos[0]-border,
+                    boarPos[1]-border,
+                    rectangleSize[0],
+                    rectangleSize[1],
+                    this.nums.getBorder() * 2,
+                    this.nums.getBorder() * 2
             ));
             textDrawer.drawText();
         }

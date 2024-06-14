@@ -7,7 +7,7 @@ import sys
 
 path_config = json.loads(sys.argv[1])
 color_config = json.loads(sys.argv[2])
-num_config = json.loads(sys.argv[3])
+num_config = json.loads(sys.argv[3]) // TODO: Fix
 avatar_url = sys.argv[4]
 user_tag = sys.argv[5]
 score = sys.argv[6]

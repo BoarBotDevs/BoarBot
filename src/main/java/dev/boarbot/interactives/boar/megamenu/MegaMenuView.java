@@ -15,6 +15,16 @@ public enum MegaMenuView {
         this.type = type;
     }
 
+    public static MegaMenuView fromString(String str) {
+        for (MegaMenuView view : MegaMenuView.values()) {
+            if (view.type.equals(str)) {
+                return view;
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public String toString() {
         return this.type;

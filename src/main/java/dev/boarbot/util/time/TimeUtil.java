@@ -18,8 +18,7 @@ public final class TimeUtil {
     }
 
     public static long getNextDailyResetMilli() {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-        return TimeUtil.getLastDailyResetMilli() + config.getNumberConfig().getOneDay();
+        return TimeUtil.getLastDailyResetMilli() + 1000 * 60 * 60 * 24;
     }
 
     public static long getCurMilli() {

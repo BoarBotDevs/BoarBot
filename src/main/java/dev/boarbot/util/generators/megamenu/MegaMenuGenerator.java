@@ -32,6 +32,18 @@ public abstract class MegaMenuGenerator {
     protected final ItemConfig itemConfig = this.config.getItemConfig();
     protected final Map<String, String> colorConfig = this.config.getColorConfig();
 
+    protected static final int[] IMAGE_SIZE = {1920, 1403};
+    protected static final int[] USER_AVATAR_POS = {882, 25};
+    protected static final int USER_AVATAR_WIDTH = 156;
+    protected static final int[] USER_TAG_POS = {959, 241};
+    protected static final int[] DATE_LABEL_POS = {1479, 81};
+    protected static final int[] DATE_POS = {1479, 135};
+    protected static final int[] NO_BADGE_POS = {442, 108};
+    protected static final int BADGE_START_X = 409;
+    protected static final int BADGE_SPACING = 68;
+    protected static final int BADGE_Y = 56;
+    protected static final int[] BADGE_SIZE = {65, 65};
+
     protected int page;
     protected BoarUser boarUser;
 
@@ -50,15 +62,16 @@ public abstract class MegaMenuGenerator {
     public abstract FileUpload generate() throws IOException, URISyntaxException;
 
     protected void drawTopInfo() throws IOException, URISyntaxException {
-        int[] avatarPos = this.nums.getCollUserAvatarPos();
-        int avatarWidth = this.nums.getCollUserAvatarWidth();
-        int[] usernamePos = this.nums.getCollUserTagPos();
-        int[] datePos = this.nums.getCollDatePos();
-
         String userAvatar = this.boarUser.getUser().getAvatarUrl();
 
         Map<Class<? extends MegaMenuGenerator>, String> classViewMap = new HashMap<>();
+        classViewMap.put(ProfileImageGenerator.class, MegaMenuView.PROFILE.toString());
         classViewMap.put(CollectionImageGenerator.class, MegaMenuView.COLLECTION.toString());
+        classViewMap.put(CompendiumImageGenerator.class, MegaMenuView.COMPENDIUM.toString());
+        classViewMap.put(StatsImageGenerator.class, MegaMenuView.STATS.toString());
+        classViewMap.put(PowerupsImageGenerator.class, MegaMenuView.POWERUPS.toString());
+        classViewMap.put(QuestsImageGenerator.class, MegaMenuView.QUESTS.toString());
+        classViewMap.put(BadgesImageGenerator.class, MegaMenuView.QUESTS.toString());
 
         String view = classViewMap.get(this.getClass());
         String viewString = Character.toUpperCase(view.charAt(0)) + view.substring(1);
@@ -67,39 +80,36 @@ public abstract class MegaMenuGenerator {
 
         Graphics2D g2d = this.generatedImage.createGraphics();
 
-        GraphicsUtil.drawCircleImage(g2d, userAvatar, avatarPos, avatarWidth);
+        GraphicsUtil.drawCircleImage(g2d, userAvatar, USER_AVATAR_POS, USER_AVATAR_WIDTH);
 
         TextDrawer textDrawer = new TextDrawer(
-                g2d, userString, usernamePos, Align.CENTER, colorConfig.get("font"), this.nums.getFontMedium()
+            g2d, userString, USER_TAG_POS, Align.CENTER, colorConfig.get("font"), this.nums.getFontMedium()
         );
         textDrawer.drawText();
 
         textDrawer.setText(this.strConfig.getCollDateLabel());
-        textDrawer.setPos(this.nums.getCollDateLabelPos());
+        textDrawer.setPos(DATE_LABEL_POS);
         textDrawer.drawText();
 
         textDrawer.setText(this.firstJoinedDate);
-        textDrawer.setPos(datePos);
+        textDrawer.setPos(DATE_POS);
         textDrawer.drawText();
 
         if (this.badgeIDs.isEmpty()) {
             textDrawer.setText(this.strConfig.getCollNoBadges());
-            textDrawer.setPos(this.nums.getCollNoBadgePos());
+            textDrawer.setPos(NO_BADGE_POS);
             textDrawer.drawText();
         }
 
         if (!this.badgeIDs.isEmpty()) {
-            int curBadgeStartX = this.nums.getCollBadgeStart() - (
-                this.nums.getCollBadgeSpacing() / 2 * (this.badgeIDs.size() - 1)
-            );
+            int curBadgeStartX = BADGE_START_X - (BADGE_SPACING / 2 * (this.badgeIDs.size() - 1));
 
             g2d.setPaint(Color.decode(this.colorConfig.get("mid")));
             g2d.fill(new RoundRectangle2D.Double(
                 curBadgeStartX - this.nums.getBorder(),
-                this.nums.getCollBadgeY() - this.nums.getBorder(),
-                this.nums.getBorder() * 2 + (this.badgeIDs.size() - 1) * this.nums.getCollBadgeSpacing() +
-                    this.nums.getCollBadgeSize()[0],
-                this.nums.getBorder() * 2 + this.nums.getCollBadgeSize()[1],
+                BADGE_Y - this.nums.getBorder(),
+                this.nums.getBorder() * 2 + (this.badgeIDs.size() - 1) * BADGE_SPACING + BADGE_SIZE[0],
+                this.nums.getBorder() * 2 + BADGE_SIZE[1],
                 this.nums.getBorder() * 2,
                 this.nums.getBorder() * 2
             ));
@@ -107,11 +117,9 @@ public abstract class MegaMenuGenerator {
             for (int i=0; i<this.badgeIDs.size(); i++) {
                 String badgeID = this.badgeIDs.get(i);
                 String badgePath = this.pathConfig.getBadges() + this.itemConfig.getBadges().get(badgeID).getFile();
-                int[] badgePos = new int[] {
-                    curBadgeStartX + i * this.nums.getCollBadgeSpacing(), this.nums.getCollBadgeY()
-                };
+                int[] badgePos = {curBadgeStartX + i * BADGE_SPACING, BADGE_Y};
 
-                GraphicsUtil.drawImage(g2d, badgePath, badgePos, this.nums.getCollBadgeSize());
+                GraphicsUtil.drawImage(g2d, badgePath, badgePos, BADGE_SIZE);
             }
         }
     }

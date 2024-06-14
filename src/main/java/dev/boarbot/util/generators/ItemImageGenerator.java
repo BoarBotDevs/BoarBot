@@ -26,9 +26,31 @@ import java.util.Map;
 public class ItemImageGenerator {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
+    public static final int[] IMAGE_SIZE = {930, 1080};
+
+    private static final int[] ORIGIN = {0, 0};
+    private static final int[] ITEM_POS = {33, 174};
+    private static final int[] TITLE_POS = {473, 77};
+    private static final int[] NAME_POS = {473, 115};
+    private static final int USER_TAG_X = 110;
+    private static final int USER_AVATAR_X = 43;
+    private static final int USER_AVATAR_Y_OFFSET = 9;
+    private static final int USER_AVATAR_WIDTH = 52;
+    private static final int USER_BOX_EXTRA = 95;
+    private static final int BOX_TEXT_X = 48;
+    private static final int BOX_TEXT_Y_OFFSET = 52;
+    private static final int BOX_TEXT_EXTRA = 33;
+    private static final int BOX_X = 33;
+    private static final int BOX_ONE_Y = 195;
+    private static final int BOX_TWO_Y = 266;
+    private static final int BOX_THREE_Y = 358;
+    private static final int BOX_FOUR_Y = 429;
+    private static final int BOX_HEIGHT = 71;
+
     private final User user;
     private final String title;
 
+    private String itemID;
     @Getter @Setter private String itemName;
     @Getter @Setter private String filePath;
     @Getter @Setter private String staticFilePath;
@@ -53,6 +75,7 @@ public class ItemImageGenerator {
     public ItemImageGenerator(User user, String title, String itemID, boolean isBadge, User giftingUser, long bucks) {
         this.user = user;
         this.title = title;
+        this.itemID = itemID;
 
         if (isBadge) {
             IndivItemConfig badgeInfo = this.config.getItemConfig().getBadges().get(itemID);
@@ -107,7 +130,7 @@ public class ItemImageGenerator {
         String extension = this.filePath.split("[.]")[1];
 
         if (extension.equals("gif") && !forceStatic) {
-            this.generatedImageByteArray = BoarBotApp.getBot().getCacheMap().get(
+            this.generatedImageByteArray = BoarBotApp.getBot().getByteCacheMap().get(
                 "animitem" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey
             );
 
@@ -115,7 +138,7 @@ public class ItemImageGenerator {
                 this.generateStatic(false);
                 this.generateAnimated();
 
-                BoarBotApp.getBot().getCacheMap().put(
+                BoarBotApp.getBot().getByteCacheMap().put(
                     "animitem" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey,
                     this.generatedImageByteArray
                 );
@@ -123,14 +146,14 @@ public class ItemImageGenerator {
 
             this.addAnimatedUser();
         } else {
-            this.generatedImageByteArray = BoarBotApp.getBot().getCacheMap().get(
+            this.generatedImageByteArray = BoarBotApp.getBot().getByteCacheMap().get(
                 "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey
             );
 
             if (this.generatedImageByteArray == null) {
                 this.generateStatic(true);
 
-                BoarBotApp.getBot().getCacheMap().put(
+                BoarBotApp.getBot().getByteCacheMap().put(
                     "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey,
                     this.generatedImageByteArray
                 );
@@ -224,30 +247,28 @@ public class ItemImageGenerator {
         String underlayPath = itemAssetsFolder + pathConfig.getItemUnderlay();
         String backplatePath = itemAssetsFolder + pathConfig.getItemBackplate();
 
-        int[] origin = {0, 0};
-        int[] imageSize = nums.getItemImageSize();
+        int[] itemSize = nums.getBigBoarSize();
 
-        int[] mainPos = nums.getItemPos();
-        int[] mainSize = nums.getBigBoarSize();
-
-        BufferedImage generatedImage = new BufferedImage(imageSize[0], imageSize[1], BufferedImage.TYPE_INT_ARGB);
+        BufferedImage generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        GraphicsUtil.drawRect(g2d, origin, imageSize, colorConfig.get(colorKey));
+        GraphicsUtil.drawRect(g2d, ORIGIN, IMAGE_SIZE, colorConfig.get(colorKey));
         g2d.setComposite(AlphaComposite.DstIn);
-        GraphicsUtil.drawImage(g2d, underlayPath, origin, imageSize);
+        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
         g2d.setComposite(AlphaComposite.SrcOver);
 
-        GraphicsUtil.drawImage(g2d, backplatePath, origin, imageSize);
-        if (makeWithItem) {
-            String filePath = this.staticFilePath != null ? this.staticFilePath : this.filePath;
-            GraphicsUtil.drawImage(g2d, filePath, mainPos, mainSize);
+        GraphicsUtil.drawImage(g2d, backplatePath, ORIGIN, IMAGE_SIZE);
+        if (makeWithItem && this.itemID != null) {
+            BufferedImage itemImage = BoarBotApp.getBot().getImageCacheMap().get("big" + this.itemID);
+            g2d.drawImage(itemImage, ITEM_POS[0], ITEM_POS[1], null);
+        } else if (makeWithItem) {
+            GraphicsUtil.drawImage(g2d, this.filePath, ITEM_POS, itemSize);
         }
 
         TextDrawer textDrawer = new TextDrawer(
             g2d,
             this.title,
-            nums.getItemTitlePos(),
+            TITLE_POS,
             Align.CENTER,
             colorConfig.get("font"),
             nums.getFontMedium()
@@ -256,9 +277,9 @@ public class ItemImageGenerator {
         textDrawer.drawText();
 
         textDrawer.setText(this.itemName);
-        textDrawer.setPos(nums.getItemNamePos());
+        textDrawer.setPos(NAME_POS);
         textDrawer.setColorVal(colorConfig.get(this.colorKey));
-        textDrawer.setWidth(mainSize[0]);
+        textDrawer.setWidth(itemSize[0]);
 
         textDrawer.drawText();
 
@@ -268,13 +289,11 @@ public class ItemImageGenerator {
     }
 
     private void addStaticUser() throws IOException, URISyntaxException {
-        NumberConfig nums = this.config.getNumberConfig();
-
         ByteArrayInputStream byteArrayIS = new ByteArrayInputStream(this.generatedImageByteArray);
         BufferedImage generatedImage = ImageIO.read(byteArrayIS);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        g2d.drawImage(this.generateUserImageData(), nums.getItemBoxX(), nums.getItemBoxOneY(), null);
+        g2d.drawImage(this.generateUserImageData(), BOX_X, BOX_ONE_Y, null);
 
         ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
         ImageIO.write(generatedImage, "png", byteArrayOS);
@@ -285,26 +304,23 @@ public class ItemImageGenerator {
         NumberConfig nums = this.config.getNumberConfig();
         Map<String, String> colorConfig = this.config.getColorConfig();
 
-        int[] origin = {0, 0};
-        int[] imageSize = nums.getItemImageSize();
-
-        int userBoxY = nums.getItemBoxOneY();
+        int userBoxY = BOX_ONE_Y;
 
         String userAvatar = this.user.getEffectiveAvatarUrl();
         String username = this.user.getName().substring(
             0, Math.min(this.user.getName().length(), this.config.getNumberConfig().getMaxUsernameLength())
         );
 
-        BufferedImage userDataImage = new BufferedImage(imageSize[0], imageSize[1], BufferedImage.TYPE_INT_ARGB);
+        BufferedImage userDataImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = userDataImage.createGraphics();
 
         TextDrawer textDrawer = new TextDrawer(
-            g2d, "", origin, Align.LEFT, colorConfig.get("font"), nums.getFontSmallMedium()
+            g2d, "", ORIGIN, Align.LEFT, colorConfig.get("font"), nums.getFontSmallMedium()
         );
         FontMetrics fm = g2d.getFontMetrics();
 
         if (this.giftingUser != null) {
-            userBoxY = nums.getItemBoxTwoY();
+            userBoxY = BOX_TWO_Y;
 
             String giftingUserAvatar = this.giftingUser.getEffectiveAvatarUrl();
             String giftingUsername = this.giftingUser.getName().substring(
@@ -312,104 +328,105 @@ public class ItemImageGenerator {
             );
 
             g2d.setPaint(Color.decode(colorConfig.get("dark")));
-            g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxOneY(), nums.getBorder(), nums.getItemBoxHeight());
+            g2d.fillRect(BOX_X, BOX_ONE_Y, nums.getBorder(), BOX_HEIGHT);
             g2d.fill(new RoundRectangle2D.Double(
-                nums.getItemBoxX(),
-                nums.getItemBoxOneY(),
-                fm.stringWidth("To") + nums.getItemTextBoxExtra(),
-                nums.getItemBoxHeight(),
+                BOX_X,
+                BOX_ONE_Y,
+                fm.stringWidth("To") + BOX_TEXT_EXTRA,
+                BOX_HEIGHT,
                 nums.getBorder() * 2,
                 nums.getBorder() * 2
             ));
+
+            int[] toPos = {BOX_TEXT_X, BOX_ONE_Y + BOX_TEXT_Y_OFFSET};
 
             textDrawer.setText("To");
-            textDrawer.setPos(new int[]{nums.getItemTextX(), nums.getItemBoxOneY() + nums.getItemTextYOffset()});
+            textDrawer.setPos(toPos);
             textDrawer.drawText();
 
             g2d.setPaint(Color.decode(colorConfig.get("dark")));
-            g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxThreeY(), nums.getBorder(), nums.getItemBoxHeight());
+            g2d.fillRect(BOX_X, BOX_THREE_Y, nums.getBorder(), BOX_HEIGHT);
             g2d.fill(new RoundRectangle2D.Double(
-                nums.getItemBoxX(),
-                nums.getItemBoxThreeY(),
-                fm.stringWidth("From") + nums.getItemTextBoxExtra(),
-                nums.getItemBoxHeight(),
+                BOX_X,
+                BOX_THREE_Y,
+                fm.stringWidth("From") + BOX_TEXT_EXTRA,
+                BOX_HEIGHT,
                 nums.getBorder() * 2,
                 nums.getBorder() * 2
             ));
+
+            int[] fromPos = {BOX_TEXT_X, BOX_THREE_Y + BOX_TEXT_Y_OFFSET};
 
             textDrawer.setText("From");
-            textDrawer.setPos(new int[]{nums.getItemTextX(), nums.getItemBoxThreeY() + nums.getItemTextYOffset()});
+            textDrawer.setPos(fromPos);
             textDrawer.drawText();
 
             g2d.setPaint(Color.decode(colorConfig.get("dark")));
-            g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxFourY(), nums.getBorder(), nums.getItemBoxHeight());
+            g2d.fillRect(BOX_X, BOX_FOUR_Y, nums.getBorder(), BOX_HEIGHT);
             g2d.fill(new RoundRectangle2D.Double(
-                nums.getItemBoxX(),
-                nums.getItemBoxFourY(),
-                fm.stringWidth(giftingUsername) + nums.getItemUserBoxExtra(),
-                nums.getItemBoxHeight(),
+                BOX_X,
+                BOX_FOUR_Y,
+                fm.stringWidth(giftingUsername) + USER_BOX_EXTRA,
+                BOX_HEIGHT,
                 nums.getBorder() * 2,
                 nums.getBorder() * 2
             ));
 
+            int[] giftingPos = {BOX_TEXT_X, BOX_FOUR_Y + BOX_TEXT_Y_OFFSET};
+
             textDrawer.setText(giftingUsername);
-            textDrawer.setPos(new int[]{nums.getItemUserTagX(), nums.getItemBoxFourY() + nums.getItemTextYOffset()});
+            textDrawer.setPos(giftingPos);
             textDrawer.drawText();
 
-            GraphicsUtil.drawCircleImage(
-                g2d,
-                giftingUserAvatar,
-                new int[]{nums.getItemUserAvatarX(), nums.getItemBoxFourY() + nums.getItemUserAvatarYOffset()},
-                nums.getItemUserAvatarWidth()
-            );
+            int[] giftingAvatarPos = {USER_AVATAR_X, BOX_FOUR_Y + USER_AVATAR_Y_OFFSET};
+
+            GraphicsUtil.drawCircleImage(g2d, giftingUserAvatar, giftingAvatarPos, USER_AVATAR_WIDTH);
         }
 
         g2d.setPaint(Color.decode(colorConfig.get("dark")));
-        g2d.fillRect(nums.getItemBoxX(), userBoxY, nums.getBorder(), nums.getItemBoxHeight());
+        g2d.fillRect(BOX_X, userBoxY, nums.getBorder(), BOX_HEIGHT);
         g2d.fill(new RoundRectangle2D.Double(
-            nums.getItemBoxX(),
+            BOX_X,
             userBoxY,
-            fm.stringWidth(username) + nums.getItemUserBoxExtra(),
-            nums.getItemBoxHeight(),
+            fm.stringWidth(username) + USER_BOX_EXTRA,
+            BOX_HEIGHT,
             nums.getBorder() * 2,
             nums.getBorder() * 2
         ));
 
+        int[] userPos = {USER_TAG_X, userBoxY + BOX_TEXT_Y_OFFSET};
+
         textDrawer.setText(username);
-        textDrawer.setPos(new int[]{nums.getItemUserTagX(), userBoxY + nums.getItemTextYOffset()});
+        textDrawer.setPos(userPos);
         textDrawer.drawText();
 
-        GraphicsUtil.drawCircleImage(
-            g2d,
-            userAvatar,
-            new int[]{nums.getItemUserAvatarX(), userBoxY + nums.getItemUserAvatarYOffset()},
-            nums.getItemUserAvatarWidth()
-        );
+        int[] userAvatarPos = {USER_AVATAR_X, userBoxY + USER_AVATAR_Y_OFFSET};
+
+        GraphicsUtil.drawCircleImage(g2d, userAvatar, userAvatarPos, USER_AVATAR_WIDTH);
 
         if (this.bucks > 0 && this.giftingUser == null) {
             String formattedBucks = "%,d".formatted(this.bucks);
 
             g2d.setPaint(Color.decode(colorConfig.get("dark")));
-            g2d.fillRect(nums.getItemBoxX(), nums.getItemBoxTwoY(), nums.getBorder(), nums.getItemBoxHeight());
+            g2d.fillRect(BOX_X, BOX_TWO_Y, nums.getBorder(), BOX_HEIGHT);
             g2d.fill(new RoundRectangle2D.Double(
-                nums.getItemBoxX(),
-                nums.getItemBoxTwoY(),
-                fm.stringWidth("+$" + formattedBucks) + nums.getItemTextBoxExtra(),
-                nums.getItemBoxHeight(),
+                BOX_X,
+                BOX_TWO_Y,
+                fm.stringWidth("+$" + formattedBucks) + BOX_TEXT_EXTRA,
+                BOX_HEIGHT,
                 nums.getBorder() * 2,
                 nums.getBorder() * 2
             ));
 
+            int[] bucksPos = {BOX_TEXT_X, BOX_TWO_Y + BOX_TEXT_Y_OFFSET};
+
             textDrawer.setText("+//bucks//$" + formattedBucks);
-            textDrawer.setPos(new int[]{nums.getItemTextX(), nums.getItemBoxTwoY() + nums.getItemTextYOffset()});
+            textDrawer.setPos(bucksPos);
             textDrawer.drawText();
         }
 
         return userDataImage.getSubimage(
-            nums.getItemBoxX(),
-            nums.getItemBoxOneY(),
-            nums.getBigBoarSize()[0],
-            nums.getItemBoxFourY() + nums.getItemBoxHeight() - nums.getItemBoxOneY()
+            BOX_X, BOX_ONE_Y, nums.getBigBoarSize()[0], BOX_FOUR_Y + BOX_HEIGHT - BOX_ONE_Y
         );
     }
 }

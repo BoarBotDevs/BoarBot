@@ -8,6 +8,7 @@ import dev.boarbot.modals.ModalHandler;
 import net.dv8tion.jda.api.JDA;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
@@ -18,7 +19,8 @@ public interface Bot {
     void loadConfig();
     BotConfig getConfig();
     Font getFont();
-    Map<String, byte[]> getCacheMap();
+    Map<String, byte[]> getByteCacheMap();
+    Map<String, BufferedImage> getImageCacheMap();
     void deployCommands();
     void registerSubcommands();
     Map<String, Constructor<? extends Subcommand>> getSubcommands();

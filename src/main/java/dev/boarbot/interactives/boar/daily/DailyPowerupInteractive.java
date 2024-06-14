@@ -9,15 +9,14 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.modals.MiracleAmountModalHandler;
 import dev.boarbot.modals.ModalHandler;
-import dev.boarbot.modals.ModalInputReceiver;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.modal.ModalUtil;
-import dev.boarbot.util.time.TimeUtil;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -36,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 @Log4j2
-public class DailyPowerupInteractive extends Interactive implements ModalInputReceiver, Synchronizable {
+public class DailyPowerupInteractive extends ModalInteractive implements Synchronizable {
     private ActionRow[] curComponents = new ActionRow[0];
 
     private ModalHandler modalHandler = null;
@@ -54,25 +53,6 @@ public class DailyPowerupInteractive extends Interactive implements ModalInputRe
     @Override
     public void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
         this.attemptExecute(compEvent, null, startTime);
-    }
-
-    @Override
-    public void attemptExecute(
-        GenericComponentInteractionCreateEvent compEvent, ModalInteractionEvent modalEvent, long startTime
-    ) {
-        if (startTime < this.lastEndTime) {
-            return;
-        }
-
-        this.curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getInteractiveIdle();
-
-        if (compEvent != null) {
-            this.execute(compEvent);
-        } else {
-            this.handleModalInput(modalEvent);
-        }
-
-        this.lastEndTime = TimeUtil.getCurMilli();
     }
 
     @Override
@@ -200,7 +180,8 @@ public class DailyPowerupInteractive extends Interactive implements ModalInputRe
         };
     }
 
-    public void handleModalInput(ModalInteractionEvent modalEvent) {
+    @Override
+    public void modalExecute(ModalInteractionEvent modalEvent) {
         modalEvent.deferEdit().complete();
 
         StringConfig strConfig = this.config.getStringConfig();

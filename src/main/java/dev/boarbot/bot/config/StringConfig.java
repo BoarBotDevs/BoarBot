@@ -19,9 +19,7 @@ public class StringConfig {
 
     private String noPermission = "";
     private String noSetup = "";
-    private String doingSetup = "";
     private String wrongChannel = "";
-    private String nullFound = "";
     private String onCooldown = "";
     private String error = "";
     private String maintenance = "";

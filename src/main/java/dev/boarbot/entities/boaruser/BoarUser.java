@@ -67,7 +67,7 @@ public class BoarUser {
                     Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
 
                     resetStreak = lastDailyTimestamp != null && lastDailyTimestamp.before(
-                        new Timestamp(TimeUtil.getLastDailyResetMilli() - this.config.getNumberConfig().getOneDay())
+                        new Timestamp(TimeUtil.getLastDailyResetMilli() - 1000 * 60 * 60 * 24)
                     );
                 }
             }
@@ -88,7 +88,7 @@ public class BoarUser {
     }
 
     public long getLastChanged(Connection connection) throws SQLException {
-        long lastChangedTimestamp = 0;
+        long lastChangedTimestamp = TimeUtil.getCurMilli();
         String query = """
             SELECT last_changed_timestamp
             FROM users
@@ -205,7 +205,11 @@ public class BoarUser {
                 MIN(obtained_timestamp) AS first_obtained,
                 MAX(obtained_timestamp) AS last_obtained
             FROM collected_boars, boars_info
-            WHERE user_id = ? AND collected_boars.boar_id = boars_info.boar_id
+            WHERE
+                user_id = ? AND
+                collected_boars.boar_id = boars_info.boar_id AND
+                collected_boars.`exists` = true AND
+                collected_boars.deleted = false
             GROUP BY boar_id;
         """;
 

@@ -3,7 +3,6 @@ package dev.boarbot.util.generators;
 import com.google.gson.Gson;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.bot.config.NumberConfig;
 import dev.boarbot.bot.config.PathConfig;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import lombok.extern.log4j.Log4j2;
@@ -19,11 +18,15 @@ import java.util.List;
 
 @Log4j2
 public final class ItemImageGrouper {
+    private static final int[] IMAGE_SIZE = ItemImageGenerator.IMAGE_SIZE;
+    private static final int HORIZ_PADDING = 135;
+    private static final int SHADOW_WIDTH = 35;
+
     public static FileUpload groupItems(
         List<ItemImageGenerator> itemGens, int page
     ) throws IOException, URISyntaxException {
         BotConfig config = BoarBotApp.getBot().getConfig();
-        NumberConfig nums = config.getNumberConfig();
+
         PathConfig pathConfig = config.getPathConfig();
 
         byte[] leftImageBytes = null;
@@ -45,14 +48,11 @@ public final class ItemImageGrouper {
             return FileUpload.fromData(middleImageBytes, "unknown." + extension);
         }
 
-        int[] imageSize = nums.getItemImageSize();
-        int[] smallImageSize = {(int) (imageSize[0] * .9), (int) (imageSize[1] * .9)};
-
-        int horizPadding = nums.getItemHorizPadding();
-        int smallYPos = (imageSize[1] - smallImageSize[1]) / 2;
+        int[] smallImageSize = {(int) (IMAGE_SIZE[0] * .9), (int) (IMAGE_SIZE[1] * .9)};
+        int smallYPos = (IMAGE_SIZE[1] - smallImageSize[1]) / 2;
 
         BufferedImage groupedImage = new BufferedImage(
-            imageSize[0] + horizPadding*2, imageSize[1], BufferedImage.TYPE_INT_ARGB
+            IMAGE_SIZE[0] + HORIZ_PADDING*2, IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB
         );
         Graphics2D g2d = groupedImage.createGraphics();
 
@@ -63,11 +63,12 @@ public final class ItemImageGrouper {
             BufferedImage firstImage = ImageIO.read(byteArrayIS);
 
             g2d.drawImage(firstImage, 0, smallYPos, smallImageSize[0], smallImageSize[1], null);
+
+            int[] shadowPos = {HORIZ_PADDING-SHADOW_WIDTH, smallYPos};
+            int[] shadowSize = {SHADOW_WIDTH, smallImageSize[1]};
+
             GraphicsUtil.drawImage(
-                g2d,
-                pathConfig.getItemAssets() + pathConfig.getItemShadowLeft(),
-                new int[]{horizPadding-nums.getItemShadowWidth(), smallYPos},
-                new int[]{nums.getItemShadowWidth(), smallImageSize[1]}
+                g2d, pathConfig.getItemAssets() + pathConfig.getItemShadowLeft(), shadowPos, shadowSize
             );
         }
 
@@ -77,17 +78,18 @@ public final class ItemImageGrouper {
 
             g2d.drawImage(
                 lastImage,
-                imageSize[0] + horizPadding*2 - smallImageSize[0],
+                IMAGE_SIZE[0] + HORIZ_PADDING*2 - smallImageSize[0],
                 smallYPos,
                 smallImageSize[0],
                 smallImageSize[1],
                 null
             );
+
+            int[] shadowPos = {HORIZ_PADDING + IMAGE_SIZE[0], smallYPos};
+            int[] shadowSize = {SHADOW_WIDTH, smallImageSize[1]};
+
             GraphicsUtil.drawImage(
-                g2d,
-                pathConfig.getItemAssets() + pathConfig.getItemShadowRight(),
-                new int[]{horizPadding + imageSize[0], smallYPos},
-                new int[]{nums.getItemShadowWidth(), smallImageSize[1]}
+                g2d, pathConfig.getItemAssets() + pathConfig.getItemShadowRight(), shadowPos, shadowSize
             );
         }
 
@@ -132,7 +134,7 @@ public final class ItemImageGrouper {
             byteArrayIS = new ByteArrayInputStream(middleImageBytes);
             BufferedImage mainImage = ImageIO.read(byteArrayIS);
 
-            g2d.drawImage(mainImage, horizPadding, 0, imageSize[0], imageSize[1], null);
+            g2d.drawImage(mainImage, HORIZ_PADDING, 0, IMAGE_SIZE[0], IMAGE_SIZE[1], null);
 
             ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             ImageIO.write(groupedImage, "png", byteArrayOS);
