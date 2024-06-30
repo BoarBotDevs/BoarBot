@@ -92,11 +92,13 @@ public abstract class MegaMenuGenerator {
         textDrawer.drawText();
 
         textDrawer.setText(this.firstJoinedDate);
+        textDrawer.setColorVal(this.colorConfig.get("silver"));
         textDrawer.setPos(DATE_POS);
         textDrawer.drawText();
 
         if (this.badgeIDs.isEmpty()) {
             textDrawer.setText(this.strConfig.getCollNoBadges());
+            textDrawer.setColorVal(this.colorConfig.get("font"));
             textDrawer.setPos(NO_BADGE_POS);
             textDrawer.drawText();
         }

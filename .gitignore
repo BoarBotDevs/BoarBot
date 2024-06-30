@@ -1,5 +1,8 @@
 .env
 .idea
+*.iml
+*.ipr
+*.iws
 src/main/resources/items/boars/*
 !src/main/resources/items/boars/NormalBoar.png
 !src/main/resources/items/boars/CarrotBoar.png

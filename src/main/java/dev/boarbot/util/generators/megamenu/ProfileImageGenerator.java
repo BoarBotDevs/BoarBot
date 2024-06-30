@@ -1,98 +1,319 @@
 package dev.boarbot.util.generators.megamenu;
 
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.entities.boaruser.BoarInfo;
+import dev.boarbot.bot.config.RarityConfig;
+import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.ProfileData;
+import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 
 public class ProfileImageGenerator extends MegaMenuGenerator {
-    public static final int BOARS_PER_PAGE = 15;
+    private final int maxUniques;
 
-    private static final int MAX_BOARS = 9999999;
     private static final int[] ORIGIN = {0, 0};
-    private static final int START_X = 25;
-    private static final int START_Y = 266;
-    private static final int NUM_COLS = 5;
-    private static final int AMOUNT_X_OFFSET = 15;
-    private static final int AMOUNT_Y_OFFSET = 49;
-    private static final int AMOUNT_BOX_WIDTH_OFFSET = 30;
-    private static final int AMOUNT_BOX_HEIGHT = 59;
+    private static final int[] LEFT_START_POS = {70, 350};
+    private static final int VALUE_Y_OFFSET = 78;
+    private static final int LABEL_Y_SPACING = 198;
+    private static final int LEFT_RIGHT_PADDING = 80;
+    private static final int[] BOTTOM_START_POS = {70, 1019};
+    private static final int[] RIGHT_START_POS = {1044, 350};
+    private static final int[] RIGHT_RIGHT_START_POS = {1473, 548};
+    private static final int[] RECENT_LABEL_POS = {1105, 959};
+    private static final int[] RECENT_POS = {1025, 984};
+    private static final int[] FAVORITE_LABEL_POS = {1509, 959};
+    private static final int[] FAVORITE_POS = {1459, 984};
 
-    private final Map<String, BoarInfo> boarInfos;
+    private final ProfileData profileData;
+
+    private TextDrawer textDrawer;
 
     public ProfileImageGenerator(
-            int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate, Map<String, BoarInfo> boarInfos
+        int page,
+        BoarUser boarUser,
+        List<String> badgeIDs,
+        String firstJoinedDate,
+        boolean isSkyblockGuild,
+        ProfileData profileData
     ) {
         super(page, boarUser, badgeIDs, firstJoinedDate);
-        this.boarInfos = boarInfos;
+        this.profileData = profileData;
+
+        int maxUniques = 0;
+        for (String boarID : this.itemConfig.getBoars().keySet()) {
+            RarityConfig boarRarity = this.config.getRarityConfigs().get(BoarUtil.findRarityKey(boarID));
+            IndivItemConfig boar = this.itemConfig.getBoars().get(boarID);
+
+            boolean countableUnique = !boar.isBlacklisted() && boarRarity.isHunterNeed();
+            boolean skyblockBlocked = boar.isSB() && !isSkyblockGuild && this.profileData.numSkyblock() == 0;
+
+            if (countableUnique && !skyblockBlocked) {
+                maxUniques++;
+            }
+        }
+
+        this.maxUniques = maxUniques;
     }
 
     public FileUpload generate() throws IOException, URISyntaxException {
-        int border = nums.getBorder();
-        int[] boarImageSize = this.nums.getMediumBoarSize();
-
-        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getCollUnderlay();
-
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
+        int mediumFont = this.nums.getFontMedium();
+        int bigFont = this.nums.getFontBig();
+
+        int[] bucksPos = {LEFT_START_POS[0], LEFT_START_POS[1] + VALUE_Y_OFFSET};
+
+        int[] totalLabelPos = {LEFT_START_POS[0], LEFT_START_POS[1] + LABEL_Y_SPACING};
+        int[] totalPos = {LEFT_START_POS[0], totalLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] uniquesLabelPos = {LEFT_START_POS[0], totalLabelPos[1] + LABEL_Y_SPACING};
+        int[] uniquesPos = {LEFT_START_POS[0], uniquesLabelPos[1] + VALUE_Y_OFFSET};
+
+        g2d.setFont(BoarBotApp.getBot().getFont().deriveFont((float) mediumFont));
+        FontMetrics fm = g2d.getFontMetrics();
+
+        int maxStrLen = Math.max(fm.stringWidth("Unique Boars"), fm.stringWidth("Total Boars"));
+
+        g2d.setFont(BoarBotApp.getBot().getFont().deriveFont((float) bigFont));
+        fm = g2d.getFontMetrics();
+
+        String totalBoarStr = "%,d".formatted(this.profileData.totalBoars());
+        String uniqueBoarsStr = this.getFractionStr(this.profileData.uniqueBoars(), this.maxUniques);
+
+        maxStrLen = Math.max(maxStrLen, fm.stringWidth(totalBoarStr));
+        maxStrLen = Math.max(maxStrLen, fm.stringWidth(uniqueBoarsStr.replaceAll("<>(.*?)<>", "")));
+
+        int[] dailyLabelPos = {totalLabelPos[0] + maxStrLen + LEFT_RIGHT_PADDING, totalLabelPos[1]};
+        int[] dailyPos = {dailyLabelPos[0], dailyLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] streakLabelPos = {dailyLabelPos[0], dailyLabelPos[1] + LABEL_Y_SPACING};
+        int[] streakPos = {streakLabelPos[0], streakLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] nextDailyPos = {BOTTOM_START_POS[0], BOTTOM_START_POS[1] + VALUE_Y_OFFSET};
+
+        String nextDailyStr = this.getDailyStr();
+
+        int[] nextQuestLabelPos = {BOTTOM_START_POS[0], BOTTOM_START_POS[1] + LABEL_Y_SPACING};
+        int[] nextQuestPos = {nextQuestLabelPos[0], nextQuestLabelPos[1] + VALUE_Y_OFFSET};
+
+        String nextQuestStr = TimeUtil.getTimeDistance(TimeUtil.getQuestResetMilli(), false);
+        nextQuestStr = Character.toUpperCase(nextQuestStr.charAt(0)) + nextQuestStr.substring(1);
+
+        int[] blessPos = {RIGHT_START_POS[0], RIGHT_START_POS[1] + VALUE_Y_OFFSET};
+
+        String blessHex = this.getBlessHex();
+        String blessStr = "%,d<>silver<>/<>blessing2<>%,d".formatted(
+            this.profileData.blessings(), this.nums.getMaxStreakBless() + this.nums.getMaxQuestBless() +
+                this.nums.getMaxUniqueBless() + this.nums.getMaxOtherBless()
+        );
+
+        int[] streakBlessLabelPos = {RIGHT_START_POS[0], RIGHT_START_POS[1] + LABEL_Y_SPACING};
+        int[] streakBlessPos = {streakBlessLabelPos[0], streakBlessLabelPos[1] + VALUE_Y_OFFSET};
+
+        String streakBlessStr = this.getFractionStr(this.profileData.streakBless(), this.nums.getMaxStreakBless());
+
+        int[] questBlessLabelPos = {streakBlessLabelPos[0], streakBlessLabelPos[1] + LABEL_Y_SPACING};
+        int[] questBlessPos = {questBlessLabelPos[0], questBlessLabelPos[1] + VALUE_Y_OFFSET};
+
+        String questBlessStr = this.getFractionStr(this.profileData.questBless(), this.nums.getMaxQuestBless());
+
+        int[] uniqueBlessPos = {RIGHT_RIGHT_START_POS[0], RIGHT_RIGHT_START_POS[1] + VALUE_Y_OFFSET};
+
+        String uniqueBlessStr = this.getFractionStr(this.profileData.uniqueBless(), this.nums.getMaxUniqueBless());
+
+        int[] otherBlessLabelPos = {RIGHT_RIGHT_START_POS[0], RIGHT_RIGHT_START_POS[1] + LABEL_Y_SPACING};
+        int[] otherBlessPos = {otherBlessLabelPos[0], otherBlessLabelPos[1] + VALUE_Y_OFFSET};
+
+        String otherBlessStr = this.getFractionStr(this.profileData.otherBless(), this.nums.getMaxOtherBless());
+
+        String recentRarityKey = this.profileData.lastBoarID() == null
+            ? ""
+            : BoarUtil.findRarityKey(this.profileData.lastBoarID());
+        String recentStr = this.profileData.lastBoarID() == null
+            ? "RECENT"
+            : "<>%s<>RECENT".formatted(recentRarityKey);
+
+        String favoriteRarityKey = this.profileData.favoriteBoarID() == null
+            ? ""
+            : BoarUtil.findRarityKey(this.profileData.favoriteBoarID());
+        String favoriteStr = this.profileData.favoriteBoarID() == null
+            ? "FAVORITE"
+            : "<>%s<>FAVORITE".formatted(favoriteRarityKey);
+
+        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getProfUnderlay();
+
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
 
-        String[] boarIDs = this.boarInfos.keySet().toArray(new String[0]);
-        int lastBoarIndex = Math.min((this.page+1)*BOARS_PER_PAGE, boarIDs.length);
+        this.textDrawer = new TextDrawer(
+            g2d, "Boar Bucks", LEFT_START_POS, Align.LEFT, this.colorConfig.get("font"), mediumFont
+        );
+        textDrawer.drawText();
 
-        for (int i=this.page*BOARS_PER_PAGE; i<lastBoarIndex; i++) {
-            String boarID = boarIDs[i];
-            int relativeIndex = i - this.page*BOARS_PER_PAGE;
+        this.drawValue("<>bucks<>$%,d".formatted(this.profileData.boarBucks()), bucksPos);
 
-            int[] boarPos = {
-                    START_X + (relativeIndex % NUM_COLS) * (boarImageSize[0] + this.nums.getBorder()),
-                    START_Y + (relativeIndex / NUM_COLS) * (boarImageSize[1] + this.nums.getBorder())
-            };
+        this.drawLabel("Total Boars", totalLabelPos);
+        this.drawValue(totalBoarStr, totalPos);
 
-            int[] amountPos = new int[] {boarPos[0] + AMOUNT_X_OFFSET, boarPos[1] + AMOUNT_Y_OFFSET};
-            String amount = "%,d".formatted(Math.min(this.boarInfos.get(boarID).amount(), MAX_BOARS));
-            TextDrawer textDrawer = new TextDrawer(
-                    g2d, amount, amountPos, Align.LEFT, this.colorConfig.get("font"), this.nums.getFontMedium()
+        this.drawLabel("Unique Boars", uniquesLabelPos);
+        this.drawValue(uniqueBoarsStr, uniquesPos);
+
+        this.drawLabel("Daily Boars", dailyLabelPos);
+        this.drawValue("%,d".formatted(this.profileData.numDailies()), dailyPos);
+
+        this.drawLabel("Boar Streak", streakLabelPos);
+        this.drawValue("%,d".formatted(this.profileData.streak()), streakPos);
+
+        this.drawLabel("Next Daily Boar", BOTTOM_START_POS);
+        this.drawValue(nextDailyStr, nextDailyPos);
+
+        this.drawLabel("Quest Reset", nextQuestLabelPos);
+        this.drawValue(nextQuestStr, nextQuestPos);
+
+        this.drawLabel("Boar Blessings", RIGHT_START_POS);
+        this.drawValue(blessStr, blessPos, blessHex);
+
+        this.drawLabel("Streak Bless", streakBlessLabelPos);
+        this.drawValue(streakBlessStr, streakBlessPos);
+
+        this.drawLabel("Quest Bless", questBlessLabelPos);
+        this.drawValue(questBlessStr, questBlessPos);
+
+        this.drawLabel("Unique Bless", RIGHT_RIGHT_START_POS);
+        this.drawValue(uniqueBlessStr, uniqueBlessPos);
+
+        this.drawLabel("Other Bless", otherBlessLabelPos);
+        this.drawValue(otherBlessStr, otherBlessPos);
+
+        this.drawLabel(recentStr, RECENT_LABEL_POS);
+
+        if (this.profileData.lastBoarID() != null) {
+            BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get(
+                "medium" + this.profileData.lastBoarID()
             );
-            FontMetrics fm = g2d.getFontMetrics();
-            int[] rectangleSize = new int[] {
-                    fm.stringWidth(amount) + AMOUNT_BOX_WIDTH_OFFSET + border,
-                    AMOUNT_BOX_HEIGHT + border
-            };
+            g2d.drawImage(boarImage, RECENT_POS[0], RECENT_POS[1], null);
 
-            BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get("medium" + boarID);
-            g2d.drawImage(boarImage, boarPos[0], boarPos[1], null);
+            BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get("border" + recentRarityKey);
+            g2d.drawImage(rarityBorderImage, RECENT_POS[0], RECENT_POS[1], null);
+        }
 
-            BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get(
-                    "border" + this.boarInfos.get(boarID).rarityID()
+        this.drawLabel(favoriteStr, FAVORITE_LABEL_POS);
+
+        if (this.profileData.favoriteBoarID() != null) {
+            BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get(
+                "medium" + this.profileData.favoriteBoarID()
             );
-            g2d.drawImage(rarityBorderImage, boarPos[0], boarPos[1], null);
+            g2d.drawImage(boarImage, FAVORITE_POS[0], FAVORITE_POS[1], null);
 
-            g2d.setPaint(Color.decode(this.colorConfig.get("dark")));
-            g2d.fill(new RoundRectangle2D.Double(
-                    boarPos[0]-border,
-                    boarPos[1]-border,
-                    rectangleSize[0],
-                    rectangleSize[1],
-                    this.nums.getBorder() * 2,
-                    this.nums.getBorder() * 2
-            ));
-            textDrawer.drawText();
+            BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get("border" + favoriteRarityKey);
+            g2d.drawImage(rarityBorderImage, FAVORITE_POS[0], FAVORITE_POS[1], null);
         }
 
         this.drawTopInfo();
         return this.getFileUpload();
+    }
+
+    private void drawLabel(String text, int[] pos) {
+        this.drawLabel(text, pos, this.colorConfig.get("font"));
+    }
+
+    private void drawLabel(String text, int[] pos, String colorVal) {
+        int mediumFont = this.nums.getFontMedium();
+
+        this.textDrawer.setText(text);
+        this.textDrawer.setPos(pos);
+        this.textDrawer.setFontSize(mediumFont);
+        this.textDrawer.setColorVal(colorVal);
+        this.textDrawer.drawText();
+    }
+
+    private void drawValue(String text, int[] pos) {
+        this.drawValue(text, pos, this.colorConfig.get("silver"));
+    }
+
+    private void drawValue(String text, int[] pos, String colorVal) {
+        int bigFont = this.nums.getFontBig();
+
+        this.textDrawer.setText(text);
+        this.textDrawer.setPos(pos);
+        this.textDrawer.setFontSize(bigFont);
+        this.textDrawer.setColorVal(colorVal);
+        this.textDrawer.drawText();
+    }
+
+    private String getFractionStr(int val, int max) {
+        return val >= max
+            ? "<>gold<>%,d<>silver<>/<>gold<>%,d".formatted(val, max)
+            : "<>error<>%,d<>silver<>/<>green<>%,d".formatted(val, max);
+    }
+
+    private String getDailyStr() {
+        boolean dailyReady = this.profileData.lastDailyTimestamp() == null ||
+            this.profileData.lastDailyTimestamp().getTime() < TimeUtil.getLastDailyResetMilli();
+        long milliDistance = TimeUtil.getNextDailyResetMilli() - TimeUtil.getCurMilli();
+        boolean showTime = this.profileData.lastDailyTimestamp() != null &&
+            this.profileData.lastDailyTimestamp().getTime() >= TimeUtil.getLastDailyResetMilli() - 1000 * 60 * 60 * 24;
+        String distanceColor = milliDistance <= 1000 * 60 * 60 * 6
+            ? "<>error<>"
+            : "<>maintenance<>";
+
+        String nextDailyStr;
+
+        if (dailyReady) {
+            nextDailyStr = "<>green<>READY";
+            nextDailyStr += showTime
+                ? " <>silver<>(%s%s<>silver<>)".formatted(
+                    distanceColor, TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), true)
+                )
+                : "";
+        } else {
+            nextDailyStr = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), false);
+            nextDailyStr = Character.toUpperCase(nextDailyStr.charAt(0)) + nextDailyStr.substring(1);
+        }
+
+        return nextDailyStr;
+    }
+
+    private String getBlessHex() {
+        String[] bless1Colors = this.colorConfig.get("blessing1").substring(1).split("(?<=\\G.{2})");
+        String[] bless2Colors = this.colorConfig.get("blessing2").substring(1).split("(?<=\\G.{2})");
+        double blessPercent = this.profileData.blessings() / (double) (this.nums.getMaxStreakBless() +
+            this.nums.getMaxQuestBless() + this.nums.getMaxUniqueBless() + this.nums.getMaxOtherBless());
+
+        String blessRed = Integer.toHexString(
+            (int) (Integer.parseInt(bless1Colors[0], 16) + blessPercent *
+                (Integer.parseInt(bless2Colors[0], 16) - Integer.parseInt(bless1Colors[0], 16)))
+        );
+        blessRed = blessRed.length() == 1
+            ? "0" + blessRed
+            : blessRed;
+
+        String blessGreen = Integer.toHexString(
+            (int) (Integer.parseInt(bless1Colors[1], 16) + blessPercent *
+                (Integer.parseInt(bless2Colors[1], 16) - Integer.parseInt(bless1Colors[1], 16)))
+        );
+        blessGreen = blessGreen.length() == 1
+            ? "0" + blessGreen
+            : blessGreen;
+
+        String blessBlue = Integer.toHexString(
+            (int) (Integer.parseInt(bless1Colors[2], 16) + blessPercent *
+                (Integer.parseInt(bless2Colors[2], 16) - Integer.parseInt(bless1Colors[2], 16)))
+        );
+        blessBlue = blessBlue.length() == 1
+            ? "0" + blessBlue
+            : blessBlue;
+
+        return "#" + blessRed + blessGreen + blessBlue;
     }
 }

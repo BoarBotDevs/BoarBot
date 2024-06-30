@@ -20,7 +20,7 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import io.github.cdimascio.dotenv.Dotenv;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -38,7 +38,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.List;
 
-@Log4j2
+@Slf4j
 public class BoarBot implements Bot {
     private final Dotenv env = Dotenv.configure()
         .filename(".env")
@@ -107,6 +107,24 @@ public class BoarBot implements Bot {
 
             this.config = g.fromJson(jsonStr.toString(), BotConfig.class);
 
+            for (IndivItemConfig boar : this.config.getItemConfig().getBoars().values()) {
+                if (boar.getPluralName() == null) {
+                    boar.setPluralName(boar.name + "s");
+                }
+            }
+
+            for (IndivItemConfig badge : this.config.getItemConfig().getBadges().values()) {
+                if (badge.getPluralName() == null) {
+                    badge.setPluralName(badge.name + "s");
+                }
+            }
+
+            for (IndivItemConfig powerup : this.config.getItemConfig().getPowerups().values()) {
+                if (powerup.getPluralName() == null) {
+                    powerup.setPluralName(powerup.name + "s");
+                }
+            }
+
             File fontFile = new File(
                 this.config.getPathConfig().getFontAssets() + this.config.getPathConfig().getMainFont()
             );
@@ -134,7 +152,7 @@ public class BoarBot implements Bot {
             String tableColumns = "(boar_id, rarity_id, is_skyblock)";
 
             if (databaseType.equals("rarities")) {
-                tableColumns = "(rarity_id, prior_rarity_id, base_bucks)";
+                tableColumns = "(rarity_id, prior_rarity_id, base_bucks, hunter_need)";
             } else if (databaseType.equals("quests")) {
                 tableColumns = "(quest_id, easy_value, medium_value, hard_value, very_hard_value, value_type)";
             }
@@ -149,7 +167,11 @@ public class BoarBot implements Bot {
             switch (databaseType) {
                 case "boars" -> {
                     for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
-                        int isSB = this.getConfig().getItemConfig().getBoars().get(boarID).getIsSB() ? 1 : 0;
+                        if (this.getConfig().getItemConfig().getBoars().get(boarID).isBlacklisted()) {
+                            continue;
+                        }
+
+                        int isSB = this.getConfig().getItemConfig().getBoars().get(boarID).isSB() ? 1 : 0;
                         String rarityID = BoarUtil.findRarityKey(boarID);
 
                         sqlStatement.append("('%s','%s',%d),".formatted(boarID, rarityID, isSB));
@@ -158,9 +180,10 @@ public class BoarBot implements Bot {
                 case "rarities" -> {
                     String priorRarityID = null;
                     for (String rarityID : this.getConfig().getRarityConfigs().keySet()) {
-                        int score = this.getConfig().getRarityConfigs().get(rarityID).baseScore;
+                        int score = this.getConfig().getRarityConfigs().get(rarityID).getBaseScore();
+                        int hunterNeed = this.getConfig().getRarityConfigs().get(rarityID).isHunterNeed() ? 1 : 0;
 
-                        sqlStatement.append("('%s','%s',%d),".formatted(rarityID, priorRarityID, score));
+                        sqlStatement.append("('%s','%s',%d,%d),".formatted(rarityID, priorRarityID, score, hunterNeed));
                         priorRarityID = rarityID;
                     }
                 }
@@ -224,6 +247,10 @@ public class BoarBot implements Bot {
 
                 GraphicsUtil.drawImage(mediumBoarGraphics, filePath, origin, mediumBoarSize);
                 this.imageCacheMap.put("medium" + boarID, mediumBoarImage);
+
+//                ItemImageGenerator itemGen = new ItemImageGenerator(null, "Daily Boar!", boarID);
+//                ByteArrayInputStream byteArrayIS = new ByteArrayInputStream(itemGen.generate(true));
+//                ImageIO.write(ImageIO.read(byteArrayIS), "png", new FileOutputStream("bubble/" + boarID + ".png"));
             } catch (Exception exception) {
                 log.error("Failed to generate cache image for %s".formatted(boarID), exception);
                 System.exit(-1);
@@ -232,7 +259,7 @@ public class BoarBot implements Bot {
 
         log.info("Successfully loaded all boar images into cache");
 
-        String rarityBorderPath = pathConfig.getMegaMenuAssets() + pathConfig.getCollRarityBorder();
+        String rarityBorderPath = pathConfig.getMegaMenuAssets() + pathConfig.getRarityBorder();
 
         for (String rarityID : this.getConfig().getRarityConfigs().keySet()) {
             String color = this.getConfig().getColorConfig().get(rarityID);

@@ -235,9 +235,9 @@ public class StringConfig {
 
     // Miscellaneous strings
 
-    private String multiplierName = "";
-    private String multiplierPluralName = "";
-    private String multiplierSymbol = "";
+    private String blessingsName = "";
+    private String blessingsPluralName = "";
+    private String blessingsSymbol = "";
     private String noParentChannel = "";
     private String notValidChannel = "";
     private String defaultSelectPlaceholder = "";

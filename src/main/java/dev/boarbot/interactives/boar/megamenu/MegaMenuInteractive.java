@@ -6,16 +6,19 @@ import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
+import dev.boarbot.entities.boaruser.ProfileData;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.modals.PageInputModalHandler;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.megamenu.CollectionImageGenerator;
 import dev.boarbot.util.generators.megamenu.MegaMenuGenerator;
+import dev.boarbot.util.generators.megamenu.ProfileImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.modal.ModalUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -43,10 +46,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Log4j2
+@Slf4j
 public class MegaMenuInteractive extends ModalInteractive {
     private int page;
     private MegaMenuView curView;
+    private boolean isSkyblockGuild;
     private ActionRow[] curComponents = new ActionRow[0];
     private ModalHandler modalHandler = null;
     private List<SelectOption> navOptions = new ArrayList<>();
@@ -64,6 +68,7 @@ public class MegaMenuInteractive extends ModalInteractive {
     private String firstJoinedDate;
     private List<String> badgeIDs;
     private Map<String, BoarInfo> boarInfos;
+    private ProfileData profileData;
 
     private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getMegaMenu();
 
@@ -155,6 +160,9 @@ public class MegaMenuInteractive extends ModalInteractive {
                             .format(MegaMenuInteractive.dateFormatter)
                         : this.config.getStringConfig().getUnavailable();
 
+                    this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
+                        connection, this.interaction.getGuild().getId()
+                    );
                     this.badgeIDs = boarUser.getCurrentBadges(connection);
                     this.viewsToUpdateData.replaceAll((k, v) -> true);
                 }
@@ -165,7 +173,7 @@ public class MegaMenuInteractive extends ModalInteractive {
             }
 
             MegaMenuGenerator imageGen = switch (this.curView) {
-                case MegaMenuView.PROFILE -> this.makeCollectionGen();
+                case MegaMenuView.PROFILE -> this.makeProfileGen();
                 case MegaMenuView.COLLECTION -> this.makeCollectionGen();
                 case MegaMenuView.COMPENDIUM -> this.makeCollectionGen();
                 case MegaMenuView.STATS -> this.makeCollectionGen();
@@ -193,6 +201,25 @@ public class MegaMenuInteractive extends ModalInteractive {
             this.page = Integer.parseInt(pageInput)-1;
             this.execute(null);
         } catch (NumberFormatException ignore) {}
+    }
+
+    public MegaMenuGenerator makeProfileGen() throws SQLException {
+        MegaMenuView view = MegaMenuView.PROFILE;
+
+        if (this.viewsToUpdateData.get(view) == null || !this.viewsToUpdateData.get(view)) {
+            try (Connection connection = DataUtil.getConnection()) {
+                this.profileData = this.boarUser.getProfileData(connection);
+            }
+        }
+
+        int maxPage = 0;
+        if (this.page > maxPage) {
+            this.page = maxPage;
+        }
+
+        return new ProfileImageGenerator(
+            this.page, this.boarUser, this.badgeIDs, this.firstJoinedDate, this.isSkyblockGuild, this.profileData
+        );
     }
 
     private MegaMenuGenerator makeCollectionGen() throws SQLException {
@@ -235,7 +262,7 @@ public class MegaMenuInteractive extends ModalInteractive {
     @Override
     public ActionRow[] getCurComponents() {
         this.curComponents = switch (this.curView) {
-            case MegaMenuView.PROFILE -> getCollectionComponents();
+            case MegaMenuView.PROFILE -> getProfileComponents();
             case MegaMenuView.COLLECTION -> getCollectionComponents();
             case MegaMenuView.COMPENDIUM -> getCollectionComponents();
             case MegaMenuView.STATS -> getCollectionComponents();
@@ -245,6 +272,22 @@ public class MegaMenuInteractive extends ModalInteractive {
         };
 
         return this.curComponents;
+    }
+
+    private ActionRow[] getProfileComponents() {
+        ActionRow[] nav = this.getNav();
+
+        Button leftBtn = ((Button) nav[1].getComponents().getFirst()).asDisabled();
+        Button pageBtn = ((Button) nav[1].getComponents().get(1)).asDisabled();
+        Button rightBtn = ((Button) nav[1].getComponents().get(2)).asDisabled();
+
+        nav[1].getComponents().set(0, leftBtn);
+        nav[1].getComponents().set(1, pageBtn);
+        nav[1].getComponents().set(2, rightBtn);
+
+        return new ActionRow[] {
+            nav[0], nav[1]
+        };
     }
 
     private ActionRow[] getCollectionComponents() {

@@ -7,14 +7,14 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Log4j2
+@Slf4j
 public class BoarUser {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
@@ -240,6 +240,56 @@ public class BoarUser {
         return boarInfo;
     }
 
+    public ProfileData getProfileData(Connection connection) throws SQLException {
+        ProfileData profileData = null;
+        String query = """
+            SELECT
+                last_boar_id,
+                favorite_boar_id,
+                total_bucks,
+                total_boars,
+                num_dailies,
+                last_daily_timestamp,
+                unique_boars,
+                num_skyblock,
+                boar_streak,
+                blessings,
+                streak_bless,
+                quest_bless,
+                unique_bless,
+                other_bless
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    profileData = new ProfileData(
+                        results.getString("last_boar_id"),
+                        results.getString("favorite_boar_id"),
+                        results.getLong("total_bucks"),
+                        results.getLong("total_boars"),
+                        results.getInt("num_dailies"),
+                        results.getTimestamp("last_daily_timestamp"),
+                        results.getInt("unique_boars"),
+                        results.getInt("num_skyblock"),
+                        results.getInt("boar_streak"),
+                        results.getInt("blessings"),
+                        results.getInt("streak_bless"),
+                        results.getInt("unique_bless"),
+                        results.getInt("quest_bless"),
+                        results.getInt("other_bless")
+                    );
+                }
+            }
+        }
+
+        return profileData;
+    }
+
     public boolean canUseDaily(Connection connection) throws SQLException {
         this.addUser(connection);
 
@@ -257,9 +307,8 @@ public class BoarUser {
                 if (results.next()) {
                     Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
 
-                    canUseDaily = lastDailyTimestamp == null || lastDailyTimestamp.before(
-                        new Timestamp(TimeUtil.getLastDailyResetMilli())
-                    );
+                    canUseDaily = lastDailyTimestamp == null ||
+                        lastDailyTimestamp.getTime() < TimeUtil.getLastDailyResetMilli();
 
                     this.isFirstDaily = lastDailyTimestamp == null;
                 }
@@ -337,45 +386,45 @@ public class BoarUser {
         return firstJoinedTimestamp;
     }
 
-    public long getMultiplier(Connection connection) throws SQLException {
-        return this.getMultiplier(connection, 0);
+    public long getBlessings(Connection connection) throws SQLException {
+        return this.getBlessings(connection, 0);
     }
 
-    public long getMultiplier(Connection connection, int extraActive) throws SQLException {
-        long multiplier = 0;
+    public long getBlessings(Connection connection, int extraActive) throws SQLException {
+        long blessings = 0;
 
-        String multiplierQuery = """
-            SELECT multiplier, miracles_active
+        String blessingsQuery = """
+            SELECT blessings, miracles_active
             FROM users
             WHERE user_id = ?;
         """;
 
-        try (PreparedStatement multiplierStatement = connection.prepareStatement(multiplierQuery)) {
-            multiplierStatement.setString(1, this.userID);
+        try (PreparedStatement blessingsStatement = connection.prepareStatement(blessingsQuery)) {
+            blessingsStatement.setString(1, this.userID);
 
-            try (ResultSet results = multiplierStatement.executeQuery()) {
+            try (ResultSet results = blessingsStatement.executeQuery()) {
                 if (results.next()) {
                     int miraclesActive = results.getInt("miracles_active");
-                    multiplier = results.getLong("multiplier");
+                    blessings = results.getLong("blessings");
                     int miracleIncreaseMax = this.config.getNumberConfig().getMiracleIncreaseMax();
 
                     int activesLeft = miraclesActive+extraActive;
                     for (; activesLeft>0; activesLeft--) {
-                        long amountToAdd = (long) Math.min(Math.ceil(multiplier * 0.1), miracleIncreaseMax);
+                        long amountToAdd = (long) Math.min(Math.ceil(blessings * 0.1), miracleIncreaseMax);
 
                         if (amountToAdd == this.config.getNumberConfig().getMiracleIncreaseMax()) {
                             break;
                         }
 
-                        multiplier += amountToAdd;
+                        blessings += amountToAdd;
                     }
 
-                    multiplier += (long) activesLeft * miracleIncreaseMax;
+                    blessings += (long) activesLeft * miracleIncreaseMax;
                 }
             }
         }
 
-        return multiplier;
+        return blessings;
     }
 
     public void setNotifications(Connection connection, String channelID) throws SQLException {

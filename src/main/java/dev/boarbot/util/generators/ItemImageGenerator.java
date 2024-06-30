@@ -10,7 +10,7 @@ import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 
 import javax.imageio.ImageIO;
@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.Map;
 
-@Log4j2
+@Slf4j
 public class ItemImageGenerator {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
@@ -144,7 +144,9 @@ public class ItemImageGenerator {
                 );
             }
 
-            this.addAnimatedUser();
+            if (this.user != null) {
+                this.addAnimatedUser();
+            }
         } else {
             this.generatedImageByteArray = BoarBotApp.getBot().getByteCacheMap().get(
                 "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey
@@ -159,7 +161,9 @@ public class ItemImageGenerator {
                 );
             }
 
-            this.addStaticUser();
+            if (this.user != null) {
+                this.addStaticUser();
+            }
         }
 
         return this.generatedImageByteArray;
@@ -420,7 +424,7 @@ public class ItemImageGenerator {
 
             int[] bucksPos = {BOX_TEXT_X, BOX_TWO_Y + BOX_TEXT_Y_OFFSET};
 
-            textDrawer.setText("+//bucks//$" + formattedBucks);
+            textDrawer.setText("+<>bucks<>$" + formattedBucks);
             textDrawer.setPos(bucksPos);
             textDrawer.drawText();
         }

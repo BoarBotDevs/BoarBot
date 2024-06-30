@@ -5,12 +5,12 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.boarmanage.SetupInteractive;
 import dev.boarbot.util.generators.EmbedGenerator;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
-@Log4j2
+@Slf4j
 public class SetupSubcommand extends Subcommand {
     public SetupSubcommand(SlashCommandInteractionEvent event) {
         super(event);

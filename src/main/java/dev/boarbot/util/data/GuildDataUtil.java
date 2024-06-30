@@ -34,4 +34,25 @@ public class GuildDataUtil {
 
         return channelIDs;
     }
+
+    public static boolean isSkyblockGuild(Connection connection, String guildID) throws SQLException {
+        boolean isSkyblock = false;
+        String query = """
+            SELECT is_skyblock_community
+            FROM guilds
+            WHERE guild_id = ?
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, guildID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    isSkyblock = results.getBoolean("is_skyblock_community");
+                }
+            }
+        }
+
+        return isSkyblock;
+    }
 }

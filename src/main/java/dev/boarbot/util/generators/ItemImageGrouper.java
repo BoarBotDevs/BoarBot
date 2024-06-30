@@ -5,7 +5,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.PathConfig;
 import dev.boarbot.util.graphics.GraphicsUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.List;
 
-@Log4j2
+@Slf4j
 public final class ItemImageGrouper {
     private static final int[] IMAGE_SIZE = ItemImageGenerator.IMAGE_SIZE;
     private static final int HORIZ_PADDING = 135;

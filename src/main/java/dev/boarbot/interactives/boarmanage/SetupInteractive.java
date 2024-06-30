@@ -7,7 +7,7 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.generators.EmbedGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Log4j2
+@Slf4j
 public class SetupInteractive extends Interactive {
     private int page = 0;
     private final EmbedGenerator embedGen = new EmbedGenerator("");
@@ -85,7 +85,7 @@ public class SetupInteractive extends Interactive {
         Button nextBtn = ((Button) this.curComponents[1].getComponents().get(2)).withDisabled(false);
         this.curComponents[1].getComponents().set(2, nextBtn);
 
-        this.embedGen.setStr(strConfig.getSetupFinished2() + (this.isSb ? "//green//Yes" : "//error//No"));
+        this.embedGen.setStr(strConfig.getSetupFinished2() + (this.isSb ? "<>green<>Yes" : "<>error<>No"));
         this.embedGen.setColor(colorConfig.get("font"));
 
         this.editedMsg.setFiles(this.embedGen.generate()).setComponents(this.curComponents);

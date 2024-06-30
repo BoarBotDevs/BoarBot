@@ -3,15 +3,16 @@ package dev.boarbot.modals;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.util.modal.ModalUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Log4j2
+@Slf4j
 public abstract class ModalHandler {
     protected final BotConfig config = BoarBotApp.getBot().getConfig();
 
@@ -37,9 +38,11 @@ public abstract class ModalHandler {
 
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);
 
-        Executors.newSingleThreadExecutor().submit(() -> this.delayStop(
-            this.config.getNumberConfig().getInteractiveIdle()
-        ));
+        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+            executor.submit(() -> this.delayStop(
+                this.config.getNumberConfig().getInteractiveIdle()
+            ));
+        }
     }
 
     public abstract void execute(ModalInteractionEvent compEvent);

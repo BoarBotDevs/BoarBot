@@ -4,11 +4,10 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,7 +30,7 @@ public final class BoarUtil {
     }
 
     public static List<String> getRandBoarIDs(
-        long multiplier, String guildID, Connection connection
+        long blessings, String guildID, Connection connection
     ) throws SQLException {
         BotConfig config = BoarBotApp.getBot().getConfig();
 
@@ -77,7 +76,7 @@ public final class BoarUtil {
             }
 
             weight = weight * (
-                Math.atan(((multiplier - 1) * weight) / rarityIncreaseConst) * (maxWeight - weight) / weight + 1
+                Math.atan((blessings * weight) / rarityIncreaseConst) * (maxWeight - weight) / weight + 1
             );
 
             if (weight > newMaxWeight) {
@@ -91,11 +90,11 @@ public final class BoarUtil {
 
         double truthWeight = 0;
 
-        if (multiplier >= 100000) {
+        if (blessings >= 100000) {
             truthWeight = totalWeight / 50;
-        } else if (multiplier >= 10000) {
+        } else if (blessings >= 10000) {
             truthWeight = totalWeight / 750;
-        } else if (multiplier >= 1000) {
+        } else if (blessings >= 1000) {
             truthWeight = totalWeight / 10000;
         }
 
@@ -115,7 +114,7 @@ public final class BoarUtil {
         int numBoars = 1;
 
         for (int i=3; i<6; i++) {
-            if (Math.random() < multiplier / Math.pow(10, i)) {
+            if (Math.random() < blessings / Math.pow(10, i)) {
                 numBoars++;
             }
         }
@@ -147,33 +146,19 @@ public final class BoarUtil {
 
         double randBoar = Math.random();
         List<String> validBoars = new ArrayList<>();
+        boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, guildID);
 
-        String query = """
-            SELECT is_skyblock_community
-            FROM guilds
-            WHERE guild_id = ?
-        """;
+        for (String boarID : rarityConfig.getBoars()) {
+            IndivItemConfig boarConfig = config.getItemConfig().getBoars().get(boarID);
+            boolean blacklisted = boarConfig.isBlacklisted();
+            boolean isSecret = boarConfig.isSecret();
+            boolean isSkyblockBoar = boarConfig.isSB();
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, guildID);
-
-            try (ResultSet results = statement.executeQuery()) {
-                if (results.next()) {
-                    boolean isSkyblockGuild = results.getBoolean("is_skyblock_community");
-
-                    for (String boarID : rarityConfig.getBoars()) {
-                        IndivItemConfig boarConfig = config.getItemConfig().getBoars().get(boarID);
-                        boolean blacklisted = boarConfig.getBlacklisted() != null && boarConfig.getBlacklisted();
-                        boolean isSkyblockBoar = boarConfig.getIsSB() != null && boarConfig.getIsSB();
-
-                        if (blacklisted || isSkyblockBoar && !isSkyblockGuild) {
-                            continue;
-                        }
-
-                        validBoars.add(boarID);
-                    }
-                }
+            if (blacklisted || isSecret || isSkyblockBoar && !isSkyblockGuild) {
+                continue;
             }
+
+            validBoars.add(boarID);
         }
 
         if (validBoars.isEmpty()) {

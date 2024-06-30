@@ -3,12 +3,12 @@ package dev.boarbot.util.data;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.cdimascio.dotenv.Dotenv;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Log4j2
+@Slf4j
 public class DataUtil {
     private static final Dotenv env = Dotenv.configure()
         .filename(".env")

@@ -1,8 +1,5 @@
 package dev.boarbot.util.time;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
-
 import java.time.*;
 
 public final class TimeUtil {
@@ -25,6 +22,17 @@ public final class TimeUtil {
         return Instant.now().toEpochMilli();
     }
 
+    public static long getQuestResetMilli() {
+        LocalDateTime dateTime = LocalDate.now(ZoneOffset.UTC).atStartOfDay().minusMinutes(1);
+        int dayOfWeek = dateTime.getDayOfWeek().getValue();
+        int daysToAdd = dayOfWeek >= 6
+            ? 7 - dayOfWeek + 6
+            : 6 - dayOfWeek;
+        dateTime = dateTime.plusDays(daysToAdd);
+
+        return dateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
+    }
+
     public static boolean isHalloween() {
         LocalDateTime curDateTime = LocalDateTime.now();
         return curDateTime.getMonth() == Month.OCTOBER && curDateTime.getDayOfMonth() >= 24;
@@ -35,7 +43,7 @@ public final class TimeUtil {
         return curDateTime.getMonth() == Month.DECEMBER && curDateTime.getDayOfMonth() >= 24;
     }
 
-    public static String getTimeDistance(long milli) {
+    public static String getTimeDistance(long milli, boolean shortened) {
         long millisDistance = milli - TimeUtil.getCurMilli();
         boolean isInPast = millisDistance < 0;
         millisDistance = Math.abs(millisDistance);
@@ -43,34 +51,60 @@ public final class TimeUtil {
         int years = (int) (millisDistance / YEAR_MILLI);
         int months = (int) (millisDistance / MONTH_MILLI);
         int days = (int) (millisDistance / DAY_MILLI);
-        int hours = (int) (millisDistance / HOUR_MILLI);
+        int hours = (int) ((millisDistance + 1000 * 60 * 30) / HOUR_MILLI);
         int minutes = (int) (millisDistance / MINUTE_MILLI);
         int seconds = (int) (millisDistance / SECOND_MILLI);
 
-        String distanceStr = isInPast
-            ? "%,d %s ago"
-            : "in %,d %s";
+        String distanceStr;
+
+        if (shortened) {
+            distanceStr = isInPast
+                ? "-%,d%s"
+                : "%,d%s";
+        } else {
+            distanceStr = isInPast
+                ? "%,d %s ago"
+                : "in %,d %s";
+        }
 
         int valueToReturn = seconds;
-        String valueType = "second";
+        String valueType = shortened
+            ? "s"
+            : "second";
 
         if (years > 0) {
             valueToReturn = years;
-            valueType = "year";
+            valueType = shortened
+                ? "s"
+                : "second";
         } else if (months > 0) {
             valueToReturn = months;
-            valueType = "month";
+            valueType = shortened
+                ? "mo"
+                : "month";
         } else if (days > 0) {
             valueToReturn = days;
-            valueType = "day";
+            valueType = shortened
+                ? "d"
+                : "day";
         } else if (hours > 0) {
             valueToReturn = hours;
-            valueType = "hour";
+            valueType = shortened
+                ? "h"
+                : "hour";
         } else if (minutes > 0) {
             valueToReturn = minutes;
-            valueType = "minute";
+            valueType = shortened
+                ? "m"
+                : "minute";
         }
 
-        return distanceStr.formatted(valueToReturn, valueToReturn == 1 ? valueType : valueType + "s");
+        if (!shortened) {
+            valueType = valueToReturn == 1
+                ? valueType
+                : valueType + "s";
+        }
+
+        return distanceStr.formatted(valueToReturn, valueType);
     }
 }

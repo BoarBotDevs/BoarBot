@@ -33,13 +33,13 @@ public class EmbedGenerator {
 
     public EmbedGenerator(String str, String color) {
         this.str = str;
-        this.pureStr = str.replaceAll("//(.*?)//", "");
+        this.pureStr = str.replaceAll("<>(.*?)<>", "");
         this.color = color == null ? this.config.getColorConfig().get("font") : color;
     }
 
     public void setStr(String str) {
         this.str = str;
-        this.pureStr = str.replaceAll("//(.*?)//", "");
+        this.pureStr = str.replaceAll("<>(.*?)<>", "");
     }
 
     public FileUpload generate() throws IOException {

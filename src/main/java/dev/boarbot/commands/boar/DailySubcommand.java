@@ -15,7 +15,7 @@ import dev.boarbot.util.generators.EmbedGenerator;
 import dev.boarbot.util.generators.ItemImageGenerator;
 import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.time.TimeUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
@@ -25,7 +25,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Log4j2
+@Slf4j
 public class DailySubcommand extends Subcommand implements Synchronizable {
     private List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucksGotten = new ArrayList<>();
@@ -58,7 +58,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         if (!this.canDaily) {
             this.interaction.deferReply().setEphemeral(true).queue();
 
-            String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli());
+            String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), false);
             dailyResetDistance = dailyResetDistance.substring(dailyResetDistance.indexOf(' ')+1);
 
             String replyStr = this.config.getStringConfig().getDailyUsed().formatted(dailyResetDistance);
@@ -112,8 +112,8 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
             this.isFirstDaily = boarUser.isFirstDaily();
 
-            long multiplier = boarUser.getMultiplier(connection);
-            this.boarIDs = BoarUtil.getRandBoarIDs(multiplier, this.interaction.getGuild().getId(), connection);
+            long blessings = boarUser.getBlessings(connection);
+            this.boarIDs = BoarUtil.getRandBoarIDs(blessings, this.interaction.getGuild().getId(), connection);
 
             boarUser.addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
             boarUser.useActiveMiracles(connection);

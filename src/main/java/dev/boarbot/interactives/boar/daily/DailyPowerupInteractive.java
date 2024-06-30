@@ -17,7 +17,7 @@ import dev.boarbot.util.generators.EmbedGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.modal.ModalUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -34,7 +34,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-@Log4j2
+@Slf4j
 public class DailyPowerupInteractive extends ModalInteractive implements Synchronizable {
     private ActionRow[] curComponents = new ActionRow[0];
 
@@ -202,19 +202,19 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             try (Connection connection = DataUtil.getConnection()) {
                 if (amount <= boarUser.getPowerupAmount(connection, "miracle")) {
-                    long multiplier = boarUser.getMultiplier(connection, amount);
+                    long blessings = boarUser.getBlessings(connection, amount);
                     this.miraclesToUse = amount;
 
                     String miracleStr = this.miraclesToUse == 1
                         ? miracleConfig.getName()
                         : miracleConfig.getPluralName();
-                    String multiplierStr = strConfig.getMultiplierSymbol() + " " + (
-                        multiplier == 1 ? strConfig.getMultiplierName() : strConfig.getMultiplierPluralName()
+                    String blessingsStr = strConfig.getBlessingsSymbol() + " " + (
+                        blessings == 1 ? strConfig.getBlessingsName() : strConfig.getBlessingsPluralName()
                     );
 
                     embedGen.setStr(
                         this.config.getStringConfig().getDailyPowAttempt().formatted(
-                            this.miraclesToUse, miracleStr, multiplier, multiplierStr
+                            this.miraclesToUse, miracleStr, blessings, blessingsStr
                         )
                     );
                 } else {

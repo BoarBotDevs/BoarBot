@@ -3,12 +3,12 @@ package dev.boarbot.listeners;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.time.TimeUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
-@Log4j2
+@Slf4j
 public class ComponentListener extends ListenerAdapter implements Runnable {
     private GenericComponentInteractionCreateEvent event = null;
 

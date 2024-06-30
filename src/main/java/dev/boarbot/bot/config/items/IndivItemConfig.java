@@ -16,12 +16,13 @@ import lombok.ToString;
 @ToString
 public class IndivItemConfig {
     public String name = "";
-    public String pluralName = "";
+    public String pluralName;
     public String description = "";
     public String file = "";
     public String staticFile;
-    public Boolean isSB;
-    public Boolean blacklisted;
+    public boolean isSB = false;
+    public boolean blacklisted = false;
+    public boolean secret = false;
     public Integer rewardAmt;
     public OutcomeConfig[] outcomes;
 }

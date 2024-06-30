@@ -5,7 +5,7 @@ import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -13,9 +13,10 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Log4j2
+@Slf4j
 public abstract class Interactive {
     protected final BotConfig config = BoarBotApp.getBot().getConfig();
 
@@ -46,9 +47,11 @@ public abstract class Interactive {
 
         BoarBotApp.getBot().getInteractives().put(this.interaction.getId() + this.user.getId(), this);
 
-        Executors.newSingleThreadExecutor().submit(() -> this.tryStop(
-            this.config.getNumberConfig().getInteractiveIdle()
-        ));
+        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+            executor.submit(() -> this.tryStop(
+                    this.config.getNumberConfig().getInteractiveIdle()
+            ));
+        }
     }
 
     public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {

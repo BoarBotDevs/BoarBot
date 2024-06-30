@@ -4,12 +4,12 @@ import dev.boarbot.commands.Subcommand;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.sql.SQLException;
 
-@Log4j2
+@Slf4j
 public class BadgesSubcommand extends Subcommand {
     public BadgesSubcommand(SlashCommandInteractionEvent event) {
         super(event);

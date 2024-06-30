@@ -27,6 +27,10 @@ public class NumberConfig {
 
     private int maxUsernameLength = 0;
     private int maxTransmute = 0;
+    private int maxStreakBless = 0;
+    private int maxQuestBless = 0;
+    private int maxUniqueBless = 0;
+    private int maxOtherBless = 0;
     private int rarityIncreaseConst = 0;
     private int miracleIncreaseMax = 0;
 

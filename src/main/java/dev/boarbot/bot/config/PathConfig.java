@@ -39,7 +39,8 @@ public class PathConfig {
     // Image/asset file names for mega menu images
 
     private String collUnderlay = "";
-    private String collRarityBorder = "";
+    private String profUnderlay = "";
+    private String rarityBorder = "";
 
     // Miscellaneous image/asset file names
 

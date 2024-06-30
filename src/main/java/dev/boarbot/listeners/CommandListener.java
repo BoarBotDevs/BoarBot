@@ -2,7 +2,7 @@ package dev.boarbot.listeners;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.commands.Subcommand;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
-@Log4j2
+@Slf4j
 public class CommandListener extends ListenerAdapter implements Runnable {
     private final Map<String, Constructor<? extends Subcommand>> subcommands = BoarBotApp.getBot().getSubcommands();
     private SlashCommandInteractionEvent event = null;

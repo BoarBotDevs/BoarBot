@@ -32,7 +32,11 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
     private final Map<String, BoarInfo> boarInfos;
 
     public PowerupsImageGenerator(
-        int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate, Map<String, BoarInfo> boarInfos
+        int page,
+        BoarUser boarUser,
+        List<String> badgeIDs,
+        String firstJoinedDate,
+        Map<String, BoarInfo> boarInfos
     ) {
         super(page, boarUser, badgeIDs, firstJoinedDate);
         this.boarInfos = boarInfos;

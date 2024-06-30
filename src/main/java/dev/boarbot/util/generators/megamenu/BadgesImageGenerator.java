@@ -32,7 +32,11 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
     private final Map<String, BoarInfo> boarInfos;
 
     public BadgesImageGenerator(
-        int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate, Map<String, BoarInfo> boarInfos
+        int page,
+        BoarUser boarUser,
+        List<String> badgeIDs,
+        String firstJoinedDate,
+        Map<String, BoarInfo> boarInfos
     ) {
         super(page, boarUser, badgeIDs, firstJoinedDate);
         this.boarInfos = boarInfos;
