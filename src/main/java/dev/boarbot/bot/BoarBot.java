@@ -224,6 +224,7 @@ public class BoarBot implements Bot {
 
         int[] origin = {0, 0};
         int[] bigBoarSize = nums.getBigBoarSize();
+        int[] mediumBigBoarSize = nums.getMediumBigBoarSize();
         int[] mediumBoarSize = nums.getMediumBoarSize();
 
         for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
@@ -236,6 +237,11 @@ public class BoarBot implements Bot {
             BufferedImage bigBoarImage = new BufferedImage(bigBoarSize[0], bigBoarSize[1], BufferedImage.TYPE_INT_ARGB);
             Graphics2D bigBoarGraphics = bigBoarImage.createGraphics();
 
+            BufferedImage mediumBigBoarImage = new BufferedImage(
+                mediumBigBoarSize[0], mediumBigBoarSize[1], BufferedImage.TYPE_INT_ARGB
+            );
+            Graphics2D mediumBigBoarGraphics = mediumBigBoarImage.createGraphics();
+
             BufferedImage mediumBoarImage = new BufferedImage(
                 mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
             );
@@ -244,6 +250,9 @@ public class BoarBot implements Bot {
             try {
                 GraphicsUtil.drawImage(bigBoarGraphics, filePath, origin, bigBoarSize);
                 this.imageCacheMap.put("big" + boarID, bigBoarImage);
+
+                GraphicsUtil.drawImage(mediumBigBoarGraphics, filePath, origin, mediumBigBoarSize);
+                this.imageCacheMap.put("mediumBig" + boarID, mediumBigBoarImage);
 
                 GraphicsUtil.drawImage(mediumBoarGraphics, filePath, origin, mediumBoarSize);
                 this.imageCacheMap.put("medium" + boarID, mediumBoarImage);
@@ -264,17 +273,28 @@ public class BoarBot implements Bot {
         for (String rarityID : this.getConfig().getRarityConfigs().keySet()) {
             String color = this.getConfig().getColorConfig().get(rarityID);
 
-            BufferedImage rarityBorderImage = new BufferedImage(
+            BufferedImage rarityMediumBorderImage = new BufferedImage(
                 mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
             );
-            Graphics2D rarityBorderG2D = rarityBorderImage.createGraphics();
+            Graphics2D rarityMediumBorderG2D = rarityMediumBorderImage.createGraphics();
+
+            BufferedImage rarityMediumBigBorderImage = new BufferedImage(
+                mediumBigBoarSize[0], mediumBigBoarSize[1], BufferedImage.TYPE_INT_ARGB
+            );
+            Graphics2D rarityMediumBigBorderG2D = rarityMediumBigBorderImage.createGraphics();
 
             try {
-                GraphicsUtil.drawRect(rarityBorderG2D, origin, mediumBoarSize, color);
-                rarityBorderG2D.setComposite(AlphaComposite.DstIn);
-                GraphicsUtil.drawImage(rarityBorderG2D, rarityBorderPath, origin, mediumBoarSize);
+                GraphicsUtil.drawRect(rarityMediumBorderG2D, origin, mediumBoarSize, color);
+                rarityMediumBorderG2D.setComposite(AlphaComposite.DstIn);
+                GraphicsUtil.drawImage(rarityMediumBorderG2D, rarityBorderPath, origin, mediumBoarSize);
+                rarityMediumBorderG2D.setComposite(AlphaComposite.SrcIn);
+                this.imageCacheMap.put("border" + rarityID, rarityMediumBorderImage);
 
-                this.imageCacheMap.put("border" + rarityID, rarityBorderImage);
+                GraphicsUtil.drawRect(rarityMediumBigBorderG2D, origin, mediumBigBoarSize, color);
+                rarityMediumBigBorderG2D.setComposite(AlphaComposite.DstIn);
+                GraphicsUtil.drawImage(rarityMediumBigBorderG2D, rarityBorderPath, origin, mediumBigBoarSize);
+                rarityMediumBigBorderG2D.setComposite(AlphaComposite.SrcIn);
+                this.imageCacheMap.put("borderMediumBig" + rarityID, rarityMediumBigBorderImage);
             } catch (Exception exception) {
                 log.error("Failed to generate cache image for %s border".formatted(rarityID), exception);
                 System.exit(-1);

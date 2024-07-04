@@ -67,36 +67,36 @@ public final class TimeUtil {
                 : "in %,d %s";
         }
 
-        int valueToReturn = seconds;
+        int valueToReturn = years;
         String valueType = shortened
-            ? "s"
-            : "second";
+            ? "y"
+            : "year";
 
-        if (years > 0) {
-            valueToReturn = years;
+        if (seconds <= 60) {
+            valueToReturn = seconds;
             valueType = shortened
                 ? "s"
                 : "second";
-        } else if (months > 0) {
-            valueToReturn = months;
-            valueType = shortened
-                ? "mo"
-                : "month";
-        } else if (days > 0) {
-            valueToReturn = days;
-            valueType = shortened
-                ? "d"
-                : "day";
-        } else if (hours > 0) {
-            valueToReturn = hours;
-            valueType = shortened
-                ? "h"
-                : "hour";
-        } else if (minutes > 0) {
+        } else if (minutes <= 60) {
             valueToReturn = minutes;
             valueType = shortened
                 ? "m"
                 : "minute";
+        } else if (hours <= 24) {
+            valueToReturn = hours;
+            valueType = shortened
+                ? "h"
+                : "hour";
+        } else if (days <= 365.2422 / 12) {
+            valueToReturn = days;
+            valueType = shortened
+                ? "d"
+                : "day";
+        } else if (months <= 12) {
+            valueToReturn = months;
+            valueType = shortened
+                ? "mo"
+                : "month";
         }
 
         if (!shortened) {

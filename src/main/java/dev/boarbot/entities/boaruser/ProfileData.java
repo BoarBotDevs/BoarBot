@@ -17,4 +17,23 @@ public record ProfileData(
     int uniqueBless,
     int questBless,
     int otherBless
-) {}
+) {
+    public ProfileData() {
+        this(
+            null,
+            null,
+            0,
+            0,
+            0,
+            null,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        );
+    }
+}

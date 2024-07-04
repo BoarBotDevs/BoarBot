@@ -94,8 +94,6 @@ public final class ItemImageGrouper {
         }
 
         if (extension.equals("gif")) {
-            Gson g = new Gson();
-
             ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             ImageIO.write(groupedImage, "png", byteArrayOS);
             resultByteArray = byteArrayOS.toByteArray();
@@ -103,7 +101,6 @@ public final class ItemImageGrouper {
             Process pythonProcess = new ProcessBuilder(
                 "python",
                 "src/main/resources/scripts/animated_item_grouper.py",
-                g.toJson(config.getNumberConfig()),
                 Integer.toString(resultByteArray.length),
                 Integer.toString(middleImageBytes.length)
             ).start();

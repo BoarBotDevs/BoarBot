@@ -94,7 +94,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
-            if (!this.config.isUnlimitedBoars() && !boarUser.canUseDaily(connection)) {
+            if (!boarUser.canUseDaily(connection) && !this.config.isUnlimitedBoars()) {
                 this.canDaily = false;
                 this.notificationsOn = boarUser.getNotificationStatus(connection);
                 return;

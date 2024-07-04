@@ -7,7 +7,7 @@ import sys
 
 path_config = json.loads(sys.argv[1])
 color_config = json.loads(sys.argv[2])
-num_config = json.loads(sys.argv[3]) // TODO: Fix
+num_config = json.loads(sys.argv[3])
 avatar_url = sys.argv[4]
 user_tag = sys.argv[5]
 score = sys.argv[6]
@@ -29,35 +29,42 @@ bucks_color = color_config['bucks']
 small_medium_font = num_config['fontSmallMedium']
 text_small_medium = ImageFont.truetype(font_path, small_medium_font)
 
-avatar_size = (num_config['itemUserAvatarWidth'], num_config['itemUserAvatarWidth'])
-user_box_y = num_config['itemBoxOneY']
+box_one_y = 195
+box_two_y = 266
+box_three_y = 358
+box_four_y = 429
+
+avatar_size = (52, 52)
+avatar_x = 43
+tag_x = 110
+avatar_y_offset = 9
+user_box_y = box_one_y
 
 if gifter_user_tag != '' and gifter_avatar_url != '':
-    user_box_y = num_config['itemBoxTwoY']
+    user_box_y = 266
 
-text_box_extra = num_config['itemTextBoxExtra']
-box_x = num_config['itemBoxX']
-box_height = num_config['itemBoxHeight']
-user_box_extra = num_config['itemUserBoxExtra']
+text_box_extra = 33
+box_x = 33
+box_height = 71
+user_box_extra = 95
+text_y_offset = 52
+text_x = 48
 
-to_pos = (num_config['itemTextX'], (num_config['itemBoxOneY'] + num_config['itemTextYOffset']))
-to_box_y = num_config['itemBoxOneY']
+to_pos = (text_x, (box_one_y + text_y_offset))
+to_box_y = box_one_y
 
-from_pos = (num_config['itemTextX'], (num_config['itemBoxThreeY'] + num_config['itemTextYOffset']))
-from_box_y = num_config['itemBoxThreeY']
+from_pos = (text_x, (box_three_y + text_y_offset))
+from_box_y = box_three_y
 
-user_avatar_pos = (num_config['itemUserAvatarX'], user_box_y + num_config['itemUserAvatarYOffset'])
-user_tag_pos = (num_config['itemUserTagX'], user_box_y + num_config['itemTextYOffset'])
+user_avatar_pos = (avatar_x, user_box_y + avatar_y_offset)
+user_tag_pos = (tag_x, user_box_y + text_y_offset)
 
-gifter_avatar_pos = (
-    num_config['itemUserAvatarX'],
-    (num_config['itemBoxFourY'] + num_config['itemUserAvatarYOffset'])
-)
-gifter_tag_pos = (num_config['itemUserTagX'], (num_config['itemBoxFourY'] + num_config['itemTextYOffset']))
-gifter_box_y = num_config['itemBoxFourY']
+gifter_avatar_pos = (avatar_x, (box_four_y + avatar_y_offset))
+gifter_tag_pos = (tag_x, (box_four_y + text_y_offset))
+gifter_box_y = box_four_y
 
-bucks_pos = (num_config['itemTextX'], (num_config['itemBoxTwoY'] + num_config['itemTextYOffset']))
-bucks_box_y = num_config['itemBoxTwoY']
+bucks_pos = (text_x, (box_two_y + text_y_offset))
+bucks_box_y = box_two_y
 
 image = Image.open(BytesIO(image_bytes))
 

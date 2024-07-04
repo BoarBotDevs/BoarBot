@@ -40,6 +40,7 @@ public class PathConfig {
 
     private String collUnderlay = "";
     private String profUnderlay = "";
+    private String compUnderlay = "";
     private String rarityBorder = "";
 
     // Miscellaneous image/asset file names

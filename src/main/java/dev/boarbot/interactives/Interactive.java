@@ -20,6 +20,8 @@ import java.util.concurrent.Executors;
 public abstract class Interactive {
     protected final BotConfig config = BoarBotApp.getBot().getConfig();
 
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+
     protected final SlashCommandInteractionEvent initEvent;
     protected final SlashCommandInteraction interaction;
     protected final User user;
@@ -47,11 +49,10 @@ public abstract class Interactive {
 
         BoarBotApp.getBot().getInteractives().put(this.interaction.getId() + this.user.getId(), this);
 
-        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
-            executor.submit(() -> this.tryStop(
-                    this.config.getNumberConfig().getInteractiveIdle()
-            ));
-        }
+        this.executor.submit(() -> this.tryStop(
+            this.config.getNumberConfig().getInteractiveIdle()
+        ));
+        this.executor.shutdown();
     }
 
     public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {

@@ -17,9 +17,12 @@ import lombok.ToString;
 public class IndivItemConfig {
     public String name = "";
     public String pluralName;
-    public String description = "";
     public String file = "";
     public String staticFile;
+    public String description = "";
+    public String classification = "None";
+    public String update = "v1.0.0";
+    public String[] searchTerms = new String[0];
     public boolean isSB = false;
     public boolean blacklisted = false;
     public boolean secret = false;

@@ -48,8 +48,8 @@ public class NumberConfig {
 
     private int[] smallBoarSize = {0, 0};
     private int[] mediumBoarSize = {0, 0};
+    private int[] mediumBigBoarSize = {0, 0};
     private int[] bigBoarSize = {0, 0};
-    private int[] largeBoarSize = {0, 0};
 
     // Powerup values
 

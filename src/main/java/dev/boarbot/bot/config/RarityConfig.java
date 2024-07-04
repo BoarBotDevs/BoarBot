@@ -24,7 +24,8 @@ public class RarityConfig {
     public boolean fromDaily = false;
     public int enhancersNeeded = 0;
     public int avgClones = 0;
-    public String[] boars = {};
     public boolean hunterNeed = false;
     public boolean givesSpecial = false;
+    public boolean hidden = false;
+    public String[] boars = {};
 }

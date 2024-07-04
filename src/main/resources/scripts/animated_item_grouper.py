@@ -1,25 +1,21 @@
-from PIL import Image, ImageSequence, ImageFont, ImageDraw, ImageChops
+from PIL import Image, ImageSequence
 import base64
 from io import BytesIO
-import requests
 import json
 import sys
-import math
 
 # Inputs from JS
 
-num_config = json.loads(sys.argv[1]) // TODO: Fix
-base_len = json.loads(sys.argv[2])
-middle_len = json.loads(sys.argv[3])
+base_len = json.loads(sys.argv[1])
+middle_len = json.loads(sys.argv[2])
 
 image_bytes = sys.stdin.buffer.read()
 
 base_image_bytes = image_bytes[:base_len]
 middle_image_bytes = image_bytes[base_len:base_len+middle_len]
 
-horiz_padding = num_config['itemHorizPadding']
-
-image_size = tuple(num_config['itemImageSize'])
+horiz_padding = 135
+image_size = (930, 1080)
 
 base_image = Image.open(BytesIO(base_image_bytes))
 middle_image = Image.open(BytesIO(middle_image_bytes))

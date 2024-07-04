@@ -1,18 +1,22 @@
 package dev.boarbot.interactives.boar.megamenu;
 
+import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.components.SelectOptionConfig;
+import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.ProfileData;
 import dev.boarbot.interactives.ModalInteractive;
+import dev.boarbot.modals.FindBoarModalHandler;
 import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.modals.PageInputModalHandler;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.megamenu.CollectionImageGenerator;
+import dev.boarbot.util.generators.megamenu.CompendiumImageGenerator;
 import dev.boarbot.util.generators.megamenu.MegaMenuGenerator;
 import dev.boarbot.util.generators.megamenu.ProfileImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
@@ -41,17 +45,17 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class MegaMenuInteractive extends ModalInteractive {
     private int page;
+    private int maxPage;
     private MegaMenuView curView;
     private boolean isSkyblockGuild;
     private ActionRow[] curComponents = new ActionRow[0];
+    private boolean filterOpen = false;
+    private boolean sortOpen = false;
     private ModalHandler modalHandler = null;
     private List<SelectOption> navOptions = new ArrayList<>();
 
@@ -67,7 +71,10 @@ public class MegaMenuInteractive extends ModalInteractive {
         .toFormatter();
     private String firstJoinedDate;
     private List<String> badgeIDs;
-    private Map<String, BoarInfo> boarInfos;
+    private Map<String, BoarInfo> ownedBoars;
+    private Map<String, BoarInfo> filteredBoars;
+    private String filterVal;
+    private Map.Entry<String, BoarInfo> curBoarEntry;
     private ProfileData profileData;
 
     private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getMegaMenu();
@@ -106,7 +113,7 @@ public class MegaMenuInteractive extends ModalInteractive {
 
             String compID = compEvent.getComponentId().split(",")[1];
 
-            if (!compID.equals("PAGE")) {
+            if (!compID.equals("PAGE") && !compID.equals("BOAR_FIND")) {
                 compEvent.deferEdit().queue();
             }
 
@@ -119,6 +126,9 @@ public class MegaMenuInteractive extends ModalInteractive {
                     this.curView = MegaMenuView.fromString(
                         ((StringSelectInteractionEvent) compEvent).getValues().getFirst()
                     );
+
+                    this.filterOpen = false;
+                    this.sortOpen = false;
                 }
 
                 case "LEFT" -> {
@@ -143,6 +153,19 @@ public class MegaMenuInteractive extends ModalInteractive {
                     this.prevPage = this.page;
                     this.page++;
                 }
+
+                case "BOAR_FIND" -> {
+                    ModalConfig modalConfig = this.config.getModalConfig().get("findBoar");
+
+                    Modal modal = new ModalImpl(
+                        ModalUtil.makeModalID(modalConfig.getId(), compEvent),
+                        modalConfig.getTitle(),
+                        ModalUtil.makeModalComponents(modalConfig.getComponents())
+                    );
+
+                    this.modalHandler = new FindBoarModalHandler(compEvent, this);
+                    compEvent.replyModal(modal).complete();
+                }
             }
         }
 
@@ -163,8 +186,8 @@ public class MegaMenuInteractive extends ModalInteractive {
                     this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
                         connection, this.interaction.getGuild().getId()
                     );
-                    this.badgeIDs = boarUser.getCurrentBadges(connection);
-                    this.viewsToUpdateData.replaceAll((k, v) -> true);
+                    this.badgeIDs = this.boarUser.getCurrentBadges(connection);
+                    this.viewsToUpdateData.replaceAll((k, v) -> false);
                 }
 
                 if (this.prevPage == this.page && this.prevView == this.curView) {
@@ -175,7 +198,7 @@ public class MegaMenuInteractive extends ModalInteractive {
             MegaMenuGenerator imageGen = switch (this.curView) {
                 case MegaMenuView.PROFILE -> this.makeProfileGen();
                 case MegaMenuView.COLLECTION -> this.makeCollectionGen();
-                case MegaMenuView.COMPENDIUM -> this.makeCollectionGen();
+                case MegaMenuView.COMPENDIUM -> this.makeCompendiumGen();
                 case MegaMenuView.STATS -> this.makeCollectionGen();
                 case MegaMenuView.POWERUPS -> this.makeCollectionGen();
                 case MegaMenuView.QUESTS -> this.makeCollectionGen();
@@ -195,12 +218,79 @@ public class MegaMenuInteractive extends ModalInteractive {
     public void modalExecute(ModalInteractionEvent modalEvent) {
         modalEvent.deferEdit().complete();
 
-        try {
-            String pageInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-            this.prevPage = this.page;
-            this.page = Integer.parseInt(pageInput)-1;
-            this.execute(null);
-        } catch (NumberFormatException ignore) {}
+        switch (modalEvent.getModalId().split(",")[2]) {
+            case "PAGE_INPUT" -> {
+                try {
+                    String pageInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
+                    this.prevPage = this.page;
+                    this.page = Math.max(Integer.parseInt(pageInput)-1, 0);
+                    this.execute(null);
+                } catch (NumberFormatException ignore) {}
+            }
+
+            case "FIND_BOAR" -> {
+                int newPage = 0;
+                boolean found = false;
+
+                String cleanInput = modalEvent.getValues().getFirst().getAsString().replaceAll(" ", "").toLowerCase();
+
+                for (String boarID : this.filteredBoars.keySet()) {
+                    IndivItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
+
+                    for (String searchTerm : boar.getSearchTerms()) {
+                        if (cleanInput.equals(searchTerm)) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (found) {
+                        break;
+                    }
+
+                    newPage++;
+                }
+
+                if (!found) {
+                    newPage = this.matchFront(cleanInput);
+                    found = newPage <= this.maxPage;
+                }
+
+                if (!found) {
+                    cleanInput = cleanInput.substring(0, cleanInput.length()-1);
+
+                    while (!cleanInput.isEmpty()) {
+                        newPage = matchFront(cleanInput);
+                        found = newPage <= this.maxPage;
+
+                        if (found) {
+                            break;
+                        }
+
+                        cleanInput = cleanInput.substring(0, cleanInput.length()-1);
+                    }
+                }
+
+                this.page = newPage;
+                this.execute(null);
+            }
+        }
+    }
+
+    private int matchFront(String cleanInput) {
+        int newPage = 0;
+
+        for (String boarID : this.filteredBoars.keySet()) {
+            IndivItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
+
+            if (boar.getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput)) {
+                break;
+            }
+
+            newPage++;
+        }
+
+        return newPage;
     }
 
     public MegaMenuGenerator makeProfileGen() throws SQLException {
@@ -209,12 +299,13 @@ public class MegaMenuInteractive extends ModalInteractive {
         if (this.viewsToUpdateData.get(view) == null || !this.viewsToUpdateData.get(view)) {
             try (Connection connection = DataUtil.getConnection()) {
                 this.profileData = this.boarUser.getProfileData(connection);
+                this.viewsToUpdateData.put(view, true);
             }
         }
 
-        int maxPage = 0;
-        if (this.page > maxPage) {
-            this.page = maxPage;
+        this.maxPage = 0;
+        if (this.page > this.maxPage) {
+            this.page = this.maxPage;
         }
 
         return new ProfileImageGenerator(
@@ -227,18 +318,93 @@ public class MegaMenuInteractive extends ModalInteractive {
 
         if (this.viewsToUpdateData.get(view) == null || !this.viewsToUpdateData.get(view)) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.boarInfos = this.boarUser.getBoarInfo(connection);
+                this.ownedBoars = this.boarUser.getOwnedBoarInfo(connection);
+                this.filterVal = this.boarUser.getFilterVal(connection);
+                this.viewsToUpdateData.put(view, true);
+                this.viewsToUpdateData.put(MegaMenuView.COMPENDIUM, true);
             }
         }
 
-        int maxPage = Math.max((this.boarInfos.size()-1) / 15, 0);
-        if (this.page > maxPage) {
-            this.page = maxPage;
+        this.refreshFilter();
+
+        this.maxPage = Math.max((this.filteredBoars.size()-1) / 15, 0);
+        if (this.page > this.maxPage) {
+            this.page = this.maxPage;
         }
 
         return new CollectionImageGenerator(
-            this.page, this.boarUser, this.badgeIDs, this.firstJoinedDate, this.boarInfos
+            this.page, this.boarUser, this.badgeIDs, this.firstJoinedDate, this.filteredBoars
         );
+    }
+
+    private MegaMenuGenerator makeCompendiumGen() throws SQLException {
+        MegaMenuView view = MegaMenuView.COMPENDIUM;
+
+        if (this.viewsToUpdateData.get(view) == null || !this.viewsToUpdateData.get(view)) {
+            try (Connection connection = DataUtil.getConnection()) {
+                this.ownedBoars = this.boarUser.getOwnedBoarInfo(connection);
+                this.filterVal = this.boarUser.getFilterVal(connection);
+                this.viewsToUpdateData.put(view, true);
+                this.viewsToUpdateData.put(MegaMenuView.COLLECTION, true);
+            }
+        }
+
+        this.refreshFilter();
+
+        this.maxPage = this.filteredBoars.size()-1;
+
+        if (this.page > this.maxPage) {
+            this.page = this.maxPage;
+        }
+
+        Iterator<Map.Entry<String, BoarInfo>> iterator = this.filteredBoars.entrySet().iterator();
+        for (int i=0; i<this.page; i++) {
+            iterator.next();
+        }
+        this.curBoarEntry = iterator.next();
+
+        return new CompendiumImageGenerator(
+            this.page,
+            this.boarUser,
+            this.badgeIDs,
+            this.firstJoinedDate,
+            this.curBoarEntry
+        );
+    }
+
+    private void refreshFilter() {
+        this.filteredBoars = new LinkedHashMap<>();
+        List<Map.Entry<String, RarityConfig>> rarityEntries = this.config.getRarityConfigs()
+            .entrySet()
+            .stream()
+            .toList()
+            .reversed();
+
+        String unavailable = this.config.getStringConfig().getUnavailable();
+
+        for (Map.Entry<String, RarityConfig> rarityEntry : rarityEntries) {
+            BoarInfo emptyBoarInfo = new BoarInfo(0, rarityEntry.getKey(), unavailable, unavailable);
+
+            for (String boarID : rarityEntry.getValue().getBoars()) {
+                // Owned filter
+                if (this.filterVal != null && this.filterVal.equals("owned") && !this.ownedBoars.containsKey(boarID)) {
+                    continue;
+                }
+
+                // Duplicate filter
+                boolean hasDuplicate = this.ownedBoars.containsKey(boarID) && this.ownedBoars.get(boarID).amount() > 1;
+                if (this.filterVal != null && this.filterVal.equals("duplicate") && !hasDuplicate) {
+                    continue;
+                }
+
+                // No filter
+                if (rarityEntry.getValue().isHidden() && !this.ownedBoars.containsKey(boarID)) {
+                    continue;
+                }
+
+                this.filteredBoars.put(boarID, this.ownedBoars.getOrDefault(boarID, emptyBoarInfo));
+            }
+        }
     }
 
     private void sendResponse() {
@@ -264,7 +430,7 @@ public class MegaMenuInteractive extends ModalInteractive {
         this.curComponents = switch (this.curView) {
             case MegaMenuView.PROFILE -> getProfileComponents();
             case MegaMenuView.COLLECTION -> getCollectionComponents();
-            case MegaMenuView.COMPENDIUM -> getCollectionComponents();
+            case MegaMenuView.COMPENDIUM -> getCompendiumComponents();
             case MegaMenuView.STATS -> getCollectionComponents();
             case MegaMenuView.POWERUPS -> getCollectionComponents();
             case MegaMenuView.QUESTS -> getCollectionComponents();
@@ -293,26 +459,25 @@ public class MegaMenuInteractive extends ModalInteractive {
     private ActionRow[] getCollectionComponents() {
         ActionRow[] nav = this.getNav();
 
-        List<ItemComponent> boarFindBtn = InteractiveUtil.makeComponents(
+        List<ItemComponent> filterSortRow = InteractiveUtil.makeComponents(
             this.interaction.getId(),
-            this.COMPONENTS.get("boarFindBtn")
+            this.COMPONENTS.get("filterBtn"),
+            this.COMPONENTS.get("sortBtn")
         );
 
         Button leftBtn = ((Button) nav[1].getComponents().getFirst()).asDisabled();
         Button pageBtn = ((Button) nav[1].getComponents().get(1)).asDisabled();
         Button rightBtn = ((Button) nav[1].getComponents().get(2)).asDisabled();
 
-        int maxPage = Math.max((this.boarInfos.size()-1) / 15, 0);
-
         if (this.page > 0) {
             leftBtn = leftBtn.withDisabled(false);
         }
 
-        if (maxPage > 0) {
+        if (this.maxPage > 0) {
             pageBtn = pageBtn.withDisabled(false);
         }
 
-        if (this.page < maxPage) {
+        if (this.page < this.maxPage) {
             rightBtn = rightBtn.withDisabled(false);
         }
 
@@ -321,7 +486,54 @@ public class MegaMenuInteractive extends ModalInteractive {
         nav[1].getComponents().set(2, rightBtn);
 
         return new ActionRow[] {
-            nav[0], nav[1], ActionRow.of(boarFindBtn)
+            nav[0], nav[1], ActionRow.of(filterSortRow)
+        };
+    }
+
+    private ActionRow[] getCompendiumComponents() {
+        ActionRow[] nav = this.getNav();
+
+        List<ItemComponent> interactRow = InteractiveUtil.makeComponents(
+            this.interaction.getId(),
+            this.COMPONENTS.get("boarFindBtn"),
+            this.COMPONENTS.get("interactBtn")
+        );
+
+        List<ItemComponent> filterSortRow = InteractiveUtil.makeComponents(
+            this.interaction.getId(),
+            this.COMPONENTS.get("filterBtn"),
+            this.COMPONENTS.get("sortBtn")
+        );
+
+        Button leftBtn = ((Button) nav[1].getComponents().getFirst()).asDisabled();
+        Button pageBtn = ((Button) nav[1].getComponents().get(1)).asDisabled();
+        Button rightBtn = ((Button) nav[1].getComponents().get(2)).asDisabled();
+        Button interactBtn = ((Button) interactRow.get(1)).asDisabled();
+
+        if (this.page > 0) {
+            leftBtn = leftBtn.withDisabled(false);
+        }
+
+        if (this.maxPage > 0) {
+            pageBtn = pageBtn.withDisabled(false);
+        }
+
+        if (this.page < this.maxPage) {
+            rightBtn = rightBtn.withDisabled(false);
+        }
+
+        boolean userSelf = this.interaction.getUser().getId().equals(this.boarUser.getUserID());
+        if (this.curBoarEntry.getValue().amount() > 0 && userSelf) {
+            interactBtn = interactBtn.withDisabled(false);
+        }
+
+        nav[1].getComponents().set(0, leftBtn);
+        nav[1].getComponents().set(1, pageBtn);
+        nav[1].getComponents().set(2, rightBtn);
+        interactRow.set(1, interactBtn);
+
+        return new ActionRow[] {
+            nav[0], nav[1], ActionRow.of(interactRow), ActionRow.of(filterSortRow)
         };
     }
 

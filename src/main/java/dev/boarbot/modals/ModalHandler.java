@@ -16,6 +16,8 @@ import java.util.concurrent.Executors;
 public abstract class ModalHandler {
     protected final BotConfig config = BoarBotApp.getBot().getConfig();
 
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+
     protected final GenericComponentInteractionCreateEvent compEvent;
     protected final ComponentInteraction interaction;
     protected final User user;
@@ -38,11 +40,10 @@ public abstract class ModalHandler {
 
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);
 
-        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
-            executor.submit(() -> this.delayStop(
-                this.config.getNumberConfig().getInteractiveIdle()
-            ));
-        }
+        this.executor.submit(() -> this.delayStop(
+            this.config.getNumberConfig().getInteractiveIdle()
+        ));
+        this.executor.shutdown();
     }
 
     public abstract void execute(ModalInteractionEvent compEvent);

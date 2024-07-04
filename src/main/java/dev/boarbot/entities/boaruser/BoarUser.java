@@ -11,12 +11,20 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 
 import java.sql.*;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class BoarUser {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
+
+    private final static DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder()
+        .appendPattern("MMMM d, yyyy")
+        .toFormatter();
 
     @Getter private final User user;
     @Getter private final String userID;
@@ -195,7 +203,28 @@ public class BoarUser {
         }
     }
 
-    public Map<String, BoarInfo> getBoarInfo(Connection connection) throws SQLException {
+    public String getFilterVal(Connection connection) throws SQLException {
+        String filterVal = null;
+        String query = """
+            SELECT filter_val
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    filterVal = results.getString("filter_val");
+                }
+            }
+        }
+
+        return filterVal;
+    }
+
+    public Map<String, BoarInfo> getOwnedBoarInfo(Connection connection) throws SQLException {
         Map<String, BoarInfo> boarInfo = new HashMap<>();
         String query = """
             SELECT
@@ -218,11 +247,18 @@ public class BoarUser {
 
             try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
+                    String firstObtained = Instant.ofEpochMilli(results.getTimestamp("first_obtained").getTime())
+                        .atOffset(ZoneOffset.UTC)
+                        .format(BoarUser.dateFormatter);
+                    String lastObtained = Instant.ofEpochMilli(results.getTimestamp("last_obtained").getTime())
+                        .atOffset(ZoneOffset.UTC)
+                        .format(BoarUser.dateFormatter);
+
                     boarInfo.put(results.getString("boar_id"), new BoarInfo(
                         results.getInt("amount"),
                         results.getString("rarity_id"),
-                        results.getTimestamp("first_obtained").getTime(),
-                        results.getTimestamp("last_obtained").getTime()
+                        firstObtained,
+                        lastObtained
                     ));
                 }
             }
@@ -241,7 +277,7 @@ public class BoarUser {
     }
 
     public ProfileData getProfileData(Connection connection) throws SQLException {
-        ProfileData profileData = null;
+        ProfileData profileData = new ProfileData();
         String query = """
             SELECT
                 last_boar_id,
