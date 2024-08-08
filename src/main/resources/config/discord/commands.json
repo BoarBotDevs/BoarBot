@@ -1,0 +1,365 @@
+{
+  "boar": {
+    "name": "boar",
+    "description": "Commands to play and interact with BoarBot",
+    "subcommands": {
+      "help": {
+        "name": "help",
+        "description": "See all boar command information",
+        "location": "dev.boarbot.commands.boar.HelpSubcommand",
+        "options": [
+          {
+            "name": "area",
+            "type": 4,
+            "description": "The area you may need help with",
+            "choices": [
+              {
+                "name": "General",
+                "value": 0
+              },
+              {
+                "name": "Powerups",
+                "value": 1
+              },
+              {
+                "name": "Market",
+                "value": 2
+              },
+              {
+                "name": "Badges & Special Boars",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "name": "page",
+            "type": 4,
+            "description": "The page to start out on"
+          }
+        ]
+      },
+      "daily": {
+        "name": "daily",
+        "description": "Get your daily boar",
+        "location": "dev.boarbot.commands.boar.DailySubcommand",
+        "options": [
+          {
+            "name": "powerup",
+            "type": 3,
+            "description": "Choose which powerups to use",
+            "choices": [
+              {
+                "name": "I want to use a powerup!",
+                "value": "y"
+              }
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "name": "profile",
+        "description": "View a user's general profile information",
+        "location": "dev.boarbot.commands.boar.megamenu.ProfileSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "Check another user's profile"
+          },
+          {
+            "name": "page",
+            "type": 3,
+            "description": "Page to start off on"
+          }
+        ]
+      },
+      "collection": {
+        "name": "collection",
+        "description": "View a user's unique boars",
+        "location": "dev.boarbot.commands.boar.megamenu.CollectionSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "View another user's collection"
+          },
+          {
+            "name": "page",
+            "type": 3,
+            "description": "Page to start off on"
+          }
+        ]
+      },
+      "compendium": {
+        "name": "compendium",
+        "description": "View a user's compendium of boars",
+        "location": "dev.boarbot.commands.boar.megamenu.CompendiumSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "View another user's compendium"
+          },
+          {
+            "name": "page",
+            "type": 3,
+            "description": "Page to start off on"
+          }
+        ]
+      },
+      "stats": {
+        "name": "stats",
+        "description": "View a user's statistics",
+        "location": "dev.boarbot.commands.boar.megamenu.StatsSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "View another user's statistics"
+          },
+          {
+            "name": "page",
+            "type": 3,
+            "description": "Page to start off on"
+          }
+        ]
+      },
+      "powerups": {
+        "name": "powerups",
+        "description": "Use/View a user's powerups",
+        "location": "dev.boarbot.commands.boar.megamenu.PowerupsSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "View another user's powerups"
+          },
+          {
+            "name": "page",
+            "type": 3,
+            "description": "Page to start off on"
+          }
+        ]
+      },
+      "quests": {
+        "name": "quests",
+        "description": "View a user's progress on weekly quests",
+        "location": "dev.boarbot.commands.boar.megamenu.QuestsSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "View another user's weekly quests"
+          },
+          {
+            "name": "page",
+            "type": 3,
+            "description": "Page to start off on"
+          }
+        ]
+      },
+      "badges": {
+        "name": "badges",
+        "description": "View a user's badges",
+        "location": "dev.boarbot.commands.boar.megamenu.QuestsSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "View another user's badges"
+          },
+          {
+            "name": "page",
+            "type": 3,
+            "description": "Page to start off on"
+          }
+        ]
+      },
+      "top": {
+        "name": "top",
+        "description": "View leaderboards showcasing a ranking of player stats",
+        "location": "dev.boarbot.commands.boar.TopSubcommand",
+        "options": [
+          {
+            "name": "leaderboard",
+            "type": 3,
+            "description": "The leaderboard to view",
+            "choices": [
+              {
+                "name": "Boar Bucks",
+                "value": "bucks"
+              },
+              {
+                "name": "Total Boars",
+                "value": "total"
+              },
+              {
+                "name": "Unique Boars",
+                "value": "uniques"
+              },
+              {
+                "name": "Unique Boars (SkyBlock included)",
+                "value": "uniquesSB"
+              },
+              {
+                "name": "Boar Streak",
+                "value": "streak"
+              },
+              {
+                "name": "Lifetime Powerups Collected",
+                "value": "attempts"
+              },
+              {
+                "name": "Number of Perfect Powerups",
+                "value": "topAttempts"
+              },
+              {
+                "name": "Gifts Used",
+                "value": "giftsUsed"
+              },
+              {
+                "name": "Boar Blessings",
+                "value": "multiplier"
+              },
+              {
+                "name": "Fastest Times",
+                "value": "fastest"
+              }
+            ]
+          },
+          {
+            "name": "user",
+            "type": 6,
+            "description": "The user to find on the leaderboard"
+          },
+          {
+            "name": "page",
+            "type": 4,
+            "description": "The page to start out on"
+          }
+        ]
+      },
+      "market": {
+        "name": "market",
+        "description": "Buy and sell boars/items",
+        "location": "dev.boarbot.commands.boar.MarketSubcommand",
+        "options": [
+          {
+            "name": "view",
+            "type": 4,
+            "description": "What view to start off in (Overview, Buy/Sell, Your Orders)",
+            "choices": [
+              {
+                "name": "Overview",
+                "value": 0
+              },
+              {
+                "name": "Buy/Sell",
+                "value": 1
+              },
+              {
+                "name": "Your Orders",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "name": "page",
+            "type": 3,
+            "description": "The page to start out on"
+          }
+        ]
+      },
+      "report": {
+        "name": "report",
+        "description": "Report a bug/exploit with BoarBot",
+        "location": "dev.boarbot.commands.boar.ReportSubcommand"
+      },
+      "self-wipe": {
+        "name": "self-wipe",
+        "description": "Wipe your profile clean. Deletes all stored data tied to your account",
+        "location": "dev.boarbot.commands.boar.SelfWipeSubcommand"
+      },
+      "gift": {
+        "name": "gift",
+        "description": "Use and send a Boar Gift in the channel you're currently in",
+        "location": "dev.boarbot.commands.boar.GiftSubcommand"
+      },
+      "support": {
+        "name": "support",
+        "description": "Get the link to BoarBot's Patreon",
+        "location": "dev.boarbot.commands.boar.SupportSubcommand"
+      },
+      "guess": {
+        "name": "guess",
+        "description": "Guess a value for hunts",
+        "location": "dev.boarbot.commands.boar.GuessSubcommand",
+        "options": [
+          {
+            "name": "value",
+            "type": 3,
+            "description": "Value to guess",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "boar-manage": {
+    "name": "boar-manage",
+    "default_member_permissions": 32,
+    "description": "Commands to manage BoarBot",
+    "subcommands": {
+      "setup": {
+        "name": "setup",
+        "description": "Set BoarBot up to your liking",
+        "location": "dev.boarbot.commands.boarmanage.SetupSubcommand"
+      }
+    }
+  },
+  "boar-dev": {
+    "name": "boar-dev",
+    "default_member_permissions": 0,
+    "description": "Commands exclusive to developers of BoarBot",
+    "subcommands": {
+      "give": {
+        "name": "give",
+        "description": "Give a user a boar/badge",
+        "location": "dev.boarbot.commands.boardev.GiveSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "User you'd like to give the item to",
+            "required": true
+          },
+          {
+            "name": "id",
+            "type": 3,
+            "description": "ID of item to give",
+            "required": true,
+            "autocomplete": true
+          }
+        ]
+      },
+      "ban": {
+        "name": "ban",
+        "description": "Ban a user from certain BoarBot features",
+        "location": "dev.boarbot.commands.boardev.BanSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "User to ban",
+            "required": true
+          },
+          {
+            "name": "duration",
+            "type": 4,
+            "description": "Duration of ban in hours"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,319 @@
+{
+  "setup": {
+    "channelSelect": {
+      "type": 8,
+      "custom_id": "CHANNEL_SELECT",
+      "placeholder": "Select channels...",
+      "min_values": 1,
+      "max_values": 3
+    },
+    "infoBtn": {
+      "custom_id": "INFO",
+      "emoji": "❔",
+      "style": 2
+    },
+    "sbYesBtn": {
+      "custom_id": "SB_YES",
+      "label": "Yes",
+      "style": 1
+    },
+    "sbNoBtn": {
+      "custom_id": "SB_NO",
+      "label": "No",
+      "style": 1
+    },
+    "cancelBtn": {
+      "custom_id": "CANCEL",
+      "label": "Cancel",
+      "style": 4
+    },
+    "nextBtn": {
+      "custom_id": "NEXT",
+      "label": "Next",
+      "style": 1,
+      "disabled": true
+    }
+  },
+  "daily": {
+    "boarSelect": {
+      "type": 3,
+      "custom_id": "BOAR_SELECT",
+      "min_values": 1,
+      "max_values": 1
+    },
+    "leftBtn": {
+      "custom_id": "LEFT",
+      "emoji": "<:back:1073072529507369072>",
+      "style": 2
+    },
+    "rightBtn": {
+      "custom_id": "RIGHT",
+      "emoji": "<:forward:1073071982096175184>",
+      "style": 2
+    },
+    "leftFullBtn": {
+      "custom_id": "LEFT_FULL",
+      "emoji": "<:fast_backward:1073082581635059824>",
+      "style": 2
+    },
+    "rightFullBtn": {
+      "custom_id": "RIGHT_FULL",
+      "emoji": "<:fast_forward:1073082583853834340>",
+      "style": 2
+    },
+    "notifyBtn": {
+      "custom_id": "ENABLE_NOTIFS",
+      "label": "Enable Notifications",
+      "style": 3
+    },
+    "powSelect": {
+      "type": 3,
+      "custom_id": "POW_SELECT",
+      "min_values": 1,
+      "max_values": 1,
+      "placeholder": "Choose powerup...",
+      "options": [
+        {
+          "label": "Miracle Charms",
+          "value": "miracle",
+          "emoji": "<:miracle:1250135118744522802>",
+          "description": "Boosts your Boar Blessings"
+        }
+      ]
+    },
+    "powSubmitBtn": {
+      "custom_id": "SUBMIT_POW",
+      "label": "Submit",
+      "style": 3,
+      "disabled": true
+    },
+    "powCancelBtn": {
+      "custom_id": "CANCEL_POW",
+      "label": "Cancel",
+      "style": 4
+    }
+  },
+  "megaMenu": {
+    "viewSelect": {
+      "type": 3,
+      "custom_id": "VIEW_SELECT",
+      "min_values": 1,
+      "max_values": 1,
+      "placeholder": "Select view...",
+      "options": [
+        {
+          "label": "Profile",
+          "value": "profile",
+          "emoji": "\uD83D\uDC64",
+          "description": "View general profile information"
+        },
+        {
+          "label": "Collection",
+          "value": "collection",
+          "emoji": "\uD83D\uDDC3\uFE0F",
+          "description": "View a grid of all unique boars obtained"
+        },
+        {
+          "label": "Compendium",
+          "value": "compendium",
+          "emoji": "\uD83D\uDCD3",
+          "description": "View detailed information for all boars"
+        },
+        {
+          "label": "Stats",
+          "value": "stats",
+          "emoji": "\uD83D\uDCCA",
+          "description": "View relevant statistics for entire profile"
+        },
+        {
+          "label": "Powerups",
+          "value": "powerups",
+          "emoji": "<:powerup:1250134593651085392>",
+          "description": "Use and view collected powerups"
+        },
+        {
+          "label": "Quests",
+          "value": "quests",
+          "emoji": "\uD83D\uDCDC",
+          "description": "View progress on weekly quests"
+        },
+        {
+          "label": "Badges",
+          "value": "badges",
+          "emoji": "\uD83E\uDDE9",
+          "description": "View detailed information for badges"
+        }
+      ]
+    },
+    "leftBtn": {
+      "custom_id": "LEFT",
+      "emoji": "<:back:1073072529507369072>",
+      "style": 2
+    },
+    "pageBtn": {
+      "custom_id": "PAGE",
+      "emoji": "\uD83D\uDCDD",
+      "style": 2
+    },
+    "rightBtn": {
+      "custom_id": "RIGHT",
+      "emoji": "<:forward:1073071982096175184>",
+      "style": 2
+    },
+    "refreshBtn": {
+      "custom_id": "REFRESH",
+      "label": "Refresh",
+      "style": 2
+    },
+    "boarFindBtn": {
+      "custom_id": "BOAR_FIND",
+      "label": "Find Boar",
+      "emoji": "\uD83D\uDD0E",
+      "style": 1
+    },
+    "interactBtn": {
+      "custom_id": "BOAR_INTERACT",
+      "label": "Interact",
+      "emoji": "\uD83E\uDDEA",
+      "style": 1
+    },
+    "interactSelect": {
+      "type": 3,
+      "custom_id": "INTERACT_SELECT",
+      "min_values": 1,
+      "max_values": 1,
+      "placeholder": "Select interaction...",
+      "options": [
+        {
+          "label": "Favorite",
+          "value": "favorite",
+          "emoji": "\uD83C\uDF1F",
+          "description": "Favorite this boar"
+        },
+        {
+          "label": "Clone",
+          "value": "clone",
+          "emoji": "<:clone:1270806135657599068>",
+          "description": "Attempt to clone this boar"
+        },
+        {
+          "label": "Transmute",
+          "value": "transmute",
+          "emoji": "<:transmute:1270807233701220454>",
+          "description": "Transmute this boar to one of the next rarity"
+        }
+      ]
+    },
+    "filterBtn": {
+      "custom_id": "BOAR_FILTER",
+      "label": "Filter",
+      "emoji": "\uD83D\uDCDA",
+      "style": 1
+    },
+    "filterSelect": {
+      "type": 3,
+      "custom_id": "FILTER_SELECT",
+      "min_values": 0,
+      "placeholder": "Select filters...",
+      "options": [
+        {
+          "label": "Owned",
+          "value": "1",
+          "emoji": "\uD83D\uDEA9",
+          "description": "Filter by boars owned"
+        },
+        {
+          "label": "Duplicate",
+          "value": "2",
+          "emoji": "\uD83D\uDC65",
+          "description": "Filter by boars with duplicates"
+        }
+      ]
+    },
+    "sortBtn": {
+      "custom_id": "BOAR_SORT",
+      "label": "Sort",
+      "emoji": "\uD83D\uDDC2",
+      "style": 1
+    },
+    "sortSelect": {
+      "type": 3,
+      "custom_id": "SORT_SELECT",
+      "min_values": 1,
+      "max_values": 1,
+      "placeholder": "Select sort...",
+      "options": [
+        {
+          "label": "High Rarities",
+          "value": "0",
+          "emoji": "\uD83D\uDCB4",
+          "description": "Sort by Rarity (Descending)"
+        },
+        {
+          "label": "Low Rarities",
+          "value": "1",
+          "emoji": "\uD83D\uDCB5",
+          "description": "Sort by Rarity (Ascending)"
+        },
+        {
+          "label": "Highest Amount",
+          "value": "2",
+          "emoji": "\uD83D\uDCC8",
+          "description": "Sort by Number Owned (Descending)"
+        },
+        {
+          "label": "Lowest Amount",
+          "value": "3",
+          "emoji": "\uD83D\uDCC9",
+          "description": "Sort by Number Owned (Ascending)"
+        },
+        {
+          "label": "Most Recent",
+          "value": "4",
+          "emoji": "\u2757",
+          "description": "Sort by Newest Specimen Date (Descending)"
+        },
+        {
+          "label": "Least Recent",
+          "value": "5",
+          "emoji": "\u2753",
+          "description": "Sort by Newest Specimen Date (Ascending)"
+        },
+        {
+          "label": "Newest",
+          "value": "6",
+          "emoji": "\uD83D\uDC23",
+          "description": "Sort by Oldest Specimen Date (Descending)"
+        },
+        {
+          "label": "Oldest",
+          "value": "7",
+          "emoji": "\uD83D\uDC14",
+          "description": "Sort by Oldest Specimen Date (Ascending)"
+        },
+        {
+          "label": "Alphabetical",
+          "value": "8",
+          "emoji": "\uD83C\uDDE6",
+          "description": "Sort Alphabetically (Descending)"
+        },
+        {
+          "label": "Reverse Alphabetical",
+          "value": "9",
+          "emoji": "\uD83C\uDDFF",
+          "description": "Sort Alphabetically (Ascending)"
+        }
+      ]
+    },
+    "confirmBtn": {
+      "custom_id": "BOAR_CONFIRM",
+      "label": "Confirm",
+      "style": 3
+    },
+    "cancelBtn": {
+      "custom_id": "BOAR_CANCEL",
+      "label": "Cancel",
+      "style": 4
+    }
+  }
+}

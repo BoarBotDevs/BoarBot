@@ -4,7 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
-import dev.boarbot.util.generators.EmbedGenerator;
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -40,18 +40,18 @@ public abstract class Subcommand {
             boolean isSetup = !validChannelIDs.isEmpty();
             boolean isValidChannel = validChannelIDs.contains(channelID);
 
-            EmbedGenerator embedGen = new EmbedGenerator(
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(
                 this.config.getStringConfig().getNoSetup(), this.config.getColorConfig().get("error")
             );
 
             if (!isSetup) {
-                this.interaction.replyFiles(embedGen.generate()).setEphemeral(true).queue();
+                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
                 return false;
             }
 
             if (!isValidChannel) {
                 embedGen.setStr(this.config.getStringConfig().getWrongChannel());
-                this.interaction.replyFiles(embedGen.generate()).setEphemeral(true).queue();
+                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
                 return false;
             }
         } catch (SQLException exception) {

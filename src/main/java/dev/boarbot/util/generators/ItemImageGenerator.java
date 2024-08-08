@@ -23,9 +23,7 @@ import java.util.Base64;
 import java.util.Map;
 
 @Slf4j
-public class ItemImageGenerator {
-    private final BotConfig config = BoarBotApp.getBot().getConfig();
-
+public class ItemImageGenerator extends ImageGenerator {
     public static final int[] IMAGE_SIZE = {930, 1080};
 
     private static final int[] ORIGIN = {0, 0};
@@ -57,8 +55,6 @@ public class ItemImageGenerator {
     @Getter @Setter private String colorKey;
     @Getter @Setter private User giftingUser;
     @Getter @Setter private long bucks;
-
-    private byte[] generatedImageByteArray;
 
     public ItemImageGenerator(User user, String title, String itemID) {
         this(user, title, itemID, false);
@@ -122,25 +118,25 @@ public class ItemImageGenerator {
         this.bucks = bucks;
     }
 
-    public byte[] generate() throws IOException, URISyntaxException {
+    public ItemImageGenerator generate() throws IOException, URISyntaxException {
         return this.generate(false);
     }
 
-    public byte[] generate(boolean forceStatic) throws IOException, URISyntaxException {
+    public ItemImageGenerator generate(boolean forceStatic) throws IOException, URISyntaxException {
         String extension = this.filePath.split("[.]")[1];
 
         if (extension.equals("gif") && !forceStatic) {
-            this.generatedImageByteArray = BoarBotApp.getBot().getByteCacheMap().get(
+            this.generatedImageBytes = BoarBotApp.getBot().getByteCacheMap().get(
                 "animitem" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey
             );
 
-            if (this.generatedImageByteArray == null) {
+            if (this.generatedImageBytes == null) {
                 this.generateStatic(false);
                 this.generateAnimated();
 
                 BoarBotApp.getBot().getByteCacheMap().put(
                     "animitem" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey,
-                    this.generatedImageByteArray
+                    this.generatedImageBytes
                 );
             }
 
@@ -148,16 +144,16 @@ public class ItemImageGenerator {
                 this.addAnimatedUser();
             }
         } else {
-            this.generatedImageByteArray = BoarBotApp.getBot().getByteCacheMap().get(
+            this.generatedImageBytes = BoarBotApp.getBot().getByteCacheMap().get(
                 "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey
             );
 
-            if (this.generatedImageByteArray == null) {
+            if (this.generatedImageBytes == null) {
                 this.generateStatic(true);
 
                 BoarBotApp.getBot().getByteCacheMap().put(
                     "item" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey,
-                    this.generatedImageByteArray
+                    this.generatedImageBytes
                 );
             }
 
@@ -166,7 +162,7 @@ public class ItemImageGenerator {
             }
         }
 
-        return this.generatedImageByteArray;
+        return this;
     }
 
     private void generateAnimated() throws IOException {
@@ -174,7 +170,7 @@ public class ItemImageGenerator {
 
         Process pythonProcess = new ProcessBuilder(
             "python",
-            "src/main/resources/scripts/make_animated_image.py",
+            this.config.getPathConfig().getMakeImageScript(),
             g.toJson(this.config.getPathConfig()),
             g.toJson(this.config.getNumberConfig()),
             this.filePath
@@ -184,7 +180,7 @@ public class ItemImageGenerator {
         BufferedReader stdErr = new BufferedReader(new InputStreamReader(pythonProcess.getErrorStream()));
         OutputStream stdOut = pythonProcess.getOutputStream();
 
-        stdOut.write(this.generatedImageByteArray);
+        stdOut.write(this.generatedImageBytes);
         stdOut.close();
 
         String result = stdIn.readLine();
@@ -200,7 +196,7 @@ public class ItemImageGenerator {
             log.error(errMessage);
         }
 
-        this.generatedImageByteArray = Base64.getDecoder().decode(result);
+        this.generatedImageBytes = Base64.getDecoder().decode(result);
     }
 
     private void addAnimatedUser() throws IOException {
@@ -208,7 +204,7 @@ public class ItemImageGenerator {
 
         Process pythonProcess = new ProcessBuilder(
             "python",
-            "src/main/resources/scripts/user_animated_overlay.py",
+            this.config.getPathConfig().getOverlayScript(),
             g.toJson(this.config.getPathConfig()),
             g.toJson(this.config.getColorConfig()),
             g.toJson(this.config.getNumberConfig()),
@@ -223,7 +219,7 @@ public class ItemImageGenerator {
         BufferedReader stdErr = new BufferedReader(new InputStreamReader(pythonProcess.getErrorStream()));
         OutputStream stdOut = pythonProcess.getOutputStream();
 
-        stdOut.write(this.generatedImageByteArray);
+        stdOut.write(this.generatedImageBytes);
         stdOut.close();
 
         String result = stdIn.readLine();
@@ -239,7 +235,7 @@ public class ItemImageGenerator {
             log.error(errMessage);
         }
 
-        this.generatedImageByteArray = Base64.getDecoder().decode(result);
+        this.generatedImageBytes = Base64.getDecoder().decode(result);
     }
 
     private void generateStatic(boolean makeWithItem) throws IOException, URISyntaxException {
@@ -289,11 +285,11 @@ public class ItemImageGenerator {
 
         ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
         ImageIO.write(generatedImage, "png", byteArrayOS);
-        this.generatedImageByteArray = byteArrayOS.toByteArray();
+        this.generatedImageBytes = byteArrayOS.toByteArray();
     }
 
     private void addStaticUser() throws IOException, URISyntaxException {
-        ByteArrayInputStream byteArrayIS = new ByteArrayInputStream(this.generatedImageByteArray);
+        ByteArrayInputStream byteArrayIS = new ByteArrayInputStream(this.generatedImageBytes);
         BufferedImage generatedImage = ImageIO.read(byteArrayIS);
         Graphics2D g2d = generatedImage.createGraphics();
 
@@ -301,7 +297,7 @@ public class ItemImageGenerator {
 
         ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
         ImageIO.write(generatedImage, "png", byteArrayOS);
-        this.generatedImageByteArray = byteArrayOS.toByteArray();
+        this.generatedImageBytes = byteArrayOS.toByteArray();
     }
 
     private BufferedImage generateUserImageData() throws IOException, URISyntaxException {

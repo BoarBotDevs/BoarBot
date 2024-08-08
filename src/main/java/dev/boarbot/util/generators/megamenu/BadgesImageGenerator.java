@@ -6,7 +6,6 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
-import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -42,7 +41,7 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
         this.boarInfos = boarInfos;
     }
 
-    public FileUpload generate() throws IOException, URISyntaxException {
+    public MegaMenuGenerator generate() throws IOException, URISyntaxException {
         int border = nums.getBorder();
         int[] boarImageSize = this.nums.getMediumBoarSize();
 
@@ -97,6 +96,6 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
         }
 
         this.drawTopInfo();
-        return this.getFileUpload();
+        return this;
     }
 }

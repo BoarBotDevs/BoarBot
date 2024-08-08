@@ -10,7 +10,6 @@ import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.time.TimeUtil;
-import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -35,6 +34,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
     private static final int[] FAVORITE_POS = {1459, 984};
 
     private final ProfileData profileData;
+    private final String favoriteID;
 
     private TextDrawer textDrawer;
 
@@ -43,11 +43,13 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         BoarUser boarUser,
         List<String> badgeIDs,
         String firstJoinedDate,
+        String favoriteID,
         boolean isSkyblockGuild,
         ProfileData profileData
     ) {
         super(page, boarUser, badgeIDs, firstJoinedDate);
         this.profileData = profileData;
+        this.favoriteID = favoriteID;
 
         int maxUniques = 0;
         for (String boarID : this.itemConfig.getBoars().keySet()) {
@@ -65,7 +67,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         this.maxUniques = maxUniques;
     }
 
-    public FileUpload generate() throws IOException, URISyntaxException {
+    public MegaMenuGenerator generate() throws IOException, URISyntaxException {
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
@@ -144,10 +146,10 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
             ? "RECENT"
             : "<>%s<>RECENT".formatted(recentRarityKey);
 
-        String favoriteRarityKey = this.profileData.favoriteBoarID() == null
+        String favoriteRarityKey = this.favoriteID == null
             ? ""
-            : BoarUtil.findRarityKey(this.profileData.favoriteBoarID());
-        String favoriteStr = this.profileData.favoriteBoarID() == null
+            : BoarUtil.findRarityKey(this.favoriteID);
+        String favoriteStr = this.favoriteID == null
             ? "FAVORITE"
             : "<>%s<>FAVORITE".formatted(favoriteRarityKey);
 
@@ -209,10 +211,8 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
 
         this.drawLabel(favoriteStr, FAVORITE_LABEL_POS);
 
-        if (this.profileData.favoriteBoarID() != null) {
-            BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get(
-                "medium" + this.profileData.favoriteBoarID()
-            );
+        if (this.favoriteID != null) {
+            BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get("medium" + this.favoriteID);
             g2d.drawImage(boarImage, FAVORITE_POS[0], FAVORITE_POS[1], null);
 
             BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get("border" + favoriteRarityKey);
@@ -220,7 +220,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         }
 
         this.drawTopInfo();
-        return this.getFileUpload();
+        return this;
     }
 
     private void drawLabel(String text, int[] pos) {

@@ -5,6 +5,7 @@ import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -22,7 +23,7 @@ public abstract class Interactive {
 
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    protected final SlashCommandInteractionEvent initEvent;
+    @Getter protected final SlashCommandInteractionEvent initEvent;
     protected final SlashCommandInteraction interaction;
     protected final User user;
 

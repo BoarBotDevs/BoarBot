@@ -42,6 +42,7 @@ public class PathConfig {
     private String profUnderlay = "";
     private String compUnderlay = "";
     private String rarityBorder = "";
+    private String favorite = "";
 
     // Miscellaneous image/asset file names
 
@@ -50,6 +51,7 @@ public class PathConfig {
 
     // Python scripts
 
-    private String dynamicImageScript = "";
-    private String userOverlayScript = "";
+    private String makeImageScript = "";
+    private String overlayScript = "";
+    private String groupScript = "";
 }

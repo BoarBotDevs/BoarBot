@@ -5,7 +5,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.generators.EmbedGenerator;
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
@@ -46,10 +46,10 @@ public class DailyNotifyInteractive extends Interactive {
         String replyStr = this.config.getStringConfig().getDailyUsed().formatted(dailyResetDistance);
 
         try {
-            EmbedGenerator embedGen = new EmbedGenerator(replyStr);
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(replyStr);
 
             MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(embedGen.generate())
+                .setFiles(embedGen.generate().getFileUpload())
                 .setComponents();
 
             compEvent.getUser().openPrivateChannel().complete().sendMessage(
@@ -70,12 +70,12 @@ public class DailyNotifyInteractive extends Interactive {
                 "An error occurred while attempting to update message after enabling notifications.", exception
             );
         } catch (ErrorResponseException exception) {
-            EmbedGenerator embedGen = new EmbedGenerator(
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(
                 this.config.getStringConfig().getNotificationFailed(), this.config.getColorConfig().get("error")
             );
 
             try {
-                this.interaction.getHook().sendFiles(embedGen.generate()).setEphemeral(true).queue();
+                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
             } catch (IOException exception1) {
                 log.error(
                     "An error occurred while attempting to update message after enabling notifications.", exception1

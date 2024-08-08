@@ -1,0 +1,159 @@
+{
+  "ghost": {
+    "name": "Ghost Boar",
+    "file": "GhostBoar.png",
+    "description": "This boar's love for karaoke combined with its terrible singing skills results in a terrifying experience. Headphones or deafness is recommended.",
+    "classification": "Incorporeal",
+    "update": "Alpha"
+  },
+  "ice": {
+    "name": "Icy Boar",
+    "file": "IceBoar.png",
+    "description": "Touching this boar will instantly give you frostbite. Wherever it goes, blizzard-like conditions follow. Found in the heart of glaciers.",
+    "classification": "Energy Leecher",
+    "update": "v1.1.30",
+    "searchTerms": [
+      "iceboar",
+      "ice"
+    ]
+  },
+  "normal": {
+    "name": "Normal Boar",
+    "file": "NormalBoar.png",
+    "description": "The original boar, the standard Creator Boar set and based many of their creations off of. Despite its historical significance, it's still rather unremarkable on its own.",
+    "classification": "Benign",
+    "update": "Alpha"
+  },
+  "carrot": {
+    "name": "Carrot Boar",
+    "file": "CarrotBoar.png",
+    "description": "On the surface, this boar is indistinguishable from the grass around it. The only being capable of spotting them is Farmer Boar.",
+    "classification": "Sustenance",
+    "update": "Alpha"
+  },
+  "sphere": {
+    "name": "Crystal Boarb",
+    "file": "Boarb.gif",
+    "staticFile": "BoarbSTATIC.png",
+    "description": "This boar inside this orb is said to have time-warping abilities. Encased in crystals, its powers are limited to telling others their future.",
+    "classification": "Time Bender",
+    "update": "Alpha",
+    "searchTerms": [
+      "boarb",
+      "sphereboar",
+      "sphere",
+      "spher",
+      "sphe",
+      "sph"
+    ]
+  },
+  "creepy": {
+    "name": "Creepy Boar",
+    "file": "CreepyBoar.png",
+    "description": "While it may look strikingly similar to a Normal Boar at first glance, this \"boar\" is actually a paranormal being that lives inside the skin of those recently deceased.",
+    "classification": "Parasite",
+    "update": "Alpha"
+  },
+  "minimumwage": {
+    "name": "Minimum Wage Boar",
+    "file": "MinimumWageBoar.png",
+    "description": "One of the smartest boars in the universe. Nobody's quite sure why it works at a fast food restaurant, but there must be a reason.",
+    "classification": "Highly Talented",
+    "update": "Alpha",
+    "searchTerms": [
+      "wage"
+    ]
+  },
+  "cowboy": {
+    "name": "Cowboar",
+    "file": "CowboyBoar.png",
+    "description": "This boar has unparalleled skill when it comes to lassoing and piloting horses. It refuses to touch any modern technology.",
+    "classification": "Highly Talented",
+    "update": "Alpha",
+    "searchTerms": [
+      "cowboy"
+    ]
+  },
+  "rickroll": {
+    "name": "Rickroll Boar",
+    "file": "RickrollBoar.gif",
+    "staticFile": "RickrollBoarSTATIC.png",
+    "description": "Spreads the word of Creator Boar. It'll never give you up, nor will it let you down. It certainly won't run around and... desert you.",
+    "classification": "Underling",
+    "update": "Alpha",
+    "searchTerms": [
+      "rickastley",
+      "astley"
+    ]
+  },
+  "supernova": {
+    "name": "Suboarnova",
+    "pluralName": "Suboarnovae",
+    "file": "Suboarnova.png",
+    "description": "Sometimes, stars become this boar after they die out instead of going supernova. It's become a highly researched area of Boarstronomy.",
+    "classification": "Celestial",
+    "update": "v1.0.0",
+    "searchTerms": [
+      "supernova",
+      "supernov",
+      "superno",
+      "supern",
+      "nova",
+      "nov"
+    ]
+  },
+  "boargalos": {
+    "name": "Boargalos",
+    "pluralName": "Boargaloses",
+    "file": "Boargalos.gif",
+    "staticFile": "BoargalosSTATIC.png",
+    "description": "An embodiment of pure entropy. Rarely ever seen in its physical form. This council member dictates the randomness of events and items.",
+    "classification": "Primordial",
+    "update": "v1.1.22",
+    "searchTerms": [
+      "galos",
+      "galo",
+      "gal"
+    ]
+  },
+  "bacteria": {
+    "name": "Boarcterium",
+    "pluralName": "Boarcteria",
+    "file": "Boarcterium.png",
+    "description": "The first boar ever created by Creator Boar. Catching a cold from this boar results in explosive symptoms.",
+    "classification": "Prehistoric",
+    "update": "v1.0.0",
+    "searchTerms": [
+      "bacterium",
+      "bacteriu",
+      "bacteria",
+      "bacteri",
+      "bacter",
+      "bacte",
+      "bact"
+    ]
+  },
+  "underwear": {
+    "name": "Boarnderwear",
+    "pluralName": "Boarnderwear",
+    "file": "Boarnderwear.png",
+    "description": "Children all around the world are disappointed when they open a gift excitedly just to get this boar. It appears as though it's been worn.",
+    "classification": "Benign",
+    "update": "v1.0.0",
+    "searchTerms": [
+      "underwear",
+      "underwea",
+      "underwe",
+      "underw",
+      "under",
+      "wear"
+    ]
+  },
+  "santa": {
+    "name": "Santa Boar",
+    "file": "SantaBoar.png",
+    "description": "Every Boarmas, this boar delivers gifts to both young and old! Questioning its identity is highly discouraged.",
+    "classification": "Psychotic",
+    "update": "v1.1.30"
+  }
+}

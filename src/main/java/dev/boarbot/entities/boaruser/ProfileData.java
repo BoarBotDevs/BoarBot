@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 
 public record ProfileData(
     String lastBoarID,
-    String favoriteBoarID,
     long boarBucks,
     long totalBoars,
     int numDailies,
@@ -20,7 +19,6 @@ public record ProfileData(
 ) {
     public ProfileData() {
         this(
-            null,
             null,
             0,
             0,

@@ -1,31 +1,25 @@
 package dev.boarbot.util.generators.megamenu;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.NumberConfig;
 import dev.boarbot.bot.config.PathConfig;
 import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
+import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
-import net.dv8tion.jda.api.utils.FileUpload;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class MegaMenuGenerator {
-    protected final BotConfig config = BoarBotApp.getBot().getConfig();
+public abstract class MegaMenuGenerator extends ImageGenerator {
     protected final NumberConfig nums = this.config.getNumberConfig();
     protected final PathConfig pathConfig = this.config.getPathConfig();
     protected final StringConfig strConfig = this.config.getStringConfig();
@@ -50,16 +44,14 @@ public abstract class MegaMenuGenerator {
     protected List<String> badgeIDs;
     protected String firstJoinedDate;
 
-    protected BufferedImage generatedImage;
-
-    public MegaMenuGenerator(int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate) {
+    public MegaMenuGenerator(
+        int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate
+    ) {
         this.page = page;
         this.boarUser = boarUser;
         this.badgeIDs = badgeIDs;
         this.firstJoinedDate = firstJoinedDate;
     }
-
-    public abstract FileUpload generate() throws IOException, URISyntaxException;
 
     protected void drawTopInfo() throws IOException, URISyntaxException {
         String userAvatar = this.boarUser.getUser().getAvatarUrl();
@@ -71,7 +63,7 @@ public abstract class MegaMenuGenerator {
         classViewMap.put(StatsImageGenerator.class, MegaMenuView.STATS.toString());
         classViewMap.put(PowerupsImageGenerator.class, MegaMenuView.POWERUPS.toString());
         classViewMap.put(QuestsImageGenerator.class, MegaMenuView.QUESTS.toString());
-        classViewMap.put(BadgesImageGenerator.class, MegaMenuView.QUESTS.toString());
+        classViewMap.put(BadgesImageGenerator.class, MegaMenuView.BADGES.toString());
 
         String view = classViewMap.get(this.getClass());
         String viewString = Character.toUpperCase(view.charAt(0)) + view.substring(1);
@@ -124,13 +116,5 @@ public abstract class MegaMenuGenerator {
                 GraphicsUtil.drawImage(g2d, badgePath, badgePos, BADGE_SIZE);
             }
         }
-    }
-
-    protected FileUpload getFileUpload() throws IOException {
-        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
-        ImageIO.write(this.generatedImage, "png", byteArrayOS);
-        byte[] generatedImageBytes = byteArrayOS.toByteArray();
-
-        return FileUpload.fromData(generatedImageBytes, "unknown.png");
     }
 }

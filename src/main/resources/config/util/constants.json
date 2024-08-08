@@ -1,0 +1,46 @@
+{
+  "fontHuge": 75,
+  "fontBig": 60,
+  "fontMedium": 45,
+  "fontSmallMedium": 40,
+  "fontSmallest": 35,
+  "maxUsernameLength": 16,
+  "maxTransmute": 30,
+  "maxStreakBless": 250,
+  "maxQuestBless": 250,
+  "maxUniqueBless": 250,
+  "maxOtherBless": 250,
+  "rarityIncreaseConst": 25000,
+  "miracleIncreaseMax": 1000,
+  "smallBoarSize": [
+    244,
+    244
+  ],
+  "mediumBoarSize": [
+    354,
+    354
+  ],
+  "mediumBigBoarSize": [
+    640,
+    640
+  ],
+  "bigBoarSize": [
+    872,
+    872
+  ],
+  "border": 25,
+  "powPlusMinusMins": 1,
+  "powIntervalHours": 2,
+  "powDurationMillis": 30000,
+  "powNumStopHelp": 10,
+  "interactiveIdle": 120000,
+  "interactiveHardStop": 300000,
+  "emojiRows": 4,
+  "emojiCols": 4,
+  "triviaRows": 2,
+  "triviaCols": 2,
+  "fastCols": 3,
+  "openDelay": 120000,
+  "notificationButtonDelay": 15000,
+  "questFullAmt": 3
+}

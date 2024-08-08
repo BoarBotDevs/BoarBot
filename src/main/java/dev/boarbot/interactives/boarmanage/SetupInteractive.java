@@ -5,7 +5,7 @@ import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.interactive.StopType;
-import dev.boarbot.util.generators.EmbedGenerator;
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
@@ -30,7 +30,7 @@ import java.util.Map;
 @Slf4j
 public class SetupInteractive extends Interactive {
     private int page = 0;
-    private final EmbedGenerator embedGen = new EmbedGenerator("");
+    private final EmbedImageGenerator embedGen = new EmbedImageGenerator("");
     private final MessageEditBuilder editedMsg = new MessageEditBuilder();
     private ActionRow[] curComponents = new ActionRow[0];
 
@@ -88,7 +88,7 @@ public class SetupInteractive extends Interactive {
         this.embedGen.setStr(strConfig.getSetupFinished2() + (this.isSb ? "<>green<>Yes" : "<>error<>No"));
         this.embedGen.setColor(colorConfig.get("font"));
 
-        this.editedMsg.setFiles(this.embedGen.generate()).setComponents(this.curComponents);
+        this.editedMsg.setFiles(this.embedGen.generate().getFileUpload()).setComponents(this.curComponents);
         this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
     }
 
@@ -110,7 +110,7 @@ public class SetupInteractive extends Interactive {
             this.embedGen.setStr(strConfig.getSetupUnfinished2());
             this.embedGen.setColor(colorConfig.get("font"));
 
-            this.editedMsg.setFiles(this.embedGen.generate()).setComponents(this.curComponents);
+            this.editedMsg.setFiles(this.embedGen.generate().getFileUpload()).setComponents(this.curComponents);
 
             if (this.isStopped) {
                 return;
@@ -137,7 +137,7 @@ public class SetupInteractive extends Interactive {
         this.embedGen.setColor(colorConfig.get("font"));
 
         MessageCreateBuilder infoMsg = new MessageCreateBuilder();
-        infoMsg.setFiles(this.embedGen.generate());
+        infoMsg.setFiles(this.embedGen.generate().getFileUpload());
         this.interaction.getHook().sendMessage(infoMsg.build()).setEphemeral(true).complete();
     }
 
@@ -193,7 +193,7 @@ public class SetupInteractive extends Interactive {
             }
         }
 
-        this.editedMsg.setFiles(this.embedGen.generate()).setComponents();
+        this.editedMsg.setFiles(this.embedGen.generate().getFileUpload()).setComponents();
         this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
     }
 

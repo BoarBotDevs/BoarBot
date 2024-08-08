@@ -1,6 +1,10 @@
 package dev.boarbot.util.time;
 
+import lombok.Getter;
+
 import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 
 public final class TimeUtil {
     private static final double YEAR_MILLI = 1000 * 60 * 60 * 24 * 365.2422;
@@ -9,6 +13,11 @@ public final class TimeUtil {
     private static final double HOUR_MILLI = 1000 * 60 * 60;
     private static final double MINUTE_MILLI = 1000 * 60;
     private static final double SECOND_MILLI = 1000;
+
+    @Getter
+    private final static DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder()
+        .appendPattern("MMMM d, yyyy")
+        .toFormatter();;
 
     public static long getLastDailyResetMilli() {
         return LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();

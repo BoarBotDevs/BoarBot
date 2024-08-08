@@ -1,0 +1,83 @@
+{
+  "miracle": {
+    "name": "Miracle Charm",
+    "file": "MiracleCharm.png",
+    "description": "Increases the number of Boar Blessings you have at 5% per charm (compounding).",
+    "rewardAmt": 1
+  },
+  "gift": {
+    "name": "Boar Gift",
+    "file": "BoarGift.png",
+    "description": "A gift that can be sent to and opened by other people. Contains boar bucks, boars, rare surprises, and more.",
+    "rewardAmt": 1,
+    "outcomes": [
+      {
+        "weight": 10,
+        "category": "Special Boar",
+        "suboutcomes": [
+          {
+            "weight": 9,
+            "name": "santa"
+          },
+          {
+            "weight": 1,
+            "name": "underwear"
+          }
+        ]
+      },
+      {
+        "weight": 800,
+        "category": "Boar Bucks",
+        "suboutcomes": [
+          {
+            "weight": 90,
+            "name": "+%@ Boar Bucks"
+          },
+          {
+            "weight": 9,
+            "name": "+%@ Boar Bucks"
+          },
+          {
+            "weight": 1,
+            "name": "+%@ Boar Bucks"
+          }
+        ]
+      },
+      {
+        "weight": 390,
+        "category": "Powerups",
+        "suboutcomes": [
+          {
+            "weight": 50,
+            "name": "+1 Cloning Serum"
+          },
+          {
+            "weight": 45,
+            "name": "+1 Miracle Charm"
+          },
+          {
+            "weight": 5,
+            "name": "+1 Transmutation Charge"
+          }
+        ]
+      },
+      {
+        "weight": 800,
+        "category": "Random Boar",
+        "suboutcomes": []
+      }
+    ]
+  },
+  "transmute": {
+    "name": "Transmutation Charge",
+    "file": "TransmutationCharge.png",
+    "description": "Used to charge up the Transmutation Cell, which can be used to transmute a boar into a random boar of the next highest rarity.",
+    "rewardAmt": 1
+  },
+  "clone": {
+    "name": "Cloning Serum",
+    "file": "CloningSerum.png",
+    "description": "Clones a boar of your choosing. Higher rarity boars are more difficult to clone than lower rarity boars.",
+    "rewardAmt": 1
+  }
+}

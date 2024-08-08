@@ -22,8 +22,8 @@ public class RarityConfig {
     public double weight = 0;
     public int baseScore = 0;
     public boolean fromDaily = false;
-    public int enhancersNeeded = 0;
-    public int avgClones = 0;
+    public int chargesNeeded = -1;
+    public int avgClones = -1;
     public boolean hunterNeed = false;
     public boolean givesSpecial = false;
     public boolean hidden = false;

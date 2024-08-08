@@ -1,0 +1,58 @@
+{
+  "miracleAmount": {
+    "id": "MIRACLE_AMOUNT",
+    "title": "How many Miracle Charms?",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "AMOUNT",
+        "style": 1,
+        "label": "Number of charms to use",
+        "max_length": 9,
+        "placeholder": "Ex: 117"
+      }
+    ]
+  },
+  "pageInput": {
+    "id": "PAGE_INPUT",
+    "title": "Enter a page number!",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "PAGE",
+        "style": 1,
+        "label": "Page number",
+        "max_length": 9,
+        "placeholder": "Ex: 3"
+      }
+    ]
+  },
+  "findBoar": {
+    "id": "FIND_BOAR",
+    "title": "Enter a value to search for!",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "SEARCH",
+        "style": 1,
+        "label": "Search term",
+        "max_length": 64,
+        "placeholder": "Ex: Explosionless Boar"
+      }
+    ]
+  },
+  "cloneAmount": {
+    "id": "CLONE_AMOUNT",
+    "title": "How many Cloning Serums?",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "AMOUNT",
+        "style": 1,
+        "label": "Number of serums to use",
+        "max_length": 9,
+        "placeholder": "Ex: 117"
+      }
+    ]
+  }
+}

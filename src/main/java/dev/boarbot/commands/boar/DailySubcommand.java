@@ -11,7 +11,7 @@ import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.generators.EmbedGenerator;
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.generators.ItemImageGenerator;
 import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.time.TimeUtil;
@@ -75,8 +75,8 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             }
 
             try {
-                EmbedGenerator embedGen = new EmbedGenerator(replyStr);
-                editedMsg.setFiles(embedGen.generate());
+                EmbedImageGenerator embedGen = new EmbedImageGenerator(replyStr);
+                editedMsg.setFiles(embedGen.generate().getFileUpload());
 
                 this.interaction.getHook().editOriginal(editedMsg.build()).queue();
             } catch (IOException exception) {
@@ -94,7 +94,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
-            if (!boarUser.canUseDaily(connection) && !this.config.isUnlimitedBoars()) {
+            if (!boarUser.canUseDaily(connection) && !this.config.getMainConfig().isUnlimitedBoars()) {
                 this.canDaily = false;
                 this.notificationsOn = boarUser.getNotificationStatus(connection);
                 return;
@@ -144,8 +144,8 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
         if (this.isFirstDaily) {
             try {
-                EmbedGenerator embedGen = new EmbedGenerator(this.config.getStringConfig().getDailyFirstTime());
-                this.interaction.getHook().sendFiles(embedGen.generate()).setEphemeral(true).complete();
+                EmbedImageGenerator embedGen = new EmbedImageGenerator(this.config.getStringConfig().getDailyFirstTime());
+                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
             } catch (IOException exception) {
                 log.error("Failed to generate first daily reward image.", exception);
             }
@@ -177,12 +177,12 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         this.interaction.deferReply().complete();
 
         try {
-            EmbedGenerator embedGen = new EmbedGenerator(this.config.getStringConfig().getDailyPow());
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(this.config.getStringConfig().getDailyPow());
 
             Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
 
             MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(embedGen.generate())
+                .setFiles(embedGen.generate().getFileUpload())
                 .setComponents(interactive.getCurComponents());
 
             if (interactive.isStopped()) {

@@ -13,7 +13,7 @@ import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.modals.MiracleAmountModalHandler;
 import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.generators.EmbedGenerator;
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.modal.ModalUtil;
@@ -118,9 +118,9 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             StringConfig strConfig = this.config.getStringConfig();
 
-            EmbedGenerator embedGen = new EmbedGenerator(strConfig.getDailyPowFailed() + " " + strConfig.getDailyPow());
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(strConfig.getDailyPowFailed() + " " + strConfig.getDailyPow());
             MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(embedGen.generate())
+                .setFiles(embedGen.generate().getFileUpload())
                 .setComponents(this.getCurComponents());
 
             if (this.isStopped) {
@@ -187,7 +187,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         StringConfig strConfig = this.config.getStringConfig();
         IndivItemConfig miracleConfig = this.config.getItemConfig().getPowerups().get("miracle");
 
-        EmbedGenerator embedGen = new EmbedGenerator("");
+        EmbedImageGenerator embedGen = new EmbedImageGenerator("");
         MessageEditBuilder editedMsg = new MessageEditBuilder();
 
         try {
@@ -224,11 +224,11 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             boarUser.decRefs();
 
-            editedMsg.setFiles(embedGen.generate()).setComponents(this.getCurComponents());
+            editedMsg.setFiles(embedGen.generate().getFileUpload()).setComponents(this.getCurComponents());
         } catch (NumberFormatException exception1) {
             try {
                 embedGen.setStr(strConfig.getDailyPowInvalid() + " " + strConfig.getDailyPow());
-                editedMsg.setFiles(embedGen.generate()).setComponents(this.getCurComponents());
+                editedMsg.setFiles(embedGen.generate().getFileUpload()).setComponents(this.getCurComponents());
             } catch (IOException exception2) {
                 log.error("Failed to generate invalid input response.", exception2);
             }

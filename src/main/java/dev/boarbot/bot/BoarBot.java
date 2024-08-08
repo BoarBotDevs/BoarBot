@@ -1,14 +1,15 @@
 package dev.boarbot.bot;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import dev.boarbot.api.bot.Bot;
-import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.bot.config.NumberConfig;
-import dev.boarbot.bot.config.PathConfig;
-import dev.boarbot.bot.config.QuestConfig;
+import dev.boarbot.bot.config.*;
 import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.commands.SubcommandConfig;
+import dev.boarbot.bot.config.components.ComponentConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.modals.ModalConfig;
+import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.CommandListener;
@@ -45,7 +46,7 @@ public class BoarBot implements Bot {
         .load();
     private JDA jda;
 
-    private BotConfig config;
+    private final BotConfig config = new BotConfig();
     private Font font;
 
     private final Map<String, byte[]> byteCacheMap = new HashMap<>();
@@ -92,20 +93,68 @@ public class BoarBot implements Bot {
         try {
             log.info("Attempting to load 'config.json' from resources.");
 
-            String configFile = "src/%s/resources/config.json".formatted(
+            Gson g = new Gson();
+            String basePath = "src/%s/resources/config/".formatted(
                 this.botType == BotType.TEST ? "test" : "main"
             );
 
-            File file = new File(configFile);
-            Scanner reader = new Scanner(file);
-            StringBuilder jsonStr = new StringBuilder();
-            Gson g = new Gson();
+            File mainConfig = new File(basePath + "config.json");
+            this.config.setMainConfig(g.fromJson(this.getJson(mainConfig), MainConfig.class));
 
-            while(reader.hasNextLine()) {
-                jsonStr.append(reader.nextLine());
-            }
+            File commandConfig = new File(basePath + "discord/commands.json");
+            this.config.setCommandConfig(
+                g.fromJson(this.getJson(commandConfig), new TypeToken<Map<String, CommandConfig>>(){}.getType())
+            );
 
-            this.config = g.fromJson(jsonStr.toString(), BotConfig.class);
+            File componentConfig = new File(basePath + "discord/components.json");
+            this.config.setComponentConfig(g.fromJson(this.getJson(componentConfig), ComponentConfig.class));
+
+            File modalConfig = new File(basePath + "discord/modals.json");
+            this.config.setModalConfig(
+                g.fromJson(this.getJson(modalConfig), new TypeToken<Map<String, ModalConfig>>(){}.getType())
+            );
+
+            File promptConfig = new File(basePath + "game/pow_prompts.json");
+            this.config.setPromptConfig(g.fromJson(this.getJson(promptConfig), PromptConfig.class));
+
+            File questConfig = new File(basePath + "game/quests.json");
+            this.config.setQuestConfig(
+                g.fromJson(this.getJson(questConfig), new TypeToken<Map<String, QuestConfig>>(){}.getType())
+            );
+
+            File rarityConfig = new File(basePath + "game/rarities.json");
+            this.config.setRarityConfigs(
+                g.fromJson(this.getJson(rarityConfig), new TypeToken<Map<String, RarityConfig>>(){}.getType())
+            );
+
+            File badgeConfig = new File(basePath + "items/badges.json");
+            this.config.getItemConfig().setBadges(
+                g.fromJson(this.getJson(badgeConfig), new TypeToken<Map<String, IndivItemConfig>>(){}.getType())
+            );
+
+            File boarConfig = new File(basePath + "items/boars.json");
+            this.config.getItemConfig().setBoars(
+                g.fromJson(this.getJson(boarConfig), new TypeToken<Map<String, IndivItemConfig>>(){}.getType())
+            );
+
+            File powerupConfig = new File(basePath + "items/powerups.json");
+            this.config.getItemConfig().setPowerups(
+                g.fromJson(this.getJson(powerupConfig), new TypeToken<Map<String, IndivItemConfig>>(){}.getType())
+            );
+
+            File langConfig = new File(basePath + "lang/en_us.json");
+            this.config.setStringConfig(g.fromJson(this.getJson(langConfig), StringConfig.class));
+
+            File colorConfig = new File(basePath + "util/colors.json");
+            this.config.setColorConfig(
+                g.fromJson(this.getJson(colorConfig), new TypeToken<Map<String, String>>(){}.getType())
+            );
+
+            File constantConfig = new File(basePath + "util/constants.json");
+            this.config.setNumberConfig(g.fromJson(this.getJson(constantConfig), NumberConfig.class));
+
+            File pathConfig = new File(basePath + "util/paths.json");
+            this.config.setPathConfig(g.fromJson(this.getJson(pathConfig), PathConfig.class));
 
             for (IndivItemConfig boar : this.config.getItemConfig().getBoars().values()) {
                 if (boar.getPluralName() == null) {
@@ -140,6 +189,17 @@ public class BoarBot implements Bot {
             log.error("Unable to find 'config.json' in resources.");
             System.exit(-1);
         }
+    }
+
+    private String getJson(File file) throws FileNotFoundException {
+        Scanner reader = new Scanner(file);
+        StringBuilder jsonStr = new StringBuilder();
+
+        while (reader.hasNextLine()) {
+            jsonStr.append(reader.nextLine());
+        }
+
+        return jsonStr.toString();
     }
 
     private void loadIntoDatabase(String databaseType) {

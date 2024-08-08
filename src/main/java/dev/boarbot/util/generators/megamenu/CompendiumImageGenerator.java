@@ -8,17 +8,20 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
-import net.dv8tion.jda.api.utils.FileUpload;
+import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
 public class CompendiumImageGenerator extends MegaMenuGenerator {
     private static final int[] ORIGIN = {0, 0};
+    private static final int[] FAV_POS = {130, 472};
     private static final int[] LEFT_START_POS = {484, 392};
     private static final int VALUE_Y_OFFSET = 78;
     private static final int LABEL_Y_SPACING = 198;
@@ -30,6 +33,7 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
 
     private final String boarID;
     private final BoarInfo boarInfo;
+    private final boolean isFavorite;
 
     private TextDrawer textDrawer;
 
@@ -38,15 +42,18 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         BoarUser boarUser,
         List<String> badgeIDs,
         String firstJoinedDate,
+        boolean isFavorite,
         Map.Entry<String, BoarInfo> boarEntry
     ) {
         super(page, boarUser, badgeIDs, firstJoinedDate);
         this.boarID = boarEntry.getKey();
         this.boarInfo = boarEntry.getValue();
+        this.isFavorite = isFavorite;
     }
 
-    public FileUpload generate() throws IOException, URISyntaxException {
+    public MegaMenuGenerator generate() throws IOException, URISyntaxException {
         String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getCompUnderlay();
+        String favoritePath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getFavorite();
 
         int smallestFont = this.nums.getFontSmallest();
         int mediumFont = this.nums.getFontMedium();
@@ -70,10 +77,25 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         String rarityKey = BoarUtil.findRarityKey(this.boarID);
         String rarityName = this.config.getRarityConfigs().get(rarityKey).getName();
 
+        String firstObtained = this.boarInfo.firstObtained() > -1
+            ? Instant.ofEpochMilli(this.boarInfo.firstObtained())
+                .atOffset(ZoneOffset.UTC)
+                .format(TimeUtil.getDateFormatter())
+            : this.config.getStringConfig().getUnavailable();
+        String lastObtained = this.boarInfo.firstObtained() > -1
+            ? Instant.ofEpochMilli(this.boarInfo.lastObtained())
+                .atOffset(ZoneOffset.UTC)
+                .format(TimeUtil.getDateFormatter())
+            : this.config.getStringConfig().getUnavailable();
+
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+
+        if (this.isFavorite) {
+            GraphicsUtil.drawImage(g2d, favoritePath, FAV_POS);
+        }
 
         this.textDrawer = new TextDrawer(
             g2d, "Number Found", LEFT_START_POS, Align.CENTER, this.colorConfig.get("font"), mediumFont
@@ -83,10 +105,10 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         this.drawValue("%,d".formatted(this.boarInfo.amount()), amountPos);
 
         this.drawLabel("Oldest Specimen", oldestLabelPos);
-        this.drawValue(this.boarInfo.firstObtained(), oldestPos);
+        this.drawValue(firstObtained, oldestPos);
 
         this.drawLabel("Newest Specimen", newestLabelPos);
-        this.drawValue(this.boarInfo.lastObtained(), newestPos);
+        this.drawValue(lastObtained, newestPos);
 
         this.drawLabel("Species Classification", classLabelPos);
         this.drawValue(this.boarInfo.amount() > 0
@@ -129,7 +151,7 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         this.textDrawer.drawText();
 
         this.drawTopInfo();
-        return this.getFileUpload();
+        return this;
     }
 
     private void drawLabel(String text, int[] pos) {

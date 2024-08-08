@@ -2,6 +2,7 @@ package dev.boarbot.entities.boaruser;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.util.interactive.megamenu.SortType;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
@@ -11,20 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 
 import java.sql.*;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class BoarUser {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
-
-    private final static DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder()
-        .appendPattern("MMMM d, yyyy")
-        .toFormatter();
 
     @Getter private final User user;
     @Getter private final String userID;
@@ -203,10 +196,10 @@ public class BoarUser {
         }
     }
 
-    public String getFilterVal(Connection connection) throws SQLException {
-        String filterVal = null;
+    public String getFavoriteID(Connection connection) throws SQLException {
+        String favoriteID = null;
         String query = """
-            SELECT filter_val
+            SELECT favorite_boar_id
             FROM users
             WHERE user_id = ?;
         """;
@@ -216,12 +209,96 @@ public class BoarUser {
 
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
-                    filterVal = results.getString("filter_val");
+                    favoriteID = results.getString("favorite_boar_id");
                 }
             }
         }
 
-        return filterVal;
+        return favoriteID;
+    }
+
+    public void setFavoriteID(Connection connection, String id) throws SQLException {
+        String query = """
+            UPDATE users
+            SET favorite_boar_id = ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, id);
+            statement.setString(2, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public int getFilterBits(Connection connection) throws SQLException {
+        int filterBits = 1;
+        String query = """
+            SELECT filter_bits
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    filterBits = results.getInt("filter_bits");
+                }
+            }
+        }
+
+        return filterBits;
+    }
+
+    public void setFilterBits(Connection connection, int filterBits) throws SQLException {
+        String query = """
+            UPDATE users
+            SET filter_bits = ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, filterBits);
+            statement.setString(2, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public SortType getSortVal(Connection connection) throws SQLException {
+        SortType sortVal = SortType.RARITY_D;
+        String query = """
+            SELECT sort_value
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    sortVal = SortType.values()[results.getInt("sort_value")];
+                }
+            }
+        }
+
+        return sortVal;
+    }
+
+    public void setSortVal(Connection connection, SortType sortVal) throws SQLException {
+        String query = """
+            UPDATE users
+            SET sort_value = ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, sortVal.ordinal());
+            statement.setString(2, this.userID);
+            statement.executeUpdate();
+        }
     }
 
     public Map<String, BoarInfo> getOwnedBoarInfo(Connection connection) throws SQLException {
@@ -247,18 +324,11 @@ public class BoarUser {
 
             try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
-                    String firstObtained = Instant.ofEpochMilli(results.getTimestamp("first_obtained").getTime())
-                        .atOffset(ZoneOffset.UTC)
-                        .format(BoarUser.dateFormatter);
-                    String lastObtained = Instant.ofEpochMilli(results.getTimestamp("last_obtained").getTime())
-                        .atOffset(ZoneOffset.UTC)
-                        .format(BoarUser.dateFormatter);
-
                     boarInfo.put(results.getString("boar_id"), new BoarInfo(
                         results.getInt("amount"),
                         results.getString("rarity_id"),
-                        firstObtained,
-                        lastObtained
+                        results.getTimestamp("first_obtained").getTime(),
+                        results.getTimestamp("last_obtained").getTime()
                     ));
                 }
             }
@@ -281,7 +351,6 @@ public class BoarUser {
         String query = """
             SELECT
                 last_boar_id,
-                favorite_boar_id,
                 total_bucks,
                 total_boars,
                 num_dailies,
@@ -305,7 +374,6 @@ public class BoarUser {
                 if (results.next()) {
                     profileData = new ProfileData(
                         results.getString("last_boar_id"),
-                        results.getString("favorite_boar_id"),
                         results.getLong("total_bucks"),
                         results.getLong("total_boars"),
                         results.getInt("num_dailies"),

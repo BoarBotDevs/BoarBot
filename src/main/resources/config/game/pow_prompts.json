@@ -1,0 +1,277 @@
+{
+  "emojiFind": {
+    "name": "Emoji Find",
+    "description": "Click the emoji that's different from the others!",
+    "rightStyle": 1,
+    "wrongStyle": 1,
+    "prompts": {
+      "frown1": {
+        "name": "Frowns",
+        "emoji1": "🙁",
+        "emoji2": "☹️"
+      },
+      "detective1": {
+        "name": "Detectives",
+        "emoji1": "🕵",
+        "emoji2": "🕵️‍♀️"
+      },
+      "cloud1": {
+        "name": "Clouds",
+        "emoji1": "🌨",
+        "emoji2": "🌧"
+      },
+      "lock1": {
+        "name": "Locks",
+        "emoji1": "🔓",
+        "emoji2": "🔒"
+      },
+      "folder1": {
+        "name": "Folders",
+        "emoji1": "📂",
+        "emoji2": "📁"
+      },
+      "nest1": {
+        "name": "Nests",
+        "emoji1": "🪺",
+        "emoji2": "🪹"
+      },
+      "hourglass1": {
+        "name": "Hourglasses",
+        "emoji1": "⌛",
+        "emoji2": "⏳"
+      },
+      "bathtub1": {
+        "name": "Bathtubs",
+        "emoji1": "🛀",
+        "emoji2": "🛁"
+      },
+      "hearts1": {
+        "name": "Hearts",
+        "emoji1": "💕",
+        "emoji2": "💞"
+      },
+      "city1": {
+        "name": "Cities",
+        "emoji1": "🌆",
+        "emoji2": "🌇"
+      },
+      "mountain1": {
+        "name": "Mountains",
+        "emoji1": "⛰",
+        "emoji2": "🏔"
+      },
+      "redshape1": {
+        "name": "Red Shapes",
+        "emoji1": "🩸",
+        "emoji2": "♦️"
+      }
+    }
+  },
+  "trivia": {
+    "name": "Boar Trivia",
+    "rightStyle": 1,
+    "wrongStyle": 1,
+    "prompts": {
+      "normal1": {
+        "name": "Normal Boar",
+        "description": "What is normal boar?",
+        "choices": [
+          "Unremarkable",
+          "Unexceptional",
+          "Average",
+          "Ordinary"
+        ]
+      },
+      "tiny1": {
+        "name": "Tiny Boar",
+        "description": "What boar is mentioned in Tiny Boar's description?",
+        "choices": [
+          "Wizard Boar",
+          "Boarfish",
+          "Soda Boar",
+          "Matrix Boar"
+        ]
+      },
+      "bor1": {
+        "name": "bor",
+        "description": "What does bor NOT have?",
+        "choices": [
+          "Tusks",
+          "Explosion",
+          "Snout",
+          "Eyes"
+        ]
+      },
+      "explosionless1": {
+        "name": "Explosionless Boar",
+        "description": "What adjective describes Explosionless Boar's potential explosivity?",
+        "choices": [
+          "Cataclysmic",
+          "Explosive",
+          "Catastrophic",
+          "Disastrous"
+        ]
+      },
+      "lowquality1": {
+        "name": "Low Quality Boar",
+        "description": "What is Low Quality Boar's internet speed?",
+        "choices": [
+          "1 Kb/s",
+          "1 Mb/s",
+          "500 Kb/s",
+          "10 Kb/s"
+        ]
+      },
+      "chocolate1": {
+        "name": "Chocolate Boar",
+        "description": "What year was Chocolate Boar pulled off shelves?",
+        "choices": [
+          "1999",
+          "1995",
+          "1996",
+          "1989"
+        ]
+      },
+      "matrix1": {
+        "name": "Matrix Boar",
+        "description": "What color pill does Matrix Boar keep taking?",
+        "choices": [
+          "Red",
+          "Blue",
+          "Green",
+          "White"
+        ]
+      },
+      "sketch1": {
+        "name": "Sketch Boar",
+        "description": "What should you NOT leave Sketch Boar by?",
+        "choices": [
+          "Printer",
+          "Boartist",
+          "Copier",
+          "Pencil"
+        ]
+      },
+      "buff1": {
+        "name": "Buff Boar",
+        "description": "What can Buff Boar crush with its bare hands?",
+        "choices": [
+          "Rocks",
+          "Bricks",
+          "Diamonds",
+          "Metal Cans"
+        ]
+      },
+      "keyboard1": {
+        "name": "KeyBOARd",
+        "description": "Where is KeyBOARd highly rated?",
+        "choices": [
+          "Boarmazon",
+          "Amazboarn",
+          "Boarmezon",
+          "BoarBay"
+        ]
+      }
+    }
+  },
+  "fast": {
+    "name": "Quick Click",
+    "description": "Click the green button!",
+    "rightStyle": 3,
+    "wrongStyle": 4,
+    "prompts": {
+      "one": {
+        "name": "One button",
+        "numButtons": 1
+      },
+      "two": {
+        "name": "Two buttons",
+        "numButtons": 2
+      },
+      "three": {
+        "name": "Three buttons",
+        "numButtons": 3
+      },
+      "six": {
+        "name": "Six buttons",
+        "numButtons": 6
+      },
+      "nine": {
+        "name": "Nine buttons",
+        "numButtons": 9
+      }
+    }
+  },
+  "time": {
+    "name": "Telling Time",
+    "description": "Click the clock that's set to %@!",
+    "rightStyle": 1,
+    "wrongStyle": 1,
+    "prompts": {
+      "one": {
+        "name": "1:00",
+        "rightClock": "🕐"
+      },
+      "oneThirty": {
+        "name": "1:30",
+        "rightClock": "🕜"
+      },
+      "two": {
+        "name": "2:00",
+        "rightClock": "🕑"
+      },
+      "threeThirty": {
+        "name": "3:30",
+        "rightClock": "🕞"
+      },
+      "four": {
+        "name": "4:00",
+        "rightClock": "🕓"
+      },
+      "fourThirty": {
+        "name": "4:30",
+        "rightClock": "🕟"
+      },
+      "five": {
+        "name": "5:00",
+        "rightClock": "🕔"
+      },
+      "sixThirty": {
+        "name": "6:30",
+        "rightClock": "🕡"
+      },
+      "seven": {
+        "name": "7:00",
+        "rightClock": "🕖"
+      },
+      "sevenThirty": {
+        "name": "7:30",
+        "rightClock": "🕢"
+      },
+      "eight": {
+        "name": "8:00",
+        "rightClock": "🕗"
+      },
+      "nineThirty": {
+        "name": "9:30",
+        "rightClock": "🕤"
+      },
+      "ten": {
+        "name": "10:00",
+        "rightClock": "🕙"
+      },
+      "tenThirty": {
+        "name": "10:30",
+        "rightClock": "🕥"
+      },
+      "eleven": {
+        "name": "11:00",
+        "rightClock": "🕚"
+      },
+      "twelveThirty": {
+        "name": "12:30",
+        "rightClock": "🕧"
+      }
+    }
+  }
+}

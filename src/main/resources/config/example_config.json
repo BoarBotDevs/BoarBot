@@ -1,0 +1,16 @@
+{
+  "devs": [
+    "184439280980983808",
+    "525050052390027269"
+  ],
+  "logChannel": "0000000000000000000",
+  "reportsChannel": "0000000000000000000",
+  "updatesChannel": "0000000000000000000",
+  "defaultChannel": "0000000000000000000",
+  "spookChannel": "0000000000000000000",
+  "unlimitedBoars": false,
+  "debugMode": false,
+  "maintenanceMode": false,
+  "marketOpen": true,
+  "firstBoarID": "bacteria"
+}

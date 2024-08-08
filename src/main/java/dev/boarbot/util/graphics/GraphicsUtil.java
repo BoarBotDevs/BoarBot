@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -42,8 +43,18 @@ public final class GraphicsUtil {
     }
 
     public static void drawImage(
+        Graphics2D g2d, String path, int[] pos
+    ) throws MalformedURLException, URISyntaxException {
+        g2d.drawImage(GraphicsUtil.getImage(path), pos[0], pos[1], null);
+    }
+
+    public static void drawImage(
         Graphics2D g2d, String path, int[] pos, int[] size
-    ) throws IOException, URISyntaxException {
+    ) throws MalformedURLException, URISyntaxException {
+        g2d.drawImage(GraphicsUtil.getImage(path), pos[0], pos[1], size[0], size[1], null);
+    }
+
+    private static Image getImage(String path) throws URISyntaxException, MalformedURLException {
         Image image;
 
         if (path.startsWith("http")) {
@@ -52,7 +63,7 @@ public final class GraphicsUtil {
             image = new ImageIcon(path).getImage();
         }
 
-        g2d.drawImage(image, pos[0], pos[1], size[0], size[1], null);
+        return image;
     }
 
     public static void drawCircleImage(

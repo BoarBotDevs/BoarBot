@@ -1,6 +1,5 @@
 package dev.boarbot.bot.config.prompts;
 
-import dev.boarbot.bot.config.components.ComponentConfig;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,15 +7,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link PromptConfig PromptConfig.java}
+ * {@link PromptConfig PromptTypeConfig.java}
  *
- * Stores powerup configurations for a bot instance.
+ * Stores a powerup prompt type configuration for a bot instance.
  *
  * @copyright WeslayCodes & Contributors 2023
  */
 @Getter
 @Setter
 public class PromptConfig {
-    private Map<String, PromptTypeConfig> types = new HashMap<>();
-    private ComponentConfig[] rows = {};
+    private String name = "";
+    private String description = "";
+    private int rightStyle = 0;
+    private int wrongStyle = 0;
+    private Map<String, IndivPromptConfig> prompts = new HashMap<>();
 }

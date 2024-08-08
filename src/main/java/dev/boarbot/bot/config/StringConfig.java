@@ -104,8 +104,8 @@ public class StringConfig {
     private String collClonesUsedLabel = "";
     private String collClonesSuccLabel = "";
     private String collMostClonesLabel = "";
-    private String collEnhancersClaimedLabel = "";
-    private String collEnhancedLabel = "";
+    private String collChargesClaimedLabel = "";
+    private String collTransmutedLabel = "";
     private String collDataChange = "";
     private String collEnhanceNoBucks = "";
     private String collEnhanceDetails = "";

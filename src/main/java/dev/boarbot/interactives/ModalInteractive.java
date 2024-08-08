@@ -1,11 +1,16 @@
 package dev.boarbot.interactives;
 
+import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.time.TimeUtil;
+import lombok.Getter;
+import lombok.Setter;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 
 public abstract class ModalInteractive extends Interactive {
+    @Getter @Setter protected ModalHandler modalHandler = null;
+
     protected ModalInteractive(SlashCommandInteractionEvent initEvent) {
         super(initEvent);
     }

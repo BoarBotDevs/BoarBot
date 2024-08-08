@@ -30,18 +30,18 @@ public final class ItemImageGrouper {
         PathConfig pathConfig = config.getPathConfig();
 
         byte[] leftImageBytes = null;
-        byte[] middleImageBytes = itemGens.get(page).generate();
+        byte[] middleImageBytes = itemGens.get(page).generate().getBytes();
         byte[] rightImageBytes = null;
         byte[] resultByteArray;
 
         String extension = itemGens.get(page).getFilePath().split("[.]")[1];
 
         if (page != 0) {
-            leftImageBytes = itemGens.get(page-1).generate(true);
+            leftImageBytes = itemGens.get(page-1).generate(true).getBytes();
         }
 
         if (page != itemGens.size()-1) {
-            rightImageBytes = itemGens.get(page+1).generate(true);
+            rightImageBytes = itemGens.get(page+1).generate(true).getBytes();
         }
 
         if (leftImageBytes == null && rightImageBytes == null) {
@@ -100,7 +100,7 @@ public final class ItemImageGrouper {
 
             Process pythonProcess = new ProcessBuilder(
                 "python",
-                "src/main/resources/scripts/animated_item_grouper.py",
+                config.getPathConfig().getGroupScript(),
                 Integer.toString(resultByteArray.length),
                 Integer.toString(middleImageBytes.length)
             ).start();
