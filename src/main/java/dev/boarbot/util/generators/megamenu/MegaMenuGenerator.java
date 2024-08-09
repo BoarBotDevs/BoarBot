@@ -79,7 +79,7 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         );
         textDrawer.drawText();
 
-        textDrawer.setText(this.strConfig.getCollDateLabel());
+        textDrawer.setText(this.strConfig.getMegaMenuDateLabel());
         textDrawer.setPos(DATE_LABEL_POS);
         textDrawer.drawText();
 
@@ -89,7 +89,7 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         textDrawer.drawText();
 
         if (this.badgeIDs.isEmpty()) {
-            textDrawer.setText(this.strConfig.getCollNoBadges());
+            textDrawer.setText(this.strConfig.getMegaMenuNoBadges());
             textDrawer.setColorVal(this.colorConfig.get("font"));
             textDrawer.setPos(NO_BADGE_POS);
             textDrawer.drawText();

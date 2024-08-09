@@ -2,10 +2,6 @@ package dev.boarbot.bot.config.commands;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import net.dv8tion.jda.api.interactions.commands.Command;
-
-import java.util.Arrays;
 
 /**
  * {@link SubcommandConfig SubcommandConfig.java}

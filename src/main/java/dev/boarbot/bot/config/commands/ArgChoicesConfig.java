@@ -2,7 +2,6 @@ package dev.boarbot.bot.config.commands;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * {@link ArgChoicesConfig ArgChoicesConfig.java}

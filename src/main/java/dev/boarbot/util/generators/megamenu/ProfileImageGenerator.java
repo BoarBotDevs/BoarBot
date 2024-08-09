@@ -85,7 +85,10 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         g2d.setFont(BoarBotApp.getBot().getFont().deriveFont((float) mediumFont));
         FontMetrics fm = g2d.getFontMetrics();
 
-        int maxStrLen = Math.max(fm.stringWidth("Unique Boars"), fm.stringWidth("Total Boars"));
+        int maxStrLen = Math.max(
+            fm.stringWidth(this.strConfig.getProfileUniquesLabel()),
+            fm.stringWidth(this.strConfig.getProfileTotalLabel())
+        );
 
         g2d.setFont(BoarBotApp.getBot().getFont().deriveFont((float) bigFont));
         fm = g2d.getFontMetrics();
@@ -143,58 +146,63 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
             ? ""
             : BoarUtil.findRarityKey(this.profileData.lastBoarID());
         String recentStr = this.profileData.lastBoarID() == null
-            ? "RECENT"
-            : "<>%s<>RECENT".formatted(recentRarityKey);
+            ? this.strConfig.getProfileRecentLabel()
+            : "<>%s<>%s".formatted(recentRarityKey, this.strConfig.getProfileRecentLabel());
 
         String favoriteRarityKey = this.favoriteID == null
             ? ""
             : BoarUtil.findRarityKey(this.favoriteID);
         String favoriteStr = this.favoriteID == null
-            ? "FAVORITE"
-            : "<>%s<>FAVORITE".formatted(favoriteRarityKey);
+            ? this.strConfig.getProfileFavLabel()
+            : "<>%s<>%s".formatted(favoriteRarityKey, this.strConfig.getProfileFavLabel());
 
         String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getProfUnderlay();
 
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
 
         this.textDrawer = new TextDrawer(
-            g2d, "Boar Bucks", LEFT_START_POS, Align.LEFT, this.colorConfig.get("font"), mediumFont
+            g2d,
+            this.strConfig.getProfileBucksLabel(),
+            LEFT_START_POS,
+            Align.LEFT,
+            this.colorConfig.get("font"),
+            mediumFont
         );
         textDrawer.drawText();
 
         this.drawValue("<>bucks<>$%,d".formatted(this.profileData.boarBucks()), bucksPos);
 
-        this.drawLabel("Total Boars", totalLabelPos);
+        this.drawLabel(this.strConfig.getProfileTotalLabel(), totalLabelPos);
         this.drawValue(totalBoarStr, totalPos);
 
-        this.drawLabel("Unique Boars", uniquesLabelPos);
+        this.drawLabel(this.strConfig.getProfileUniquesLabel(), uniquesLabelPos);
         this.drawValue(uniqueBoarsStr, uniquesPos);
 
-        this.drawLabel("Daily Boars", dailyLabelPos);
+        this.drawLabel(this.strConfig.getProfileDailiesLabel(), dailyLabelPos);
         this.drawValue("%,d".formatted(this.profileData.numDailies()), dailyPos);
 
-        this.drawLabel("Boar Streak", streakLabelPos);
+        this.drawLabel(this.strConfig.getProfileStreakLabel(), streakLabelPos);
         this.drawValue("%,d".formatted(this.profileData.streak()), streakPos);
 
-        this.drawLabel("Next Daily Boar", BOTTOM_START_POS);
+        this.drawLabel(this.strConfig.getProfileNextDailyLabel(), BOTTOM_START_POS);
         this.drawValue(nextDailyStr, nextDailyPos);
 
-        this.drawLabel("Quest Reset", nextQuestLabelPos);
+        this.drawLabel(this.strConfig.getProfileQuestResetLabel(), nextQuestLabelPos);
         this.drawValue(nextQuestStr, nextQuestPos);
 
-        this.drawLabel("Boar Blessings", RIGHT_START_POS);
+        this.drawLabel(this.strConfig.getProfileBlessingsLabel(), RIGHT_START_POS);
         this.drawValue(blessStr, blessPos, blessHex);
 
-        this.drawLabel("Streak Bless", streakBlessLabelPos);
+        this.drawLabel(this.strConfig.getProfileStreakBlessLabel(), streakBlessLabelPos);
         this.drawValue(streakBlessStr, streakBlessPos);
 
-        this.drawLabel("Quest Bless", questBlessLabelPos);
+        this.drawLabel(this.strConfig.getProfileQuestBlessLabel(), questBlessLabelPos);
         this.drawValue(questBlessStr, questBlessPos);
 
-        this.drawLabel("Unique Bless", RIGHT_RIGHT_START_POS);
+        this.drawLabel(this.strConfig.getProfileUniqueBlessLabel(), RIGHT_RIGHT_START_POS);
         this.drawValue(uniqueBlessStr, uniqueBlessPos);
 
-        this.drawLabel("Other Bless", otherBlessLabelPos);
+        this.drawLabel(this.strConfig.getProfileOtherBlessLabel(), otherBlessLabelPos);
         this.drawValue(otherBlessStr, otherBlessPos);
 
         this.drawLabel(recentStr, RECENT_LABEL_POS);
@@ -270,7 +278,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         String nextDailyStr;
 
         if (dailyReady) {
-            nextDailyStr = "<>green<>READY";
+            nextDailyStr = "<>green<>" + this.strConfig.getProfileDailyReady();
             nextDailyStr += showTime
                 ? " <>silver<>(%s%s<>silver<>)".formatted(
                     distanceColor, TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), true)

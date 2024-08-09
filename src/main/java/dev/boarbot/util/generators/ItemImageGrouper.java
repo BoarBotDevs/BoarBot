@@ -1,6 +1,5 @@
 package dev.boarbot.util.generators;
 
-import com.google.gson.Gson;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.PathConfig;

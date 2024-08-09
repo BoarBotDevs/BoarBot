@@ -17,7 +17,7 @@ public final class TimeUtil {
     @Getter
     private final static DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder()
         .appendPattern("MMMM d, yyyy")
-        .toFormatter();;
+        .toFormatter();
 
     public static long getLastDailyResetMilli() {
         return LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();

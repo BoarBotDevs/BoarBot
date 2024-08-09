@@ -8,7 +8,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 public class OverlayImageGenerator extends ImageGenerator {
-    private String text;
+    private final String text;
 
     public OverlayImageGenerator(BufferedImage image, String text) {
         this.generatedImage = image;

@@ -2,9 +2,6 @@ package dev.boarbot.bot.config.commands;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-
-import java.util.Arrays;
 
 /**
  * {@link SubcommandArgsConfig SubcommandArgsConfig.java}

@@ -67,51 +67,33 @@ public class StringConfig {
     private String giveBadgeHas = "";
     private String giftOpenTitle = "";
 
-    // Collection command strings
+    // Mega Menu command strings
 
-    private String collNoBadges = "";
-    private String collDateLabel = "";
-    private String collUserExtra = "";
-    private String collScoreLabel = "";
-    private String collTotalLabel = "";
-    private String collUniquesLabel = "";
-    private String collDailiesLabel = "";
-    private String collStreakLabel = "";
-    private String collLastDailyLabel = "";
-    private String collFavLabel = "";
-    private String collRecentLabel = "";
-    private String collIndivTotalLabel = "";
-    private String collFirstObtainedLabel = "";
-    private String collLastObtainedLabel = "";
-    private String collDescriptionLabel = "";
-    private String collClaimsLabel = "";
-    private String collFastestClaimsLabel = "";
-    private String collFastestTimeLabel = "";
-    private String collBestPromptLabel = "";
-    private String collBlessLabel = "";
-    private String collGiftsLabel = "";
-    private String collClonesLabel = "";
-    private String collCellLabel = "";
-    private String collMiraclesClaimedLabel = "";
-    private String collMiraclesUsedLabel = "";
-    private String collMostMiraclesLabel = "";
-    private String collHighestMultiLabel = "";
-    private String collGiftsClaimedLabel = "";
-    private String collGiftsUsedLabel = "";
-    private String collGiftsOpenedLabel = "";
-    private String collMostGiftsLabel = "";
-    private String collClonesClaimedLabel = "";
-    private String collClonesUsedLabel = "";
-    private String collClonesSuccLabel = "";
-    private String collMostClonesLabel = "";
-    private String collChargesClaimedLabel = "";
-    private String collTransmutedLabel = "";
-    private String collDataChange = "";
-    private String collEnhanceNoBucks = "";
-    private String collEnhanceDetails = "";
-    private String collEditionTitle = "";
-    private String collEditionLine = "";
-    private String collDescriptionSB = "";
+    private String megaMenuNoBadges = "";
+    private String megaMenuDateLabel = "";
+    private String profileBucksLabel = "";
+    private String profileTotalLabel = "";
+    private String profileDailiesLabel = "";
+    private String profileUniquesLabel = "";
+    private String profileStreakLabel = "";
+    private String profileNextDailyLabel = "";
+    private String profileDailyReady = "";
+    private String profileQuestResetLabel = "";
+    private String profileBlessingsLabel = "";
+    private String profileStreakBlessLabel = "";
+    private String profileUniqueBlessLabel = "";
+    private String profileQuestBlessLabel = "";
+    private String profileOtherBlessLabel = "";
+    private String profileFavLabel = "";
+    private String profileRecentLabel = "";
+    private String compTransmuteConfirm = "";
+    private String compAmountLabel = "";
+    private String compOldestLabel = "";
+    private String compNewestLabel = "";
+    private String compSpeciesLabel = "";
+    private String compNoSpecies = "";
+    private String compUpdateLabel = "";
+    private String compDefaultUpdate = "";
 
     // Event strings
 

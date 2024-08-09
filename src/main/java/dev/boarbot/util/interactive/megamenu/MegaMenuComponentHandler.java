@@ -9,7 +9,6 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
-import dev.boarbot.modals.MiracleAmountModalHandler;
 import dev.boarbot.modals.megamenu.CloneModalHandler;
 import dev.boarbot.modals.megamenu.FindBoarModalHandler;
 import dev.boarbot.modals.PageInputModalHandler;

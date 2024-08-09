@@ -98,25 +98,25 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         }
 
         this.textDrawer = new TextDrawer(
-            g2d, "Number Found", LEFT_START_POS, Align.CENTER, this.colorConfig.get("font"), mediumFont
+            g2d, this.strConfig.getCompAmountLabel(), LEFT_START_POS, Align.CENTER, this.colorConfig.get("font"), mediumFont
         );
         this.textDrawer.drawText();
 
         this.drawValue("%,d".formatted(this.boarInfo.amount()), amountPos);
 
-        this.drawLabel("Oldest Specimen", oldestLabelPos);
+        this.drawLabel(this.strConfig.getCompOldestLabel(), oldestLabelPos);
         this.drawValue(firstObtained, oldestPos);
 
-        this.drawLabel("Newest Specimen", newestLabelPos);
+        this.drawLabel(this.strConfig.getCompNewestLabel(), newestLabelPos);
         this.drawValue(lastObtained, newestPos);
 
-        this.drawLabel("Species Classification", classLabelPos);
+        this.drawLabel(this.strConfig.getCompSpeciesLabel(), classLabelPos);
         this.drawValue(this.boarInfo.amount() > 0
             ? boar.getClassification()
-            : "Unknown",
+            : this.strConfig.getCompNoSpecies(),
         classPos);
 
-        this.drawLabel("Update Introduced", updateLabelPos);
+        this.drawLabel(this.strConfig.getCompUpdateLabel(), updateLabelPos);
         this.drawValue(boar.getUpdate(), updatePos);
 
         this.textDrawer.setText(rarityName.toUpperCase());

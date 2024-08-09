@@ -98,6 +98,20 @@ public class BoarBot implements Bot {
                 this.botType == BotType.TEST ? "test" : "main"
             );
 
+            File langConfig = new File(basePath + "lang/en_us.json");
+            this.config.setStringConfig(g.fromJson(this.getJson(langConfig), StringConfig.class));
+
+            File colorConfig = new File(basePath + "util/colors.json");
+            this.config.setColorConfig(
+                    g.fromJson(this.getJson(colorConfig), new TypeToken<Map<String, String>>(){}.getType())
+            );
+
+            File constantConfig = new File(basePath + "util/constants.json");
+            this.config.setNumberConfig(g.fromJson(this.getJson(constantConfig), NumberConfig.class));
+
+            File pathConfig = new File(basePath + "util/paths.json");
+            this.config.setPathConfig(g.fromJson(this.getJson(pathConfig), PathConfig.class));
+
             File mainConfig = new File(basePath + "config.json");
             this.config.setMainConfig(g.fromJson(this.getJson(mainConfig), MainConfig.class));
 
@@ -141,20 +155,6 @@ public class BoarBot implements Bot {
             this.config.getItemConfig().setPowerups(
                 g.fromJson(this.getJson(powerupConfig), new TypeToken<Map<String, IndivItemConfig>>(){}.getType())
             );
-
-            File langConfig = new File(basePath + "lang/en_us.json");
-            this.config.setStringConfig(g.fromJson(this.getJson(langConfig), StringConfig.class));
-
-            File colorConfig = new File(basePath + "util/colors.json");
-            this.config.setColorConfig(
-                g.fromJson(this.getJson(colorConfig), new TypeToken<Map<String, String>>(){}.getType())
-            );
-
-            File constantConfig = new File(basePath + "util/constants.json");
-            this.config.setNumberConfig(g.fromJson(this.getJson(constantConfig), NumberConfig.class));
-
-            File pathConfig = new File(basePath + "util/paths.json");
-            this.config.setPathConfig(g.fromJson(this.getJson(pathConfig), PathConfig.class));
 
             for (IndivItemConfig boar : this.config.getItemConfig().getBoars().values()) {
                 if (boar.getPluralName() == null) {
