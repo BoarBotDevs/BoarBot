@@ -2,6 +2,7 @@ package dev.boarbot.interactives.boar.megamenu;
 
 import dev.boarbot.entities.boaruser.*;
 import dev.boarbot.interactives.ModalInteractive;
+import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
@@ -125,8 +126,9 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             this.currentImageGen = this.generatorMaker.make().generate();
 
             if (this.confirmOpen) {
-                this.currentImageUpload = new OverlayImageGenerator(this.currentImageGen.getImage(), "Hello")
-                    .generate().getFileUpload();
+                switch (this.interactType) {
+                    case TRANSMUTE -> applyTransmuteOverlay();
+                }
             } else {
                 this.currentImageUpload = this.currentImageGen.getFileUpload();
             }
@@ -137,6 +139,26 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         } catch (Exception exception) {
             log.error("Failed to generate collection image.", exception);
         }
+    }
+
+    private void applyTransmuteOverlay() throws IOException {
+        String curRarityKey = BoarUtil.findRarityKey(this.curBoarEntry.getKey());
+        String nextRarityKey;
+
+        Iterator<String> iterator = this.config.getRarityConfigs().keySet().iterator();
+        while (!iterator.next().equals(curRarityKey));
+        nextRarityKey = iterator.next();
+
+        String boarPluralName = this.config.getItemConfig().getBoars().get(this.curBoarEntry.getKey())
+            .getPluralName();
+
+        this.currentImageUpload = new OverlayImageGenerator(
+            this.currentImageGen.getImage(),
+            this.config.getStringConfig().getCompTransmuteConfirm().formatted(
+                "<>" + curRarityKey + "<>" + boarPluralName,
+                "<>" + nextRarityKey + "<>" + this.config.getRarityConfigs().get(nextRarityKey).getName()
+            )
+        ).generate().getFileUpload();
     }
 
     @Override
@@ -154,14 +176,30 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             } else if (this.interactOpen) {
                 switch (this.interactType) {
                     case FAVORITE -> {
+                        this.favoriteID = boarUser.getFavoriteID(connection);
+
                         if (this.favoriteID == null || !this.favoriteID.equals(this.curBoarEntry.getKey())) {
                             boarUser.setFavoriteID(connection, this.curBoarEntry.getKey());
                         } else {
                             boarUser.setFavoriteID(connection, null);
                         }
                     }
-                    case CLONE -> {}
-                    case TRANSMUTE -> {}
+
+                    case CLONE -> {
+                        int numClones = boarUser.getPowerupAmount(connection, "clone");
+                        // TODO
+                        // Compare number of clones to use to how many user has
+                        // Check if user has the boar still
+                        // If enough clones and boars, go through with clone
+                    }
+
+                    case TRANSMUTE -> {
+                        int numTransmutes = boarUser.getPowerupAmount(connection, "transmute");
+                        // TODO
+                        // Compare number of charges to use to how many user has
+                        // Check if user has the boar still
+                        // If enough charges and boars, go through with transmute
+                    }
                 }
             }
         } catch (SQLException exception) {

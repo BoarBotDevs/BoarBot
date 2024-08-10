@@ -107,9 +107,7 @@ public class MegaMenuComponentHandler {
                     this.interactive.setSortOpen(false);
                 }
 
-                case "INTERACT_SELECT" -> {
-                    this.doInteract();
-                }
+                case "INTERACT_SELECT" -> this.doInteract();
 
                 case "BOAR_FILTER" -> {
                     this.interactive.setFilterOpen(!this.interactive.isFilterOpen());
@@ -117,9 +115,7 @@ public class MegaMenuComponentHandler {
                     this.interactive.setSortOpen(false);
                 }
 
-                case "FILTER_SELECT" -> {
-                    this.setFilterBits();
-                }
+                case "FILTER_SELECT" -> this.setFilterBits();
 
                 case "BOAR_SORT" -> {
                     this.interactive.setSortOpen(!this.interactive.isSortOpen());
@@ -127,8 +123,17 @@ public class MegaMenuComponentHandler {
                     this.interactive.setFilterOpen(false);
                 }
 
-                case "SORT_SELECT" -> {
-                    this.setSortVal();
+                case "SORT_SELECT" -> this.setSortVal();
+
+                case "CONFIRM" -> {
+                    this.interactive.setConfirmOpen(false);
+                    this.interactive.setInteractType(null);
+                    this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+                }
+
+                case "CANCEL" -> {
+                    this.interactive.setConfirmOpen(false);
+                    this.interactive.setInteractType(null);
                 }
             }
         }
@@ -209,9 +214,6 @@ public class MegaMenuComponentHandler {
             case TRANSMUTE -> {
                 this.compEvent.deferEdit().queue();
                 this.interactive.setConfirmOpen(true);
-                // TODO
-                // Edit image with confirmation
-                // Remove all buttons and replace with Confirm or Cancel
             }
         }
     }

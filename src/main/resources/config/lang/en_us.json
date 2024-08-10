@@ -58,7 +58,7 @@
   "profileOtherBlessLabel": "Other Bless",
   "profileFavLabel": "FAVORITE",
   "profileRecentLabel": "RECENT",
-  "compTransmuteConfirm": "Are you sure? This action will <>error<>completely drain <>font<>your <>powerup<>Transmutation Cell<>font<>, granting you a random boar of the next highest rarity.",
+  "compTransmuteConfirm": "Are you sure? This action will <>error<>completely drain <>font<>your <>powerup<>Transmutation Cell<>font<> and will replace one of your %s <>font<>with a random %s Boar<>font<>.",
   "compAmountLabel": "Number Found",
   "compOldestLabel": "Oldest Specimen",
   "compNewestLabel": "Newest Specimen",

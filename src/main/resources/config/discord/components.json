@@ -306,12 +306,12 @@
       ]
     },
     "confirmBtn": {
-      "custom_id": "BOAR_CONFIRM",
+      "custom_id": "CONFIRM",
       "label": "Confirm",
       "style": 3
     },
     "cancelBtn": {
-      "custom_id": "BOAR_CANCEL",
+      "custom_id": "CANCEL",
       "label": "Cancel",
       "style": 4
     }

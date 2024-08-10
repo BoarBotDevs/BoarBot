@@ -164,6 +164,11 @@ public class BoarUser {
         boarIDs.addAll(newBoarIDs);
     }
 
+    public void removeBoars(List<String> boarIDs, Connection connection) throws SQLException {
+        // For each boar
+        // Find the latest boar and set its deleted value to 1
+    }
+
     private void addFirstBoar(
         List<String> newBoarIDs,
         Connection connection,
