@@ -4,10 +4,8 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
-import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.time.TimeUtil;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,9 +27,16 @@ public final class BoarUtil {
         throw new IllegalArgumentException("Boar ID input does not exist");
     }
 
-    public static List<String> getRandBoarIDs(
-        long blessings, String guildID, Connection connection
-    ) throws SQLException {
+    public static String getNextRarityKey(String rarityKey) {
+        BotConfig config = BoarBotApp.getBot().getConfig();
+        Iterator<String> iterator = config.getRarityConfigs().keySet().iterator();
+
+        while (!iterator.next().equals(rarityKey));
+
+        return iterator.next();
+    }
+
+    public static List<String> getRandBoarIDs(long blessings, boolean isSkyblockGuild) throws SQLException {
         BotConfig config = BoarBotApp.getBot().getConfig();
 
         List<String> boarsObtained = new ArrayList<>();
@@ -131,7 +136,7 @@ public final class BoarUtil {
                     continue;
                 }
 
-                String boarObtained = BoarUtil.findValid(entry.getKey(), guildID, connection);
+                String boarObtained = BoarUtil.findValid(entry.getKey(), isSkyblockGuild);
                 boarsObtained.add(boarObtained);
                 break;
             }
@@ -140,13 +145,12 @@ public final class BoarUtil {
         return boarsObtained;
     }
 
-    public static String findValid(String rarityKey, String guildID, Connection connection) throws SQLException {
+    public static String findValid(String rarityKey, boolean isSkyblockGuild) {
         BotConfig config = BoarBotApp.getBot().getConfig();
         RarityConfig rarityConfig = config.getRarityConfigs().get(rarityKey);
 
         double randBoar = Math.random();
         List<String> validBoars = new ArrayList<>();
-        boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, guildID);
 
         for (String boarID : rarityConfig.getBoars()) {
             IndivItemConfig boarConfig = config.getItemConfig().getBoars().get(boarID);

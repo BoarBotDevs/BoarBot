@@ -11,6 +11,7 @@ import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.generators.ItemImageGenerator;
 import dev.boarbot.util.generators.ItemImageGrouper;
@@ -113,7 +114,8 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             this.isFirstDaily = boarUser.isFirstDaily();
 
             long blessings = boarUser.getBlessings(connection);
-            this.boarIDs = BoarUtil.getRandBoarIDs(blessings, this.interaction.getGuild().getId(), connection);
+            boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.interaction.getGuild().getId());
+            this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
             boarUser.addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
             boarUser.useActiveMiracles(connection);

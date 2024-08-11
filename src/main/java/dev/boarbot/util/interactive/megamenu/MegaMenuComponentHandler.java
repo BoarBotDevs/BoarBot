@@ -2,9 +2,7 @@ package dev.boarbot.util.interactive.megamenu;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
-import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
@@ -12,6 +10,7 @@ import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
 import dev.boarbot.modals.megamenu.CloneModalHandler;
 import dev.boarbot.modals.megamenu.FindBoarModalHandler;
 import dev.boarbot.modals.PageInputModalHandler;
+import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.modal.ModalUtil;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -22,7 +21,6 @@ import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 @Log4j2
 public class MegaMenuComponentHandler {
@@ -125,16 +123,14 @@ public class MegaMenuComponentHandler {
 
                 case "SORT_SELECT" -> this.setSortVal();
 
-                case "CONFIRM" -> {
-                    this.interactive.setConfirmOpen(false);
-                    this.interactive.setInteractType(null);
-                    this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
-                }
+                case "CONFIRM" -> this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
 
                 case "CANCEL" -> {
                     this.interactive.setConfirmOpen(false);
                     this.interactive.setInteractType(null);
                 }
+
+                case "OKAY" -> this.interactive.setAcknowledgeOpen(false);
             }
         }
     }
@@ -154,7 +150,9 @@ public class MegaMenuComponentHandler {
 
             case "FIND_BOAR" -> {
                 this.interactive.setPrevPage(this.interactive.getPage());
-                this.interactive.setPage(this.getFindBoarPage());
+                this.interactive.setPage(
+                    this.interactive.getFindBoarPage(this.modalEvent.getValues().getFirst().getAsString())
+                );
                 this.interactive.execute(null);
             }
 
@@ -214,6 +212,17 @@ public class MegaMenuComponentHandler {
             case TRANSMUTE -> {
                 this.compEvent.deferEdit().queue();
                 this.interactive.setConfirmOpen(true);
+
+                String nextRarityKey = BoarUtil.getNextRarityKey(this.interactive.getCurRarityKey());
+
+                String boarPluralName = this.config.getItemConfig().getBoars().get(
+                    this.interactive.getCurBoarEntry().getKey()
+                ).getPluralName();
+
+                this.interactive.setConfirmString(this.config.getStringConfig().getCompTransmuteConfirm().formatted(
+                    "<>" + this.interactive.getCurRarityKey() + "<>" + boarPluralName,
+                    "<>" + nextRarityKey + "<>" + this.config.getRarityConfigs().get(nextRarityKey).getName()
+                ));
             }
         }
     }
@@ -253,71 +262,5 @@ public class MegaMenuComponentHandler {
         } catch (SQLException exception) {
             log.error("Failed to get boar user.", exception);
         }
-    }
-
-    private int getFindBoarPage() {
-        int newPage = 0;
-        boolean found = false;
-
-        String cleanInput = this.modalEvent.getValues().getFirst().getAsString().replaceAll(" ", "").toLowerCase();
-        Map<String, BoarInfo> filteredBoars = this.interactive.getFilteredBoars();
-
-        // Find by search term first
-        for (String boarID : filteredBoars.keySet()) {
-            IndivItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
-
-            for (String searchTerm : boar.getSearchTerms()) {
-                if (cleanInput.equals(searchTerm)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) {
-                break;
-            }
-
-            newPage++;
-        }
-
-        // Find by boar name (startsWith) second
-        if (!found) {
-            newPage = this.matchFront(cleanInput, filteredBoars);
-            found = newPage <= this.interactive.getMaxPage();
-        }
-
-        // Find by shrinking boar name (startsWith) third
-        if (!found) {
-            cleanInput = cleanInput.substring(0, cleanInput.length()-1);
-
-            while (!cleanInput.isEmpty()) {
-                newPage = this.matchFront(cleanInput, filteredBoars);
-                found = newPage <= this.interactive.getMaxPage();
-
-                if (found) {
-                    break;
-                }
-
-                cleanInput = cleanInput.substring(0, cleanInput.length()-1);
-            }
-        }
-
-        return newPage;
-    }
-
-    private int matchFront(String cleanInput, Map<String, BoarInfo> filteredBoars) {
-        int newPage = 0;
-
-        for (String boarID : filteredBoars.keySet()) {
-            IndivItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
-
-            if (boar.getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput)) {
-                break;
-            }
-
-            newPage++;
-        }
-
-        return newPage;
     }
 }

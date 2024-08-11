@@ -314,6 +314,11 @@
       "custom_id": "CANCEL",
       "label": "Cancel",
       "style": 4
+    },
+    "okayBtn": {
+      "custom_id": "OKAY",
+      "label": "OK",
+      "style": 2
     }
   }
 }

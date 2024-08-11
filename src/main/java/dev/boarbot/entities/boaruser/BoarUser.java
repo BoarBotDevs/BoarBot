@@ -164,9 +164,20 @@ public class BoarUser {
         boarIDs.addAll(newBoarIDs);
     }
 
-    public void removeBoars(List<String> boarIDs, Connection connection) throws SQLException {
-        // For each boar
-        // Find the latest boar and set its deleted value to 1
+    public boolean removeBoar(String boarID, Connection connection) throws SQLException {
+        String query = """
+            UPDATE collected_boars
+            SET deleted = 1
+            WHERE boar_id = ? AND user_id = ? AND `exists` = 1 AND deleted = 0
+            ORDER BY edition DESC
+            LIMIT 1;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, boarID);
+            statement.setString(2, this.userID);
+            return statement.executeUpdate() > 0;
+        }
     }
 
     private void addFirstBoar(
@@ -180,7 +191,7 @@ public class BoarUser {
             VALUES (?, ?, ?)
             RETURNING edition;
         """;
-        String firstBoarID = this.config.getStringConfig().getFirstBoarID();
+        String firstBoarID = this.config.getMainConfig().getFirstBoarID();
 
         if (!this.config.getItemConfig().getBoars().containsKey(firstBoarID)) {
             return;

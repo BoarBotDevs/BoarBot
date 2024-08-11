@@ -8,6 +8,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
+import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.megamenu.CollectionImageGenerator;
 import dev.boarbot.util.generators.megamenu.CompendiumImageGenerator;
@@ -102,12 +103,18 @@ public class MegaMenuGeneratorMaker {
             this.interactive.setPage(this.interactive.getMaxPage());
         }
 
+        if (this.interactive.getBoarPage() != null) {
+            this.interactive.setPage(this.interactive.getFindBoarPage(this.interactive.getBoarPage()));
+            this.interactive.setBoarPage(null);
+        }
+
         Iterator<Map.Entry<String, BoarInfo>> iterator = this.interactive.getFilteredBoars().entrySet().iterator();
         for (int i=0; i<this.interactive.getPage(); i++) {
             iterator.next();
         }
 
         this.interactive.setCurBoarEntry(iterator.next());
+        this.interactive.setCurRarityKey(BoarUtil.findRarityKey(this.interactive.getCurBoarEntry().getKey()));
 
         return new CompendiumImageGenerator(
             this.interactive.getPage(),
@@ -127,6 +134,14 @@ public class MegaMenuGeneratorMaker {
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
                 this.interactive.setOwnedBoars(this.interactive.getBoarUser().getOwnedBoarInfo(connection));
+
+                if (view == MegaMenuView.COMPENDIUM) {
+                    this.interactive.setFavoriteID(this.interactive.getBoarUser().getFavoriteID(connection));
+                    this.interactive.setNumTransmute(
+                        this.interactive.getBoarUser().getPowerupAmount(connection, "transmute")
+                    );
+                    this.interactive.setNumClone(this.interactive.getBoarUser().getPowerupAmount(connection, "clone"));
+                }
 
                 BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getInitEvent().getUser());
                 this.interactive.setFilterBits(interBoarUser.getFilterBits(connection));
@@ -154,68 +169,50 @@ public class MegaMenuGeneratorMaker {
         LinkedHashMap<String, BoarInfo> sortedBoars = new LinkedHashMap<>();
 
         switch (this.interactive.getSortVal()) {
-            case RARITY_A -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case RARITY_A -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case AMOUNT_D -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue(BoarInfo.amountComparator().reversed()))
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case AMOUNT_D -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(BoarInfo.amountComparator().reversed()))
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case AMOUNT_A -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue(BoarInfo.amountComparator()))
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case AMOUNT_A -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(BoarInfo.amountComparator()))
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case RECENT_D -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue(BoarInfo.recentComparator().reversed()))
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case RECENT_D -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(BoarInfo.recentComparator().reversed()))
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case RECENT_A -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue(BoarInfo.recentComparator()))
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case RECENT_A -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(BoarInfo.recentComparator()))
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case NEWEST_D -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue(BoarInfo.newestComparator().reversed()))
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case NEWEST_D -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(BoarInfo.newestComparator().reversed()))
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case NEWEST_A -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue(BoarInfo.newestComparator()))
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case NEWEST_A -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(BoarInfo.newestComparator()))
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case ALPHA_D -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case ALPHA_D -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case ALPHA_A -> {
-                this.interactive.getFilteredBoars().entrySet()
-                    .stream()
-                    .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
-                    .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
-            }
+            case ALPHA_A -> this.interactive.getFilteredBoars().entrySet()
+                .stream()
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
+                .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
         }
 
         if (!sortedBoars.isEmpty()) {

@@ -86,7 +86,15 @@ public class StringConfig {
     private String profileOtherBlessLabel = "";
     private String profileFavLabel = "";
     private String profileRecentLabel = "";
+    private String compFavoriteSuccess = "";
+    private String compUnfavoriteSuccess = "";
+    private String compCloneSuccess = "";
+    private String compCloneFailed = "";
+    private String compNoBoar = "";
+    private String compNoPow = "";
     private String compTransmuteConfirm = "";
+    private String compTransmuteSuccess = "";
+    private String compTransmuteFirst = "";
     private String compAmountLabel = "";
     private String compOldestLabel = "";
     private String compNewestLabel = "";

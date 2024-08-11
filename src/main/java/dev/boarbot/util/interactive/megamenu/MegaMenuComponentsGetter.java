@@ -8,7 +8,6 @@ import dev.boarbot.bot.config.components.SelectOptionConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
-import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
@@ -71,6 +70,16 @@ public class MegaMenuComponentsGetter {
     private ActionRow[] getCompendiumCollectionComponents(boolean isCompendium) {
         List<ActionRow> actionRows = new ArrayList<>();
 
+        if (this.interactive.isAcknowledgeOpen()) {
+            List<ItemComponent> okayRow = InteractiveUtil.makeComponents(
+                this.interactive.getInitEvent().getInteraction().getId(),
+                this.COMPONENTS.get("okayBtn")
+            );
+
+            actionRows.add(ActionRow.of(okayRow));
+            return actionRows.toArray(new ActionRow[0]);
+        }
+
         if (this.interactive.isConfirmOpen()) {
             List<ItemComponent> confirmRow = InteractiveUtil.makeComponents(
                 this.interactive.getInitEvent().getInteraction().getId(),
@@ -79,7 +88,6 @@ public class MegaMenuComponentsGetter {
             );
 
             actionRows.add(ActionRow.of(confirmRow));
-
             return actionRows.toArray(new ActionRow[0]);
         }
 
@@ -251,10 +259,11 @@ public class MegaMenuComponentsGetter {
             selectOptions.set(0, selectOptions.getFirst().withDescription("Unfavorite this boar"));
         }
 
-        String rarity = BoarUtil.findRarityKey(this.interactive.getCurBoarEntry().getKey());
+        RarityConfig curRarity = this.config.getRarityConfigs().get(this.interactive.getCurRarityKey());
 
-        boolean cloneable = this.config.getRarityConfigs().get(rarity).getAvgClones() != -1;
-        boolean transmutable = this.config.getRarityConfigs().get(rarity).getChargesNeeded() != -1;
+        boolean cloneable = curRarity.getAvgClones() != -1 && this.interactive.getNumClone() > 0;
+        boolean transmutable = curRarity.getChargesNeeded() != -1 &&
+            curRarity.getChargesNeeded() <= this.interactive.getNumTransmute();
 
         if (!cloneable) {
             selectOptions.remove(1);
