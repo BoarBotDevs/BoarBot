@@ -275,6 +275,9 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                         "<>" + firstRarityKey + "<>" + firstBoarName
                     );
                 }
+
+                // TODO
+                // Send item images (rework DailyInteractive into a more generic class)
             } else {
                 this.acknowledgeString = strConfig.getCompNoBoar().formatted(
                     "<>" + this.curRarityKey + "<>" + boarName
