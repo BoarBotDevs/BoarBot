@@ -1,6 +1,5 @@
 package dev.boarbot.commands.boar;
 
-import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
@@ -125,7 +124,9 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     }
 
     private void sendResponse() {
-        List<ItemImageGenerator> itemGens = getItemImageGenerators();
+        List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
+            this.boarIDs, this.bucksGotten, this.user, this.config.getStringConfig().getDailyTitle()
+        );
 
         if (itemGens.size() > 1) {
             Interactive interactive = InteractiveFactory.constructItemInteractive(
@@ -152,28 +153,6 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 log.error("Failed to generate first daily reward image.", exception);
             }
         }
-    }
-
-    private List<ItemImageGenerator> getItemImageGenerators() {
-        StringConfig strConfig = this.config.getStringConfig();
-
-        List<ItemImageGenerator> itemGens = new ArrayList<>();
-
-        for (int i=0; i<this.boarIDs.size(); i++) {
-            String title = strConfig.getDailyTitle();
-
-            if (this.boarIDs.get(i).equals(strConfig.getFirstBoarID())) {
-                title = strConfig.getFirstTitle();
-            }
-
-            ItemImageGenerator boarItemGen = new ItemImageGenerator(
-                this.event.getUser(), title, this.boarIDs.get(i), false, null, this.bucksGotten.get(i)
-            );
-
-            itemGens.add(boarItemGen);
-        }
-
-        return itemGens;
     }
 
     private void sendPowResponse() {

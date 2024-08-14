@@ -50,9 +50,6 @@ public class StringConfig {
     private String dailyUsedNotify = "";
     private String dailyTitle = "";
     private String firstTitle = "";
-    private String firstBoarID = "";
-    private String enhanceTitle = "";
-    private String cloneTitle = "";
     private String dailyNoBoarFound = "";
 
     // Give command messages/strings (also badges)
@@ -90,11 +87,13 @@ public class StringConfig {
     private String compUnfavoriteSuccess = "";
     private String compCloneSuccess = "";
     private String compCloneFailed = "";
+    private String compCloneTitle = "";
     private String compNoBoar = "";
     private String compNoPow = "";
     private String compTransmuteConfirm = "";
     private String compTransmuteSuccess = "";
     private String compTransmuteFirst = "";
+    private String compTransmuteTitle = "";
     private String compAmountLabel = "";
     private String compOldestLabel = "";
     private String compNewestLabel = "";

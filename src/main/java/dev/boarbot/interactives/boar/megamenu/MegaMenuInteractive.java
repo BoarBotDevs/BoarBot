@@ -284,7 +284,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 }
 
                 List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
-                    newBoarIDs, bucksGotten, this.user
+                    newBoarIDs, bucksGotten, this.user, strConfig.getCompTransmuteTitle()
                 );
 
                 if (itemGens.size() > 1) {

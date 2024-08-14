@@ -411,23 +411,20 @@ public class ItemImageGenerator extends ImageGenerator {
     }
 
     public static List<ItemImageGenerator> getItemImageGenerators(
-        List<String> boarIDs, List<Integer> bucksGotten, User user
+        List<String> boarIDs, List<Integer> bucksGotten, User user, String title
     ) {
-        return ItemImageGenerator.getItemImageGenerators(boarIDs, bucksGotten, user, null);
+        return ItemImageGenerator.getItemImageGenerators(boarIDs, bucksGotten, user, title, null);
     }
 
     public static List<ItemImageGenerator> getItemImageGenerators(
-        List<String> boarIDs, List<Integer> bucksGotten, User user, User giftingUser
+        List<String> boarIDs, List<Integer> bucksGotten, User user, String title, User giftingUser
     ) {
-        StringConfig strConfig = BoarBotApp.getBot().getConfig().getStringConfig();
-
+        BotConfig config = BoarBotApp.getBot().getConfig();
         List<ItemImageGenerator> itemGens = new ArrayList<>();
 
         for (int i=0; i<boarIDs.size(); i++) {
-            String title = strConfig.getDailyTitle();
-
-            if (boarIDs.get(i).equals(strConfig.getFirstBoarID())) {
-                title = strConfig.getFirstTitle();
+            if (boarIDs.get(i).equals(config.getMainConfig().getFirstBoarID())) {
+                title = config.getStringConfig().getFirstTitle();
             }
 
             ItemImageGenerator boarItemGen = new ItemImageGenerator(
