@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.io.IOException;
@@ -293,11 +294,11 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                     interactive.execute(null);
                 } else {
                     try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
-                        MessageEditBuilder editedMsg = new MessageEditBuilder()
+                        MessageCreateBuilder msg = new MessageCreateBuilder()
                             .setFiles(imageToSend)
                             .setComponents();
 
-                        this.updateInteractive(editedMsg.build());
+                        this.sendMessage(msg.build(), false);
                     } catch (Exception exception) {
                         log.error("Failed to send daily boar response!", exception);
                     }
