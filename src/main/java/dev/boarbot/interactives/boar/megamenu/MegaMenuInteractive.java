@@ -5,15 +5,18 @@ import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.entities.boaruser.*;
+import dev.boarbot.interactives.Interactive;
+import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
+import dev.boarbot.util.generators.ItemImageGenerator;
+import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.interactive.StopType;
-import dev.boarbot.util.interactive.megamenu.*;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,6 +51,9 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter @Setter private boolean acknowledgeOpen = false;
     @Getter @Setter private String acknowledgeString;
 
+    @Getter @Setter private GenericComponentInteractionCreateEvent compEvent;
+    @Getter @Setter private ModalInteractionEvent modalEvent;
+
     @Getter private final BoarUser boarUser;
 
     @Getter private final Map<MegaMenuView, Boolean> viewsToUpdateData = new HashMap<>();
@@ -71,15 +77,15 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter @Setter private int numTransmute;
     @Getter @Setter private int numClone;
 
-    public MegaMenuInteractive(SlashCommandInteractionEvent initEvent, MegaMenuView curView) throws SQLException {
-        super(initEvent);
+    public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) throws SQLException {
+        super(event.getInteraction());
 
-        this.page = initEvent.getOption("page") != null
-            ? Math.max(initEvent.getOption("page").getAsInt() - 1, 0)
+        this.page = event.getOption("page") != null
+            ? Math.max(event.getOption("page").getAsInt() - 1, 0)
             : 0;
-        this.boarUser = initEvent.getOption("user") != null
-            ? BoarUserFactory.getBoarUser(initEvent.getOption("user").getAsUser())
-            : BoarUserFactory.getBoarUser(initEvent.getUser());
+        this.boarUser = event.getOption("user") != null
+            ? BoarUserFactory.getBoarUser(event.getOption("user").getAsUser())
+            : BoarUserFactory.getBoarUser(event.getUser());
 
         this.curView = curView;
     }
@@ -92,7 +98,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
         if (compEvent != null) {
-            if (!this.initEvent.getUser().getId().equals(compEvent.getUser().getId())) {
+            if (!this.user.getId().equals(compEvent.getUser().getId())) {
                 compEvent.deferEdit().queue();
                 return;
             }
@@ -122,9 +128,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                             .format(TimeUtil.getDateFormatter())
                         : this.config.getStringConfig().getUnavailable();
 
-                    this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
-                        connection, this.interaction.getGuild().getId()
-                    );
+                    this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.guildID);
                     this.badgeIDs = this.boarUser.getCurrentBadges(connection);
                     this.viewsToUpdateData.replaceAll((k, v) -> false);
                 }
@@ -248,13 +252,15 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
                 String newBoarName = itemConfig.getBoars().get(newBoarIDs.getFirst()).getName();
                 String newBoarRarityKey = BoarUtil.findRarityKey(newBoarIDs.getFirst());
+
+                List<Integer> bucksGotten = new ArrayList<>();
                 List<Integer> editions = new ArrayList<>();
 
                 boarUser.addBoars(
                     newBoarIDs,
                     connection,
                     BoarObtainType.TRANSMUTE,
-                    new ArrayList<>(),
+                    bucksGotten,
                     editions
                 );
 
@@ -276,8 +282,26 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                     );
                 }
 
-                // TODO
-                // Send item images (rework DailyInteractive into a more generic class)
+                List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
+                    newBoarIDs, bucksGotten, this.user
+                );
+
+                if (itemGens.size() > 1) {
+                    Interactive interactive = InteractiveFactory.constructItemInteractive(
+                        this.compEvent.getInteraction(), itemGens, newBoarIDs, editions
+                    );
+                    interactive.execute(null);
+                } else {
+                    try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
+                        MessageEditBuilder editedMsg = new MessageEditBuilder()
+                            .setFiles(imageToSend)
+                            .setComponents();
+
+                        this.updateInteractive(editedMsg.build());
+                    } catch (Exception exception) {
+                        log.error("Failed to send daily boar response!", exception);
+                    }
+                }
             } else {
                 this.acknowledgeString = strConfig.getCompNoBoar().formatted(
                     "<>" + this.curRarityKey + "<>" + boarName
@@ -299,7 +323,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             return;
         }
 
-        this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+        this.updateInteractive(editedMsg.build());
     }
 
     public int getFindBoarPage(String input) {

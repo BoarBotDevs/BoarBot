@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteract
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class DailyNotifyInteractive extends Interactive {
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
         compEvent.deferEdit().queue();
 
-        if (!this.initEvent.getUser().getId().equals(compEvent.getUser().getId())) {
+        if (!this.user.getId().equals(compEvent.getUser().getId())) {
             return;
         }
 
@@ -57,7 +58,7 @@ public class DailyNotifyInteractive extends Interactive {
             ).complete();
 
             if (!this.isStopped) {
-                this.interaction.getHook().editOriginal(editedMsg.build()).queue();
+                this.updateInteractive(editedMsg.build());
             }
 
             try (Connection connection = DataUtil.getConnection()) {
@@ -75,7 +76,8 @@ public class DailyNotifyInteractive extends Interactive {
             );
 
             try {
-                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
+                MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
+                this.sendMessage(msg.build(), true);
             } catch (IOException exception1) {
                 log.error(
                     "An error occurred while attempting to update message after enabling notifications.", exception1
@@ -95,7 +97,7 @@ public class DailyNotifyInteractive extends Interactive {
             return;
         }
 
-        this.interaction.getHook().deleteOriginal().queue();
+        this.deleteInteractiveMessage();
     }
 
     @Override
@@ -109,7 +111,7 @@ public class DailyNotifyInteractive extends Interactive {
 
     private ActionRow[] getComponents() {
         List<ItemComponent> notifyBtn = InteractiveUtil.makeComponents(
-            this.interaction.getId(),
+            this.interactionID,
             this.COMPONENTS.get("notifyBtn")
         );
 

@@ -3,12 +3,12 @@ package dev.boarbot.interactives;
 import dev.boarbot.commands.boar.DailySubcommand;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
-import dev.boarbot.interactives.boar.daily.DailyInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.interactives.boar.daily.DailyPowerupInteractive;
 import dev.boarbot.interactives.boarmanage.SetupInteractive;
 import dev.boarbot.util.generators.ItemImageGenerator;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.Interaction;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -26,13 +26,13 @@ public class InteractiveFactory {
         throw new IllegalArgumentException("Not a valid interactive class: " + interactiveClass);
     }
 
-    public static synchronized Interactive constructDailyInteractive(
-        SlashCommandInteractionEvent initEvent,
+    public static synchronized Interactive constructItemInteractive(
+        Interaction interaction,
         List<ItemImageGenerator> itemGens,
         List<String> boarIDs,
         List<Integer> boarEditions
     ) {
-        return new DailyInteractive(initEvent, itemGens, boarIDs, boarEditions);
+        return new ItemInteractive(interaction, itemGens, boarIDs, boarEditions);
     }
 
     public static synchronized Interactive constructDailyPowerupInteractive(

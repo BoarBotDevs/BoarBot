@@ -19,7 +19,9 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -56,18 +58,6 @@ public class ItemImageGenerator extends ImageGenerator {
     @Getter @Setter private User giftingUser;
     @Getter @Setter private long bucks;
 
-    public ItemImageGenerator(User user, String title, String itemID) {
-        this(user, title, itemID, false);
-    }
-
-    public ItemImageGenerator(User user, String title, String itemID, boolean isBadge) {
-        this(user, title, itemID, isBadge, null);
-    }
-
-    public ItemImageGenerator(User user, String title, String itemID, boolean isBadge, User giftingUser) {
-        this(user, title, itemID, isBadge, giftingUser, 0);
-    }
-
     public ItemImageGenerator(User user, String title, String itemID, boolean isBadge, User giftingUser, long bucks) {
         this.user = user;
         this.title = title;
@@ -91,16 +81,6 @@ public class ItemImageGenerator extends ImageGenerator {
 
         this.giftingUser = giftingUser;
         this.bucks = bucks;
-    }
-
-    public ItemImageGenerator(User user, String title, String itemName, String filePath, String colorKey) {
-        this(user, title, itemName, filePath, colorKey, null);
-    }
-
-    public ItemImageGenerator(
-        User user, String title, String itemName, String filePath, String colorKey, User giftingUser
-    ) {
-        this(user, title, itemName, filePath, colorKey, giftingUser, 0);
     }
 
     public ItemImageGenerator(
@@ -428,5 +408,35 @@ public class ItemImageGenerator extends ImageGenerator {
         return userDataImage.getSubimage(
             BOX_X, BOX_ONE_Y, nums.getBigBoarSize()[0], BOX_FOUR_Y + BOX_HEIGHT - BOX_ONE_Y
         );
+    }
+
+    public static List<ItemImageGenerator> getItemImageGenerators(
+        List<String> boarIDs, List<Integer> bucksGotten, User user
+    ) {
+        return ItemImageGenerator.getItemImageGenerators(boarIDs, bucksGotten, user, null);
+    }
+
+    public static List<ItemImageGenerator> getItemImageGenerators(
+        List<String> boarIDs, List<Integer> bucksGotten, User user, User giftingUser
+    ) {
+        StringConfig strConfig = BoarBotApp.getBot().getConfig().getStringConfig();
+
+        List<ItemImageGenerator> itemGens = new ArrayList<>();
+
+        for (int i=0; i<boarIDs.size(); i++) {
+            String title = strConfig.getDailyTitle();
+
+            if (boarIDs.get(i).equals(strConfig.getFirstBoarID())) {
+                title = strConfig.getFirstTitle();
+            }
+
+            ItemImageGenerator boarItemGen = new ItemImageGenerator(
+                user, title, boarIDs.get(i), false, giftingUser, bucksGotten.get(i)
+            );
+
+            itemGens.add(boarItemGen);
+        }
+
+        return itemGens;
     }
 }

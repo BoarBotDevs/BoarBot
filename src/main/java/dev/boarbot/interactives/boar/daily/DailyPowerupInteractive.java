@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.modals.Modal;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
@@ -40,6 +41,9 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     private ModalHandler modalHandler = null;
     private int miraclesToUse = 0;
+    private boolean firstMsg = true;
+
+    private FileUpload currentImageUpload;
 
     private final DailySubcommand callingObj;
 
@@ -57,50 +61,72 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
-        if (!this.initEvent.getUser().getId().equals(compEvent.getUser().getId())) {
-            compEvent.deferEdit().queue();
-            return;
-        }
-
-        if (this.modalHandler != null) {
-            this.modalHandler.stop();
-        }
-
-        String compID = compEvent.getComponentId().split(",")[1];
-
-        switch(compID) {
-            case "POW_SELECT" -> {
-                ModalConfig modalConfig = this.config.getModalConfig().get("miracleAmount");
-
-                Modal modal = new ModalImpl(
-                    ModalUtil.makeModalID(modalConfig.getId(), compEvent),
-                    modalConfig.getTitle(),
-                    ModalUtil.makeModalComponents(modalConfig.getComponents())
-                );
-
-                this.modalHandler = new MiracleAmountModalHandler(compEvent, this);
-
-                if (this.isStopped) {
-                    return;
-                }
-
-                compEvent.replyModal(modal).complete();
-                this.interaction.getHook().editOriginalComponents(this.getCurComponents()).complete();
-            }
-
-            case "SUBMIT_POW" -> {
+        if (compEvent != null) {
+            if (!this.user.getId().equals(compEvent.getUser().getId())) {
                 compEvent.deferEdit().queue();
-
-                try {
-                    BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-                    boarUser.passSynchronizedAction(this);
-                    boarUser.decRefs();
-                } catch (SQLException exception) {
-                    log.error("Failed to get boar user.", exception);
-                }
+                return;
             }
 
-            case "CANCEL_POW" -> this.stop(StopType.EXPIRED);
+            if (this.modalHandler != null) {
+                this.modalHandler.stop();
+            }
+
+            String compID = compEvent.getComponentId().split(",")[1];
+
+            switch(compID) {
+                case "POW_SELECT" -> {
+                    ModalConfig modalConfig = this.config.getModalConfig().get("miracleAmount");
+
+                    Modal modal = new ModalImpl(
+                        ModalUtil.makeModalID(modalConfig.getId(), compEvent),
+                        modalConfig.getTitle(),
+                        ModalUtil.makeModalComponents(modalConfig.getComponents())
+                    );
+
+                    this.modalHandler = new MiracleAmountModalHandler(compEvent, this);
+                    compEvent.replyModal(modal).complete();
+                }
+
+                case "SUBMIT_POW" -> {
+                    compEvent.deferEdit().queue();
+
+                    try {
+                        BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
+                        boarUser.passSynchronizedAction(this);
+                        boarUser.decRefs();
+                    } catch (SQLException exception) {
+                        log.error("Failed to get boar user.", exception);
+                    }
+                }
+
+                case "CANCEL_POW" -> this.stop(StopType.EXPIRED);
+            }
+        }
+
+        this.sendResponse();
+    }
+
+    private void sendResponse() {
+        try {
+            StringConfig strConfig = this.config.getStringConfig();
+
+            if (this.firstMsg) {
+                this.currentImageUpload = new EmbedImageGenerator(strConfig.getDailyPow()).generate().getFileUpload();
+            }
+
+            this.firstMsg = false;
+
+            MessageEditBuilder editedMsg = new MessageEditBuilder()
+                .setFiles(this.currentImageUpload)
+                .setComponents(this.getCurComponents());
+
+            if (this.isStopped) {
+                return;
+            }
+
+            this.updateInteractive(editedMsg.build());
+        } catch (IOException exception) {
+            log.error("Failed to generate powerup use image.", exception);
         }
     }
 
@@ -114,25 +140,19 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 return;
             }
 
-            this.miraclesToUse = 0;
-
             StringConfig strConfig = this.config.getStringConfig();
 
-            EmbedImageGenerator embedGen = new EmbedImageGenerator(strConfig.getDailyPowFailed() + " " + strConfig.getDailyPow());
-            MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(embedGen.generate().getFileUpload())
-                .setComponents(this.getCurComponents());
-
-            if (this.isStopped) {
-                return;
-            }
-
-            this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+            this.miraclesToUse = 0;
+            this.currentImageUpload = new EmbedImageGenerator(
+                strConfig.getDailyPowFailed() + " " + strConfig.getDailyPow()
+            ).generate().getFileUpload();
         } catch (SQLException exception) {
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
-        } catch (IOException exception) {
-            log.error("Failed to generate response image.", exception);
+        } catch (IOException e) {
+            log.error("Failed to create embed image");
         } catch (InterruptedException ignored) {}
+
+        this.sendResponse();
     }
 
     @Override
@@ -145,7 +165,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         }
 
         if (type == StopType.EXPIRED) {
-            this.interaction.getHook().deleteOriginal().queue();
+            this.deleteInteractiveMessage();
         }
     }
 
@@ -168,10 +188,10 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     private ActionRow[] getComponents() {
         List<ItemComponent> powSelect = InteractiveUtil.makeComponents(
-            this.interaction.getId(), this.COMPONENTS.get("powSelect")
+            this.interactionID, this.COMPONENTS.get("powSelect")
         );
         List<ItemComponent> submitCancelBtns = InteractiveUtil.makeComponents(
-            this.interaction.getId(), this.COMPONENTS.get("powSubmitBtn"), this.COMPONENTS.get("powCancelBtn")
+            this.interactionID, this.COMPONENTS.get("powSubmitBtn"), this.COMPONENTS.get("powCancelBtn")
         );
 
         return new ActionRow[] {
@@ -186,9 +206,6 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
         StringConfig strConfig = this.config.getStringConfig();
         IndivItemConfig miracleConfig = this.config.getItemConfig().getPowerups().get("miracle");
-
-        EmbedImageGenerator embedGen = new EmbedImageGenerator("");
-        MessageEditBuilder editedMsg = new MessageEditBuilder();
 
         try {
             String amountInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
@@ -212,23 +229,24 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                         blessings == 1 ? strConfig.getBlessingsName() : strConfig.getBlessingsPluralName()
                     );
 
-                    embedGen.setStr(
+                    this.currentImageUpload = new EmbedImageGenerator(
                         this.config.getStringConfig().getDailyPowAttempt().formatted(
                             this.miraclesToUse, miracleStr, blessings, blessingsStr
                         )
-                    );
+                    ).generate().getFileUpload();
                 } else {
-                    embedGen.setStr(strConfig.getDailyPowFailed() + " " + strConfig.getDailyPow());
+                    this.currentImageUpload = new EmbedImageGenerator(
+                        strConfig.getDailyPowFailed() + " " + strConfig.getDailyPow()
+                    ).generate().getFileUpload();
                 }
             }
 
             boarUser.decRefs();
-
-            editedMsg.setFiles(embedGen.generate().getFileUpload()).setComponents(this.getCurComponents());
         } catch (NumberFormatException exception1) {
             try {
-                embedGen.setStr(strConfig.getDailyPowInvalid() + " " + strConfig.getDailyPow());
-                editedMsg.setFiles(embedGen.generate().getFileUpload()).setComponents(this.getCurComponents());
+                this.currentImageUpload = new EmbedImageGenerator(
+                    strConfig.getDailyPowInvalid() + " " + strConfig.getDailyPow()
+                ).generate().getFileUpload();
             } catch (IOException exception2) {
                 log.error("Failed to generate invalid input response.", exception2);
             }
@@ -238,10 +256,6 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             log.error("An error occurred generating response image.", exception);
         }
 
-        if (this.isStopped) {
-            return;
-        }
-
-        this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+        this.sendResponse();
     }
 }

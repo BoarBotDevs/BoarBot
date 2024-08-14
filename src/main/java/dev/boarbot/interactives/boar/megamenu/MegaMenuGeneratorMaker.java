@@ -1,4 +1,4 @@
-package dev.boarbot.util.interactive.megamenu;
+package dev.boarbot.interactives.boar.megamenu;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
@@ -6,8 +6,6 @@ import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
-import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.megamenu.CollectionImageGenerator;
@@ -19,7 +17,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-public class MegaMenuGeneratorMaker {
+class MegaMenuGeneratorMaker {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
     private final MegaMenuInteractive interactive;
@@ -143,7 +141,7 @@ public class MegaMenuGeneratorMaker {
                     this.interactive.setNumClone(this.interactive.getBoarUser().getPowerupAmount(connection, "clone"));
                 }
 
-                BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getInitEvent().getUser());
+                BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
                 this.interactive.setFilterBits(interBoarUser.getFilterBits(connection));
                 this.interactive.setSortVal(interBoarUser.getSortVal(connection));
                 interBoarUser.decRefs();

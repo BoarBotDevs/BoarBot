@@ -128,7 +128,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         List<ItemImageGenerator> itemGens = getItemImageGenerators();
 
         if (itemGens.size() > 1) {
-            Interactive interactive = InteractiveFactory.constructDailyInteractive(
+            Interactive interactive = InteractiveFactory.constructItemInteractive(
                 this.event, itemGens, this.boarIDs, this.boarEditions
             );
             interactive.execute(null);
@@ -172,28 +172,14 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
             itemGens.add(boarItemGen);
         }
+
         return itemGens;
     }
 
     private void sendPowResponse() {
         this.interaction.deferReply().complete();
 
-        try {
-            EmbedImageGenerator embedGen = new EmbedImageGenerator(this.config.getStringConfig().getDailyPow());
-
-            Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
-
-            MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(embedGen.generate().getFileUpload())
-                .setComponents(interactive.getCurComponents());
-
-            if (interactive.isStopped()) {
-                return;
-            }
-
-            this.interaction.getHook().editOriginal(editedMsg.build()).complete();
-        } catch (IOException exception) {
-            log.error("Failed to generate powerup use image.", exception);
-        }
+        Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
+        interactive.execute(null);
     }
 }

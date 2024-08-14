@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
@@ -30,9 +31,9 @@ import java.util.Map;
 @Slf4j
 public class SetupInteractive extends Interactive {
     private int page = 0;
-    private final EmbedImageGenerator embedGen = new EmbedImageGenerator("");
-    private final MessageEditBuilder editedMsg = new MessageEditBuilder();
-    private ActionRow[] curComponents = new ActionRow[0];
+    private FileUpload currentImageUpload;
+
+    private boolean selected = false;
 
     private List<GuildChannel> chosenChannels = new ArrayList<>();
     private boolean isSb = false;
@@ -45,100 +46,100 @@ public class SetupInteractive extends Interactive {
 
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
-        compEvent.deferEdit().queue();
+        if (compEvent != null) {
+            compEvent.deferEdit().queue();
 
-        if (!this.initEvent.getUser().getId().equals(compEvent.getUser().getId())) {
-            return;
-        }
-
-        String compID = compEvent.getComponentId().split(",")[1];
-
-        try {
-            switch (compID) {
-                case "CHANNEL_SELECT" -> this.doChannels(compEvent);
-                case "SB_YES", "SB_NO" -> this.doSb(compID);
-                case "NEXT" -> this.doNext();
-                case "INFO" -> this.doInfo();
-                case "CANCEL" -> this.stop(StopType.CANCELLED);
+            if (!this.user.getId().equals(compEvent.getUser().getId())) {
+                return;
             }
-        } catch (Exception exception){
-            log.error("Failed to create file from image data!", exception);
+
+            String compID = compEvent.getComponentId().split(",")[1];
+
+            try {
+                switch (compID) {
+                    case "CHANNEL_SELECT" -> this.doChannels(compEvent);
+                    case "SB_YES", "SB_NO" -> this.doSb(compID);
+                    case "NEXT" -> this.doNext();
+                    case "INFO" -> this.doInfo();
+                    case "CANCEL" -> this.stop(StopType.CANCELLED);
+                }
+            } catch (Exception exception){
+                log.error("Failed to create file from image data!", exception);
+            }
         }
+
+        this.sendResponse();
     }
 
-    public void doChannels(GenericComponentInteractionCreateEvent compEvent) {
-        Button nextBtn = ((Button) this.curComponents[1].getComponents().get(2)).withDisabled(false);
+    private void sendResponse() {
+        try {
+            if (this.page == 0) {
+                this.currentImageUpload = new EmbedImageGenerator(
+                    this.config.getStringConfig().getSetupUnfinished1()
+                ).generate().getFileUpload();
+            }
 
-        this.chosenChannels = ((EntitySelectInteractionEvent) compEvent).getMentions().getChannels();
-
-        this.curComponents[1].getComponents().set(2, nextBtn);
-        this.editedMsg.setComponents(this.curComponents);
-        this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
-    }
-
-    public void doSb(String compID) throws IOException {
-        StringConfig strConfig = this.config.getStringConfig();
-        Map<String, String> colorConfig = this.config.getColorConfig();
-
-        this.isSb = compID.equals("SB_YES");
-
-        Button nextBtn = ((Button) this.curComponents[1].getComponents().get(2)).withDisabled(false);
-        this.curComponents[1].getComponents().set(2, nextBtn);
-
-        this.embedGen.setStr(strConfig.getSetupFinished2() + (this.isSb ? "<>green<>Yes" : "<>error<>No"));
-        this.embedGen.setColor(colorConfig.get("font"));
-
-        this.editedMsg.setFiles(this.embedGen.generate().getFileUpload()).setComponents(this.curComponents);
-        this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
-    }
-
-    public void doNext() throws IOException {
-        StringConfig strConfig = this.config.getStringConfig();
-        Map<String, String> colorConfig = this.config.getColorConfig();
-
-        if (this.page == 0) {
-            this.page = 1;
-
-            this.getCurComponents();
-
-            Button nextBtn = ((Button) this.curComponents[1].getComponents().get(2)).asDisabled()
-                .withStyle(ButtonStyle.SUCCESS)
-                .withLabel("Finish");
-
-            this.curComponents[1].getComponents().set(2, nextBtn);
-
-            this.embedGen.setStr(strConfig.getSetupUnfinished2());
-            this.embedGen.setColor(colorConfig.get("font"));
-
-            this.editedMsg.setFiles(this.embedGen.generate().getFileUpload()).setComponents(this.curComponents);
+            MessageEditBuilder editedMsg = new MessageEditBuilder()
+                .setFiles(this.currentImageUpload)
+                .setComponents(this.getCurComponents());
 
             if (this.isStopped) {
                 return;
             }
 
-            this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
+            this.updateInteractive(editedMsg.build());
+        } catch (IOException exception) {
+            log.error("Failed to generate powerup use image.", exception);
+        }
+    }
 
+    public void doChannels(GenericComponentInteractionCreateEvent compEvent) {
+        this.selected = true;
+        this.chosenChannels = ((EntitySelectInteractionEvent) compEvent).getMentions().getChannels();
+    }
+
+    public void doSb(String compID) throws IOException {
+        StringConfig strConfig = this.config.getStringConfig();
+
+        this.selected = true;
+        this.isSb = compID.equals("SB_YES");
+
+        this.currentImageUpload = new EmbedImageGenerator(
+            strConfig.getSetupFinished2() + (this.isSb ? "<>green<>Yes" : "<>error<>No")
+        ).generate().getFileUpload();
+    }
+
+    public void doNext() throws IOException {
+        StringConfig strConfig = this.config.getStringConfig();
+
+        if (this.page != 0) {
+            this.stop(StopType.FINISHED);
             return;
         }
 
-        this.stop(StopType.FINISHED);
+        this.selected = false;
+        this.page = 1;
+
+        this.currentImageUpload = new EmbedImageGenerator(strConfig.getSetupUnfinished2()).generate().getFileUpload();
     }
 
     public void doInfo() throws IOException {
         StringConfig strConfig = this.config.getStringConfig();
-        Map<String, String> colorConfig = this.config.getColorConfig();
+        FileUpload imageUpload;
 
         if (this.page == 0) {
-            this.embedGen.setStr(strConfig.getSetupInfoResponse1());
+            imageUpload = new EmbedImageGenerator(
+                strConfig.getSetupInfoResponse1()
+            ).generate().getFileUpload();
         } else {
-            this.embedGen.setStr(strConfig.getSetupInfoResponse2());
+            imageUpload = new EmbedImageGenerator(
+                strConfig.getSetupInfoResponse2()
+            ).generate().getFileUpload();
         }
 
-        this.embedGen.setColor(colorConfig.get("font"));
-
         MessageCreateBuilder infoMsg = new MessageCreateBuilder();
-        infoMsg.setFiles(this.embedGen.generate().getFileUpload());
-        this.interaction.getHook().sendMessage(infoMsg.build()).setEphemeral(true).complete();
+        infoMsg.setFiles(imageUpload);
+        this.sendMessage(infoMsg.build(), true);
     }
 
     @Override
@@ -153,15 +154,15 @@ public class SetupInteractive extends Interactive {
         }
 
         switch (type) {
-            case StopType.CANCELLED -> {
-                this.embedGen.setStr(strConfig.getSetupCancelled());
-                this.embedGen.setColor(colorConfig.get("error"));
-            }
+            case StopType.CANCELLED -> this.currentImageUpload = new EmbedImageGenerator(
+                strConfig.getSetupCancelled(),
+                colorConfig.get("error")
+            ).generate().getFileUpload();
 
-            case StopType.EXPIRED -> {
-                this.embedGen.setStr(strConfig.getSetupExpired());
-                this.embedGen.setColor(colorConfig.get("error"));
-            }
+            case StopType.EXPIRED -> this.currentImageUpload = new EmbedImageGenerator(
+                strConfig.getSetupExpired(),
+                colorConfig.get("error")
+            ).generate().getFileUpload();
 
             case StopType.FINISHED -> {
                 String query = """
@@ -173,7 +174,7 @@ public class SetupInteractive extends Interactive {
                     Connection connection = DataUtil.getConnection();
                     PreparedStatement statement = connection.prepareStatement(query)
                 ) {
-                    statement.setString(1, this.interaction.getGuild().getId());
+                    statement.setString(1, this.guildID);
                     statement.setBoolean(2, this.isSb);
                     statement.setString(3, this.chosenChannels.get(0).getId());
                     statement.setString(
@@ -188,31 +189,33 @@ public class SetupInteractive extends Interactive {
                     log.error("Failed to add guild to database!", exception);
                 }
 
-                this.embedGen.setStr(strConfig.getSetupFinishedAll());
-                this.embedGen.setColor(colorConfig.get("green"));
+                this.currentImageUpload = new EmbedImageGenerator(
+                    strConfig.getSetupFinishedAll(),
+                    colorConfig.get("green")
+                ).generate().getFileUpload();
             }
         }
 
-        this.editedMsg.setFiles(this.embedGen.generate().getFileUpload()).setComponents();
-        this.interaction.getHook().editOriginal(this.editedMsg.build()).complete();
+        MessageEditBuilder editedMsg = new MessageEditBuilder()
+            .setFiles(this.currentImageUpload)
+            .setComponents();
+        this.updateInteractive(editedMsg.build());
     }
 
     @Override
     public ActionRow[] getCurComponents() {
         if (this.page == 0) {
-            this.curComponents = getFirstComponents();
-        } else {
-            this.curComponents = getSecondComponents();
+            return getFirstComponents();
         }
 
-        return this.curComponents;
+        return getSecondComponents();
     }
 
     private ActionRow[] getFirstComponents() {
         ActionRow navRow = this.getNavRow();
 
         List<ItemComponent> channelSelect1 = InteractiveUtil.makeComponents(
-            this.interaction.getId(), this.COMPONENTS.get("channelSelect")
+            this.interactionID, this.COMPONENTS.get("channelSelect")
         );
 
         return new ActionRow[] {
@@ -225,7 +228,7 @@ public class SetupInteractive extends Interactive {
         ActionRow navRow = this.getNavRow();
 
         List<ItemComponent> sbChoice = InteractiveUtil.makeComponents(
-            this.interaction.getId(), this.COMPONENTS.get("sbYesBtn"), this.COMPONENTS.get("sbNoBtn")
+            this.interactionID, this.COMPONENTS.get("sbYesBtn"), this.COMPONENTS.get("sbNoBtn")
         );
 
         return new ActionRow[] {
@@ -236,11 +239,23 @@ public class SetupInteractive extends Interactive {
 
     private ActionRow getNavRow() {
         List<ItemComponent> components = InteractiveUtil.makeComponents(
-            this.interaction.getId(),
+            this.interactionID,
             this.COMPONENTS.get("cancelBtn"),
             this.COMPONENTS.get("infoBtn"),
             this.COMPONENTS.get("nextBtn")
         );
+
+        if (this.selected) {
+            Button nextBtn = ((Button) components.get(2)).withDisabled(false);
+            components.set(2, nextBtn);
+        }
+
+        if (this.page == 1) {
+            Button nextBtn = ((Button) components.get(2))
+                .withStyle(ButtonStyle.SUCCESS)
+                .withLabel("Finish");
+            components.set(2, nextBtn);
+        }
 
         return ActionRow.of(components);
     }

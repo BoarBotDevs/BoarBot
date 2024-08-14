@@ -2,7 +2,7 @@ package dev.boarbot.entities.boaruser;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.util.interactive.megamenu.SortType;
+import dev.boarbot.interactives.boar.megamenu.SortType;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;

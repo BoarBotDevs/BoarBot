@@ -1,12 +1,10 @@
-package dev.boarbot.util.interactive.megamenu;
+package dev.boarbot.interactives.boar.megamenu;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
-import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
 import dev.boarbot.modals.megamenu.CloneModalHandler;
 import dev.boarbot.modals.megamenu.FindBoarModalHandler;
 import dev.boarbot.modals.PageInputModalHandler;
@@ -23,26 +21,28 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Log4j2
-public class MegaMenuComponentHandler {
+class MegaMenuComponentHandler {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
-    private GenericComponentInteractionCreateEvent compEvent = null;
-    private ModalInteractionEvent modalEvent = null;
     private final MegaMenuInteractive interactive;
+    private GenericComponentInteractionCreateEvent compEvent;
+    private ModalInteractionEvent modalEvent;
 
     public MegaMenuComponentHandler(GenericComponentInteractionCreateEvent compEvent, MegaMenuInteractive interactive) {
-        this.compEvent = compEvent;
         this.interactive = interactive;
+        this.compEvent = compEvent;
+        this.interactive.setCompEvent(compEvent);
     }
 
     public MegaMenuComponentHandler(ModalInteractionEvent modalEvent, MegaMenuInteractive interactive) {
-        this.modalEvent = modalEvent;
         this.interactive = interactive;
+        this.modalEvent = modalEvent;
+        this.interactive.setModalEvent(modalEvent);
     }
 
     public void handleCompEvent() {
         if (this.compEvent != null) {
-            if (!this.interactive.getInitEvent().getUser().getId().equals(compEvent.getUser().getId())) {
+            if (!this.interactive.getUser().getId().equals(compEvent.getUser().getId())) {
                 this.compEvent.deferEdit().queue();
                 return;
             }
@@ -204,9 +204,6 @@ public class MegaMenuComponentHandler {
                 }
 
                 this.compEvent.replyModal(modal).complete();
-                this.interactive.getInitEvent().getHook().editOriginalComponents(
-                    this.interactive.getCurComponents()
-                ).complete();
             }
 
             case TRANSMUTE -> {
@@ -240,7 +237,7 @@ public class MegaMenuComponentHandler {
         this.interactive.setFilterBits(filterBits);
 
         try {
-            BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getInitEvent().getUser());
+            BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
             interBoarUser.passSynchronizedAction(this.interactive);
             interBoarUser.decRefs();
         } catch (SQLException exception) {
@@ -256,7 +253,7 @@ public class MegaMenuComponentHandler {
         ]);
 
         try {
-            BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getInitEvent().getUser());
+            BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
             interBoarUser.passSynchronizedAction(this.interactive);
             interBoarUser.decRefs();
         } catch (SQLException exception) {

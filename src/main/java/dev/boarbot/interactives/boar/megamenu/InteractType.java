@@ -1,4 +1,4 @@
-package dev.boarbot.util.interactive.megamenu;
+package dev.boarbot.interactives.boar.megamenu;
 
 public enum InteractType {
     FAVORITE("favorite"),

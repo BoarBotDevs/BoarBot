@@ -1,16 +1,15 @@
-package dev.boarbot.interactives.boar.daily;
+package dev.boarbot.interactives;
 
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
-import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.generators.ItemImageGenerator;
 import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class DailyInteractive extends Interactive {
+public class ItemInteractive extends Interactive {
     private int page = 0;
     private final List<ItemImageGenerator> itemGens;
     private List<SelectOption> selectableBoars;
@@ -36,13 +35,13 @@ public class DailyInteractive extends Interactive {
 
     private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getDaily();
 
-    public DailyInteractive(
-        SlashCommandInteractionEvent initEvent,
+    public ItemInteractive(
+        Interaction interaction,
         List<ItemImageGenerator> itemGens,
         List<String> boarIDs,
         List<Integer> boarEditions
     ) {
-        super(initEvent);
+        super(interaction);
         this.itemGens = itemGens;
         this.boarIDs = boarIDs;
         this.boarEditions = boarEditions;
@@ -85,7 +84,7 @@ public class DailyInteractive extends Interactive {
         if (compEvent != null) {
             compEvent.deferEdit().queue();
 
-            if (!this.initEvent.getUser().getId().equals(compEvent.getUser().getId())) {
+            if (!this.user.getId().equals(compEvent.getUser().getId())) {
                 return;
             }
 
@@ -111,7 +110,7 @@ public class DailyInteractive extends Interactive {
                 return;
             }
 
-            this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+            this.updateInteractive(editedMsg.build());
         } catch (Exception exception) {
             log.error("Failed to change daily boar page!", exception);
         }
@@ -130,8 +129,8 @@ public class DailyInteractive extends Interactive {
             this.makeSelectOptions(this.boarIDs, this.boarEditions);
         }
 
-        if (this.interaction.getHook().retrieveOriginal().complete().isEdited()) {
-            this.interaction.getHook().editOriginalComponents(this.curComponents[0]).queue();
+        if (this.hook != null || this.msg != null) {
+            this.updateComponents(this.curComponents[0]);
             return;
         }
 
@@ -140,7 +139,7 @@ public class DailyInteractive extends Interactive {
                 .setFiles(imageToSend)
                 .setComponents(this.getCurComponents()[0]);
 
-            this.interaction.getHook().editOriginal(editedMsg.build()).queue();
+            this.updateInteractive(editedMsg.build());
         } catch (Exception exception) {
             log.error("Failed to change daily boar page!", exception);
         }
@@ -198,10 +197,10 @@ public class DailyInteractive extends Interactive {
 
     private ActionRow[] getComponents() {
         List<ItemComponent> boarSelect = InteractiveUtil.makeComponents(
-            this.interaction.getId(), this.COMPONENTS.get("boarSelect")
+            this.interactionID, this.COMPONENTS.get("boarSelect")
         );
         List<ItemComponent> navRow = InteractiveUtil.makeComponents(
-            this.interaction.getId(),
+            this.interactionID,
             this.COMPONENTS.get("leftFullBtn"),
             this.COMPONENTS.get("leftBtn"),
             this.COMPONENTS.get("rightBtn"),
