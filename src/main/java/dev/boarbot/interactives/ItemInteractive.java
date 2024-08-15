@@ -7,15 +7,18 @@ import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
 
@@ -211,5 +214,44 @@ public class ItemInteractive extends Interactive {
             ActionRow.of(boarSelect),
             ActionRow.of(navRow)
         };
+    }
+
+    public static void sendInteractive(
+        List<String> boarIDs,
+        List<Integer> bucksGotten,
+        List<Integer> editions,
+        User user,
+        String title,
+        InteractionHook hook,
+        boolean isNewMsg
+    ) {
+        List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
+            boarIDs, bucksGotten, user, title
+        );
+
+        if (itemGens.size() > 1) {
+            Interactive interactive = InteractiveFactory.constructItemInteractive(
+                hook.getInteraction(), itemGens, boarIDs, editions
+            );
+            interactive.execute(null);
+        } else {
+            try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
+                if (isNewMsg) {
+                    MessageCreateBuilder msg = new MessageCreateBuilder()
+                        .setFiles(imageToSend)
+                        .setComponents();
+
+                    hook.sendMessage(msg.build()).complete();
+                } else {
+                    MessageEditBuilder editedMsg = new MessageEditBuilder()
+                        .setFiles(imageToSend)
+                        .setComponents();
+
+                    hook.editOriginal(editedMsg.build()).complete();
+                }
+            } catch (Exception exception) {
+                log.error("Failed to send daily boar response!", exception);
+            }
+        }
     }
 }

@@ -245,7 +245,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         } catch (NumberFormatException exception1) {
             try {
                 this.currentImageUpload = new EmbedImageGenerator(
-                    strConfig.getDailyPowInvalid() + " " + strConfig.getDailyPow()
+                    strConfig.getInvalidInput() + " " + strConfig.getDailyPow()
                 ).generate().getFileUpload();
             } catch (IOException exception2) {
                 log.error("Failed to generate invalid input response.", exception2);

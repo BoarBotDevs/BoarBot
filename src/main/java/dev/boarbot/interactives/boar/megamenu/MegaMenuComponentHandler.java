@@ -2,6 +2,9 @@ package dev.boarbot.interactives.boar.megamenu;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.bot.config.RarityConfig;
+import dev.boarbot.bot.config.StringConfig;
+import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
@@ -9,6 +12,7 @@ import dev.boarbot.modals.megamenu.CloneModalHandler;
 import dev.boarbot.modals.megamenu.FindBoarModalHandler;
 import dev.boarbot.modals.PageInputModalHandler;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.modal.ModalUtil;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -17,7 +21,10 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 
 @Log4j2
@@ -157,9 +164,53 @@ class MegaMenuComponentHandler {
             }
 
             case "CLONE_AMOUNT" -> {
-                // TODO
-                // Edit image with confirmation
-                // Remove all buttons and replace with Confirm or Cancel
+                StringConfig strConfig = this.config.getStringConfig();
+
+                try (Connection connection = DataUtil.getConnection()) {
+                    String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
+                    int input = Math.max(Integer.parseInt(inputStr), 1);
+
+                    int avgClones = this.config.getRarityConfigs().get(
+                        this.interactive.getCurRarityKey()
+                    ).getAvgClones();
+
+                    boolean tooMany = input / avgClones > 25;
+                    boolean cloneable = avgClones != -1 && input <= this.interactive.getNumClone();
+
+                    if (tooMany) {
+                        this.interactive.setAcknowledgeOpen(true);
+                        this.interactive.setAcknowledgeString(strConfig.getCompCloneTooMany());
+                    } else if (cloneable) {
+                        boolean hasBoar = this.interactive.getBoarUser().hasBoar(
+                            this.interactive.getCurBoarEntry().getKey(), connection
+                        );
+
+                        if (hasBoar) {
+                            this.confirmClone(input);
+                        } else {
+                            String boarName = this.config.getItemConfig().getBoars().get(
+                                this.interactive.getCurBoarEntry().getKey()
+                            ).getName();
+
+                            this.interactive.setAcknowledgeOpen(true);
+                            this.interactive.setAcknowledgeString(strConfig.getCompNoBoar().formatted(
+                                "<>" + this.interactive.getCurRarityKey() + "<>" + boarName
+                            ));
+                        }
+                    } else {
+                        this.interactive.setAcknowledgeOpen(true);
+                        this.interactive.setAcknowledgeString(strConfig.getCompNoPow().formatted(
+                            this.config.getItemConfig().getPowerups().get("clone").getPluralName()
+                        ));
+                    }
+                } catch (NumberFormatException exception1) {
+                    this.interactive.setAcknowledgeOpen(true);
+                    this.interactive.setAcknowledgeString(strConfig.getInvalidInput());
+                } catch (SQLException exception2) {
+                    log.error("Failed to get user data", exception2);
+                } finally {
+                    this.interactive.execute(null);
+                }
             }
         }
     }
@@ -258,6 +309,53 @@ class MegaMenuComponentHandler {
             interBoarUser.decRefs();
         } catch (SQLException exception) {
             log.error("Failed to get boar user.", exception);
+        }
+    }
+
+    private void confirmClone(int input) {
+        ItemConfig itemConfig = this.config.getItemConfig();
+        StringConfig strConfig = this.config.getStringConfig();
+
+        this.interactive.setNumTryClone(input);
+        this.interactive.setConfirmOpen(true);
+
+        RarityConfig rarity = this.config.getRarityConfigs().get(this.interactive.getCurRarityKey());
+        int avgClones = rarity.getAvgClones();
+
+        double percentVal = ((double) (input % avgClones) / avgClones) * 100;
+        NumberFormat percentFormat = new DecimalFormat("#.##");
+
+        if (input / avgClones <= 1) {
+            String boarName = itemConfig.getBoars().get(
+                this.interactive.getCurBoarEntry().getKey()
+            ).getName();
+            String cloneName = input == 1
+                ? itemConfig.getPowerups().get("clone").getName()
+                : itemConfig.getPowerups().get("clone").getPluralName();
+            String percentStr = percentVal == 0
+                ? percentFormat.format(percentVal + 100) + "%"
+                : percentFormat.format(percentVal) + "%";
+
+            this.interactive.setConfirmString(strConfig.getCompCloneConfirmOne().formatted(
+                "%,d".formatted(input) + " " + cloneName,
+                percentStr,
+                "<>" + this.interactive.getCurRarityKey() + "<>" + boarName
+            ));
+        } else {
+            String boarName = input / avgClones > 1
+                ? itemConfig.getBoars().get(
+                    this.interactive.getCurBoarEntry().getKey()
+                ).getPluralName()
+                : itemConfig.getBoars().get(
+                    this.interactive.getCurBoarEntry().getKey()
+                ).getName();
+
+            this.interactive.setConfirmString(strConfig.getCompCloneConfirmMultiple().formatted(
+                "%,d".formatted(input) + " " + itemConfig.getPowerups().get("clone").getPluralName(),
+                (input / avgClones),
+                "<>" + this.interactive.getCurRarityKey() + "<>" + boarName,
+                percentFormat.format(percentVal) + "%"
+            ));
         }
     }
 }

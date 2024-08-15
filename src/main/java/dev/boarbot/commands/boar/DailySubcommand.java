@@ -6,18 +6,16 @@ import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
+import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
-import dev.boarbot.util.generators.ItemImageGenerator;
-import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.io.IOException;
@@ -124,26 +122,11 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     }
 
     private void sendResponse() {
-        List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
-            this.boarIDs, this.bucksGotten, this.user, this.config.getStringConfig().getDailyTitle()
+        String title = this.config.getStringConfig().getDailyTitle();
+
+        ItemInteractive.sendInteractive(
+            this.boarIDs, this.bucksGotten, this.boarEditions, this.user, title, this.interaction.getHook(), false
         );
-
-        if (itemGens.size() > 1) {
-            Interactive interactive = InteractiveFactory.constructItemInteractive(
-                this.event, itemGens, this.boarIDs, this.boarEditions
-            );
-            interactive.execute(null);
-        } else {
-            try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
-                MessageEditBuilder editedMsg = new MessageEditBuilder()
-                    .setFiles(imageToSend)
-                    .setComponents();
-
-                this.interaction.getHook().editOriginal(editedMsg.build()).complete();
-            } catch (Exception exception) {
-                log.error("Failed to send daily boar response!", exception);
-            }
-        }
 
         if (this.isFirstDaily) {
             try {

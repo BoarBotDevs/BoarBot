@@ -5,16 +5,13 @@ import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.entities.boaruser.*;
-import dev.boarbot.interactives.Interactive;
-import dev.boarbot.interactives.InteractiveFactory;
+import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
-import dev.boarbot.util.generators.ItemImageGenerator;
-import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
@@ -26,7 +23,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.io.IOException;
@@ -77,6 +73,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter @Setter private ProfileData profileData;
     @Getter @Setter private int numTransmute;
     @Getter @Setter private int numClone;
+    @Getter @Setter private int numTryClone;
 
     public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) throws SQLException {
         super(event.getInteraction());
@@ -216,18 +213,57 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
         this.numClone = boarUser.getPowerupAmount(connection, "clone");
         boolean cloneable = this.config.getRarityConfigs().get(this.curRarityKey).getAvgClones() != -1 &&
-            this.numClone > 0;
+            this.numTryClone <= this.numClone;
 
         if (cloneable) {
-            if (boarUser.removeBoar(this.curBoarEntry.getKey(), connection)) {
-                this.acknowledgeString = strConfig.getCompCloneSuccess();
+            if (boarUser.hasBoar(this.curBoarEntry.getKey(), connection)) {
+                int avgClones = this.config.getRarityConfigs().get(this.curRarityKey).getAvgClones();
+                double chance = this.numTryClone == avgClones
+                    ? 1
+                    : (double) (this.numTryClone % avgClones) / avgClones;
+                double randVal = Math.random();
+
+                List<String> newBoarIDs = new ArrayList<>();
+
+                for (int i=0; i<(this.numTryClone / avgClones); i++) {
+                    newBoarIDs.add(this.curBoarEntry.getKey());
+                }
+
+                if (chance > randVal) {
+                    newBoarIDs.add(this.curBoarEntry.getKey());
+                }
+
+                if (newBoarIDs.isEmpty()) {
+                    this.acknowledgeString = strConfig.getCompCloneFailed().formatted(boarName);
+                } else {
+                    List<Integer> bucksGotten = new ArrayList<>();
+                    List<Integer> editions = new ArrayList<>();
+
+                    boarUser.addBoars(
+                        newBoarIDs,
+                        connection,
+                        BoarObtainType.CLONE,
+                        bucksGotten,
+                        editions
+                    );
+
+                    boarUser.usePowerup(connection, "clone", this.numTryClone);
+
+                    this.acknowledgeString = strConfig.getCompCloneSuccess().formatted(boarName);
+
+                    String title = this.config.getStringConfig().getCompCloneTitle();
+
+                    ItemInteractive.sendInteractive(
+                        newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook(), true
+                    );
+                }
             } else {
                 this.acknowledgeString = strConfig.getCompNoBoar().formatted(
                     "<>" + this.curRarityKey + "<>" + boarName
                 );
             }
         } else {
-            this.acknowledgeString = strConfig.getCompNoBoar().formatted(
+            this.acknowledgeString = strConfig.getCompNoPow().formatted(
                 powConfig.get("transmute").getPluralName()
             );
         }
@@ -245,7 +281,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             curRarity.getChargesNeeded() <= this.numTransmute;
 
         if (transmutable) {
-            if (boarUser.removeBoar(this.curBoarEntry.getKey(), connection)) {
+            if (boarUser.hasBoar(this.curBoarEntry.getKey(), connection)) {
                 List<String> newBoarIDs = new ArrayList<>();
                 String nextRarityID = BoarUtil.getNextRarityKey(this.curRarityKey);
 
@@ -257,6 +293,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 List<Integer> bucksGotten = new ArrayList<>();
                 List<Integer> editions = new ArrayList<>();
 
+                boarUser.removeBoar(this.curBoarEntry.getKey(), connection);
                 boarUser.addBoars(
                     newBoarIDs,
                     connection,
@@ -283,32 +320,18 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                     );
                 }
 
-                List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
-                    newBoarIDs, bucksGotten, this.user, strConfig.getCompTransmuteTitle()
-                );
+                String title = this.config.getStringConfig().getCompTransmuteTitle();
 
-                if (itemGens.size() > 1) {
-                    Interactive interactive = InteractiveFactory.constructItemInteractive(
-                        this.compEvent.getInteraction(), itemGens, newBoarIDs, editions
-                    );
-                    interactive.execute(null);
-                } else {
-                    try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
-                        MessageCreateBuilder msg = new MessageCreateBuilder()
-                            .setFiles(imageToSend)
-                            .setComponents();
-                        this.compEvent.getHook().sendMessage(msg.build()).complete();
-                    } catch (Exception exception) {
-                        log.error("Failed to send daily boar response!", exception);
-                    }
-                }
+                ItemInteractive.sendInteractive(
+                    newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook(), true
+                );
             } else {
                 this.acknowledgeString = strConfig.getCompNoBoar().formatted(
                     "<>" + this.curRarityKey + "<>" + boarName
                 );
             }
         } else {
-            this.acknowledgeString = strConfig.getCompNoBoar().formatted(
+            this.acknowledgeString = strConfig.getCompNoPow().formatted(
                 powConfig.get("transmute").getPluralName()
             );
         }

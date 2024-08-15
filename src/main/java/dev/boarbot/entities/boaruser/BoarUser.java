@@ -164,7 +164,21 @@ public class BoarUser {
         boarIDs.addAll(newBoarIDs);
     }
 
-    public boolean removeBoar(String boarID, Connection connection) throws SQLException {
+    public boolean hasBoar(String boarID, Connection connection) throws SQLException {
+        String query = """
+            SELECT boar_id
+            FROM collected_boars
+            WHERE boar_id = ? AND user_id = ? AND `exists` = 1 AND deleted = 0;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, boarID);
+            statement.setString(2, this.userID);
+            return statement.executeQuery().next();
+        }
+    }
+
+    public void removeBoar(String boarID, Connection connection) throws SQLException {
         String query = """
             UPDATE collected_boars
             SET deleted = 1
@@ -176,7 +190,7 @@ public class BoarUser {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, boarID);
             statement.setString(2, this.userID);
-            return statement.executeUpdate() > 0;
+            statement.executeUpdate();
         }
     }
 

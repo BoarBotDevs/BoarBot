@@ -26,6 +26,7 @@ public class StringConfig {
     private String bannedString = "";
     private String permBannedString = "";
     private String banSuccess = "";
+    private String invalidInput = "";
 
     // Setup command messages
 
@@ -43,7 +44,6 @@ public class StringConfig {
 
     private String dailyPow = "";
     private String dailyPowAttempt = "";
-    private String dailyPowInvalid = "";
     private String dailyPowFailed = "";
     private String dailyUsed = "";
     private String dailyFirstTime = "";
@@ -85,6 +85,9 @@ public class StringConfig {
     private String profileRecentLabel = "";
     private String compFavoriteSuccess = "";
     private String compUnfavoriteSuccess = "";
+    private String compCloneConfirmOne = "";
+    private String compCloneConfirmMultiple = "";
+    private String compCloneTooMany = "";
     private String compCloneSuccess = "";
     private String compCloneFailed = "";
     private String compCloneTitle = "";
@@ -187,8 +190,6 @@ public class StringConfig {
     private String giftOpenedWow = "";
     private String miracleConfirm = "";
     private String miracleSuccess = "";
-    private String cloneConfirm = "";
-    private String cloneFail = "";
 
     // Notification strings
 
