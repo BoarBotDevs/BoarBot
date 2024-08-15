@@ -77,7 +77,7 @@ public class DailyNotifyInteractive extends Interactive {
 
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
-                this.sendMessage(msg.build(), true);
+                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
             } catch (IOException exception1) {
                 log.error(
                     "An error occurred while attempting to update message after enabling notifications.", exception1

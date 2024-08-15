@@ -60,7 +60,7 @@ public class SetupInteractive extends Interactive {
                     case "CHANNEL_SELECT" -> this.doChannels(compEvent);
                     case "SB_YES", "SB_NO" -> this.doSb(compID);
                     case "NEXT" -> this.doNext();
-                    case "INFO" -> this.doInfo();
+                    case "INFO" -> this.doInfo(compEvent);
                     case "CANCEL" -> this.stop(StopType.CANCELLED);
                 }
             } catch (Exception exception){
@@ -123,7 +123,7 @@ public class SetupInteractive extends Interactive {
         this.currentImageUpload = new EmbedImageGenerator(strConfig.getSetupUnfinished2()).generate().getFileUpload();
     }
 
-    public void doInfo() throws IOException {
+    public void doInfo(GenericComponentInteractionCreateEvent compEvent) throws IOException {
         StringConfig strConfig = this.config.getStringConfig();
         FileUpload imageUpload;
 
@@ -139,7 +139,7 @@ public class SetupInteractive extends Interactive {
 
         MessageCreateBuilder infoMsg = new MessageCreateBuilder();
         infoMsg.setFiles(imageUpload);
-        this.sendMessage(infoMsg.build(), true);
+        compEvent.getHook().sendMessage(infoMsg.build()).setEphemeral(true).complete();
     }
 
     @Override

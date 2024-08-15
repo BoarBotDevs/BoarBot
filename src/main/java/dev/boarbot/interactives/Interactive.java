@@ -84,18 +84,6 @@ public abstract class Interactive {
     public abstract void execute(GenericComponentInteractionCreateEvent compEvent);
     public abstract ActionRow[] getCurComponents();
 
-    public void sendMessage(MessageCreateData msg, boolean ephemeral) {
-        if (this.hook == null && this.msg == null) {
-            throw new IllegalStateException("The interactive hasn't been initialized yet!");
-        }
-
-        if (this.hook != null) {
-            this.hook.sendMessage(msg).setEphemeral(ephemeral).complete();
-        } else {
-            this.msg.reply(msg).complete();
-        }
-    }
-
     public void updateInteractive(MessageEditData editedMsg) {
         if (this.hook == null && this.msg == null) {
             this.msg = ((ComponentInteraction) this.interaction).getMessage().reply(

@@ -297,8 +297,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                         MessageCreateBuilder msg = new MessageCreateBuilder()
                             .setFiles(imageToSend)
                             .setComponents();
-
-                        this.sendMessage(msg.build(), false);
+                        this.compEvent.getHook().sendMessage(msg.build()).complete();
                     } catch (Exception exception) {
                         log.error("Failed to send daily boar response!", exception);
                     }
