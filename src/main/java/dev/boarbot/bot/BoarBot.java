@@ -288,26 +288,34 @@ public class BoarBot implements Bot {
         int[] mediumBoarSize = nums.getMediumBoarSize();
 
         for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
-            IndivItemConfig boarInfo = this.getConfig().getItemConfig().getBoars().get(boarID);
-
-            String filePath = boarInfo.getStaticFile() != null
-                ? pathConfig.getBoars() + boarInfo.getStaticFile()
-                : pathConfig.getBoars() + boarInfo.getFile();
-
-            BufferedImage bigBoarImage = new BufferedImage(bigBoarSize[0], bigBoarSize[1], BufferedImage.TYPE_INT_ARGB);
-            Graphics2D bigBoarGraphics = bigBoarImage.createGraphics();
-
-            BufferedImage mediumBigBoarImage = new BufferedImage(
-                mediumBigBoarSize[0], mediumBigBoarSize[1], BufferedImage.TYPE_INT_ARGB
-            );
-            Graphics2D mediumBigBoarGraphics = mediumBigBoarImage.createGraphics();
-
-            BufferedImage mediumBoarImage = new BufferedImage(
-                mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
-            );
-            Graphics2D mediumBoarGraphics = mediumBoarImage.createGraphics();
-
             try {
+                IndivItemConfig boarInfo = this.getConfig().getItemConfig().getBoars().get(boarID);
+
+                if (boarInfo.getFile().isEmpty()) {
+                    throw new IllegalArgumentException("Failed to find file.");
+                }
+
+                String filePath = boarInfo.getStaticFile() != null
+                    ? pathConfig.getBoars() + boarInfo.getStaticFile()
+                    : pathConfig.getBoars() + boarInfo.getFile();
+
+                if (filePath.endsWith(".gif")) {
+                    throw new IllegalArgumentException("Animated file is missing a static version.");
+                }
+
+                BufferedImage bigBoarImage = new BufferedImage(bigBoarSize[0], bigBoarSize[1], BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bigBoarGraphics = bigBoarImage.createGraphics();
+
+                BufferedImage mediumBigBoarImage = new BufferedImage(
+                    mediumBigBoarSize[0], mediumBigBoarSize[1], BufferedImage.TYPE_INT_ARGB
+                );
+                Graphics2D mediumBigBoarGraphics = mediumBigBoarImage.createGraphics();
+
+                BufferedImage mediumBoarImage = new BufferedImage(
+                    mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
+                );
+                Graphics2D mediumBoarGraphics = mediumBoarImage.createGraphics();
+
                 GraphicsUtil.drawImage(bigBoarGraphics, filePath, origin, bigBoarSize);
                 this.imageCacheMap.put("big" + boarID, bigBoarImage);
 
