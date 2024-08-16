@@ -302,6 +302,11 @@
             "required": true
           }
         ]
+      },
+      "beta-powerups": {
+        "name": "beta-powerups",
+        "description": "Gives you ten of each powerup",
+        "location": "dev.boarbot.commands.boar.BetaPowerupsSubcommand"
       }
     }
   },

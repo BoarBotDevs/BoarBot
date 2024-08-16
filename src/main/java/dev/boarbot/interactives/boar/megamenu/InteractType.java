@@ -3,7 +3,8 @@ package dev.boarbot.interactives.boar.megamenu;
 public enum InteractType {
     FAVORITE("favorite"),
     CLONE("clone"),
-    TRANSMUTE("transmute");
+    TRANSMUTE("transmute"),
+    ANIMATE("animate"),;
 
     private final String type;
 

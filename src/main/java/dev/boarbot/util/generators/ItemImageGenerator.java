@@ -8,6 +8,7 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.python.PythonUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -156,27 +156,7 @@ public class ItemImageGenerator extends ImageGenerator {
             this.filePath
         ).start();
 
-        BufferedReader stdIn = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
-        BufferedReader stdErr = new BufferedReader(new InputStreamReader(pythonProcess.getErrorStream()));
-        OutputStream stdOut = pythonProcess.getOutputStream();
-
-        stdOut.write(this.generatedImageBytes);
-        stdOut.close();
-
-        String result = stdIn.readLine();
-
-        if (result == null) {
-            String tempErrMessage;
-            String errMessage = "";
-
-            while ((tempErrMessage = stdErr.readLine()) != null) {
-                errMessage = errMessage.concat(tempErrMessage + "\n");
-            }
-
-            log.error(errMessage);
-        }
-
-        this.generatedImageBytes = Base64.getDecoder().decode(result);
+        this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.generatedImageBytes);
     }
 
     private void addAnimatedUser() throws IOException {
@@ -195,27 +175,7 @@ public class ItemImageGenerator extends ImageGenerator {
             this.giftingUser == null ? "" : this.giftingUser.getName()
         ).start();
 
-        BufferedReader stdIn = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
-        BufferedReader stdErr = new BufferedReader(new InputStreamReader(pythonProcess.getErrorStream()));
-        OutputStream stdOut = pythonProcess.getOutputStream();
-
-        stdOut.write(this.generatedImageBytes);
-        stdOut.close();
-
-        String result = stdIn.readLine();
-
-        if (result == null) {
-            String tempErrMessage;
-            String errMessage = "";
-
-            while ((tempErrMessage = stdErr.readLine()) != null) {
-                errMessage = errMessage.concat(tempErrMessage + "\n");
-            }
-
-            log.error(errMessage);
-        }
-
-        this.generatedImageBytes = Base64.getDecoder().decode(result);
+        this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.generatedImageBytes);
     }
 
     private void generateStatic(boolean makeWithItem) throws IOException, URISyntaxException {

@@ -54,4 +54,5 @@ public class PathConfig {
     private String makeImageScript = "";
     private String overlayScript = "";
     private String groupScript = "";
+    private String applyScript = "";
 }
