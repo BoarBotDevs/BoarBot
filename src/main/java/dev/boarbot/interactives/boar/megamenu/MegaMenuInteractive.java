@@ -1,5 +1,7 @@
 package dev.boarbot.interactives.boar.megamenu;
 
+import com.google.gson.Gson;
+import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.items.IndivItemConfig;
@@ -14,6 +16,7 @@ import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.python.PythonUtil;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +28,9 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -47,6 +52,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter @Setter private String confirmString;
     @Getter @Setter private boolean acknowledgeOpen = false;
     @Getter @Setter private String acknowledgeString;
+    @Getter @Setter private boolean animated = false;
 
     @Getter @Setter private GenericComponentInteractionCreateEvent compEvent;
     @Getter @Setter private ModalInteractionEvent modalEvent;
@@ -138,6 +144,10 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
             this.currentImageGen = this.generatorMaker.make().generate();
 
+            boolean isAnimatedBoar = this.config.getItemConfig().getBoars().get(
+                this.curBoarEntry.getKey()
+            ).getStaticFile() != null;
+
             if (this.confirmOpen) {
                 this.currentImageUpload = new OverlayImageGenerator(
                     this.currentImageGen.getImage(), this.confirmString
@@ -146,6 +156,34 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 this.currentImageUpload = new OverlayImageGenerator(
                     this.currentImageGen.getImage(), this.acknowledgeString
                 ).generate().getFileUpload();
+            } else if (this.animated && isAnimatedBoar) {
+                this.animated = false;
+
+                Gson g = new Gson();
+                String filePath = this.config.getPathConfig().getBoars() +
+                    this.config.getItemConfig().getBoars().get(this.curBoarEntry.getKey()).getFile();
+
+                BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get(
+                    "borderMediumBig" + this.curRarityKey
+                );
+
+                ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+                ImageIO.write(rarityBorderImage, "png", byteArrayOS);
+                byte[] rarityBorderBytes = byteArrayOS.toByteArray();
+
+                Process pythonProcess = new ProcessBuilder(
+                    "python",
+                    this.config.getPathConfig().getApplyScript(),
+                    g.toJson(this.config.getNumberConfig()),
+                    filePath,
+                    Integer.toString(this.currentImageGen.getBytes().length),
+                    Integer.toString(rarityBorderBytes.length)
+                ).start();
+
+                this.currentImageUpload = FileUpload.fromData(
+                    PythonUtil.getResult(pythonProcess, this.currentImageGen.getBytes(), rarityBorderBytes),
+                    "unknown.gif"
+                );
             } else {
                 this.currentImageUpload = this.currentImageGen.getFileUpload();
             }

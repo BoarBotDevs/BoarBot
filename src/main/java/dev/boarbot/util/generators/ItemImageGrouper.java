@@ -4,6 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.PathConfig;
 import dev.boarbot.util.graphics.GraphicsUtil;
+import dev.boarbot.util.python.PythonUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.utils.FileUpload;
 
@@ -12,7 +13,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URISyntaxException;
-import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -104,28 +104,7 @@ public final class ItemImageGrouper {
                 Integer.toString(middleImageBytes.length)
             ).start();
 
-            BufferedReader stdIn = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
-            BufferedReader stdErr = new BufferedReader(new InputStreamReader(pythonProcess.getErrorStream()));
-            OutputStream stdOut = pythonProcess.getOutputStream();
-
-            stdOut.write(resultByteArray);
-            stdOut.write(middleImageBytes);
-            stdOut.close();
-
-            String result = stdIn.readLine();
-
-            if (result == null) {
-                String tempErrMessage;
-                String errMessage = "";
-
-                while ((tempErrMessage = stdErr.readLine()) != null) {
-                    errMessage = errMessage.concat(tempErrMessage + "\n");
-                }
-
-                log.error(errMessage);
-            }
-
-            resultByteArray = Base64.getDecoder().decode(result);
+            resultByteArray = PythonUtil.getResult(pythonProcess, resultByteArray, middleImageBytes);
         } else {
             byteArrayIS = new ByteArrayInputStream(middleImageBytes);
             BufferedImage mainImage = ImageIO.read(byteArrayIS);

@@ -125,7 +125,8 @@ public class BoarUser {
         List<String> newBoarIDs = new ArrayList<>();
 
         if (this.isFirstDaily) {
-            this.giveFirstBonus(connection);
+            this.addPowerup(connection, "miracle", 5);
+            this.addPowerup(connection, "gift", 1);
         }
         this.isFirstDaily = false;
 
@@ -452,25 +453,19 @@ public class BoarUser {
         return canUseDaily;
     }
 
-    private void giveFirstBonus(Connection connection) throws SQLException {
-        this.insertPowerupIfNotExist(connection, "miracle");
-        this.insertPowerupIfNotExist(connection, "gift");
+    public void addPowerup(Connection connection, String powerupID, int amount) throws SQLException {
+        this.insertPowerupIfNotExist(connection, powerupID);
 
         String updateQuery = """
             UPDATE collected_powerups
-            SET amount = CASE
-                WHEN powerup_id = ? THEN amount + 5
-                WHEN powerup_id = ? THEN amount + 1
-            END
-            WHERE user_id = ? AND powerup_id IN (?, ?);
+            SET amount = amount + ?
+            WHERE user_id = ? AND powerup_id = ?;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
-            statement.setString(1, "miracle");
-            statement.setString(2, "gift");
-            statement.setString(3, this.userID);
-            statement.setString(4, "miracle");
-            statement.setString(5, "gift");
+            statement.setInt(1, amount);
+            statement.setString(2, this.userID);
+            statement.setString(3, powerupID);
             statement.execute();
         }
     }

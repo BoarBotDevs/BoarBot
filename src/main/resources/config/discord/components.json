@@ -201,6 +201,12 @@
           "value": "transmute",
           "emoji": "<:transmute:1270807233701220454>",
           "description": "Transmute this boar to one of the next rarity"
+        },
+        {
+          "label": "Animate",
+          "value": "animate",
+          "emoji": "<:wiggleboar:1274071700153041096>",
+          "description": "Show the animated version of this boar"
         }
       ]
     },

@@ -5,6 +5,7 @@ import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.components.SelectOptionConfig;
+import dev.boarbot.bot.config.items.IndivItemConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -249,7 +250,9 @@ class MegaMenuComponentsGetter {
         boolean canFavorite = this.interactive.getFavoriteID() == null ||
             !this.interactive.getFavoriteID().equals(this.interactive.getCurBoarEntry().getKey());
 
-        List<SelectOption> selectOptions = new ArrayList<>(this.interactOptions);
+        List<SelectOption> selectOptions = new ArrayList<>();
+
+        selectOptions.add(this.interactOptions.getFirst());
 
         if (!canFavorite) {
             selectOptions.set(0, this.interactOptions.getFirst().withLabel("Unfavorite"));
@@ -262,14 +265,19 @@ class MegaMenuComponentsGetter {
         boolean transmutable = curRarity.getChargesNeeded() != -1 &&
             curRarity.getChargesNeeded() <= this.interactive.getNumTransmute();
 
-        if (!cloneable) {
-            selectOptions.remove(1);
+        IndivItemConfig boar = this.config.getItemConfig().getBoars().get(this.interactive.getCurBoarEntry().getKey());
+        boolean canAnimate = boar.getStaticFile() != null;
+
+        if (cloneable) {
+            selectOptions.add(this.interactOptions.get(1));
         }
 
-        if (cloneable && !transmutable) {
-            selectOptions.remove(2);
-        } else if (!cloneable && !transmutable) {
-            selectOptions.remove(1);
+        if (transmutable) {
+            selectOptions.add(this.interactOptions.get(2));
+        }
+
+        if (canAnimate) {
+            selectOptions.add(this.interactOptions.get(3));
         }
 
         StringSelectMenu interactSelectMenu = (StringSelectMenu) selectRow.getFirst();

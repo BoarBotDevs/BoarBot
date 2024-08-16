@@ -37,5 +37,4 @@ frames[0].save(
 )
 img_data = output.getvalue()
 
-# Sends the result to JS
 print(str(base64.b64encode(img_data))[2:-1])

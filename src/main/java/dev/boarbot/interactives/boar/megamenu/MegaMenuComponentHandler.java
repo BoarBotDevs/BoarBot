@@ -272,6 +272,11 @@ class MegaMenuComponentHandler {
                     "<>" + nextRarityKey + "<>" + this.config.getRarityConfigs().get(nextRarityKey).getName()
                 ));
             }
+
+            case ANIMATE -> {
+                this.compEvent.deferEdit().queue();
+                this.interactive.setAnimated(true);
+            }
         }
     }
 
