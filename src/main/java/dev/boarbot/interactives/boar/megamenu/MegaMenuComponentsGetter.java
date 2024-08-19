@@ -11,7 +11,6 @@ import dev.boarbot.util.interactive.InteractiveUtil;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
@@ -115,15 +114,13 @@ class MegaMenuComponentsGetter {
             selectRow = getFilterRow();
         } else if (this.interactive.isSortOpen()) {
             selectRow = getSortRow();
-        } else if (this.interactive.isInteractOpen() && this.interactive.getCurBoarEntry().getValue().amount() > 0) {
+        } else if (this.interactive.isInteractOpen()) {
             selectRow = getInteractRow();
         }
 
         Button leftBtn = ((Button) nav[1].getComponents().getFirst()).asDisabled();
         Button pageBtn = ((Button) nav[1].getComponents().get(1)).asDisabled();
         Button rightBtn = ((Button) nav[1].getComponents().get(2)).asDisabled();
-        Button filterBtn = ((Button) filterSortRow.getFirst());
-        Button sortBtn = ((Button) filterSortRow.get(1));
         Button interactBtn = null;
 
         if (interactRow != null) {
@@ -148,14 +145,6 @@ class MegaMenuComponentsGetter {
             interactBtn = interactBtn.withDisabled(false);
         }
 
-        if (this.interactive.getFilterBits() != 1) {
-            filterBtn = filterBtn.withStyle(ButtonStyle.SUCCESS);
-        }
-
-        if (this.interactive.getSortVal() != SortType.RARITY_D) {
-            sortBtn = sortBtn.withStyle(ButtonStyle.SUCCESS);
-        }
-
         nav[1].getComponents().set(0, leftBtn);
         nav[1].getComponents().set(1, pageBtn);
         nav[1].getComponents().set(2, rightBtn);
@@ -163,9 +152,6 @@ class MegaMenuComponentsGetter {
         if (interactRow != null) {
             interactRow.set(1, interactBtn);
         }
-
-        filterSortRow.set(0, filterBtn);
-        filterSortRow.set(1, sortBtn);
 
         actionRows.add(nav[0]);
         actionRows.add(nav[1]);
@@ -204,8 +190,6 @@ class MegaMenuComponentsGetter {
             this.filterOptions.set(i, filterOption.withDefault(false));
         }
 
-        List<SelectOption> selectOptions = new ArrayList<>(this.filterOptions);
-
         StringSelectMenu filterSelectMenu = (StringSelectMenu) selectRow.getFirst();
         selectRow.set(0, new StringSelectMenuImpl(
             filterSelectMenu.getId(),
@@ -213,7 +197,7 @@ class MegaMenuComponentsGetter {
             filterSelectMenu.getMinValues(),
             filterSelectMenu.getMaxValues(),
             filterSelectMenu.isDisabled(),
-            selectOptions
+            this.filterOptions
         ));
 
         return selectRow;
@@ -266,9 +250,7 @@ class MegaMenuComponentsGetter {
         boolean canFavorite = this.interactive.getFavoriteID() == null ||
             !this.interactive.getFavoriteID().equals(this.interactive.getCurBoarEntry().getKey());
 
-        List<SelectOption> selectOptions = new ArrayList<>();
-
-        selectOptions.add(this.interactOptions.getFirst());
+        List<SelectOption> selectOptions = new ArrayList<>(this.interactOptions);
 
         if (!canFavorite) {
             selectOptions.set(0, this.interactOptions.getFirst().withLabel("Unfavorite"));
@@ -281,19 +263,14 @@ class MegaMenuComponentsGetter {
         boolean transmutable = curRarity.getChargesNeeded() != -1 &&
             curRarity.getChargesNeeded() <= this.interactive.getNumTransmute();
 
-        BoarItemConfig boar = this.config.getItemConfig().getBoars().get(this.interactive.getCurBoarEntry().getKey());
-        boolean canAnimate = boar.getStaticFile() != null;
-
-        if (cloneable) {
-            selectOptions.add(this.interactOptions.get(1));
+        if (!cloneable) {
+            selectOptions.remove(1);
         }
 
-        if (transmutable) {
-            selectOptions.add(this.interactOptions.get(2));
-        }
-
-        if (canAnimate) {
-            selectOptions.add(this.interactOptions.get(3));
+        if (cloneable && !transmutable) {
+            selectOptions.remove(2);
+        } else if (!cloneable && !transmutable) {
+            selectOptions.remove(1);
         }
 
         StringSelectMenu interactSelectMenu = (StringSelectMenu) selectRow.getFirst();
