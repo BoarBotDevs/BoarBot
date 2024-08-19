@@ -4,8 +4,9 @@ import com.google.gson.Gson;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.StringConfig;
-import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
+import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.entities.boaruser.*;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.ModalInteractive;
@@ -36,50 +37,61 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class MegaMenuInteractive extends ModalInteractive implements Synchronizable {
+    @Getter @Setter private int prevPage = -1;
     @Getter @Setter private int page;
     @Getter @Setter private int maxPage;
     @Getter @Setter private String boarPage;
+
     @Getter @Setter private MegaMenuView curView;
-    @Getter private boolean isSkyblockGuild;
-    private final MegaMenuComponentsGetter componentsGetter = new MegaMenuComponentsGetter(this);
-    @Getter @Setter private boolean filterOpen = false;
-    @Getter @Setter private boolean sortOpen = false;
-    @Getter @Setter private boolean interactOpen = false;
-    @Getter @Setter private boolean confirmOpen = false;
-    @Getter @Setter private String confirmString;
-    @Getter @Setter private boolean acknowledgeOpen = false;
-    @Getter @Setter private String acknowledgeString;
-    @Getter @Setter private boolean animated = false;
+    @Getter @Setter private MegaMenuView prevView;
+    @Getter private final Map<MegaMenuView, Boolean> viewsToUpdateData = new HashMap<>();
 
     @Getter @Setter private GenericComponentInteractionCreateEvent compEvent;
     @Getter @Setter private ModalInteractionEvent modalEvent;
 
-    @Getter private final BoarUser boarUser;
-
-    @Getter private final Map<MegaMenuView, Boolean> viewsToUpdateData = new HashMap<>();
-    @Getter @Setter private int prevPage = -1;
-    @Getter @Setter private MegaMenuView prevView;
+    private final MegaMenuComponentsGetter componentsGetter = new MegaMenuComponentsGetter(this);
     private final MegaMenuGeneratorMaker generatorMaker = new MegaMenuGeneratorMaker(this);
     private ImageGenerator currentImageGen;
     private FileUpload currentImageUpload;
 
+    @Getter private boolean isSkyblockGuild;
+
+    @Getter @Setter private boolean filterOpen = false;
+    @Getter @Setter private int filterBits = 0;
+
+    @Getter @Setter private boolean sortOpen = false;
+    @Getter @Setter private SortType sortVal = SortType.RARITY_D;
+
+    @Getter @Setter private boolean interactOpen = false;
+    @Getter @Setter private InteractType interactType;
+
+    @Getter @Setter private boolean confirmOpen = false;
+    @Getter @Setter private String confirmString;
+
+    @Getter @Setter private boolean acknowledgeOpen = false;
+    @Getter @Setter private String acknowledgeString;
+
+    @Getter @Setter private boolean animated = false;
+
+    @Getter private final BoarUser boarUser;
+
     @Getter private String firstJoinedDate;
     @Getter private List<String> badgeIDs;
     @Getter @Setter private String favoriteID;
+
     @Getter @Setter private Map<String, BoarInfo> ownedBoars;
     @Getter @Setter private Map<String, BoarInfo> filteredBoars;
-    @Getter @Setter private InteractType interactType;
-    @Getter @Setter private int filterBits;
-    @Getter @Setter private SortType sortVal;
     @Getter @Setter private Map.Entry<String, BoarInfo> curBoarEntry;
     @Getter @Setter private String curRarityKey;
-    @Getter @Setter private ProfileData profileData;
     @Getter @Setter private int numTransmute;
     @Getter @Setter private int numClone;
     @Getter @Setter private int numTryClone;
+
+    @Getter @Setter private ProfileData profileData;
 
     public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) throws SQLException {
         super(event.getInteraction());
@@ -87,6 +99,9 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         this.page = event.getOption("page") != null
             ? Math.max(event.getOption("page").getAsInt() - 1, 0)
             : 0;
+        this.boarPage = event.getOption("search") != null
+            ? event.getOption("search").getAsString()
+            : null;
         this.boarUser = event.getOption("user") != null
             ? BoarUserFactory.getBoarUser(event.getOption("user").getAsUser())
             : BoarUserFactory.getBoarUser(event.getUser());
@@ -131,22 +146,23 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                             .atOffset(ZoneOffset.UTC)
                             .format(TimeUtil.getDateFormatter())
                         : this.config.getStringConfig().getUnavailable();
+                    this.favoriteID = this.boarUser.getFavoriteID(connection);
 
                     this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.guildID);
                     this.badgeIDs = this.boarUser.getCurrentBadges(connection);
                     this.viewsToUpdateData.replaceAll((k, v) -> false);
                 }
-
-                if (this.prevPage == this.page && this.prevView == this.curView && !this.confirmOpen) {
-                    return;
-                }
             }
 
             this.currentImageGen = this.generatorMaker.make().generate();
 
-            boolean isAnimatedBoar = this.config.getItemConfig().getBoars().get(
-                this.curBoarEntry.getKey()
-            ).getStaticFile() != null;
+            boolean isAnimatedBoar = false;
+
+            if (this.curView == MegaMenuView.COMPENDIUM) {
+                isAnimatedBoar = this.config.getItemConfig().getBoars().get(
+                    this.curBoarEntry.getKey()
+                ).getStaticFile() != null;
+            }
 
             if (this.confirmOpen) {
                 this.currentImageUpload = new OverlayImageGenerator(
@@ -203,146 +219,169 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
-        try (Connection connection = DataUtil.getConnection()) {
+        try {
             if (this.filterOpen) {
-                boarUser.setFilterBits(connection, this.filterBits);
+                try (Connection connection = DataUtil.getConnection()) {
+                    boarUser.setFilterBits(connection, this.filterBits);
+                }
             } else if (this.sortOpen) {
-                boarUser.setSortVal(connection, this.sortVal);
+                try (Connection connection = DataUtil.getConnection()) {
+                    boarUser.setSortVal(connection, this.sortVal);
+                }
             } else if (this.interactOpen) {
                 switch (this.interactType) {
-                    case FAVORITE -> this.doFavorite(connection, boarUser);
-                    case CLONE -> this.doClone(connection, boarUser);
-                    case TRANSMUTE -> this.doTransmute(connection, boarUser);
+                    case FAVORITE -> this.doFavorite(boarUser);
+                    case CLONE -> this.doClone(boarUser);
+                    case TRANSMUTE -> this.doTransmute(boarUser);
                 }
+
                 this.acknowledgeOpen = true;
+                this.interactType = null;
+                this.confirmOpen = false;
             }
         } catch (SQLException exception) {
             log.error("Failed to get user data", exception);
-        } finally {
-            this.confirmOpen = false;
-            this.interactType = null;
         }
     }
 
-    private void doFavorite(Connection connection, BoarUser boarUser) throws SQLException {
+    private void doFavorite(BoarUser boarUser) throws SQLException {
         StringConfig strConfig = this.config.getStringConfig();
         String boarName = this.config.getItemConfig().getBoars().get(this.curBoarEntry.getKey()).getName();
 
-        this.favoriteID = boarUser.getFavoriteID(connection);
+        try (Connection connection = DataUtil.getConnection()) {
+            this.favoriteID = boarUser.getFavoriteID(connection);
 
-        if (this.favoriteID == null || !this.favoriteID.equals(this.curBoarEntry.getKey())) {
-            this.acknowledgeString = strConfig.getCompFavoriteSuccess().formatted(
-                "<>" + this.curRarityKey + "<>" + boarName
-            );
-            boarUser.setFavoriteID(connection, this.curBoarEntry.getKey());
-        } else {
-            this.acknowledgeString = strConfig.getCompUnfavoriteSuccess().formatted(
-                "<>" + this.curRarityKey + "<>" + boarName
-            );
-            boarUser.setFavoriteID(connection, null);
+            if (this.favoriteID == null || !this.favoriteID.equals(this.curBoarEntry.getKey())) {
+                this.acknowledgeString = strConfig.getCompFavoriteSuccess().formatted(
+                    "<>" + this.curRarityKey + "<>" + boarName
+                );
+                boarUser.setFavoriteID(connection, this.curBoarEntry.getKey());
+            } else {
+                this.acknowledgeString = strConfig.getCompUnfavoriteSuccess().formatted(
+                    "<>" + this.curRarityKey + "<>" + boarName
+                );
+                boarUser.setFavoriteID(connection, null);
+            }
         }
     }
 
-    private void doClone(Connection connection, BoarUser boarUser) throws SQLException {
+    private void doClone(BoarUser boarUser) throws SQLException {
         StringConfig strConfig = this.config.getStringConfig();
         ItemConfig itemConfig = this.config.getItemConfig();
-        Map<String, IndivItemConfig> powConfig = itemConfig.getPowerups();
+        Map<String, PowerupItemConfig> powConfig = itemConfig.getPowerups();
         String boarName = itemConfig.getBoars().get(this.curBoarEntry.getKey()).getName();
 
-        this.numClone = boarUser.getPowerupAmount(connection, "clone");
-        boolean cloneable = this.config.getRarityConfigs().get(this.curRarityKey).getAvgClones() != -1 &&
-            this.numTryClone <= this.numClone;
+        List<String> newBoarIDs = new ArrayList<>();
+        List<Integer> bucksGotten = new ArrayList<>();
+        List<Integer> editions = new ArrayList<>();
 
-        if (cloneable) {
-            if (boarUser.hasBoar(this.curBoarEntry.getKey(), connection)) {
-                int avgClones = this.config.getRarityConfigs().get(this.curRarityKey).getAvgClones();
-                double chance = this.numTryClone == avgClones
-                    ? 1
-                    : (double) (this.numTryClone % avgClones) / avgClones;
-                double randVal = Math.random();
+        try (Connection connection = DataUtil.getConnection()) {
+            this.numClone = boarUser.getPowerupAmount(connection, "clone");
+            boolean cloneable = this.config.getRarityConfigs().get(this.curRarityKey).getAvgClones() != -1 &&
+                this.numTryClone <= this.numClone;
 
-                List<String> newBoarIDs = new ArrayList<>();
+            if (cloneable) {
+                if (boarUser.hasBoar(this.curBoarEntry.getKey(), connection)) {
+                    int avgClones = this.config.getRarityConfigs().get(this.curRarityKey).getAvgClones();
+                    double chance = this.numTryClone == avgClones
+                        ? 1
+                        : (double) (this.numTryClone % avgClones) / avgClones;
+                    double randVal = Math.random();
 
-                for (int i=0; i<(this.numTryClone / avgClones); i++) {
-                    newBoarIDs.add(this.curBoarEntry.getKey());
-                }
+                    for (int i = 0; i < (this.numTryClone / avgClones); i++) {
+                        newBoarIDs.add(this.curBoarEntry.getKey());
+                    }
 
-                if (chance > randVal) {
-                    newBoarIDs.add(this.curBoarEntry.getKey());
-                }
+                    if (chance < 1 && chance > randVal) {
+                        newBoarIDs.add(this.curBoarEntry.getKey());
+                    }
 
-                if (newBoarIDs.isEmpty()) {
-                    this.acknowledgeString = strConfig.getCompCloneFailed().formatted(boarName);
+                    if (newBoarIDs.isEmpty()) {
+                        this.acknowledgeString = strConfig.getCompCloneFailed().formatted(boarName);
+                    } else {
+                        boarUser.addBoars(
+                            newBoarIDs,
+                            connection,
+                            BoarObtainType.CLONE,
+                            bucksGotten,
+                            editions
+                        );
+
+                        boarUser.usePowerup(connection, "clone", this.numTryClone);
+                    }
                 } else {
-                    List<Integer> bucksGotten = new ArrayList<>();
-                    List<Integer> editions = new ArrayList<>();
+                    this.acknowledgeString = strConfig.getCompNoBoar().formatted(
+                        "<>" + this.curRarityKey + "<>" + boarName
+                    );
+                }
+            } else {
+                this.acknowledgeString = strConfig.getCompNoPow().formatted(
+                    powConfig.get("transmute").getPluralName()
+                );
+            }
+        }
 
+        if (!newBoarIDs.isEmpty()) {
+            CompletableFuture.runAsync(() -> {
+                this.acknowledgeString = strConfig.getCompCloneSuccess().formatted(boarName);
+                String title = this.config.getStringConfig().getCompCloneTitle();
+
+                ItemInteractive.sendInteractive(
+                    newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook()
+                );
+            });
+        }
+    }
+
+    private void doTransmute(BoarUser boarUser) throws SQLException {
+        StringConfig strConfig = this.config.getStringConfig();
+        ItemConfig itemConfig = this.config.getItemConfig();
+        Map<String, PowerupItemConfig> powConfig = itemConfig.getPowerups();
+        String boarName = itemConfig.getBoars().get(this.curBoarEntry.getKey()).getName();
+
+        List<String> newBoarIDs = new ArrayList<>();
+        List<Integer> bucksGotten = new ArrayList<>();
+        List<Integer> editions = new ArrayList<>();
+
+        try (Connection connection = DataUtil.getConnection()) {
+            this.numTransmute = boarUser.getPowerupAmount(connection, "transmute");
+            RarityConfig curRarity = this.config.getRarityConfigs().get(this.curRarityKey);
+            boolean transmutable = curRarity.getChargesNeeded() != -1 &&
+                curRarity.getChargesNeeded() <= this.numTransmute;
+
+            if (transmutable) {
+                if (boarUser.hasBoar(this.curBoarEntry.getKey(), connection)) {
+                    String nextRarityID = BoarUtil.getNextRarityKey(this.curRarityKey);
+                    newBoarIDs.add(BoarUtil.findValid(nextRarityID, this.isSkyblockGuild));
+
+                    boarUser.removeBoar(this.curBoarEntry.getKey(), connection);
                     boarUser.addBoars(
                         newBoarIDs,
                         connection,
-                        BoarObtainType.CLONE,
+                        BoarObtainType.TRANSMUTE,
                         bucksGotten,
                         editions
                     );
 
-                    boarUser.usePowerup(connection, "clone", this.numTryClone);
-
-                    this.acknowledgeString = strConfig.getCompCloneSuccess().formatted(boarName);
-
-                    String title = this.config.getStringConfig().getCompCloneTitle();
-
-                    ItemInteractive.sendInteractive(
-                        newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook(), true
+                    boarUser.usePowerup(connection, "transmute", this.numTransmute);
+                } else {
+                    this.acknowledgeString = strConfig.getCompNoBoar().formatted(
+                        "<>" + this.curRarityKey + "<>" + boarName
                     );
                 }
             } else {
-                this.acknowledgeString = strConfig.getCompNoBoar().formatted(
-                    "<>" + this.curRarityKey + "<>" + boarName
+                this.acknowledgeString = strConfig.getCompNoPow().formatted(
+                    powConfig.get("transmute").getPluralName()
                 );
             }
-        } else {
-            this.acknowledgeString = strConfig.getCompNoPow().formatted(
-                powConfig.get("transmute").getPluralName()
-            );
         }
-    }
 
-    private void doTransmute(Connection connection, BoarUser boarUser) throws SQLException {
-        StringConfig strConfig = this.config.getStringConfig();
-        ItemConfig itemConfig = this.config.getItemConfig();
-        Map<String, IndivItemConfig> powConfig = itemConfig.getPowerups();
-        String boarName = itemConfig.getBoars().get(this.curBoarEntry.getKey()).getName();
-
-        this.numTransmute = boarUser.getPowerupAmount(connection, "transmute");
-        RarityConfig curRarity = this.config.getRarityConfigs().get(this.curRarityKey);
-        boolean transmutable = curRarity.getChargesNeeded() != -1 &&
-            curRarity.getChargesNeeded() <= this.numTransmute;
-
-        if (transmutable) {
-            if (boarUser.hasBoar(this.curBoarEntry.getKey(), connection)) {
-                List<String> newBoarIDs = new ArrayList<>();
-                String nextRarityID = BoarUtil.getNextRarityKey(this.curRarityKey);
-
-                newBoarIDs.add(BoarUtil.findValid(nextRarityID, this.isSkyblockGuild));
-
+        if (!newBoarIDs.isEmpty()) {
+            CompletableFuture.runAsync(() -> {
                 String newBoarName = itemConfig.getBoars().get(newBoarIDs.getFirst()).getName();
                 String newBoarRarityKey = BoarUtil.findRarityKey(newBoarIDs.getFirst());
 
-                List<Integer> bucksGotten = new ArrayList<>();
-                List<Integer> editions = new ArrayList<>();
-
-                boarUser.removeBoar(this.curBoarEntry.getKey(), connection);
-                boarUser.addBoars(
-                    newBoarIDs,
-                    connection,
-                    BoarObtainType.TRANSMUTE,
-                    bucksGotten,
-                    editions
-                );
-
                 this.boarPage = newBoarName;
-                boarUser.usePowerup(connection, "transmute", this.numTransmute);
-
                 this.acknowledgeString = strConfig.getCompTransmuteSuccess().formatted(
                     "<>" + this.curRarityKey + "<>" + boarName,
                     "<>" + newBoarRarityKey + "<>" + newBoarName
@@ -361,17 +400,9 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 String title = this.config.getStringConfig().getCompTransmuteTitle();
 
                 ItemInteractive.sendInteractive(
-                    newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook(), true
+                    newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook()
                 );
-            } else {
-                this.acknowledgeString = strConfig.getCompNoBoar().formatted(
-                    "<>" + this.curRarityKey + "<>" + boarName
-                );
-            }
-        } else {
-            this.acknowledgeString = strConfig.getCompNoPow().formatted(
-                powConfig.get("transmute").getPluralName()
-            );
+            });
         }
     }
 
@@ -396,7 +427,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
         // Find by search term first
         for (String boarID : filteredBoars.keySet()) {
-            IndivItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
+            BoarItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
 
             for (String searchTerm : boar.getSearchTerms()) {
                 if (cleanInput.equals(searchTerm)) {
@@ -415,7 +446,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         // Find by boar name (startsWith) second
         if (!found) {
             newPage = this.matchFront(cleanInput, filteredBoars);
-            found = newPage <= this.getMaxPage();
+            found = newPage <= this.maxPage;
         }
 
         // Find by shrinking boar name (startsWith) third
@@ -434,6 +465,10 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             }
         }
 
+        if (!found) {
+            newPage = this.page;
+        }
+
         return newPage;
     }
 
@@ -441,7 +476,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         int newPage = 0;
 
         for (String boarID : filteredBoars.keySet()) {
-            IndivItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
+            BoarItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
 
             if (boar.getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput)) {
                 break;

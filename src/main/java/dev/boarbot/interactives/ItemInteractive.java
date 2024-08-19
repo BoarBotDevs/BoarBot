@@ -18,7 +18,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
 
@@ -31,7 +30,6 @@ public class ItemInteractive extends Interactive {
     private int page = 0;
     private final List<ItemImageGenerator> itemGens;
     private List<SelectOption> selectableBoars;
-    private ActionRow[] curComponents = new ActionRow[0];
 
     private final List<String> boarIDs;
     private final List<Integer> boarEditions;
@@ -59,15 +57,13 @@ public class ItemInteractive extends Interactive {
         for (int i=0; i<boarIDs.size(); i++) {
             RarityConfig rarityConfig = rarityConfigs.get(this.itemGens.get(i).getColorKey());
 
-            String description = rarityConfig.name + " Boar";
+            String description = rarityConfig.getName() + " Boar";
 
             if (this.itemGens.get(i).getBucks() > 0) {
                 description += " (+$%,d)".formatted(this.itemGens.get(i).getBucks());
             }
 
-            boolean isSpecial = this.itemGens.get(i).getColorKey().equals("special");
-
-            if (isSpecial) {
+            if (rarityConfig.isShowEdition()) {
                 description += " (Edition #%,d)".formatted(boarEditions.get(i));
             }
 
@@ -84,6 +80,11 @@ public class ItemInteractive extends Interactive {
 
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
+        if (this.itemGens.size() == 1) {
+            this.stop(StopType.EXPIRED);
+            return;
+        }
+
         if (compEvent != null) {
             compEvent.deferEdit().queue();
 
@@ -128,13 +129,8 @@ public class ItemInteractive extends Interactive {
             return;
         }
 
-        if (this.curComponents.length == 0) {
+        if (this.getComponents().length == 0) {
             this.makeSelectOptions(this.boarIDs, this.boarEditions);
-        }
-
-        if (this.hook != null || this.msg != null) {
-            this.updateComponents(this.curComponents[0]);
-            return;
         }
 
         try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {
@@ -150,18 +146,16 @@ public class ItemInteractive extends Interactive {
 
     @Override
     public ActionRow[] getCurComponents() {
-        if (this.curComponents.length == 0) {
-            this.curComponents = this.getComponents();
-        }
+        ActionRow[] components = this.getComponents();
 
-        SelectMenu boarSelect = (SelectMenu) this.curComponents[0].getComponents().getFirst();
-        Button leftFullBtn = ((Button) this.curComponents[1].getComponents().get(0)).withDisabled(false);
-        Button leftBtn = ((Button) this.curComponents[1].getComponents().get(1)).withDisabled(false);
-        Button rightBtn = ((Button) this.curComponents[1].getComponents().get(2)).withDisabled(false);
-        Button rightFullBtn = ((Button) this.curComponents[1].getComponents().get(3)).withDisabled(false);
+        SelectMenu boarSelect = (SelectMenu) components[0].getComponents().getFirst();
+        Button leftFullBtn = ((Button) components[1].getComponents().get(0)).withDisabled(false);
+        Button leftBtn = ((Button) components[1].getComponents().get(1)).withDisabled(false);
+        Button rightBtn = ((Button) components[1].getComponents().get(2)).withDisabled(false);
+        Button rightFullBtn = ((Button) components[1].getComponents().get(3)).withDisabled(false);
 
         for (int i=0; i<this.selectableBoars.size(); i++) {
-            if (i == page) {
+            if (i == this.page) {
                 this.selectableBoars.set(i, this.selectableBoars.get(i).withDefault(true));
                 continue;
             }
@@ -178,7 +172,7 @@ public class ItemInteractive extends Interactive {
             this.selectableBoars
         );
 
-        this.curComponents[0].getComponents().set(0, boarSelect);
+        components[0].getComponents().set(0, boarSelect);
 
         if (this.page == 0) {
             leftFullBtn = leftFullBtn.asDisabled();
@@ -190,12 +184,12 @@ public class ItemInteractive extends Interactive {
             rightBtn = rightBtn.asDisabled();
         }
 
-        this.curComponents[1].getComponents().set(0, leftFullBtn);
-        this.curComponents[1].getComponents().set(1, leftBtn);
-        this.curComponents[1].getComponents().set(2, rightBtn);
-        this.curComponents[1].getComponents().set(3, rightFullBtn);
+        components[1].getComponents().set(0, leftFullBtn);
+        components[1].getComponents().set(1, leftBtn);
+        components[1].getComponents().set(2, rightBtn);
+        components[1].getComponents().set(3, rightFullBtn);
 
-        return this.curComponents;
+        return components;
     }
 
     private ActionRow[] getComponents() {
@@ -222,36 +216,15 @@ public class ItemInteractive extends Interactive {
         List<Integer> editions,
         User user,
         String title,
-        InteractionHook hook,
-        boolean isNewMsg
+        InteractionHook hook
     ) {
         List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
             boarIDs, bucksGotten, user, title
         );
 
-        if (itemGens.size() > 1) {
-            Interactive interactive = InteractiveFactory.constructItemInteractive(
-                hook.getInteraction(), itemGens, boarIDs, editions
-            );
-            interactive.execute(null);
-        } else {
-            try (FileUpload imageToSend = ItemImageGrouper.groupItems(itemGens, 0)) {
-                if (isNewMsg) {
-                    MessageCreateBuilder msg = new MessageCreateBuilder()
-                        .setFiles(imageToSend)
-                        .setComponents();
-
-                    hook.sendMessage(msg.build()).complete();
-                } else {
-                    MessageEditBuilder editedMsg = new MessageEditBuilder()
-                        .setFiles(imageToSend)
-                        .setComponents();
-
-                    hook.editOriginal(editedMsg.build()).complete();
-                }
-            } catch (Exception exception) {
-                log.error("Failed to send daily boar response!", exception);
-            }
-        }
+        Interactive interactive = InteractiveFactory.constructItemInteractive(
+            hook.getInteraction(), itemGens, boarIDs, editions
+        );
+        interactive.execute(null);
     }
 }

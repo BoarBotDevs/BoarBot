@@ -6,6 +6,7 @@
 src/main/resources/assets/images/items/boars/*
 !src/main/resources/assets/images/items/boars/ZombieBoar.png
 !src/main/resources/assets/images/items/boars/IceBoar.png
+!src/main/resources/assets/images/items/boars/BirthdayBoar.png
 !src/main/resources/assets/images/items/boars/NormalBoar.png
 !src/main/resources/assets/images/items/boars/CarrotBoar.png
 !src/main/resources/assets/images/items/boars/Boarb.gif
@@ -19,12 +20,14 @@ src/main/resources/assets/images/items/boars/*
 !src/main/resources/assets/images/items/boars/Boargalos.png
 !src/main/resources/assets/images/items/boars/Boarcterium.png
 !src/main/resources/assets/images/items/boars/Boarnderwear.png
+!src/main/resources/assets/images/items/boars/SpookyBoar.png
 !src/main/resources/assets/images/items/boars/SantaBoar.png
 src/main/resources/assets/images/items/badges/*
 !src/main/resources/assets/images/items/badges/Hunter.png
 !src/main/resources/assets/images/items/badges/Athlete.png
 src/main/java/dev/boarbot/util/boar/GuessInterpreter.ts
 src/main/resources/config/config.json
+src/main/resources/config/game/rarities.json
 src/main/resources/config/items/boars.json
 src/main/resources/config/items/badges.json
 /target

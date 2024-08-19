@@ -2,7 +2,7 @@ package dev.boarbot.util.generators.megamenu;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.RarityConfig;
-import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.ProfileData;
 import dev.boarbot.util.boar.BoarUtil;
@@ -54,7 +54,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         int maxUniques = 0;
         for (String boarID : this.itemConfig.getBoars().keySet()) {
             RarityConfig boarRarity = this.config.getRarityConfigs().get(BoarUtil.findRarityKey(boarID));
-            IndivItemConfig boar = this.itemConfig.getBoars().get(boarID);
+            BoarItemConfig boar = this.itemConfig.getBoars().get(boarID);
 
             boolean countableUnique = !boar.isBlacklisted() && boarRarity.isHunterNeed();
             boolean skyblockBlocked = boar.isSB() && !isSkyblockGuild && this.profileData.numSkyblock() == 0;

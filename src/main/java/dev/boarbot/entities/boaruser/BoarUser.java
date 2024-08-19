@@ -22,7 +22,6 @@ public class BoarUser {
     @Getter private final User user;
     @Getter private final String userID;
 
-    private boolean alreadyAdded = false;
     private boolean isFirstDaily = false;
 
     private volatile int numRefs = 0;
@@ -34,12 +33,12 @@ public class BoarUser {
     }
 
     private void addUser(Connection connection) throws SQLException {
-        if (this.alreadyAdded) {
+        if (this.userExists(connection)) {
             return;
         }
 
         String query = """
-            INSERT IGNORE INTO users (user_id, username) VALUES (?, ?)
+            INSERT INTO users (user_id, username) VALUES (?, ?)
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -47,8 +46,22 @@ public class BoarUser {
             statement.setString(2, this.user.getName());
             statement.execute();
         }
+    }
 
-        this.alreadyAdded = true;
+    public boolean userExists(Connection connection) throws SQLException {
+        String query = """
+            SELECT user_id
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                return results.next();
+            }
+        }
     }
 
     private synchronized void updateUser(Connection connection) throws SQLException {
@@ -153,7 +166,7 @@ public class BoarUser {
 
                         String rarityKey = BoarUtil.findRarityKey(boarID);
 
-                        if (curEdition == 1 && this.config.getRarityConfigs().get(rarityKey).isGivesSpecial()) {
+                        if (curEdition == 1 && this.config.getRarityConfigs().get(rarityKey).isGivesFirstBoar()) {
                             this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions);
                         }
                     }

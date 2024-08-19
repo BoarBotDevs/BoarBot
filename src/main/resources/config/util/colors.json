@@ -15,7 +15,8 @@
   "maintenance": "#FFFF00",
   "error": "#FF5555",
   "halloween": "#474747,#679311,#474747",
-  "christmas": "#ff0000,#ffffff,#155412",
+  "christmas": "#ffffff,#e13737,#ffffff,#e13737,#ffffff,#e13737,",
+  "event": "#ff0000,#fcff00,#000cff",
   "common": "#FFFFFF",
   "uncommon": "#00FF0F",
   "rare": "#0064FF",
@@ -24,6 +25,6 @@
   "mythic": "#F300FF",
   "divine": "#00FFFB",
   "immaculate": "#ff6666,#ffb566,#fffa66,#74ff66,#666bff,#b966ff",
-  "truth": "#d6d6d6,#fff581,#d6d6d6",
+  "truth": "#633fc0,#5cc3c4,#633fc0",
   "special": "#BC2326,#FF3136,#BC2326"
 }

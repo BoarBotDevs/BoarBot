@@ -125,7 +125,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         String title = this.config.getStringConfig().getDailyTitle();
 
         ItemInteractive.sendInteractive(
-            this.boarIDs, this.bucksGotten, this.boarEditions, this.user, title, this.interaction.getHook(), false
+            this.boarIDs, this.bucksGotten, this.boarEditions, this.user, title, this.interaction.getHook()
         );
 
         if (this.isFirstDaily) {

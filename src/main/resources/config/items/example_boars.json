@@ -17,6 +17,13 @@
       "ice"
     ]
   },
+  "birthday": {
+    "name": "Birthday Boar",
+    "file": "BirthdayBoar.png",
+    "description": "It is believed that this boar has been partying for eternity. Disturbingly, it has only ever done so by itself as its location is unknown.",
+    "classification": "Unreachable",
+    "update": "v1.1.32"
+  },
   "normal": {
     "name": "Normal Boar",
     "file": "NormalBoar.png",
@@ -148,6 +155,13 @@
       "under",
       "wear"
     ]
+  },
+  "spooky": {
+    "name": "Spooky Boar",
+    "file": "SpookyBoar.png",
+    "description": "The suspicious host of Boar-o-ween. He can't go a sentence without rhyming and always seems to have traces of pig hair on his coat.",
+    "classification": "Psychotic",
+    "update": "Alpha"
   },
   "santa": {
     "name": "Santa Boar",

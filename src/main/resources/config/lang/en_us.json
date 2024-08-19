@@ -56,6 +56,7 @@
   "profileOtherBlessLabel": "Other Bless",
   "profileFavLabel": "FAVORITE",
   "profileRecentLabel": "RECENT",
+  "compBlocked": "<>error<>Your current filter prevents you from viewing the Compendium.",
   "compFavoriteSuccess": "%s <>font<>is now your favorite boar!",
   "compUnfavoriteSuccess": "%s <>font<>has been removed as your favorite boar!",
   "compCloneConfirmOne": "Are you sure? This will use <>powerup<>%s<>font<>, granting you a <>silver<>%s <>font<>chance of cloning a %s<>font<>.",

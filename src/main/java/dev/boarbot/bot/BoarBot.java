@@ -7,7 +7,9 @@ import dev.boarbot.bot.config.*;
 import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.commands.SubcommandConfig;
 import dev.boarbot.bot.config.components.ComponentConfig;
-import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.items.BadgeItemConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
+import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.interactives.Interactive;
@@ -143,34 +145,34 @@ public class BoarBot implements Bot {
 
             File badgeConfig = new File(basePath + "items/badges.json");
             this.config.getItemConfig().setBadges(
-                g.fromJson(this.getJson(badgeConfig), new TypeToken<Map<String, IndivItemConfig>>(){}.getType())
+                g.fromJson(this.getJson(badgeConfig), new TypeToken<Map<String, BadgeItemConfig>>(){}.getType())
             );
 
             File boarConfig = new File(basePath + "items/boars.json");
             this.config.getItemConfig().setBoars(
-                g.fromJson(this.getJson(boarConfig), new TypeToken<Map<String, IndivItemConfig>>(){}.getType())
+                g.fromJson(this.getJson(boarConfig), new TypeToken<Map<String, BoarItemConfig>>(){}.getType())
             );
 
             File powerupConfig = new File(basePath + "items/powerups.json");
             this.config.getItemConfig().setPowerups(
-                g.fromJson(this.getJson(powerupConfig), new TypeToken<Map<String, IndivItemConfig>>(){}.getType())
+                g.fromJson(this.getJson(powerupConfig), new TypeToken<Map<String, PowerupItemConfig>>(){}.getType())
             );
 
-            for (IndivItemConfig boar : this.config.getItemConfig().getBoars().values()) {
+            for (BoarItemConfig boar : this.config.getItemConfig().getBoars().values()) {
                 if (boar.getPluralName() == null) {
-                    boar.setPluralName(boar.name + "s");
+                    boar.setPluralName(boar.getName() + "s");
                 }
             }
 
-            for (IndivItemConfig badge : this.config.getItemConfig().getBadges().values()) {
+            for (BadgeItemConfig badge : this.config.getItemConfig().getBadges().values()) {
                 if (badge.getPluralName() == null) {
-                    badge.setPluralName(badge.name + "s");
+                    badge.setPluralName(badge.getName() + "s");
                 }
             }
 
-            for (IndivItemConfig powerup : this.config.getItemConfig().getPowerups().values()) {
+            for (PowerupItemConfig powerup : this.config.getItemConfig().getPowerups().values()) {
                 if (powerup.getPluralName() == null) {
-                    powerup.setPluralName(powerup.name + "s");
+                    powerup.setPluralName(powerup.getName() + "s");
                 }
             }
 
@@ -267,6 +269,15 @@ public class BoarBot implements Bot {
             sqlStatement.append(";");
 
             statement.executeUpdate(sqlStatement.toString());
+
+            if (databaseType.equals("rarities")) {
+                String finishQuery = """
+                    INSERT INTO rarities_info (rarity_id, prior_rarity_id, base_bucks, hunter_need)
+                    VALUES ('all_done', null, 0, 0)
+                """;
+
+                statement.executeUpdate(finishQuery);
+            }
         } catch (SQLException exception) {
             log.error("Something went wrong when loading config data into database.", exception);
             System.exit(-1);
@@ -289,7 +300,7 @@ public class BoarBot implements Bot {
 
         for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
             try {
-                IndivItemConfig boarInfo = this.getConfig().getItemConfig().getBoars().get(boarID);
+                BoarItemConfig boarInfo = this.getConfig().getItemConfig().getBoars().get(boarID);
 
                 if (boarInfo.getFile().isEmpty()) {
                     throw new IllegalArgumentException("Failed to find file.");

@@ -17,7 +17,7 @@ public abstract class ModalInteractive extends Interactive {
         super(interaction);
     }
 
-    public void attemptExecute(
+    public synchronized void attemptExecute(
         GenericComponentInteractionCreateEvent compEvent, ModalInteractionEvent modalEvent, long startTime
     ) {
         if (startTime < this.lastEndTime) {

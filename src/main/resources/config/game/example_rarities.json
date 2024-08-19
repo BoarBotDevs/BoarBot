@@ -5,18 +5,10 @@
     "weight": 825,
     "baseScore": 20,
     "hunterNeed": true,
+    "givesFirstBoar": true,
     "avgClones": 100,
     "boars": [
-      "ghost",
-      "pumpkin",
-      "spider",
-      "vampire",
-      "zombie",
-      "witch",
-      "candy",
-      "tombstone",
-      "mummy",
-      "fortune"
+      "ghost"
     ]
   },
   "christmas": {
@@ -25,12 +17,9 @@
     "weight": 825,
     "baseScore": 20,
     "hunterNeed": true,
+    "givesFirstBoar": true,
     "avgClones": 100,
     "boars": [
-      "ornament",
-      "snowflake",
-      "peppermint",
-      "elf",
       "ice"
     ]
   },
@@ -56,21 +45,7 @@
     "chargesNeeded": 1,
     "avgClones": 1,
     "boars": [
-      "normal",
-      "explosionless",
-      "tiny",
-      "bor",
-      "lowquality",
-      "chef",
-      "recursive",
-      "dog",
-      "ascii",
-      "barber",
-      "robber",
-      "barbarian",
-      "trash",
-      "tree",
-      "windows"
+      "normal"
     ]
   },
   "uncommon": {
@@ -84,21 +59,7 @@
     "chargesNeeded": 2,
     "avgClones": 2,
     "boars": [
-      "carrot",
-      "buff",
-      "chocolate",
-      "emo",
-      "matrix",
-      "soda",
-      "lightbulb",
-      "minion",
-      "sketch",
-      "police",
-      "chalk",
-      "bacon",
-      "origami",
-      "baseball",
-      "banana"
+      "carrot"
     ]
   },
   "rare": {
@@ -112,20 +73,7 @@
     "chargesNeeded": 3,
     "avgClones": 5,
     "boars": [
-      "clown",
-      "sphere",
-      "killer",
-      "fish",
-      "kiwi",
-      "stormy",
-      "golden",
-      "keyboard",
-      "pirate",
-      "sanglier",
-      "motherboard",
-      "coin",
-      "mosaic",
-      "glitched"
+      "sphere"
     ]
   },
   "epic": {
@@ -139,19 +87,7 @@
     "chargesNeeded": 5,
     "avgClones": 10,
     "boars": [
-      "creepy",
-      "robot",
-      "coffee",
-      "moon",
-      "wizard",
-      "aurora",
-      "kuudra",
-      "mlg",
-      "hammer",
-      "tornado",
-      "broccoli",
-      "skateboard",
-      "capybara"
+      "creepy"
     ]
   },
   "legendary": {
@@ -166,18 +102,7 @@
     "chargesNeeded": 10,
     "avgClones": 20,
     "boars": [
-      "minimumwage",
-      "backrooms",
-      "jumpscare",
-      "sleepy",
-      "boartist",
-      "grimreaper",
-      "newborn",
-      "volcano",
-      "radioactive",
-      "billionaire",
-      "mushroom",
-      "firefighter"
+      "minimumwage"
     ]
   },
   "mythic": {
@@ -191,16 +116,7 @@
     "chargesNeeded": 18,
     "avgClones": 50,
     "boars": [
-      "cowboy",
-      "realistic",
-      "farmer",
-      "beachbum",
-      "hyperion",
-      "fairy",
-      "unicorn",
-      "ballerina",
-      "obama",
-      "cerberus"
+      "cowboy"
     ]
   },
   "divine": {
@@ -214,13 +130,7 @@
     "chargesNeeded": 30,
     "avgClones": 200,
     "boars": [
-      "rickroll",
-      "morbius",
-      "imposter",
-      "curious",
-      "dante",
-      "pixel",
-      "drip"
+      "rickroll"
     ]
   },
   "immaculate": {
@@ -233,11 +143,7 @@
     "showEdition": true,
     "avgClones": 500,
     "boars": [
-      "supernova",
-      "creator",
-      "gigachad",
-      "duck",
-      "super"
+      "supernova"
     ]
   },
   "truth": {
@@ -249,9 +155,7 @@
     "givesFirstBoar": true,
     "showEdition": true,
     "boars": [
-      "boargalos",
-      "boarfadius",
-      "boardrick"
+      "boargalos"
     ]
   },
   "special": {
@@ -262,11 +166,9 @@
     "hidden": true,
     "showEdition": true,
     "boars": [
-      "gamebreaker",
       "bacteria",
       "underwear",
       "spooky",
-      "trophy",
       "santa"
     ]
   }

@@ -86,7 +86,7 @@ public abstract class Interactive {
 
     public void updateInteractive(MessageEditData editedMsg) {
         if (this.hook == null && this.msg == null) {
-            this.msg = ((ComponentInteraction) this.interaction).getMessage().reply(
+            this.msg = ((ComponentInteraction) this.interaction).getHook().sendMessage(
                 MessageCreateData.fromEditData(editedMsg)
             ).complete();
         }
@@ -153,6 +153,8 @@ public abstract class Interactive {
 
         if (this.hook != null) {
             this.hook.editOriginalComponents().complete();
+        } else {
+            this.msg.editMessageComponents().complete();
         }
     }
 

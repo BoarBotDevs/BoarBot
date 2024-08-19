@@ -15,6 +15,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class SubOutcomeConfig {
-    public int weight = 0;
-    public String name = "";
+    private int weight = 0;
+    private String name = "";
 }

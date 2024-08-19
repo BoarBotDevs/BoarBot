@@ -6,11 +6,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class IndivPromptConfig {
-    public String name = "";
-    public String description = "";
-    public String emoji1;
-    public String emoji2;
-    public String[] choices;
-    public Integer numButtons;
-    public String rightClock;
+    private String name = "";
+    private String description = "";
+    private String emoji1;
+    private String emoji2;
+    private String[] choices;
+    private Integer numButtons;
+    private String rightClock;
 }

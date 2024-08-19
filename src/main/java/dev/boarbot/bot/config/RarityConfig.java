@@ -16,16 +16,17 @@ import lombok.ToString;
 @Setter
 @ToString
 public class RarityConfig {
-    public String name = "";
-    public String pluralName = "";
-    public String emoji = "";
-    public double weight = 0;
-    public int baseScore = 0;
-    public boolean fromDaily = false;
-    public int chargesNeeded = -1;
-    public int avgClones = -1;
-    public boolean hunterNeed = false;
-    public boolean givesSpecial = false;
-    public boolean hidden = false;
-    public String[] boars = {};
+    private String name = "";
+    private String pluralName = "";
+    private String emoji = "";
+    private double weight = 0;
+    private int baseScore = 0;
+    private boolean fromDaily = false;
+    private int chargesNeeded = -1;
+    private int avgClones = -1;
+    private boolean hunterNeed = false;
+    private boolean givesFirstBoar = false;
+    private boolean hidden = false;
+    private boolean showEdition = false;
+    private String[] boars = {};
 }

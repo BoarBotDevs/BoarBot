@@ -5,12 +5,13 @@ import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.components.SelectOptionConfig;
-import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
@@ -114,13 +115,15 @@ class MegaMenuComponentsGetter {
             selectRow = getFilterRow();
         } else if (this.interactive.isSortOpen()) {
             selectRow = getSortRow();
-        } else if (this.interactive.isInteractOpen()) {
+        } else if (this.interactive.isInteractOpen() && this.interactive.getCurBoarEntry().getValue().amount() > 0) {
             selectRow = getInteractRow();
         }
 
         Button leftBtn = ((Button) nav[1].getComponents().getFirst()).asDisabled();
         Button pageBtn = ((Button) nav[1].getComponents().get(1)).asDisabled();
         Button rightBtn = ((Button) nav[1].getComponents().get(2)).asDisabled();
+        Button filterBtn = ((Button) filterSortRow.getFirst());
+        Button sortBtn = ((Button) filterSortRow.get(1));
         Button interactBtn = null;
 
         if (interactRow != null) {
@@ -145,6 +148,14 @@ class MegaMenuComponentsGetter {
             interactBtn = interactBtn.withDisabled(false);
         }
 
+        if (this.interactive.getFilterBits() != 1) {
+            filterBtn = filterBtn.withStyle(ButtonStyle.SUCCESS);
+        }
+
+        if (this.interactive.getSortVal() != SortType.RARITY_D) {
+            sortBtn = sortBtn.withStyle(ButtonStyle.SUCCESS);
+        }
+
         nav[1].getComponents().set(0, leftBtn);
         nav[1].getComponents().set(1, pageBtn);
         nav[1].getComponents().set(2, rightBtn);
@@ -152,6 +163,9 @@ class MegaMenuComponentsGetter {
         if (interactRow != null) {
             interactRow.set(1, interactBtn);
         }
+
+        filterSortRow.set(0, filterBtn);
+        filterSortRow.set(1, sortBtn);
 
         actionRows.add(nav[0]);
         actionRows.add(nav[1]);
@@ -190,6 +204,8 @@ class MegaMenuComponentsGetter {
             this.filterOptions.set(i, filterOption.withDefault(false));
         }
 
+        List<SelectOption> selectOptions = new ArrayList<>(this.filterOptions);
+
         StringSelectMenu filterSelectMenu = (StringSelectMenu) selectRow.getFirst();
         selectRow.set(0, new StringSelectMenuImpl(
             filterSelectMenu.getId(),
@@ -197,7 +213,7 @@ class MegaMenuComponentsGetter {
             filterSelectMenu.getMinValues(),
             filterSelectMenu.getMaxValues(),
             filterSelectMenu.isDisabled(),
-            this.filterOptions
+            selectOptions
         ));
 
         return selectRow;
@@ -265,7 +281,7 @@ class MegaMenuComponentsGetter {
         boolean transmutable = curRarity.getChargesNeeded() != -1 &&
             curRarity.getChargesNeeded() <= this.interactive.getNumTransmute();
 
-        IndivItemConfig boar = this.config.getItemConfig().getBoars().get(this.interactive.getCurBoarEntry().getKey());
+        BoarItemConfig boar = this.config.getItemConfig().getBoars().get(this.interactive.getCurBoarEntry().getKey());
         boolean canAnimate = boar.getStaticFile() != null;
 
         if (cloneable) {

@@ -3,6 +3,7 @@ package dev.boarbot.interactives.boar.megamenu;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
@@ -95,15 +96,29 @@ class MegaMenuGeneratorMaker {
         this.updateCompendiumCollection(view);
         this.refreshFilterSort();
 
+        if (this.interactive.getFilteredBoars().isEmpty()) {
+            this.interactive.setCurView(MegaMenuView.COLLECTION);
+            this.interactive.setInteractOpen(false);
+            this.interactive.setSortOpen(false);
+            this.interactive.setFilterOpen(false);
+
+            this.interactive.setAcknowledgeOpen(true);
+            this.interactive.setAcknowledgeString(this.config.getStringConfig().getCompBlocked());
+
+            return this.makeCollectionGen();
+        }
+
         this.interactive.setMaxPage(this.interactive.getFilteredBoars().size()-1);
+
+        if (this.interactive.getBoarPage() != null) {
+            this.interactive.setPrevPage(this.interactive.getPage());
+            this.interactive.setPage(this.interactive.getFindBoarPage(this.interactive.getBoarPage()));
+            this.interactive.setBoarPage(null);
+        }
+
         if (this.interactive.getPage() > this.interactive.getMaxPage()) {
             this.interactive.setPrevPage(this.interactive.getPage());
             this.interactive.setPage(this.interactive.getMaxPage());
-        }
-
-        if (this.interactive.getBoarPage() != null) {
-            this.interactive.setPage(this.interactive.getFindBoarPage(this.interactive.getBoarPage()));
-            this.interactive.setBoarPage(null);
         }
 
         Iterator<Map.Entry<String, BoarInfo>> iterator = this.interactive.getFilteredBoars().entrySet().iterator();
@@ -142,8 +157,10 @@ class MegaMenuGeneratorMaker {
                 }
 
                 BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
+
                 this.interactive.setFilterBits(interBoarUser.getFilterBits(connection));
                 this.interactive.setSortVal(interBoarUser.getSortVal(connection));
+
                 interBoarUser.decRefs();
 
                 this.interactive.getViewsToUpdateData().put(view, true);
@@ -244,8 +261,11 @@ class MegaMenuGeneratorMaker {
                 continue;
             }
 
+            BoarItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
+            boolean boarShouldHide = rarity.isHidden() || boar.isSecret();
+
             // No filter
-            if (rarity.isHidden() && !this.interactive.getOwnedBoars().containsKey(boarID)) {
+            if (boar.isBlacklisted() || boarShouldHide && !this.interactive.getOwnedBoars().containsKey(boarID)) {
                 continue;
             }
 

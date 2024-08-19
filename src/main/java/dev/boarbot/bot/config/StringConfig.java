@@ -83,6 +83,7 @@ public class StringConfig {
     private String profileOtherBlessLabel = "";
     private String profileFavLabel = "";
     private String profileRecentLabel = "";
+    private String compBlocked = "";
     private String compFavoriteSuccess = "";
     private String compUnfavoriteSuccess = "";
     private String compCloneConfirmOne = "";

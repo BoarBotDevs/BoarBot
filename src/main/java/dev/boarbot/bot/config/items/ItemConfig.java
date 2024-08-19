@@ -18,7 +18,7 @@ import java.util.Map;
 @Setter
 @ToString
 public class ItemConfig {
-    public Map<String, IndivItemConfig> boars = new HashMap<>();
-    public Map<String, IndivItemConfig> badges = new HashMap<>();
-    public Map<String, IndivItemConfig> powerups = new HashMap<>();
+    private Map<String, BoarItemConfig> boars = new HashMap<>();
+    private Map<String, BadgeItemConfig> badges = new HashMap<>();
+    private Map<String, PowerupItemConfig> powerups = new HashMap<>();
 }

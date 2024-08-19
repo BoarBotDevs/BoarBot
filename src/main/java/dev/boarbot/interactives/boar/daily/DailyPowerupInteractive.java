@@ -2,7 +2,7 @@ package dev.boarbot.interactives.boar.daily;
 
 import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
-import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.commands.boar.DailySubcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
@@ -205,7 +205,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         modalEvent.deferEdit().complete();
 
         StringConfig strConfig = this.config.getStringConfig();
-        IndivItemConfig miracleConfig = this.config.getItemConfig().getPowerups().get("miracle");
+        PowerupItemConfig miracleConfig = this.config.getItemConfig().getPowerups().get("miracle");
 
         try {
             String amountInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
@@ -218,7 +218,13 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
 
             try (Connection connection = DataUtil.getConnection()) {
-                if (amount <= boarUser.getPowerupAmount(connection, "miracle")) {
+                int numMiraclesHas = boarUser.getPowerupAmount(connection, "miracle");
+
+                if (amount > numMiraclesHas) {
+                    amount = numMiraclesHas;
+                }
+
+                if (amount > 0) {
                     long blessings = boarUser.getBlessings(connection, amount);
                     this.miraclesToUse = amount;
 

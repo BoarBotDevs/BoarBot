@@ -207,6 +207,18 @@
           "value": "animate",
           "emoji": "<:wiggleboar:1274071700153041096>",
           "description": "Show the animated version of this boar"
+        },
+        {
+          "label": "Editions",
+          "value": "editions",
+          "emoji": "\u23F1",
+          "description": "View each edition and edition date of this boar"
+        },
+        {
+          "label": "Zoom In",
+          "value": "zoom",
+          "emoji": "\uD83D\uDD0E",
+          "description": "Get a closer view of this boar"
         }
       ]
     },

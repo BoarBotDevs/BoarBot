@@ -15,7 +15,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class OutcomeConfig {
-    public int weight = 0;
-    public String category = "";
-    public SubOutcomeConfig[] subOutcomes = {};
+    private int weight = 0;
+    private String category = "";
+    private SubOutcomeConfig[] subOutcomes = {};
 }

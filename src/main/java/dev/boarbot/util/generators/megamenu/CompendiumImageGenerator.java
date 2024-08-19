@@ -1,7 +1,7 @@
 package dev.boarbot.util.generators.megamenu;
 
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.util.boar.BoarUtil;
@@ -58,7 +58,7 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         int smallestFont = this.nums.getFontSmallest();
         int mediumFont = this.nums.getFontMedium();
 
-        IndivItemConfig boar = this.itemConfig.getBoars().get(this.boarID);
+        BoarItemConfig boar = this.itemConfig.getBoars().get(this.boarID);
 
         int[] amountPos = {LEFT_START_POS[0], LEFT_START_POS[1] + VALUE_Y_OFFSET};
 

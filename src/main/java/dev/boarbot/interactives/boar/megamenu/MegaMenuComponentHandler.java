@@ -167,20 +167,18 @@ class MegaMenuComponentHandler {
                 StringConfig strConfig = this.config.getStringConfig();
 
                 try (Connection connection = DataUtil.getConnection()) {
+                    this.interactive.setNumClone(this.interactive.getBoarUser().getPowerupAmount(connection, "clone"));
+
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-                    int input = Math.max(Integer.parseInt(inputStr), 1);
+                    int input = Math.min(Math.max(Integer.parseInt(inputStr), 1), this.interactive.getNumClone());
 
                     int avgClones = this.config.getRarityConfigs().get(
                         this.interactive.getCurRarityKey()
                     ).getAvgClones();
 
-                    boolean tooMany = input / avgClones > 25;
-                    boolean cloneable = avgClones != -1 && input <= this.interactive.getNumClone();
+                    boolean cloneable = avgClones != -1 && input > 0;
 
-                    if (tooMany) {
-                        this.interactive.setAcknowledgeOpen(true);
-                        this.interactive.setAcknowledgeString(strConfig.getCompCloneTooMany());
-                    } else if (cloneable) {
+                    if (cloneable) {
                         boolean hasBoar = this.interactive.getBoarUser().hasBoar(
                             this.interactive.getCurBoarEntry().getKey(), connection
                         );
@@ -321,11 +319,17 @@ class MegaMenuComponentHandler {
         ItemConfig itemConfig = this.config.getItemConfig();
         StringConfig strConfig = this.config.getStringConfig();
 
-        this.interactive.setNumTryClone(input);
-        this.interactive.setConfirmOpen(true);
-
         RarityConfig rarity = this.config.getRarityConfigs().get(this.interactive.getCurRarityKey());
         int avgClones = rarity.getAvgClones();
+
+        boolean tooMany = input / avgClones > 25 || input / avgClones == 25 && input % avgClones > 0;
+
+        if (tooMany) {
+            input = avgClones * 25;
+        }
+
+        this.interactive.setNumTryClone(input);
+        this.interactive.setConfirmOpen(true);
 
         double percentVal = ((double) (input % avgClones) / avgClones) * 100;
         NumberFormat percentFormat = new DecimalFormat("#.##");

@@ -3,7 +3,7 @@ package dev.boarbot.util.boar;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
-import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.sql.SQLException;
@@ -153,7 +153,7 @@ public final class BoarUtil {
         List<String> validBoars = new ArrayList<>();
 
         for (String boarID : rarityConfig.getBoars()) {
-            IndivItemConfig boarConfig = config.getItemConfig().getBoars().get(boarID);
+            BoarItemConfig boarConfig = config.getItemConfig().getBoars().get(boarID);
             boolean blacklisted = boarConfig.isBlacklisted();
             boolean isSecret = boarConfig.isSecret();
             boolean isSkyblockBoar = boarConfig.isSB();

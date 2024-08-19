@@ -3,7 +3,8 @@ package dev.boarbot.util.generators;
 import com.google.gson.Gson;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.*;
-import dev.boarbot.bot.config.items.IndivItemConfig;
+import dev.boarbot.bot.config.items.BadgeItemConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
@@ -64,14 +65,14 @@ public class ItemImageGenerator extends ImageGenerator {
         this.itemID = itemID;
 
         if (isBadge) {
-            IndivItemConfig badgeInfo = this.config.getItemConfig().getBadges().get(itemID);
-            this.itemName = badgeInfo.name;
-            this.filePath = this.config.getPathConfig().getBadges() + badgeInfo.file;
+            BadgeItemConfig badgeInfo = this.config.getItemConfig().getBadges().get(itemID);
+            this.itemName = badgeInfo.getName();
+            this.filePath = this.config.getPathConfig().getBadges() + badgeInfo.getFile();
             this.staticFilePath = null;
             this.colorKey = "badge";
         } else {
-            IndivItemConfig boarInfo = this.config.getItemConfig().getBoars().get(itemID);
-            this.itemName = boarInfo.name;
+            BoarItemConfig boarInfo = this.config.getItemConfig().getBoars().get(itemID);
+            this.itemName = boarInfo.getName();
             this.filePath = this.config.getPathConfig().getBoars() + boarInfo.getFile();
             this.staticFilePath = boarInfo.getStaticFile() != null
                 ? this.config.getPathConfig().getBoars() + boarInfo.getStaticFile()
