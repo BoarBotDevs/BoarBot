@@ -99,6 +99,7 @@ public class ItemImageGenerator extends ImageGenerator {
         this.bucks = bucks;
     }
 
+    @Override
     public ItemImageGenerator generate() throws IOException, URISyntaxException {
         return this.generate(false);
     }

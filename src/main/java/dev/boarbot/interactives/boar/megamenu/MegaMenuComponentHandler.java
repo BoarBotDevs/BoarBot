@@ -137,7 +137,15 @@ class MegaMenuComponentHandler {
                     this.interactive.setInteractType(null);
                 }
 
-                case "OKAY" -> this.interactive.setAcknowledgeOpen(false);
+                case "BACK" -> {
+                    this.interactive.setAcknowledgeOpen(false);
+
+                    if (this.interactive.getCurView() == MegaMenuView.EDITIONS) {
+                        this.interactive.setPrevView(this.interactive.getCurView());
+                        this.interactive.setCurView(MegaMenuView.COMPENDIUM);
+                        this.interactive.setBoarPage(this.interactive.getCurBoarEntry().getKey());
+                    }
+                }
             }
         }
     }
@@ -274,6 +282,19 @@ class MegaMenuComponentHandler {
             case ANIMATE -> {
                 this.compEvent.deferEdit().queue();
                 this.interactive.setAnimated(true);
+            }
+
+            case EDITIONS -> {
+                this.compEvent.deferEdit().queue();
+
+                this.setPageZero();
+
+                this.interactive.setPrevView(this.interactive.getCurView());
+                this.interactive.setCurView(MegaMenuView.EDITIONS);
+
+                this.interactive.setFilterOpen(false);
+                this.interactive.setSortOpen(false);
+                this.interactive.setInteractOpen(false);
             }
         }
     }

@@ -333,9 +333,9 @@
       "label": "Cancel",
       "style": 4
     },
-    "okayBtn": {
-      "custom_id": "OKAY",
-      "label": "OK",
+    "backBtn": {
+      "custom_id": "BACK",
+      "label": "Go Back",
       "style": 2
     }
   }

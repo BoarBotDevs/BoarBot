@@ -1,14 +1,19 @@
 package dev.boarbot.entities.boaruser;
 
 import dev.boarbot.BoarBotApp;
+import lombok.Getter;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public record BoarInfo(
-    int amount, String rarityID, long firstObtained, long lastObtained
-) implements Comparable<BoarInfo> {
+@Getter
+public class BoarInfo implements Comparable<BoarInfo> {
+    private int amount;
+    private final String rarityID;
+    private long firstObtained = -1;
+    private long lastObtained = -1;
+    private final List<Long> editions = new ArrayList<>();
+    private final List<Long> editionTimestamps = new ArrayList<>();
+
     private final static Map<String, Integer> rarityMap = new HashMap<>();
 
     static {
@@ -16,6 +21,24 @@ public record BoarInfo(
         for (String rarityID : BoarBotApp.getBot().getConfig().getRarityConfigs().keySet()) {
             BoarInfo.rarityMap.put(rarityID, i);
             i--;
+        }
+    }
+
+    public BoarInfo(String rarityID) {
+        this.rarityID = rarityID;
+    }
+
+    public void addEdition(long edition, long editionTimestamp) {
+        this.editions.add(edition);
+        this.editionTimestamps.add(editionTimestamp);
+        this.amount++;
+
+        if (this.firstObtained == -1 || editionTimestamp < this.firstObtained) {
+            this.firstObtained = editionTimestamp;
+        }
+
+        if (this.lastObtained == -1 || editionTimestamp > this.lastObtained) {
+            this.lastObtained = editionTimestamp;
         }
     }
 

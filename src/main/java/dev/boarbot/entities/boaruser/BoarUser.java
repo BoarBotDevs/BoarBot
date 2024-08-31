@@ -347,13 +347,12 @@ public class BoarUser {
 
     public Map<String, BoarInfo> getOwnedBoarInfo(Connection connection) throws SQLException {
         Map<String, BoarInfo> boarInfo = new HashMap<>();
-        String query = """
+
+        String firstQuery = """
             SELECT
                 collected_boars.boar_id,
                 COUNT(*) AS amount,
-                rarity_id,
-                MIN(obtained_timestamp) AS first_obtained,
-                MAX(obtained_timestamp) AS last_obtained
+                rarity_id
             FROM collected_boars, boars_info
             WHERE
                 user_id = ? AND
@@ -363,17 +362,38 @@ public class BoarUser {
             GROUP BY boar_id;
         """;
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        String secondQuery = """
+            SELECT
+                boar_id,
+                edition,
+                obtained_timestamp
+            FROM collected_boars
+            WHERE
+                user_id = ? AND
+                `exists` = true AND
+                deleted = false;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(firstQuery)) {
             statement.setString(1, this.userID);
 
             try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
                     boarInfo.put(results.getString("boar_id"), new BoarInfo(
-                        results.getInt("amount"),
-                        results.getString("rarity_id"),
-                        results.getTimestamp("first_obtained").getTime(),
-                        results.getTimestamp("last_obtained").getTime()
+                        results.getString("rarity_id")
                     ));
+                }
+            }
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(secondQuery)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    boarInfo.get(results.getString("boar_id")).addEdition(
+                        results.getLong("edition"), results.getTimestamp("obtained_timestamp").getTime()
+                    );
                 }
             }
         }

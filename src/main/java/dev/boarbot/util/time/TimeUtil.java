@@ -19,6 +19,11 @@ public final class TimeUtil {
         .appendPattern("MMMM d, yyyy")
         .toFormatter();
 
+    @Getter
+    private final static DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
+        .appendPattern("MMMM d, yyyy h:mm:ss a")
+        .toFormatter();
+
     public static long getLastDailyResetMilli() {
         return LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
     }

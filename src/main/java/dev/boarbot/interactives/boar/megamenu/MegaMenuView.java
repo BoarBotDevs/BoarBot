@@ -7,7 +7,8 @@ public enum MegaMenuView {
     STATS("stats"),
     POWERUPS("powerups"),
     QUESTS("quests"),
-    BADGES("badges");
+    BADGES("badges"),
+    EDITIONS("editions");
 
     private final String type;
 

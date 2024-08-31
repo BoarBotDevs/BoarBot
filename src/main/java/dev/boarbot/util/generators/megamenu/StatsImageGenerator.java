@@ -41,6 +41,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         this.boarInfos = boarInfos;
     }
 
+    @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
         int border = nums.getBorder();
         int[] boarImageSize = this.nums.getMediumBoarSize();
@@ -65,7 +66,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
             };
 
             int[] amountPos = new int[] {boarPos[0] + AMOUNT_X_OFFSET, boarPos[1] + AMOUNT_Y_OFFSET};
-            String amount = "%,d".formatted(Math.min(this.boarInfos.get(boarID).amount(), MAX_BOARS));
+            String amount = "%,d".formatted(Math.min(this.boarInfos.get(boarID).getAmount(), MAX_BOARS));
             TextDrawer textDrawer = new TextDrawer(
                     g2d, amount, amountPos, Align.LEFT, this.colorConfig.get("font"), this.nums.getFontMedium()
             );
@@ -79,7 +80,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
             g2d.drawImage(boarImage, boarPos[0], boarPos[1], null);
 
             BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get(
-                    "border" + this.boarInfos.get(boarID).rarityID()
+                    "border" + this.boarInfos.get(boarID).getRarityID()
             );
             g2d.drawImage(rarityBorderImage, boarPos[0], boarPos[1], null);
 

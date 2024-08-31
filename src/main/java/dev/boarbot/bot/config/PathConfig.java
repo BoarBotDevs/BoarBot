@@ -38,6 +38,7 @@ public class PathConfig {
 
     // Image/asset file names for mega menu images
 
+    private String megaMenuBase = "";
     private String collUnderlay = "";
     private String profUnderlay = "";
     private String compUnderlay = "";

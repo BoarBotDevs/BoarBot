@@ -67,6 +67,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         this.maxUniques = maxUniques;
     }
 
+    @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();

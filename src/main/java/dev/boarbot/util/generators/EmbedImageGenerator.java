@@ -36,6 +36,7 @@ public class EmbedImageGenerator extends ImageGenerator {
         this.pureStr = str.replaceAll("<>(.*?)<>", "");
     }
 
+    @Override
     public EmbedImageGenerator generate() throws IOException {
         NumberConfig nums = this.config.getNumberConfig();
 

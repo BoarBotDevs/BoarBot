@@ -5,7 +5,6 @@ import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.components.SelectOptionConfig;
-import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -36,29 +35,14 @@ class MegaMenuComponentsGetter {
 
     public ActionRow[] getComponents() {
         return switch (this.interactive.getCurView()) {
-            case MegaMenuView.PROFILE -> getProfileComponents();
+            case MegaMenuView.PROFILE -> this.getNav();
             case MegaMenuView.COLLECTION -> getCompendiumCollectionComponents();
             case MegaMenuView.COMPENDIUM -> getCompendiumCollectionComponents(true);
+            case MegaMenuView.EDITIONS -> getEditionsComponents();
             case MegaMenuView.STATS -> getCompendiumCollectionComponents();
             case MegaMenuView.POWERUPS -> getCompendiumCollectionComponents();
             case MegaMenuView.QUESTS -> getCompendiumCollectionComponents();
             case MegaMenuView.BADGES -> getCompendiumCollectionComponents();
-        };
-    }
-
-    private ActionRow[] getProfileComponents() {
-        ActionRow[] nav = getNav();
-
-        Button leftBtn = ((Button) nav[1].getComponents().getFirst()).asDisabled();
-        Button pageBtn = ((Button) nav[1].getComponents().get(1)).asDisabled();
-        Button rightBtn = ((Button) nav[1].getComponents().get(2)).asDisabled();
-
-        nav[1].getComponents().set(0, leftBtn);
-        nav[1].getComponents().set(1, pageBtn);
-        nav[1].getComponents().set(2, rightBtn);
-
-        return new ActionRow[] {
-            nav[0], nav[1]
         };
     }
 
@@ -70,12 +54,12 @@ class MegaMenuComponentsGetter {
         List<ActionRow> actionRows = new ArrayList<>();
 
         if (this.interactive.isAcknowledgeOpen()) {
-            List<ItemComponent> okayRow = InteractiveUtil.makeComponents(
+            List<ItemComponent> backRow = InteractiveUtil.makeComponents(
                 this.interactive.getInteractionID(),
-                this.COMPONENTS.get("okayBtn")
+                this.COMPONENTS.get("backBtn")
             );
 
-            actionRows.add(ActionRow.of(okayRow));
+            actionRows.add(ActionRow.of(backRow));
             return actionRows.toArray(new ActionRow[0]);
         }
 
@@ -118,36 +102,17 @@ class MegaMenuComponentsGetter {
             selectRow = getInteractRow();
         }
 
-        Button leftBtn = ((Button) nav[1].getComponents().getFirst()).asDisabled();
-        Button pageBtn = ((Button) nav[1].getComponents().get(1)).asDisabled();
-        Button rightBtn = ((Button) nav[1].getComponents().get(2)).asDisabled();
         Button interactBtn = null;
 
         if (interactRow != null) {
             interactBtn = ((Button) interactRow.get(1)).asDisabled();
         }
 
-        if (this.interactive.getPage() > 0) {
-            leftBtn = leftBtn.withDisabled(false);
-        }
-
-        if (this.interactive.getMaxPage() > 0) {
-            pageBtn = pageBtn.withDisabled(false);
-        }
-
-        if (this.interactive.getPage() < this.interactive.getMaxPage()) {
-            rightBtn = rightBtn.withDisabled(false);
-        }
-
         boolean userSelf = this.interactive.getUser().getId().equals(this.interactive.getBoarUser().getUserID());
 
-        if (interactBtn != null && this.interactive.getCurBoarEntry().getValue().amount() > 0 && userSelf) {
+        if (interactBtn != null && this.interactive.getCurBoarEntry().getValue().getAmount() > 0 && userSelf) {
             interactBtn = interactBtn.withDisabled(false);
         }
-
-        nav[1].getComponents().set(0, leftBtn);
-        nav[1].getComponents().set(1, pageBtn);
-        nav[1].getComponents().set(2, rightBtn);
 
         if (interactRow != null) {
             interactRow.set(1, interactBtn);
@@ -167,6 +132,42 @@ class MegaMenuComponentsGetter {
         }
 
         return actionRows.toArray(new ActionRow[0]);
+    }
+
+    private ActionRow[] getEditionsComponents() {
+        ActionRow[] nav = getNav();
+
+        List<ItemComponent> backRow = InteractiveUtil.makeComponents(
+            this.interactive.getInteractionID(),
+            this.COMPONENTS.get("backBtn")
+        );
+
+        String rarityEmoji = this.config.getRarityConfigs().get(this.interactive.getCurRarityKey()).getEmoji();
+        String boarName = this.config.getItemConfig().getBoars().get(
+            this.interactive.getCurBoarEntry().getKey()
+        ).getName();
+
+        List<SelectOption> selectOptions = new ArrayList<>(this.navOptions);
+        selectOptions.add(
+            SelectOption.of(boarName + " Editions", MegaMenuView.EDITIONS.toString())
+                .withEmoji(InteractiveUtil.parseEmoji(rarityEmoji))
+                .withDescription("Viewing owned editions for %s".formatted(boarName))
+                .withDefault(true)
+        );
+
+        StringSelectMenu navSelectMenu = (StringSelectMenu) nav[0].getComponents().getFirst();
+        nav[0].getComponents().set(0, new StringSelectMenuImpl(
+            navSelectMenu.getId(),
+            navSelectMenu.getPlaceholder(),
+            navSelectMenu.getMinValues(),
+            navSelectMenu.getMaxValues(),
+            navSelectMenu.isDisabled(),
+            selectOptions
+        ));
+
+        return new ActionRow[] {
+            nav[0], nav[1], ActionRow.of(backRow)
+        };
     }
 
     private List<ItemComponent> getFilterRow() {
@@ -311,6 +312,26 @@ class MegaMenuComponentsGetter {
             this.navOptions.set(i, navOption.withDefault(false));
         }
 
+        Button leftBtn = ((Button) navBtns.getFirst()).asDisabled();
+        Button pageBtn = ((Button) navBtns.get(1)).asDisabled();
+        Button rightBtn = ((Button) navBtns.get(2)).asDisabled();
+
+        if (this.interactive.getPage() > 0) {
+            leftBtn = leftBtn.withDisabled(false);
+        }
+
+        if (this.interactive.getMaxPage() > 0) {
+            pageBtn = pageBtn.withDisabled(false);
+        }
+
+        if (this.interactive.getPage() < this.interactive.getMaxPage()) {
+            rightBtn = rightBtn.withDisabled(false);
+        }
+
+        navBtns.set(0, leftBtn);
+        navBtns.set(1, pageBtn);
+        navBtns.set(2, rightBtn);
+
         StringSelectMenu viewSelectMenu = (StringSelectMenu) viewSelect.getFirst();
         viewSelect.set(0, new StringSelectMenuImpl(
             viewSelectMenu.getId(),
@@ -343,7 +364,7 @@ class MegaMenuComponentsGetter {
                 Set<String> ownedRarities = new HashSet<>();
 
                 for (BoarInfo boarInfo : this.interactive.getOwnedBoars().values()) {
-                    ownedRarities.add(boarInfo.rarityID());
+                    ownedRarities.add(boarInfo.getRarityID());
                 }
 
                 int rarityBits = 4;

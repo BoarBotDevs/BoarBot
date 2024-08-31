@@ -60,6 +60,7 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         classViewMap.put(ProfileImageGenerator.class, MegaMenuView.PROFILE.toString());
         classViewMap.put(CollectionImageGenerator.class, MegaMenuView.COLLECTION.toString());
         classViewMap.put(CompendiumImageGenerator.class, MegaMenuView.COMPENDIUM.toString());
+        classViewMap.put(EditionsImageGenerator.class, MegaMenuView.EDITIONS.toString());
         classViewMap.put(StatsImageGenerator.class, MegaMenuView.STATS.toString());
         classViewMap.put(PowerupsImageGenerator.class, MegaMenuView.POWERUPS.toString());
         classViewMap.put(QuestsImageGenerator.class, MegaMenuView.QUESTS.toString());

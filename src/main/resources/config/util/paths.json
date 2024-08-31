@@ -11,6 +11,7 @@
   "itemBackplate": "ItemBackplate.png",
   "itemShadowLeft": "ShadowLeft.png",
   "itemShadowRight": "ShadowRight.png",
+  "megaMenuBase": "BoarMegaMenuBase.png",
   "collUnderlay": "BoarCollectionUnderlay.png",
   "profUnderlay": "BoarProfileUnderlay.png",
   "compUnderlay": "BoarCompendiumUnderlay.png",

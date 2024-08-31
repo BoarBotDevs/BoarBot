@@ -41,6 +41,7 @@ public class CollectionImageGenerator extends MegaMenuGenerator {
         this.filteredBoars = filteredBoars;
     }
 
+    @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
         int border = nums.getBorder();
         int[] boarImageSize = this.nums.getMediumBoarSize();
@@ -65,7 +66,7 @@ public class CollectionImageGenerator extends MegaMenuGenerator {
             };
 
             int[] amountPos = new int[] {boarPos[0] + AMOUNT_X_OFFSET, boarPos[1] + AMOUNT_Y_OFFSET};
-            String amount = "%,d".formatted(Math.min(this.filteredBoars.get(boarID).amount(), MAX_BOARS));
+            String amount = "%,d".formatted(Math.min(this.filteredBoars.get(boarID).getAmount(), MAX_BOARS));
             TextDrawer textDrawer = new TextDrawer(
                 g2d, amount, amountPos, Align.LEFT, this.colorConfig.get("font"), this.nums.getFontMedium()
             );
@@ -75,17 +76,17 @@ public class CollectionImageGenerator extends MegaMenuGenerator {
                 AMOUNT_BOX_HEIGHT + border
             };
 
-            if (this.filteredBoars.get(boarID).amount() > 0) {
+            if (this.filteredBoars.get(boarID).getAmount() > 0) {
                 BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get("medium" + boarID);
                 g2d.drawImage(boarImage, boarPos[0], boarPos[1], null);
             }
 
             BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get(
-                "border" + this.filteredBoars.get(boarID).rarityID()
+                "border" + this.filteredBoars.get(boarID).getRarityID()
             );
             g2d.drawImage(rarityBorderImage, boarPos[0], boarPos[1], null);
 
-            if (this.filteredBoars.get(boarID).amount() > 0) {
+            if (this.filteredBoars.get(boarID).getAmount() > 0) {
                 g2d.setPaint(Color.decode(this.colorConfig.get("dark")));
                 g2d.fill(new RoundRectangle2D.Double(
                     boarPos[0]-border,

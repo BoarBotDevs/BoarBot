@@ -15,6 +15,7 @@ public class OverlayImageGenerator extends ImageGenerator {
         this.text = text;
     }
 
+    @Override
     public OverlayImageGenerator generate() {
         Graphics2D g2d = this.generatedImage.createGraphics();
 

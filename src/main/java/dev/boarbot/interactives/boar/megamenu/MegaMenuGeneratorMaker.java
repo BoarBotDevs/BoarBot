@@ -9,10 +9,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.generators.megamenu.CollectionImageGenerator;
-import dev.boarbot.util.generators.megamenu.CompendiumImageGenerator;
-import dev.boarbot.util.generators.megamenu.MegaMenuGenerator;
-import dev.boarbot.util.generators.megamenu.ProfileImageGenerator;
+import dev.boarbot.util.generators.megamenu.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,6 +29,7 @@ class MegaMenuGeneratorMaker {
             case MegaMenuView.PROFILE -> this.makeProfileGen();
             case MegaMenuView.COLLECTION -> this.makeCollectionGen();
             case MegaMenuView.COMPENDIUM -> this.makeCompendiumGen();
+            case MegaMenuView.EDITIONS -> this.makeEditionsGen();
             case MegaMenuView.STATS -> this.makeCollectionGen();
             case MegaMenuView.POWERUPS -> this.makeCollectionGen();
             case MegaMenuView.QUESTS -> this.makeCollectionGen();
@@ -140,6 +138,25 @@ class MegaMenuGeneratorMaker {
         );
     }
 
+    private MegaMenuGenerator makeEditionsGen() {
+        this.interactive.setMaxPage(
+            Math.max((this.interactive.getCurBoarEntry().getValue().getEditions().size()-1) / 5, 0)
+        );
+
+        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
+            this.interactive.setPrevPage(this.interactive.getPage());
+            this.interactive.setPage(this.interactive.getMaxPage());
+        }
+
+        return new EditionsImageGenerator(
+            this.interactive.getPage(),
+            this.interactive.getBoarUser(),
+            this.interactive.getBadgeIDs(),
+            this.interactive.getFirstJoinedDate(),
+            this.interactive.getCurBoarEntry()
+        );
+    }
+
     private void updateCompendiumCollection(MegaMenuView view) throws SQLException {
         boolean notUpdated = this.interactive.getViewsToUpdateData().get(view) == null ||
             !this.interactive.getViewsToUpdateData().get(view);
@@ -236,7 +253,7 @@ class MegaMenuGeneratorMaker {
     }
 
     private void applyFilter(RarityConfig rarity, String rarityKey, int[] rarityBitShift) {
-        BoarInfo emptyBoarInfo = new BoarInfo(0, rarityKey, -1, -1);
+        BoarInfo emptyBoarInfo = new BoarInfo(rarityKey);
 
         boolean ownedFilter = this.interactive.getFilterBits() % 2 == 1;
         boolean duplicateFilter = (this.interactive.getFilterBits() >> 1) % 2 == 1;
@@ -256,7 +273,7 @@ class MegaMenuGeneratorMaker {
 
             // Duplicate filter
             boolean hasDuplicate = this.interactive.getOwnedBoars().containsKey(boarID) &&
-                this.interactive.getOwnedBoars().get(boarID).amount() > 1;
+                this.interactive.getOwnedBoars().get(boarID).getAmount() > 1;
             if (duplicateFilter && !hasDuplicate) {
                 continue;
             }
