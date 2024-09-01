@@ -4,7 +4,6 @@ public enum InteractType {
     FAVORITE("favorite"),
     CLONE("clone"),
     TRANSMUTE("transmute"),
-    ANIMATE("animate"),
     EDITIONS("editions"),
     ZOOM("zoom");
 

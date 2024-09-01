@@ -4,6 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.StringConfig;
+import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
@@ -13,6 +14,7 @@ import dev.boarbot.modals.megamenu.FindBoarModalHandler;
 import dev.boarbot.modals.PageInputModalHandler;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.modal.ModalUtil;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -139,6 +141,7 @@ class MegaMenuComponentHandler {
 
                 case "BACK" -> {
                     this.interactive.setAcknowledgeOpen(false);
+                    this.interactive.setAcknowledgeImageGen(null);
 
                     if (this.interactive.getCurView() == MegaMenuView.EDITIONS) {
                         this.interactive.setPrevView(this.interactive.getCurView());
@@ -199,19 +202,31 @@ class MegaMenuComponentHandler {
                             ).getName();
 
                             this.interactive.setAcknowledgeOpen(true);
-                            this.interactive.setAcknowledgeString(strConfig.getCompNoBoar().formatted(
-                                "<>" + this.interactive.getCurRarityKey() + "<>" + boarName
-                            ));
+                            this.interactive.setAcknowledgeImageGen(
+                                new OverlayImageGenerator(
+                                    null,
+                                    strConfig.getCompNoBoar().formatted(
+                                        "<>" + this.interactive.getCurRarityKey() + "<>" + boarName
+                                    )
+                                )
+                            );
                         }
                     } else {
                         this.interactive.setAcknowledgeOpen(true);
-                        this.interactive.setAcknowledgeString(strConfig.getCompNoPow().formatted(
-                            this.config.getItemConfig().getPowerups().get("clone").getPluralName()
-                        ));
+                        this.interactive.setAcknowledgeImageGen(
+                            new OverlayImageGenerator(
+                                null,
+                                strConfig.getCompNoPow().formatted(
+                                    this.config.getItemConfig().getPowerups().get("clone").getPluralName()
+                                )
+                            )
+                        );
                     }
                 } catch (NumberFormatException exception1) {
                     this.interactive.setAcknowledgeOpen(true);
-                    this.interactive.setAcknowledgeString(strConfig.getInvalidInput());
+                    this.interactive.setAcknowledgeImageGen(
+                        new OverlayImageGenerator(null, strConfig.getInvalidInput())
+                    );
                 } catch (SQLException exception2) {
                     log.error("Failed to get user data", exception2);
                 } finally {
@@ -279,11 +294,6 @@ class MegaMenuComponentHandler {
                 ));
             }
 
-            case ANIMATE -> {
-                this.compEvent.deferEdit().queue();
-                this.interactive.setAnimated(true);
-            }
-
             case EDITIONS -> {
                 this.compEvent.deferEdit().queue();
 
@@ -295,6 +305,28 @@ class MegaMenuComponentHandler {
                 this.interactive.setFilterOpen(false);
                 this.interactive.setSortOpen(false);
                 this.interactive.setInteractOpen(false);
+            }
+
+            case ZOOM -> {
+                this.compEvent.deferEdit().queue();
+                this.interactive.setAcknowledgeOpen(true);
+
+                String curBoarID = this.interactive.getCurBoarEntry().getKey();
+                BoarItemConfig curBoar = this.config.getItemConfig().getBoars().get(curBoarID);
+
+                if (curBoar.getStaticFile() != null) {
+                    String filePath = this.config.getPathConfig().getBoars() + curBoar.getFile();
+
+                    this.interactive.setAcknowledgeImageGen(
+                        new OverlayImageGenerator(
+                            null, filePath, this.config.getNumberConfig().getLargeBoarSize()
+                        )
+                    );
+                } else {
+                    this.interactive.setAcknowledgeImageGen(
+                        new OverlayImageGenerator(null, BoarBotApp.getBot().getImageCacheMap().get("large" + curBoarID))
+                    );
+                }
             }
         }
     }

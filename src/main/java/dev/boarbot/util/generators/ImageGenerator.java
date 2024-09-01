@@ -16,6 +16,7 @@ public abstract class ImageGenerator {
 
     protected byte[] generatedImageBytes;
     protected BufferedImage generatedImage;
+    protected boolean animated = false;
 
     public abstract ImageGenerator generate() throws IOException, URISyntaxException;
 
@@ -40,6 +41,6 @@ public abstract class ImageGenerator {
     }
 
     public FileUpload getFileUpload() throws IOException {
-        return FileUpload.fromData(this.getBytes(), "unknown.png");
+        return FileUpload.fromData(this.getBytes(), "unknown" + (this.animated ? ".gif" : ".png"));
     }
 }

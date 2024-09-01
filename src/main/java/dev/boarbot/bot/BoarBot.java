@@ -294,9 +294,12 @@ public class BoarBot implements Bot {
         PathConfig pathConfig = this.getConfig().getPathConfig();
 
         int[] origin = {0, 0};
+        int[] largeBoarSize = nums.getLargeBoarSize();
         int[] bigBoarSize = nums.getBigBoarSize();
         int[] mediumBigBoarSize = nums.getMediumBigBoarSize();
         int[] mediumBoarSize = nums.getMediumBoarSize();
+
+        log.info("Attempting to load boar images into cache");
 
         for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
             try {
@@ -314,7 +317,14 @@ public class BoarBot implements Bot {
                     throw new IllegalArgumentException("Animated file is missing a static version.");
                 }
 
-                BufferedImage bigBoarImage = new BufferedImage(bigBoarSize[0], bigBoarSize[1], BufferedImage.TYPE_INT_ARGB);
+                BufferedImage largeBoarImage = new BufferedImage(
+                    largeBoarSize[0], largeBoarSize[1], BufferedImage.TYPE_INT_ARGB
+                );
+                Graphics2D largeBoarGraphics = largeBoarImage.createGraphics();
+
+                BufferedImage bigBoarImage = new BufferedImage(
+                    bigBoarSize[0], bigBoarSize[1], BufferedImage.TYPE_INT_ARGB
+                );
                 Graphics2D bigBoarGraphics = bigBoarImage.createGraphics();
 
                 BufferedImage mediumBigBoarImage = new BufferedImage(
@@ -326,6 +336,9 @@ public class BoarBot implements Bot {
                     mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
                 );
                 Graphics2D mediumBoarGraphics = mediumBoarImage.createGraphics();
+
+                GraphicsUtil.drawImage(largeBoarGraphics, filePath, origin, largeBoarSize);
+                this.imageCacheMap.put("large" + boarID, largeBoarImage);
 
                 GraphicsUtil.drawImage(bigBoarGraphics, filePath, origin, bigBoarSize);
                 this.imageCacheMap.put("big" + boarID, bigBoarImage);
@@ -348,6 +361,8 @@ public class BoarBot implements Bot {
         log.info("Successfully loaded all boar images into cache");
 
         String rarityBorderPath = pathConfig.getMegaMenuAssets() + pathConfig.getRarityBorder();
+
+        log.info("Attempting to load rarity borders into cache");
 
         for (String rarityID : this.getConfig().getRarityConfigs().keySet()) {
             String color = this.getConfig().getColorConfig().get(rarityID);

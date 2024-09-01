@@ -203,12 +203,6 @@
           "description": "Transmute this boar to one of the next rarity"
         },
         {
-          "label": "Animate",
-          "value": "animate",
-          "emoji": "<:wiggleboar:1274071700153041096>",
-          "description": "Show the animated version of this boar"
-        },
-        {
           "label": "Editions",
           "value": "editions",
           "emoji": "\u23F1",

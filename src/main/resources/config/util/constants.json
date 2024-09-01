@@ -28,6 +28,10 @@
     872,
     872
   ],
+  "largeBoarSize": [
+    1100,
+    1100
+  ],
   "border": 25,
   "powPlusMinusMins": 1,
   "powIntervalHours": 2,

@@ -9,6 +9,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.generators.megamenu.*;
 
 import java.sql.Connection;
@@ -101,7 +102,9 @@ class MegaMenuGeneratorMaker {
             this.interactive.setFilterOpen(false);
 
             this.interactive.setAcknowledgeOpen(true);
-            this.interactive.setAcknowledgeString(this.config.getStringConfig().getCompBlocked());
+            this.interactive.setAcknowledgeImageGen(
+                new OverlayImageGenerator(null, this.config.getStringConfig().getCompBlocked())
+            );
 
             return this.makeCollectionGen();
         }

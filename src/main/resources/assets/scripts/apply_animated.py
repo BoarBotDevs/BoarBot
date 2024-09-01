@@ -5,35 +5,26 @@ import json
 import sys
 
 num_config = json.loads(sys.argv[1])
-item_path = sys.argv[2]
-base_len = json.loads(sys.argv[3])
-border_len = json.loads(sys.argv[4])
+overlay_path = sys.argv[2]
+overlay_pos = tuple(json.loads(sys.argv[3]))
+overlay_size = tuple(json.loads(sys.argv[4]))
 
-image_bytes = sys.stdin.buffer.read()
+base_bytes = sys.stdin.buffer.read()
 
-base_bytes = image_bytes[:base_len]
-border_bytes = image_bytes[base_len:base_len+border_len]
-
-image = Image.open(item_path)
+overlay_image = Image.open(overlay_path)
 base_image = Image.open(BytesIO(base_bytes)).convert('RGBA')
-border_image = Image.open(BytesIO(border_bytes)).convert('RGBA')
 
-image_size = (1920, 1403)
-
-item_pos = (1108, 455)
-item_size = tuple(num_config['mediumBigBoarSize'])
+base_image_size = (base_image.width, base_image.height)
 
 frames = []
 durations = []
 
-for frame in ImageSequence.Iterator(image):
-    new_frame = Image.new('RGBA', image_size)
+for frame in ImageSequence.Iterator(overlay_image):
+    new_frame = Image.new('RGBA', base_image_size)
     new_frame.paste(base_image, (0, 0))
 
-    frame = frame.copy().resize(item_size).convert('RGBA')
-    new_frame.paste(frame, item_pos)
-
-    new_frame.paste(border_image, item_pos, mask=border_image)
+    frame = frame.copy().resize(overlay_size).convert('RGBA')
+    new_frame.paste(frame, overlay_pos, mask=frame)
 
     frames.append(new_frame)
     durations.append(frame.info['duration'])
