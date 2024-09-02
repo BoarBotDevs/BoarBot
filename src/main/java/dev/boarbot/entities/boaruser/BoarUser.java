@@ -505,7 +505,17 @@ public class BoarUser {
                 unique_boars,
                 highest_unique_boars,
                 boar_streak,
-                highest_streak
+                highest_streak,
+                blessings,
+                highest_blessings,
+                streak_bless,
+                highest_streak_bless,
+                quest_bless,
+                highest_quest_bless,
+                unique_bless,
+                highest_unique_bless,
+                other_bless,
+                highest_other_bless
             FROM users
             WHERE user_id = ?;
         """;
@@ -528,7 +538,17 @@ public class BoarUser {
                         results.getInt("unique_boars"),
                         results.getInt("highest_unique_boars"),
                         results.getInt("boar_streak"),
-                        results.getInt("highest_streak")
+                        results.getInt("highest_streak"),
+                        results.getInt("blessings"),
+                        results.getInt("highest_blessings"),
+                        results.getInt("streak_bless"),
+                        results.getInt("highest_streak_bless"),
+                        results.getInt("quest_bless"),
+                        results.getInt("highest_quest_bless"),
+                        results.getInt("unique_bless"),
+                        results.getInt("highest_unique_bless"),
+                        results.getInt("other_bless"),
+                        results.getInt("highest_other_bless")
                     );
                 }
             }

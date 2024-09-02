@@ -35,11 +35,10 @@ class MegaMenuComponentsGetter {
 
     public ActionRow[] getComponents() {
         return switch (this.interactive.getCurView()) {
-            case MegaMenuView.PROFILE -> this.getNav();
+            case MegaMenuView.PROFILE, MegaMenuView.STATS -> this.getNav();
             case MegaMenuView.COLLECTION -> getCompendiumCollectionComponents();
             case MegaMenuView.COMPENDIUM -> getCompendiumCollectionComponents(true);
             case MegaMenuView.EDITIONS -> getEditionsComponents();
-            case MegaMenuView.STATS -> getCompendiumCollectionComponents();
             case MegaMenuView.POWERUPS -> getCompendiumCollectionComponents();
             case MegaMenuView.QUESTS -> getCompendiumCollectionComponents();
             case MegaMenuView.BADGES -> getCompendiumCollectionComponents();

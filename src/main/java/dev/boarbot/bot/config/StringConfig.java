@@ -118,6 +118,16 @@ public class StringConfig {
     private String statsPeakUniquesLabel = "";
     private String statsStreakLabel = "";
     private String statsPeakStreakLabel = "";
+    private String statsBlessingsLabel = "";
+    private String statsPeakBlessingsLabel = "";
+    private String statsStreakBlessLabel = "";
+    private String statsPeakStreakBlessLabel = "";
+    private String statsQuestBlessLabel = "";
+    private String statsPeakQuestBlessLabel = "";
+    private String statsUniqueBlessLabel = "";
+    private String statsPeakUniqueBlessLabel = "";
+    private String statsOtherBlessLabel = "";
+    private String statsPeakOtherBlessLabel = "";
 
     // Event strings
 

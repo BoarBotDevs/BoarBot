@@ -15,7 +15,17 @@ public record StatsData(
     int uniques,
     int highestUniques,
     int boarStreak,
-    int highestStreak
+    int highestStreak,
+    int blessings,
+    int highestBlessings,
+    int streakBless,
+    int highestStreakBless,
+    int questBless,
+    int highestQuestBless,
+    int uniqueBless,
+    int highestUniqueBless,
+    int otherBless,
+    int highestOtherBless
 ) {
     public StatsData() {
         this(
@@ -26,6 +36,16 @@ public record StatsData(
             null,
             null,
             null,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,

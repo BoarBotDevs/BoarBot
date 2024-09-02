@@ -169,7 +169,7 @@ class MegaMenuGeneratorMaker {
             }
         }
 
-        this.interactive.setMaxPage(0);
+        this.interactive.setMaxPage(1);
         if (this.interactive.getPage() > this.interactive.getMaxPage()) {
             this.interactive.setPrevPage(this.interactive.getPage());
             this.interactive.setPage(this.interactive.getMaxPage());

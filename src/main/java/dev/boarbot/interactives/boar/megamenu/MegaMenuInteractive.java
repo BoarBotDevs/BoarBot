@@ -257,7 +257,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
                     if (newBoarIDs.isEmpty()) {
                         this.acknowledgeImageGen = new OverlayImageGenerator(
-                            null, strConfig.getCompCloneFailed().formatted(boarName)
+                            null, strConfig.getCompCloneFailed().formatted("<>" + this.curRarityKey + "<>" + boarName)
                         );
                     } else {
                         boarUser.addBoars(
@@ -285,7 +285,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         if (!newBoarIDs.isEmpty()) {
             CompletableFuture.runAsync(() -> {
                 this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, strConfig.getCompCloneSuccess().formatted(boarName)
+                    null, strConfig.getCompCloneSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
                 );
 
                 String title = this.config.getStringConfig().getCompCloneTitle();
