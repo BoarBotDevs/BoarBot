@@ -105,6 +105,19 @@ public class StringConfig {
     private String compNoSpecies = "";
     private String compUpdateLabel = "";
     private String compDefaultUpdate = "";
+    private String statsBucksLabel = "";
+    private String statsPeakBucksLabel = "";
+    private String statsDailiesLabel = "";
+    private String statsDailiesMissedLabel = "";
+    private String statsLastDailyLabel = "";
+    private String statsLastBoarLabel = "";
+    private String statsFavBoarLabel = "";
+    private String statsTotalBoarsLabel = "";
+    private String statsPeakTotalBoarsLabel = "";
+    private String statsUniquesLabel = "";
+    private String statsPeakUniquesLabel = "";
+    private String statsStreakLabel = "";
+    private String statsPeakStreakLabel = "";
 
     // Event strings
 

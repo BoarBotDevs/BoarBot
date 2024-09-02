@@ -1,11 +1,13 @@
 package dev.boarbot.entities.boaruser;
 
+import java.sql.Timestamp;
+
 public record StatsData(
     long bucks,
     long highestBucks,
     int dailies,
     int dailiesMissed,
-    long lastDailyTimestamp,
+    Timestamp lastDailyTimestamp,
     String lastBoar,
     String favBoar,
     long totalBoars,
@@ -21,7 +23,7 @@ public record StatsData(
             0,
             0,
             0,
-            0,
+            null,
             null,
             null,
             0,

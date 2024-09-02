@@ -44,6 +44,8 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
     protected List<String> badgeIDs;
     protected String firstJoinedDate;
 
+    protected TextDrawer textDrawer;
+
     public MegaMenuGenerator(
         int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate
     ) {

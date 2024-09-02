@@ -20,18 +20,22 @@ class MegaMenuGeneratorMaker {
     private final BotConfig config = BoarBotApp.getBot().getConfig();
 
     private final MegaMenuInteractive interactive;
+    private MegaMenuView view;
 
     public MegaMenuGeneratorMaker(MegaMenuInteractive interactive) {
         this.interactive = interactive;
+        this.view = this.interactive.getCurView();
     }
 
     public MegaMenuGenerator make() throws SQLException {
+        this.view = this.interactive.getCurView();
+
         return switch (this.interactive.getCurView()) {
             case MegaMenuView.PROFILE -> this.makeProfileGen();
             case MegaMenuView.COLLECTION -> this.makeCollectionGen();
             case MegaMenuView.COMPENDIUM -> this.makeCompendiumGen();
             case MegaMenuView.EDITIONS -> this.makeEditionsGen();
-            case MegaMenuView.STATS -> this.makeCollectionGen();
+            case MegaMenuView.STATS -> this.makeStatsGen();
             case MegaMenuView.POWERUPS -> this.makeCollectionGen();
             case MegaMenuView.QUESTS -> this.makeCollectionGen();
             case MegaMenuView.BADGES -> this.makeCollectionGen();
@@ -39,15 +43,13 @@ class MegaMenuGeneratorMaker {
     }
 
     public MegaMenuGenerator makeProfileGen() throws SQLException {
-        MegaMenuView view = MegaMenuView.PROFILE;
-
-        boolean notUpdated = this.interactive.getViewsToUpdateData().get(view) == null ||
-            !this.interactive.getViewsToUpdateData().get(view);
+        boolean notUpdated = this.interactive.getViewsToUpdateData().get(this.view) == null ||
+            !this.interactive.getViewsToUpdateData().get(this.view);
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
                 this.interactive.setProfileData(this.interactive.getBoarUser().getProfileData(connection));
-                this.interactive.getViewsToUpdateData().put(view, true);
+                this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
 
@@ -69,9 +71,7 @@ class MegaMenuGeneratorMaker {
     }
 
     private MegaMenuGenerator makeCollectionGen() throws SQLException {
-        MegaMenuView view = MegaMenuView.COLLECTION;
-
-        this.updateCompendiumCollection(view);
+        this.updateCompendiumCollection();
         this.refreshFilterSort();
 
         this.interactive.setMaxPage(Math.max((this.interactive.getFilteredBoars().size()-1) / 15, 0));
@@ -90,9 +90,7 @@ class MegaMenuGeneratorMaker {
     }
 
     private MegaMenuGenerator makeCompendiumGen() throws SQLException {
-        MegaMenuView view = MegaMenuView.COMPENDIUM;
-
-        this.updateCompendiumCollection(view);
+        this.updateCompendiumCollection();
         this.refreshFilterSort();
 
         if (this.interactive.getFilteredBoars().isEmpty()) {
@@ -161,13 +159,13 @@ class MegaMenuGeneratorMaker {
     }
 
     private MegaMenuGenerator makeStatsGen() throws SQLException {
-        boolean notUpdated = this.interactive.getViewsToUpdateData().get(MegaMenuView.STATS) == null ||
-            !this.interactive.getViewsToUpdateData().get(MegaMenuView.STATS);
+        boolean notUpdated = this.interactive.getViewsToUpdateData().get(this.view) == null ||
+            !this.interactive.getViewsToUpdateData().get(this.view);
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
                 this.interactive.setStatsData(this.interactive.getBoarUser().getStatsData(connection));
-                this.interactive.getViewsToUpdateData().put(MegaMenuView.STATS, true);
+                this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
 
@@ -182,19 +180,19 @@ class MegaMenuGeneratorMaker {
             this.interactive.getBoarUser(),
             this.interactive.getBadgeIDs(),
             this.interactive.getFirstJoinedDate(),
-            this.interactive.getFilteredBoars()
+            this.interactive.getStatsData()
         );
     }
 
-    private void updateCompendiumCollection(MegaMenuView view) throws SQLException {
-        boolean notUpdated = this.interactive.getViewsToUpdateData().get(view) == null ||
-            !this.interactive.getViewsToUpdateData().get(view);
+    private void updateCompendiumCollection() throws SQLException {
+        boolean notUpdated = this.interactive.getViewsToUpdateData().get(this.view) == null ||
+            !this.interactive.getViewsToUpdateData().get(this.view);
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
                 this.interactive.setOwnedBoars(this.interactive.getBoarUser().getOwnedBoarInfo(connection));
 
-                if (view == MegaMenuView.COMPENDIUM) {
+                if (this.view == MegaMenuView.COMPENDIUM) {
                     this.interactive.setFavoriteID(this.interactive.getBoarUser().getFavoriteID(connection));
                     this.interactive.setNumTransmute(
                         this.interactive.getBoarUser().getPowerupAmount(connection, "transmute")
@@ -209,7 +207,7 @@ class MegaMenuGeneratorMaker {
 
                 interBoarUser.decRefs();
 
-                this.interactive.getViewsToUpdateData().put(view, true);
+                this.interactive.getViewsToUpdateData().put(MegaMenuView.COMPENDIUM, true);
                 this.interactive.getViewsToUpdateData().put(MegaMenuView.COLLECTION, true);
             }
         }

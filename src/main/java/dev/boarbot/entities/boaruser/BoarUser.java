@@ -66,12 +66,14 @@ public class BoarUser {
 
     private synchronized void updateUser(Connection connection) throws SQLException {
         String query = """
-            SELECT last_daily_timestamp, boar_streak
+            SELECT last_daily_timestamp, last_streak_fix, first_joined_timestamp, boar_streak
             FROM users
             WHERE user_id = ?;
         """;
 
         long lastDailyLong = 0;
+        long lastStreakLong = 0;
+        long firstJoinedLong = 0;
         int boarStreak = 0;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -80,9 +82,19 @@ public class BoarUser {
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
                     Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
+                    Timestamp lastStreakFixTimestamp = results.getTimestamp("last_streak_fix");
+                    Timestamp firstJoinedTimestamp = results.getTimestamp("first_joined_timestamp");
 
                     if (lastDailyTimestamp != null) {
                         lastDailyLong = lastDailyTimestamp.getTime();
+                    }
+
+                    if (lastStreakFixTimestamp != null) {
+                        lastStreakLong = lastStreakFixTimestamp.getTime();
+                    }
+
+                    if (firstJoinedTimestamp != null) {
+                        firstJoinedLong = firstJoinedTimestamp.getTime();
                     }
 
                     boarStreak = results.getInt("boar_streak");
@@ -91,32 +103,30 @@ public class BoarUser {
         }
 
         int newBoarStreak = boarStreak;
+        long timeToReach = Math.max(Math.max(lastDailyLong, lastStreakLong), firstJoinedLong);
         long curTimeCheck = TimeUtil.getLastDailyResetMilli() - TimeUtil.getOneDayMilli();
         int curRemove = 7;
         int curDailiesMissed = 0;
 
-        if (lastDailyLong == 0) {
-            newBoarStreak = 0;
-        }
-
-        while (lastDailyLong > 0 && lastDailyLong < curTimeCheck) {
+        while (timeToReach < curTimeCheck) {
             newBoarStreak = Math.max(newBoarStreak - curRemove, 0);
             curTimeCheck -= TimeUtil.getOneDayMilli();
             curRemove *= 2;
             curDailiesMissed++;
         }
 
-        if (newBoarStreak != boarStreak) {
+        if (curDailiesMissed > 0) {
             query = """
                 UPDATE users
-                SET boar_streak = ?, cur_dailies_missed = ?
+                SET boar_streak = ?, num_dailies_missed = num_dailies_missed + ?, last_streak_fix = ?
                 WHERE user_id = ?
             """;
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.setInt(1, newBoarStreak);
                 statement.setInt(2, curDailiesMissed);
-                statement.setString(3, this.userID);
+                statement.setTimestamp(3, new Timestamp(TimeUtil.getLastDailyResetMilli()-1));
+                statement.setString(4, this.userID);
                 statement.executeUpdate();
             }
         }
@@ -481,6 +491,49 @@ public class BoarUser {
 
     public StatsData getStatsData(Connection connection) throws SQLException {
         StatsData statsData = new StatsData();
+        String query = """
+            SELECT
+                total_bucks,
+                highest_bucks,
+                num_dailies,
+                num_dailies_missed,
+                last_daily_timestamp,
+                last_boar_id,
+                favorite_boar_id,
+                total_boars,
+                highest_boars,
+                unique_boars,
+                highest_unique_boars,
+                boar_streak,
+                highest_streak
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    statsData = new StatsData(
+                        results.getLong("total_bucks"),
+                        results.getLong("highest_bucks"),
+                        results.getInt("num_dailies"),
+                        results.getInt("num_dailies_missed"),
+                        results.getTimestamp("last_daily_timestamp"),
+                        results.getString("last_boar_id"),
+                        results.getString("favorite_boar_id"),
+                        results.getLong("total_boars"),
+                        results.getLong("highest_boars"),
+                        results.getInt("unique_boars"),
+                        results.getInt("highest_unique_boars"),
+                        results.getInt("boar_streak"),
+                        results.getInt("highest_streak")
+                    );
+                }
+            }
+        }
+
         return statsData;
     }
 
