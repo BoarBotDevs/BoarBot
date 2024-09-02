@@ -102,7 +102,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         int[] streakLabelPos = {RIGHT_START_X, peakUniquesLabelPos[1] + RIGHT_LABEL_Y_SPACING};
         String streakStr = "%,d".formatted(this.statsData.boarStreak());
         int[] streakPos = {RIGHT_START_X, streakLabelPos[1] + VALUE_Y_OFFSET};
-s
+
         int[] peakStreakLabelPos = {RIGHT_START_X, streakLabelPos[1] + RIGHT_LABEL_Y_SPACING};
         String peakStreakStr = "%,d".formatted(this.statsData.highestStreak());
         int[] peakStreakPos = {RIGHT_START_X, peakStreakLabelPos[1] + VALUE_Y_OFFSET};
