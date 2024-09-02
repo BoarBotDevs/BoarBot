@@ -160,6 +160,32 @@ class MegaMenuGeneratorMaker {
         );
     }
 
+    private MegaMenuGenerator makeStatsGen() throws SQLException {
+        boolean notUpdated = this.interactive.getViewsToUpdateData().get(MegaMenuView.STATS) == null ||
+            !this.interactive.getViewsToUpdateData().get(MegaMenuView.STATS);
+
+        if (notUpdated) {
+            try (Connection connection = DataUtil.getConnection()) {
+                this.interactive.setStatsData(this.interactive.getBoarUser().getStatsData(connection));
+                this.interactive.getViewsToUpdateData().put(MegaMenuView.STATS, true);
+            }
+        }
+
+        this.interactive.setMaxPage(0);
+        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
+            this.interactive.setPrevPage(this.interactive.getPage());
+            this.interactive.setPage(this.interactive.getMaxPage());
+        }
+
+        return new StatsImageGenerator(
+            this.interactive.getPage(),
+            this.interactive.getBoarUser(),
+            this.interactive.getBadgeIDs(),
+            this.interactive.getFirstJoinedDate(),
+            this.interactive.getFilteredBoars()
+        );
+    }
+
     private void updateCompendiumCollection(MegaMenuView view) throws SQLException {
         boolean notUpdated = this.interactive.getViewsToUpdateData().get(view) == null ||
             !this.interactive.getViewsToUpdateData().get(view);

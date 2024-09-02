@@ -36,6 +36,10 @@ public final class TimeUtil {
         return Instant.now().toEpochMilli();
     }
 
+    public static long getOneDayMilli() {
+        return 1000 * 60 * 60 * 24;
+    }
+
     public static long getQuestResetMilli() {
         LocalDateTime dateTime = LocalDate.now(ZoneOffset.UTC).atStartOfDay().minusMinutes(1);
         int dayOfWeek = dateTime.getDayOfWeek().getValue();

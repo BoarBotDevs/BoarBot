@@ -66,12 +66,13 @@ public class BoarUser {
 
     private synchronized void updateUser(Connection connection) throws SQLException {
         String query = """
-            SELECT last_daily_timestamp
+            SELECT last_daily_timestamp, boar_streak
             FROM users
             WHERE user_id = ?;
         """;
 
-        boolean resetStreak = false;
+        long lastDailyLong = 0;
+        int boarStreak = 0;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, this.userID);
@@ -80,22 +81,42 @@ public class BoarUser {
                 if (results.next()) {
                     Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
 
-                    resetStreak = lastDailyTimestamp != null && lastDailyTimestamp.before(
-                        new Timestamp(TimeUtil.getLastDailyResetMilli() - 1000 * 60 * 60 * 24)
-                    );
+                    if (lastDailyTimestamp != null) {
+                        lastDailyLong = lastDailyTimestamp.getTime();
+                    }
+
+                    boarStreak = results.getInt("boar_streak");
                 }
             }
         }
 
-        if (resetStreak) {
+        int newBoarStreak = boarStreak;
+        long curTimeCheck = TimeUtil.getLastDailyResetMilli() - TimeUtil.getOneDayMilli();
+        int curRemove = 7;
+        int curDailiesMissed = 0;
+
+        if (lastDailyLong == 0) {
+            newBoarStreak = 0;
+        }
+
+        while (lastDailyLong > 0 && lastDailyLong < curTimeCheck) {
+            newBoarStreak = Math.max(newBoarStreak - curRemove, 0);
+            curTimeCheck -= TimeUtil.getOneDayMilli();
+            curRemove *= 2;
+            curDailiesMissed++;
+        }
+
+        if (newBoarStreak != boarStreak) {
             query = """
                 UPDATE users
-                SET boar_streak = 0
+                SET boar_streak = ?, cur_dailies_missed = ?
                 WHERE user_id = ?
             """;
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, this.userID);
+                statement.setInt(1, newBoarStreak);
+                statement.setInt(2, curDailiesMissed);
+                statement.setString(3, this.userID);
                 statement.executeUpdate();
             }
         }
@@ -456,6 +477,11 @@ public class BoarUser {
         }
 
         return profileData;
+    }
+
+    public StatsData getStatsData(Connection connection) throws SQLException {
+        StatsData statsData = new StatsData();
+        return statsData;
     }
 
     public boolean canUseDaily(Connection connection) throws SQLException {

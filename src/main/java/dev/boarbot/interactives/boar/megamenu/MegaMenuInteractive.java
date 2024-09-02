@@ -86,6 +86,8 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     @Getter @Setter private ProfileData profileData;
 
+    @Getter @Setter private StatsData statsData;
+
     public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) throws SQLException {
         super(event.getInteraction());
 
