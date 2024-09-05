@@ -1,6 +1,8 @@
 package dev.boarbot.entities.boaruser;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 public record StatsData(
     long bucks,
@@ -16,6 +18,7 @@ public record StatsData(
     int highestUniques,
     int boarStreak,
     int highestStreak,
+    boolean notificationsOn,
     int blessings,
     int highestBlessings,
     int streakBless,
@@ -25,7 +28,21 @@ public record StatsData(
     int uniqueBless,
     int highestUniqueBless,
     int otherBless,
-    int highestOtherBless
+    int highestOtherBless,
+    int powerupAttempts,
+    int powerupWins,
+    int perfectPowerups,
+    int fastestPowerup,
+    double avgPowerupPlacement,
+    List<String> bestPrompts,
+    int miraclesAmt,
+    int highestMiraclesAmt,
+    int miraclesActive,
+    int miraclesUsed,
+    int miracleRolls,
+    int miraclesMostUsed,
+    int miracleBestBucks,
+    String miracleBestRarity
 ) {
     public StatsData() {
         this(
@@ -42,6 +59,7 @@ public record StatsData(
             0,
             0,
             0,
+            false,
             0,
             0,
             0,
@@ -51,7 +69,21 @@ public record StatsData(
             0,
             0,
             0,
-            0
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            new ArrayList<>(),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null
         );
     }
 }

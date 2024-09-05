@@ -115,7 +115,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
             boarUser.addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
-            boarUser.useActiveMiracles(connection);
+            boarUser.useActiveMiracles(this.boarIDs, this.bucksGotten, connection);
         } catch (SQLException exception) {
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
         }

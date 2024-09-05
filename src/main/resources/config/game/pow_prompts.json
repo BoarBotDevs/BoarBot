@@ -1,6 +1,6 @@
 {
   "emojiFind": {
-    "name": "Emoji Find",
+    "name": "Emojis",
     "description": "Click the emoji that's different from the others!",
     "rightStyle": 1,
     "wrongStyle": 1,
@@ -68,7 +68,7 @@
     }
   },
   "trivia": {
-    "name": "Boar Trivia",
+    "name": "Trivia",
     "rightStyle": 1,
     "wrongStyle": 1,
     "prompts": {
@@ -181,23 +181,23 @@
     "wrongStyle": 4,
     "prompts": {
       "one": {
-        "name": "One button",
+        "name": "One",
         "numButtons": 1
       },
       "two": {
-        "name": "Two buttons",
+        "name": "Two",
         "numButtons": 2
       },
       "three": {
-        "name": "Three buttons",
+        "name": "Three",
         "numButtons": 3
       },
       "six": {
-        "name": "Six buttons",
+        "name": "Six",
         "numButtons": 6
       },
       "nine": {
-        "name": "Nine buttons",
+        "name": "Nine",
         "numButtons": 9
       }
     }

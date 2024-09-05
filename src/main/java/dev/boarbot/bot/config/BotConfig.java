@@ -46,7 +46,7 @@ public class BotConfig {
     /**
      * Collection of information about powerups
      */
-    private PromptConfig promptConfig = new PromptConfig();
+    private Map<String, PromptConfig> promptConfig = new HashMap<>();
 
     /**
      * Collection of information about quests

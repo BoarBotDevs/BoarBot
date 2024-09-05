@@ -50,7 +50,11 @@ public class TextUtil {
             : "<>error<>%,d<>silver<>/<>green<>%,d".formatted(val, max);
     }
 
-    public static String getBlessHex(int blessings) {
+    public static String getBlessHex(long blessings) {
+        if (blessings > 1000) {
+            return colorConfig.get("powerup");
+        }
+
         String[] bless1Colors = colorConfig.get("blessing1").substring(1).split("(?<=\\G.{2})");
         String[] bless2Colors = colorConfig.get("blessing2").substring(1).split("(?<=\\G.{2})");
         double blessPercent = blessings / (double) (

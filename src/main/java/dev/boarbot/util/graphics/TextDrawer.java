@@ -163,8 +163,12 @@ public class TextDrawer {
             }
 
             if (isEndColorTag) {
-                String colorKey = this.text.substring(startCurColorTag, i);
-                String curColorVal = this.config.getColorConfig().get(colorKey);
+                String colorInput = this.text.substring(startCurColorTag, i);
+                String curColorVal = colorInput;
+
+                if (!colorInput.startsWith("#")) {
+                    curColorVal = this.config.getColorConfig().get(colorInput);
+                }
 
                 this.colorValsList.add(curColorVal);
 

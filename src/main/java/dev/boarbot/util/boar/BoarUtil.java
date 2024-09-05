@@ -4,6 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
+import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.sql.SQLException;
@@ -34,6 +35,22 @@ public final class BoarUtil {
         while (!iterator.next().equals(rarityKey));
 
         return iterator.next();
+    }
+
+    public static String getHigherRarity(String rarity1, String rarity2) {
+        BotConfig config = BoarBotApp.getBot().getConfig();
+
+        for (String rarityID : config.getRarityConfigs().keySet()) {
+            if (rarityID.equals(rarity1)) {
+                return rarity2;
+            }
+
+            if (rarityID.equals(rarity2)) {
+                return rarity1;
+            }
+        }
+
+        return rarity1;
     }
 
     public static List<String> getRandBoarIDs(long blessings, boolean isSkyblockGuild) throws SQLException {
@@ -170,5 +187,20 @@ public final class BoarUtil {
         }
 
         return validBoars.get((int) (randBoar * validBoars.size()));
+    }
+
+    public static String getPromptStr(String promptID) {
+        BotConfig config = BoarBotApp.getBot().getConfig();
+        Map<String, PromptConfig> promptConfig = config.getPromptConfig();
+
+        for (PromptConfig promptType : promptConfig.values()) {
+            for (String prompt : promptType.getPrompts().keySet()) {
+                if (promptID.equals(prompt)) {
+                    return "%s - %s".formatted(promptType.getName(), promptType.getPrompts().get(prompt).getName());
+                }
+            }
+        }
+
+        return config.getStringConfig().getUnavailable();
     }
 }

@@ -118,6 +118,7 @@ public class StringConfig {
     private String statsPeakUniquesLabel = "";
     private String statsStreakLabel = "";
     private String statsPeakStreakLabel = "";
+    private String statsNotificationLabel = "";
     private String statsBlessingsLabel = "";
     private String statsPeakBlessingsLabel = "";
     private String statsStreakBlessLabel = "";
@@ -128,6 +129,22 @@ public class StringConfig {
     private String statsPeakUniqueBlessLabel = "";
     private String statsOtherBlessLabel = "";
     private String statsPeakOtherBlessLabel = "";
+    private String statsPowAttemptsLabel = "";
+    private String statsPowWinsLabel = "";
+    private String statsPowPerfectLabel = "";
+    private String statsPowFastestLabel = "";
+    private String statsPowAvgLabel = "";
+    private String statsPowBestLabel1 = "";
+    private String statsPowBestLabel2 = "";
+    private String statsPowBestLabel3 = "";
+    private String statsMiracleAmtLabel = "";
+    private String statsPeakMiracleAmtLabel = "";
+    private String statsMiraclesActiveLabel = "";
+    private String statsMiraclesUsedLabel = "";
+    private String statsMiracleRollsLabel = "";
+    private String statsPeakMiracleRollLabel = "";
+    private String statsMiracleBucksLabel = "";
+    private String statsMiracleRarityLabel = "";
 
     // Event strings
 

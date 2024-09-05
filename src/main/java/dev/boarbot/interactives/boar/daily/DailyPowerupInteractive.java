@@ -14,6 +14,7 @@ import dev.boarbot.modals.MiracleAmountModalHandler;
 import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.graphics.TextUtil;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.modal.ModalUtil;
@@ -231,13 +232,21 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                     String miracleStr = this.miraclesToUse == 1
                         ? miracleConfig.getName()
                         : miracleConfig.getPluralName();
-                    String blessingsStr = strConfig.getBlessingsSymbol() + " " + (
-                        blessings == 1 ? strConfig.getBlessingsName() : strConfig.getBlessingsPluralName()
-                    );
+                    String blessHex = TextUtil.getBlessHex(blessings);
+                    String blessingsStr = blessings == 1
+                        ? strConfig.getBlessingsName()
+                        : strConfig.getBlessingsPluralName();
 
                     this.currentImageUpload = new EmbedImageGenerator(
                         this.config.getStringConfig().getDailyPowAttempt().formatted(
-                            this.miraclesToUse, miracleStr, blessings, blessingsStr
+                            this.miraclesToUse,
+                            miracleStr,
+                            blessHex,
+                            blessings > 1000
+                                ? strConfig.getBlessingsSymbol() + " "
+                                : "",
+                            blessings,
+                            blessingsStr
                         )
                     ).generate().getFileUpload();
                 } else {

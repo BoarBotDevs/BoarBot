@@ -131,7 +131,9 @@ public class BoarBot implements Bot {
             );
 
             File promptConfig = new File(basePath + "game/pow_prompts.json");
-            this.config.setPromptConfig(g.fromJson(this.getJson(promptConfig), PromptConfig.class));
+            this.config.setPromptConfig(
+                g.fromJson(this.getJson(promptConfig), new TypeToken<Map<String, PromptConfig>>(){}.getType())
+            );
 
             File questConfig = new File(basePath + "game/quests.json");
             this.config.setQuestConfig(

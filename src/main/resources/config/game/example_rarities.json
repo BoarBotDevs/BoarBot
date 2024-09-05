@@ -26,7 +26,7 @@
   "event": {
     "name": "Event",
     "emoji": "<:event:1275180575715496059>",
-    "weight": 825,
+    "weight": 0,
     "baseScore": 20,
     "hunterNeed": true,
     "avgClones": 100,

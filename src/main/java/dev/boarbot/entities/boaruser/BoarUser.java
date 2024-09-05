@@ -491,7 +491,8 @@ public class BoarUser {
 
     public StatsData getStatsData(Connection connection) throws SQLException {
         StatsData statsData = new StatsData();
-        String query = """
+
+        String mainQuery = """
             SELECT
                 total_bucks,
                 highest_bucks,
@@ -506,6 +507,7 @@ public class BoarUser {
                 highest_unique_boars,
                 boar_streak,
                 highest_streak,
+                notifications_on,
                 blessings,
                 highest_blessings,
                 streak_bless,
@@ -515,40 +517,114 @@ public class BoarUser {
                 unique_bless,
                 highest_unique_bless,
                 other_bless,
-                highest_other_bless
+                highest_other_bless,
+                powerup_attempts,
+                powerup_wins,
+                powerup_perfects,
+                powerup_fastest_time,
+                (
+                    SELECT SUM(average_placement) / GREATEST(COUNT(average_placement), 1)
+                    FROM prompt_stats
+                    WHERE user_id = ?
+                ) AS powerup_average_placement,
+                miracles_active,
+                miracle_rolls,
+                highest_miracles_active,
+                miracle_best_bucks,
+                miracle_best_rarity
             FROM users
             WHERE user_id = ?;
         """;
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, this.userID);
+        String promptQuery = """
+            SELECT prompt_id
+            FROM prompt_stats
+            WHERE user_id = ?
+            ORDER BY average_placement
+            DESC
+            LIMIT 3;
+        """;
 
-            try (ResultSet results = statement.executeQuery()) {
-                if (results.next()) {
+        String powAmtsQuery = """
+            SELECT powerup_id, amount, highest_amount, amount_used
+            FROM collected_powerups
+            WHERE user_id = ?;
+        """;
+
+        try (
+            PreparedStatement statement1 = connection.prepareStatement(mainQuery);
+            PreparedStatement statement2 = connection.prepareStatement(promptQuery);
+            PreparedStatement statement3 = connection.prepareStatement(powAmtsQuery)
+        ) {
+            statement1.setString(1, this.userID);
+            statement1.setString(2, this.userID);
+
+            statement2.setString(1, this.userID);
+
+            statement3.setString(1, this.userID);
+
+            try (
+                ResultSet results1 = statement1.executeQuery();
+                ResultSet results2 = statement2.executeQuery();
+                ResultSet results3 = statement3.executeQuery()
+            ) {
+                List<String> topPrompts = new ArrayList<>();
+                Map<String, Integer> powAmts = new HashMap<>();
+                Map<String, Integer> powHighestAmts = new HashMap<>();
+                Map<String, Integer> powUsed = new HashMap<>();
+
+                while (results2.next()) {
+                    topPrompts.add(results2.getString("prompt_id"));
+                }
+
+                while (results3.next()) {
+                    String powerupID = results3.getString("powerup_id");
+
+                    powAmts.put(powerupID, results3.getInt("amount"));
+                    powHighestAmts.put(powerupID, results3.getInt("highest_amount"));
+                    powUsed.put(powerupID, results3.getInt("amount_used"));
+                }
+
+                if (results1.next()) {
                     statsData = new StatsData(
-                        results.getLong("total_bucks"),
-                        results.getLong("highest_bucks"),
-                        results.getInt("num_dailies"),
-                        results.getInt("num_dailies_missed"),
-                        results.getTimestamp("last_daily_timestamp"),
-                        results.getString("last_boar_id"),
-                        results.getString("favorite_boar_id"),
-                        results.getLong("total_boars"),
-                        results.getLong("highest_boars"),
-                        results.getInt("unique_boars"),
-                        results.getInt("highest_unique_boars"),
-                        results.getInt("boar_streak"),
-                        results.getInt("highest_streak"),
-                        results.getInt("blessings"),
-                        results.getInt("highest_blessings"),
-                        results.getInt("streak_bless"),
-                        results.getInt("highest_streak_bless"),
-                        results.getInt("quest_bless"),
-                        results.getInt("highest_quest_bless"),
-                        results.getInt("unique_bless"),
-                        results.getInt("highest_unique_bless"),
-                        results.getInt("other_bless"),
-                        results.getInt("highest_other_bless")
+                        results1.getLong("total_bucks"),
+                        results1.getLong("highest_bucks"),
+                        results1.getInt("num_dailies"),
+                        results1.getInt("num_dailies_missed"),
+                        results1.getTimestamp("last_daily_timestamp"),
+                        results1.getString("last_boar_id"),
+                        results1.getString("favorite_boar_id"),
+                        results1.getLong("total_boars"),
+                        results1.getLong("highest_boars"),
+                        results1.getInt("unique_boars"),
+                        results1.getInt("highest_unique_boars"),
+                        results1.getInt("boar_streak"),
+                        results1.getInt("highest_streak"),
+                        results1.getBoolean("notifications_on"),
+                        results1.getInt("blessings"),
+                        results1.getInt("highest_blessings"),
+                        results1.getInt("streak_bless"),
+                        results1.getInt("highest_streak_bless"),
+                        results1.getInt("quest_bless"),
+                        results1.getInt("highest_quest_bless"),
+                        results1.getInt("unique_bless"),
+                        results1.getInt("highest_unique_bless"),
+                        results1.getInt("other_bless"),
+                        results1.getInt("highest_other_bless"),
+                        results1.getInt("powerup_attempts"),
+                        results1.getInt("powerup_wins"),
+                        results1.getInt("powerup_perfects"),
+                        results1.getInt("powerup_fastest_time"),
+                        results1.getDouble("powerup_average_placement"),
+                        topPrompts,
+                        powAmts.get("miracle"),
+                        powHighestAmts.get("miracle"),
+                        results1.getInt("miracles_active"),
+                        powUsed.get("miracle"),
+                        results1.getInt("miracle_rolls"),
+                        results1.getInt("highest_miracles_active"),
+                        results1.getInt("miracle_best_bucks"),
+                        results1.getString("miracle_best_rarity")
                     );
                 }
             }
@@ -763,30 +839,68 @@ public class BoarUser {
     }
 
     public void activateMiracles(Connection connection, int amount) throws SQLException {
-        String query = """
+        String updateQuery = """
             UPDATE users
-            SET miracles_active = miracles_active + ?
+            SET
+                miracles_active = miracles_active + ?,
+                highest_blessings = GREATEST(highest_blessings, ?),
+                miracle_rolls = miracle_rolls + 1
             WHERE user_id = ?;
         """;
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
             statement.setInt(1, amount);
-            statement.setString(2, this.userID);
+            statement.setLong(2, this.getBlessings(connection, amount));
+            statement.setString(3, this.userID);
             statement.executeUpdate();
         }
 
         this.usePowerup(connection, "miracle", amount);
     }
 
-    public void useActiveMiracles(Connection connection) throws SQLException {
-        String query = """
-            UPDATE users
-            SET miracles_active = 0
+    public void useActiveMiracles(
+        List<String> boarIDs, List<Integer> bucksGotten, Connection connection
+    ) throws SQLException {
+        int totalBucks = bucksGotten.stream().reduce(0, Integer::sum);
+        String bestRarity = null;
+
+        for (String boarID : boarIDs) {
+            String boarRarity = BoarUtil.findRarityKey(boarID);
+
+            if (bestRarity == null) {
+                bestRarity = boarRarity;
+                continue;
+            }
+
+            bestRarity = BoarUtil.getHigherRarity(bestRarity, boarRarity);
+        }
+
+        String bestRarityQuery = """
+            SELECT miracle_best_rarity
+            FROM users
             WHERE user_id = ?;
         """;
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (PreparedStatement statement = connection.prepareStatement(bestRarityQuery)) {
             statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next() && results.getString("miracle_best_rarity") != null) {
+                    bestRarity = BoarUtil.getHigherRarity(bestRarity, results.getString("miracle_best_rarity"));
+                }
+            }
+        }
+
+        String updateQuery = """
+            UPDATE users
+            SET miracles_active = 0, miracle_best_bucks = GREATEST(miracle_best_bucks, ?), miracle_best_rarity = ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setInt(1, totalBucks);
+            statement.setString(2, bestRarity);
+            statement.setString(3, this.userID);
             statement.executeUpdate();
         }
     }
