@@ -127,8 +127,23 @@ public class StringConfig {
     private String statsMiraclesActiveLabel = "";
     private String statsMiracleRollsLabel = "";
     private String statsPeakMiracleRollLabel = "";
-    private String statsMiracleBucksLabel = "";
-    private String statsMiracleRarityLabel = "";
+    private String statsBestBucksLabel = "";
+    private String statsBestRarityLabel = "";
+    private String statsTransmuteLastLabel = "";
+    private String statsTransmutedLabel = "";
+    private String statsCloneLastLabel = "";
+    private String statsClonedLabel = "";
+    private String statsGiftHandicapLabel = "";
+    private String statsGiftOpenedLabel = "";
+    private String statsGiftFastestLabel = "";
+    private String statsQuestsCompletedLabel = "";
+    private String statsFullQuestsCompletedLabel = "";
+    private String statsFastestFullQuestLabel = "";
+    private String statsQuestAutoClaimLabel = "";
+    private String statsEasyQuestsLabel = "";
+    private String statsMediumQuestsLabel = "";
+    private String statsHardQuestsLabel = "";
+    private String statsVeryHardQuestsLabel = "";
 
     // Notification strings
 

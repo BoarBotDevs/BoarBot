@@ -45,8 +45,23 @@ public record StatsData(
     int miraclesMostUsed,
     int miracleBestBucks,
     String miracleBestRarity,
-    String lastTransmuteRarity,
-    Map<String, Integer> rarityTransmutes
+    String lastTransmuteBoar,
+    Map<String, Integer> rarityTransmutes,
+    String lastCloneBoar,
+    Map<String, Integer> rarityClones,
+    int giftHandicap,
+    int giftsOpened,
+    int giftFastest,
+    int giftBestBucks,
+    String giftBestRarity,
+    int questsCompleted,
+    int fullQuestsCompleted,
+    long fastestFullQuest,
+    boolean questAutoClaim,
+    int easyQuests,
+    int mediumQuests,
+    int hardQuests,
+    int veryHardQuests
 ) {
     public StatsData() {
         this(
@@ -89,7 +104,22 @@ public record StatsData(
             0,
             null,
             null,
-            new HashMap<>()
+            new HashMap<>(),
+            null,
+            new HashMap<>(),
+            0,
+            0,
+            0,
+            0,
+            null,
+            0,
+            0,
+            0,
+            true,
+            0,
+            0,
+            0,
+            0
         );
     }
 }

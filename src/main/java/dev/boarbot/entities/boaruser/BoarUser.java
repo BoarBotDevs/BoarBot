@@ -533,11 +533,38 @@ public class BoarUser {
                 miracle_best_bucks,
                 miracle_best_rarity,
                 (
-                    SELECT boars_info.rarity_id
-                    FROM boars_info, collected_boars
-                    WHERE collected_boars.user_id = ? AND collected_boars.boar_id = boars_info.boar_id
-                    ORDER BY edition DESC LIMIT 1
-                ) AS last_transmute_rarity
+                    SELECT boar_id
+                    FROM collected_boars
+                    WHERE
+                        collected_boars.user_id = ? AND
+                        collected_boars.original_obtain_type = 'TRANSMUTE' AND
+                        collected_boars.exists = true AND
+                        collected_boars.deleted = false
+                    ORDER BY unique_id DESC LIMIT 1
+                ) AS last_transmute,
+                (
+                    SELECT boar_id
+                    FROM collected_boars
+                    WHERE
+                        collected_boars.user_id = ? AND
+                        collected_boars.original_obtain_type = 'CLONE' AND
+                        collected_boars.exists = true AND
+                        collected_boars.deleted = false
+                    ORDER BY unique_id DESC LIMIT 1
+                ) AS last_clone,
+                gift_handicap,
+                gifts_opened,
+                gift_fastest,
+                gift_best_bucks,
+                gift_best_rarity,
+                total_quests_completed,
+                total_full_quests_completed,
+                fastest_full_quest,
+                quest_auto_claim,
+                easy_quests_completed,
+                medium_quests_completed,
+                hard_quests_completed,
+                very_hard_quests_completed
             FROM users
             WHERE user_id = ?;
         """;
@@ -561,15 +588,23 @@ public class BoarUser {
             WHERE user_id = ?;
         """;
 
+        String cloneQuery = """
+            SELECT rarity_id, amount
+            FROM clone_stats
+            WHERE user_id = ?;
+        """;
+
         try (
             PreparedStatement statement1 = connection.prepareStatement(mainQuery);
             PreparedStatement statement2 = connection.prepareStatement(promptQuery);
             PreparedStatement statement3 = connection.prepareStatement(powAmtsQuery);
-            PreparedStatement statement4 = connection.prepareStatement(transmuteQuery)
+            PreparedStatement statement4 = connection.prepareStatement(transmuteQuery);
+            PreparedStatement statement5 = connection.prepareStatement(cloneQuery)
         ) {
             statement1.setString(1, this.userID);
             statement1.setString(2, this.userID);
             statement1.setString(3, this.userID);
+            statement1.setString(4, this.userID);
 
             statement2.setString(1, this.userID);
 
@@ -577,11 +612,14 @@ public class BoarUser {
 
             statement4.setString(1, this.userID);
 
+            statement5.setString(1, this.userID);
+
             try (
                 ResultSet results1 = statement1.executeQuery();
                 ResultSet results2 = statement2.executeQuery();
                 ResultSet results3 = statement3.executeQuery();
-                ResultSet results4 = statement4.executeQuery()
+                ResultSet results4 = statement4.executeQuery();
+                ResultSet results5 = statement5.executeQuery()
             ) {
                 List<String> topPrompts = new ArrayList<>();
 
@@ -590,6 +628,7 @@ public class BoarUser {
                 Map<String, Integer> powUsed = new HashMap<>();
 
                 Map<String, Integer> transmuteRarities = new HashMap<>();
+                Map<String, Integer> cloneRarities = new HashMap<>();
 
                 while (results2.next()) {
                     topPrompts.add(results2.getString("prompt_id"));
@@ -605,6 +644,10 @@ public class BoarUser {
 
                 while (results4.next()) {
                     transmuteRarities.put(results4.getString("rarity_id"), results4.getInt("amount"));
+                }
+
+                while (results5.next()) {
+                    cloneRarities.put(results5.getString("rarity_id"), results5.getInt("amount"));
                 }
 
                 if (results1.next()) {
@@ -647,8 +690,23 @@ public class BoarUser {
                         results1.getInt("highest_miracles_active"),
                         results1.getInt("miracle_best_bucks"),
                         results1.getString("miracle_best_rarity"),
-                        results1.getString("last_transmute_rarity"),
-                        transmuteRarities
+                        results1.getString("last_transmute"),
+                        transmuteRarities,
+                        results1.getString("last_clone"),
+                        cloneRarities,
+                        results1.getInt("gift_handicap"),
+                        results1.getInt("gifts_opened"),
+                        results1.getInt("gift_fastest"),
+                        results1.getInt("gift_best_bucks"),
+                        results1.getString("gift_best_rarity"),
+                        results1.getInt("total_quests_completed"),
+                        results1.getInt("total_full_quests_completed"),
+                        results1.getInt("fastest_full_quest"),
+                        results1.getBoolean("quest_auto_claim"),
+                        results1.getInt("easy_quests_completed"),
+                        results1.getInt("medium_quests_completed"),
+                        results1.getInt("hard_quests_completed"),
+                        results1.getInt("very_hard_quests_completed")
                     );
                 }
             }

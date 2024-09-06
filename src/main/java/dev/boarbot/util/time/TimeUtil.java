@@ -62,7 +62,11 @@ public final class TimeUtil {
     }
 
     public static String getTimeDistance(long milli, boolean shortened) {
-        long millisDistance = milli - TimeUtil.getCurMilli();
+        return TimeUtil.getTimeDistance(TimeUtil.getCurMilli(), milli, shortened);
+    }
+
+    public static String getTimeDistance(long start, long milli, boolean shortened) {
+        long millisDistance = milli - start;
         boolean isInPast = millisDistance < 0;
         millisDistance = Math.abs(millisDistance);
 

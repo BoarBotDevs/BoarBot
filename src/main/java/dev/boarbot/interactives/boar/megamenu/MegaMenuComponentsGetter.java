@@ -259,8 +259,8 @@ class MegaMenuComponentsGetter {
 
         RarityConfig curRarity = this.config.getRarityConfigs().get(this.interactive.getCurRarityKey());
 
-        boolean cloneable = curRarity.getAvgClones() != -1 && this.interactive.getNumClone() > 0;
-        boolean transmutable = curRarity.getChargesNeeded() != -1 &&
+        boolean cloneable = curRarity.getAvgClones() != 0 && this.interactive.getNumClone() > 0;
+        boolean transmutable = curRarity.getChargesNeeded() != 0 &&
             curRarity.getChargesNeeded() <= this.interactive.getNumTransmute();
 
         if (!cloneable) {

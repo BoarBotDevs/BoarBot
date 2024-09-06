@@ -8,6 +8,7 @@ import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.commands.SubcommandConfig;
 import dev.boarbot.bot.config.components.ComponentConfig;
 import dev.boarbot.bot.config.items.BadgeItemConfig;
+import dev.boarbot.bot.config.items.BaseItemConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
@@ -93,7 +94,7 @@ public class BoarBot implements Bot {
     @Override
     public void loadConfig() {
         try {
-            log.info("Attempting to load 'config.json' from resources.");
+            log.info("Attempting to load configs from 'src/main/resources/config'");
 
             Gson g = new Gson();
             String basePath = "src/%s/resources/config/".formatted(
@@ -140,9 +141,9 @@ public class BoarBot implements Bot {
                 g.fromJson(this.getJson(questConfig), new TypeToken<Map<String, QuestConfig>>(){}.getType())
             );
 
-            File rarityConfig = new File(basePath + "game/rarities.json");
+            File rarityConfigs = new File(basePath + "game/rarities.json");
             this.config.setRarityConfigs(
-                g.fromJson(this.getJson(rarityConfig), new TypeToken<Map<String, RarityConfig>>(){}.getType())
+                g.fromJson(this.getJson(rarityConfigs), new TypeToken<Map<String, RarityConfig>>(){}.getType())
             );
 
             File badgeConfig = new File(basePath + "items/badges.json");
@@ -161,20 +162,20 @@ public class BoarBot implements Bot {
             );
 
             for (BoarItemConfig boar : this.config.getItemConfig().getBoars().values()) {
-                if (boar.getPluralName() == null) {
-                    boar.setPluralName(boar.getName() + "s");
-                }
+                this.setNames(boar);
             }
 
             for (BadgeItemConfig badge : this.config.getItemConfig().getBadges().values()) {
-                if (badge.getPluralName() == null) {
-                    badge.setPluralName(badge.getName() + "s");
-                }
+                this.setNames(badge);
             }
 
             for (PowerupItemConfig powerup : this.config.getItemConfig().getPowerups().values()) {
-                if (powerup.getPluralName() == null) {
-                    powerup.setPluralName(powerup.getName() + "s");
+                this.setNames(powerup);
+            }
+
+            for (RarityConfig rarityConfig : this.getConfig().getRarityConfigs().values()) {
+                if (rarityConfig.getPluralName() == null) {
+                    rarityConfig.setPluralName(rarityConfig.getName() + "s");
                 }
             }
 
@@ -190,10 +191,24 @@ public class BoarBot implements Bot {
 
             this.fixStrings();
 
-            log.info("Successfully loaded config.");
+            log.info("Successfully loaded config");
         } catch (FileNotFoundException exception) {
-            log.error("Unable to find 'config.json' in resources.");
+            log.error("Unable to find one or more config files in 'src/main/resources/config'");
             System.exit(-1);
+        }
+    }
+
+    private void setNames(BaseItemConfig item) {
+        if (item.getPluralName() == null) {
+            item.setPluralName(item.getName() + "s");
+        }
+
+        if (item.getShortName() == null) {
+            item.setShortName(item.getName());
+        }
+
+        if (item.getShortPluralName() == null) {
+            item.setShortPluralName(item.getShortName() + "s");
         }
     }
 
@@ -254,10 +269,10 @@ public class BoarBot implements Bot {
         strs.setStatsUniquesLabel(strs.getStatsUniquesLabel().formatted(strs.getMainItemPluralName()));
         strs.setStatsStreakLabel(strs.getStatsStreakLabel().formatted(strs.getMainItemName()));
         strs.setStatsMiraclesActiveLabel(
-            strs.getStatsMiraclesActiveLabel().formatted(pows.get("miracle").getPluralName())
+            strs.getStatsMiraclesActiveLabel().formatted(pows.get("miracle").getShortPluralName())
         );
         strs.setStatsMiracleRollsLabel(
-            strs.getStatsMiracleRollsLabel().formatted(pows.get("miracle").getName())
+            strs.getStatsMiracleRollsLabel().formatted(pows.get("miracle").getShortName())
         );
 
         strs.setNotificationSuccess(strs.getNotificationSuccess().formatted(

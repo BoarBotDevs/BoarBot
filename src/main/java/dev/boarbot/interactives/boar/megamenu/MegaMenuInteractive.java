@@ -236,7 +236,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
         try (Connection connection = DataUtil.getConnection()) {
             this.numClone = boarUser.getPowerupAmount(connection, "clone");
-            boolean cloneable = this.config.getRarityConfigs().get(this.curRarityKey).getAvgClones() != -1 &&
+            boolean cloneable = this.config.getRarityConfigs().get(this.curRarityKey).getAvgClones() != 0 &&
                 this.numTryClone <= this.numClone;
 
             if (cloneable) {
@@ -310,7 +310,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         try (Connection connection = DataUtil.getConnection()) {
             this.numTransmute = boarUser.getPowerupAmount(connection, "transmute");
             RarityConfig curRarity = this.config.getRarityConfigs().get(this.curRarityKey);
-            boolean transmutable = curRarity.getChargesNeeded() != -1 &&
+            boolean transmutable = curRarity.getChargesNeeded() != 0 &&
                 curRarity.getChargesNeeded() <= this.numTransmute;
 
             if (transmutable) {

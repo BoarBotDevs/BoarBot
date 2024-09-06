@@ -17,13 +17,13 @@ import lombok.ToString;
 @ToString
 public class RarityConfig {
     private String name = "";
-    private String pluralName = "";
+    private String pluralName;
     private String emoji = "";
     private double weight = 0;
     private int baseScore = 0;
     private boolean fromDaily = false;
-    private int chargesNeeded = -1;
-    private int avgClones = -1;
+    private int chargesNeeded = 0;
+    private int avgClones = 0;
     private boolean hunterNeed = false;
     private boolean givesFirstBoar = false;
     private boolean hidden = false;

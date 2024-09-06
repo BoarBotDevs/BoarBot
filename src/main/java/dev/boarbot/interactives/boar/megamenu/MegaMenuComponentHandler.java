@@ -187,7 +187,7 @@ class MegaMenuComponentHandler {
                         this.interactive.getCurRarityKey()
                     ).getAvgClones();
 
-                    boolean cloneable = avgClones != -1 && input > 0;
+                    boolean cloneable = avgClones != 0 && input > 0;
 
                     if (cloneable) {
                         boolean hasBoar = this.interactive.getBoarUser().hasBoar(

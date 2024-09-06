@@ -1,5 +1,6 @@
 package dev.boarbot.util.generators.megamenu;
 
+import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.StatsData;
@@ -17,6 +18,7 @@ import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 
 public class StatsImageGenerator extends MegaMenuGenerator {
     private static final int[] ORIGIN = {0, 0};
@@ -54,6 +56,9 @@ public class StatsImageGenerator extends MegaMenuGenerator {
             case 2 -> this.drawPageThree();
             case 3 -> this.drawPageFour();
             case 4 -> this.drawPageFive();
+            case 5 -> this.drawPageSix();
+            case 6 -> this.drawPageSeven();
+            case 7 -> this.drawPageEight();
         }
 
         this.drawTopInfo();
@@ -63,7 +68,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
     private void drawPageOne() {
         final int LEFT_START_X = 335;
         final int RIGHT_START_X = 1075;
-        final int START_Y = 354;
+        final int START_Y = 359;
         final int LABEL_Y_SPACING = 145;
 
         int[] bucksLabelPos = {LEFT_START_X, START_Y};
@@ -185,7 +190,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
     private void drawPageTwo() {
         final int LEFT_START_X = 240;
         final int RIGHT_START_X = 980;
-        final int START_Y = 499;
+        final int START_Y = 504;
         final int LABEL_Y_SPACING = 145;
 
         int[] blessingsLabelPos = {LEFT_START_X, START_Y};
@@ -303,7 +308,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
     private void drawPageThree() {
         final int LEFT_START_X = 327;
         final int RIGHT_START_X = 1067;
-        final int START_Y = 572;
+        final int START_Y = 577;
         final int LABEL_Y_SPACING = 145;
 
         int[] powAttemptsLabelPos = {LEFT_START_X, START_Y};
@@ -374,19 +379,19 @@ public class StatsImageGenerator extends MegaMenuGenerator {
     }
 
     private void drawPageFour() {
-        final int LEFT_START_X = 315;
-        final int RIGHT_START_X = 1055;
-        final int START_Y = 572;
+        final int LEFT_START_X = 377;
+        final int RIGHT_START_X = 1117;
+        final int START_Y = 577;
         final int LABEL_Y_SPACING = 145;
 
         PowerupItemConfig pow = this.itemConfig.getPowerups().get("miracle");
 
-        String miracleAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getPluralName());
+        String miracleAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
         int[] miracleAmtLabelPos = {LEFT_START_X, START_Y};
         String miracleAmtStr = "%,d".formatted(this.statsData.powAmts().get("miracle"));
         int[] miracleAmtPos = {LEFT_START_X, miracleAmtLabelPos[1] + VALUE_Y_OFFSET};
 
-        String peakMiracleAmtLabel = this.strConfig.getStatsPeakLabel().formatted(miracleAmtLabel);
+        String peakMiracleAmtLabel = this.strConfig.getStatsPeakLabel().formatted(pow.getShortPluralName());
         int[] peakMiracleAmtLabelPos = {LEFT_START_X, miracleAmtLabelPos[1] + LABEL_Y_SPACING};
         String peakMiracleAmtStr = "%,d".formatted(this.statsData.peakPowAmts().get("miracle"));
         int[] peakMiracleAmtPos = {LEFT_START_X, peakMiracleAmtLabelPos[1] + VALUE_Y_OFFSET};
@@ -395,7 +400,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         String miraclesActiveStr = "%,d".formatted(this.statsData.miraclesActive());
         int[] miraclesActivePos = {LEFT_START_X, miraclesActiveLabelPos[1] + VALUE_Y_OFFSET};
 
-        String miraclesUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getPluralName());
+        String miraclesUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getShortPluralName());
         int[] miraclesUsedLabelPos = {LEFT_START_X, miraclesActiveLabelPos[1] + LABEL_Y_SPACING};
         String miraclesUsedStr = "%,d".formatted(this.statsData.powUsed().get("miracle"));
         int[] miraclesUsedPos = {LEFT_START_X, miraclesUsedLabelPos[1] + VALUE_Y_OFFSET};
@@ -441,25 +446,334 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsPeakMiracleRollLabel(), biggestRollLabelPos);
         TextUtil.drawValue(this.textDrawer, biggestRollStr, biggestRollPos, true);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsMiracleBucksLabel(), bestBucksLabelPos);
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsBestBucksLabel(), bestBucksLabelPos);
         TextUtil.drawValue(this.textDrawer, bestBucksStr, bestBucksPos, true);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsMiracleRarityLabel(), bestRarityLabelPos);
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsBestRarityLabel(), bestRarityLabelPos);
         TextUtil.drawValue(this.textDrawer, bestRarityStr, bestRarityPos, true);
     }
 
     private void drawPageFive() {
-        final int LEFT_START_X = 315;
-        final int RIGHT_START_X = 1055;
-        final int START_Y = 572;
+        final int LEFT_START_X = 244;
+        final int RIGHT_START_X = 984;
+        final int LEFT_START_Y = 504;
+        final int RIGHT_START_Y = 355;
         final int LABEL_Y_SPACING = 145;
 
-        int[] transmuteAmtLabelPos = {LEFT_START_X, START_Y};
+        Map<String, RarityConfig> rarityConfigs = this.config.getRarityConfigs();
+        PowerupItemConfig pow = this.itemConfig.getPowerups().get("transmute");
+
+        String transmuteAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
+        int[] transmuteAmtLabelPos = {LEFT_START_X, LEFT_START_Y};
         String transmuteAmtStr = "%,d".formatted(this.statsData.powAmts().get("transmute"));
         int[] transmuteAmtPos = {LEFT_START_X, transmuteAmtLabelPos[1] + VALUE_Y_OFFSET};
 
+        String peakTransmuteAmtLabel = this.strConfig.getStatsPeakLabel().formatted(pow.getShortPluralName());
         int[] peakTransmuteAmtLabelPos = {LEFT_START_X, transmuteAmtLabelPos[1] + LABEL_Y_SPACING};
         String peakTransmuteAmtStr = "%,d".formatted(this.statsData.peakPowAmts().get("transmute"));
         int[] peakTransmuteAmtPos = {LEFT_START_X, peakTransmuteAmtLabelPos[1] + VALUE_Y_OFFSET};
+
+        String transmuteUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getShortPluralName());
+        int[] transmuteUsedLabelPos = {LEFT_START_X, peakTransmuteAmtLabelPos[1] + LABEL_Y_SPACING};
+        String transmuteUsedStr = "%,d".formatted(this.statsData.powUsed().get("transmute"));
+        int[] transmuteUsedPos = {LEFT_START_X, transmuteUsedLabelPos[1] + VALUE_Y_OFFSET};
+
+        String lastTransmuteLabel = this.strConfig.getStatsTransmuteLastLabel();
+        int[] lastTransmuteLabelPos = {LEFT_START_X, transmuteUsedLabelPos[1] + LABEL_Y_SPACING};
+        String lastTransmuteStr = this.statsData.lastTransmuteBoar() == null
+            ? this.strConfig.getUnavailable()
+            : "<>%s<>%s".formatted(
+                BoarUtil.findRarityKey(this.statsData.lastTransmuteBoar()),
+                this.itemConfig.getBoars().get(this.statsData.lastTransmuteBoar()).getName()
+        );
+        int[] lastTransmutePos = {LEFT_START_X, lastTransmuteLabelPos[1] + VALUE_Y_OFFSET};
+
+        String totalTransmutedLabel = this.strConfig.getStatsTotalLabel()
+            .formatted(this.strConfig.getStatsTransmutedLabel().formatted(""));
+        int[] totalTransmutedLabelPos = {LEFT_START_X, lastTransmuteLabelPos[1] + LABEL_Y_SPACING};
+        String totalTransmutedStr = "%,d".formatted(
+            this.statsData.rarityTransmutes().values().stream().reduce(0, Integer::sum)
+        );
+        int[] totalTransmutedPos = {LEFT_START_X, totalTransmutedLabelPos[1] + VALUE_Y_OFFSET};
+
+        int curY = RIGHT_START_Y;
+
+        for (String rarityKey : rarityConfigs.keySet()) {
+            RarityConfig rarityConfig = rarityConfigs.get(rarityKey);
+
+            if (rarityConfig.getChargesNeeded() == 0) {
+                continue;
+            }
+
+            String transmutedRarityLabel = this.strConfig.getStatsTransmutedLabel()
+                .formatted("<>" + rarityKey + "<>" + rarityConfig.getPluralName());
+            int[] transmutedRarityLabelPos = {RIGHT_START_X, curY};
+            String transmutedRarityStr = this.statsData.rarityTransmutes().get(rarityKey) == null
+                ? "0"
+                : "%,d".formatted(this.statsData.rarityTransmutes().get(rarityKey));
+            int[] transmutedRarityPos = {RIGHT_START_X, curY + VALUE_Y_OFFSET};
+
+            TextUtil.drawLabel(this.textDrawer, transmutedRarityLabel, transmutedRarityLabelPos);
+            TextUtil.drawValue(this.textDrawer, transmutedRarityStr, transmutedRarityPos, true);
+
+            curY += LABEL_Y_SPACING;
+        }
+
+        TextUtil.drawLabel(this.textDrawer, transmuteAmtLabel, transmuteAmtLabelPos);
+        TextUtil.drawValue(this.textDrawer, transmuteAmtStr, transmuteAmtPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, peakTransmuteAmtLabel, peakTransmuteAmtLabelPos);
+        TextUtil.drawValue(this.textDrawer, peakTransmuteAmtStr, peakTransmuteAmtPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, transmuteUsedLabel, transmuteUsedLabelPos);
+        TextUtil.drawValue(this.textDrawer, transmuteUsedStr, transmuteUsedPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, lastTransmuteLabel, lastTransmuteLabelPos);
+        TextUtil.drawValue(this.textDrawer, lastTransmuteStr, lastTransmutePos, true);
+
+        TextUtil.drawLabel(this.textDrawer, totalTransmutedLabel, totalTransmutedLabelPos);
+        TextUtil.drawValue(this.textDrawer, totalTransmutedStr, totalTransmutedPos, true);
+    }
+
+    private void drawPageSix() {
+        final int LEFT_START_X = 315;
+        final int RIGHT_START_X = 1055;
+        final int LEFT_START_Y = 504;
+        final int RIGHT_START_Y = 355;
+        final int LABEL_Y_SPACING = 145;
+
+        Map<String, RarityConfig> rarityConfigs = this.config.getRarityConfigs();
+        PowerupItemConfig pow = this.itemConfig.getPowerups().get("clone");
+
+        String cloneAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
+        int[] cloneAmtLabelPos = {LEFT_START_X, LEFT_START_Y};
+        String cloneAmtStr = "%,d".formatted(this.statsData.powAmts().get("clone"));
+        int[] cloneAmtPos = {LEFT_START_X, cloneAmtLabelPos[1] + VALUE_Y_OFFSET};
+
+        String peakCloneAmtLabel = this.strConfig.getStatsPeakLabel().formatted(pow.getShortPluralName());
+        int[] peakCloneAmtLabelPos = {LEFT_START_X, cloneAmtLabelPos[1] + LABEL_Y_SPACING};
+        String peakCloneAmtStr = "%,d".formatted(this.statsData.peakPowAmts().get("clone"));
+        int[] peakCloneAmtPos = {LEFT_START_X, peakCloneAmtLabelPos[1] + VALUE_Y_OFFSET};
+
+        String clonesUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getShortPluralName());
+        int[] clonesUsedLabelPos = {LEFT_START_X, peakCloneAmtLabelPos[1] + LABEL_Y_SPACING};
+        String clonesUsedStr = "%,d".formatted(this.statsData.powUsed().get("clone"));
+        int[] clonesUsedPos = {LEFT_START_X, clonesUsedLabelPos[1] + VALUE_Y_OFFSET};
+
+        String lastCloneLabel = this.strConfig.getStatsCloneLastLabel();
+        int[] lastCloneLabelPos = {LEFT_START_X, clonesUsedLabelPos[1] + LABEL_Y_SPACING};
+        String lastCloneStr = this.statsData.lastCloneBoar() == null
+            ? this.strConfig.getUnavailable()
+            : "<>%s<>%s".formatted(
+                BoarUtil.findRarityKey(this.statsData.lastCloneBoar()),
+                this.itemConfig.getBoars().get(this.statsData.lastCloneBoar()).getName()
+        );
+        int[] lastClonePos = {LEFT_START_X, lastCloneLabelPos[1] + VALUE_Y_OFFSET};
+
+        String totalClonedLabel = this.strConfig.getStatsTotalLabel()
+            .formatted(this.strConfig.getStatsClonedLabel().formatted(""));
+        int[] totalClonedLabelPos = {LEFT_START_X, lastCloneLabelPos[1] + LABEL_Y_SPACING};
+        String totalClonedStr = "%,d".formatted(
+            this.statsData.rarityClones().values().stream().reduce(0, Integer::sum)
+        );
+        int[] totalClonedPos = {LEFT_START_X, totalClonedLabelPos[1] + VALUE_Y_OFFSET};
+
+        int curY = RIGHT_START_Y;
+
+        for (String rarityKey : rarityConfigs.keySet()) {
+            RarityConfig rarityConfig = rarityConfigs.get(rarityKey);
+
+            if (rarityConfig.getChargesNeeded() == 0) {
+                continue;
+            }
+
+            String clonedRarityLabel = this.strConfig.getStatsClonedLabel()
+                .formatted("<>" + rarityKey + "<>" + rarityConfig.getPluralName());
+            int[] clonedRarityLabelPos = {RIGHT_START_X, curY};
+            String clonedRarityStr = this.statsData.rarityClones().get(rarityKey) == null
+                ? "0"
+                : "%,d".formatted(this.statsData.rarityClones().get(rarityKey));
+            int[] clonedRarityPos = {RIGHT_START_X, curY + VALUE_Y_OFFSET};
+
+            TextUtil.drawLabel(this.textDrawer, clonedRarityLabel, clonedRarityLabelPos);
+            TextUtil.drawValue(this.textDrawer, clonedRarityStr, clonedRarityPos, true);
+
+            curY += LABEL_Y_SPACING;
+        }
+
+        TextUtil.drawLabel(this.textDrawer, cloneAmtLabel, cloneAmtLabelPos);
+        TextUtil.drawValue(this.textDrawer, cloneAmtStr, cloneAmtPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, peakCloneAmtLabel, peakCloneAmtLabelPos);
+        TextUtil.drawValue(this.textDrawer, peakCloneAmtStr, peakCloneAmtPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, clonesUsedLabel, clonesUsedLabelPos);
+        TextUtil.drawValue(this.textDrawer, clonesUsedStr, clonesUsedPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, lastCloneLabel, lastCloneLabelPos);
+        TextUtil.drawValue(this.textDrawer, lastCloneStr, lastClonePos, true);
+
+        TextUtil.drawLabel(this.textDrawer, totalClonedLabel, totalClonedLabelPos);
+        TextUtil.drawValue(this.textDrawer, totalClonedStr, totalClonedPos, true);
+    }
+
+    private void drawPageSeven() {
+        final int LEFT_START_X = 377;
+        final int RIGHT_START_X = 1117;
+        final int START_Y = 577;
+        final int LABEL_Y_SPACING = 145;
+
+        PowerupItemConfig pow = this.itemConfig.getPowerups().get("gift");
+
+        String giftAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
+        int[] giftAmtLabelPos = {LEFT_START_X, START_Y};
+        String giftAmtStr = "%,d".formatted(this.statsData.powAmts().get("gift"));
+        int[] giftAmtPos = {LEFT_START_X, giftAmtLabelPos[1] + VALUE_Y_OFFSET};
+
+        String peakGiftAmtLabel = this.strConfig.getStatsPeakLabel().formatted(pow.getShortPluralName());
+        int[] peakGiftAmtLabelPos = {LEFT_START_X, giftAmtLabelPos[1] + LABEL_Y_SPACING};
+        String peakGiftAmtStr = "%,d".formatted(this.statsData.peakPowAmts().get("gift"));
+        int[] peakGiftAmtPos = {LEFT_START_X, peakGiftAmtLabelPos[1] + VALUE_Y_OFFSET};
+
+        String giftsUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getShortPluralName());
+        int[] giftsUsedLabelPos = {LEFT_START_X, peakGiftAmtLabelPos[1] + LABEL_Y_SPACING};
+        String giftsUsedAmtStr = "%,d".formatted(this.statsData.powUsed().get("gift"));
+        int[] giftsUsedAmtPos = {LEFT_START_X, giftsUsedLabelPos[1] + VALUE_Y_OFFSET};
+
+        String handicapLabel = this.strConfig.getStatsGiftHandicapLabel();
+        int[] handicapLabelPos = {LEFT_START_X, giftsUsedLabelPos[1] + LABEL_Y_SPACING};
+
+        String handicapPrefix = "<>silver<>";
+
+        if (this.statsData.giftHandicap() > 0) {
+            handicapPrefix = "<>error<>+";
+        }
+
+        if (this.statsData.giftHandicap() < 0) {
+            handicapPrefix = "<>green<>";
+        }
+
+        String handicapStr = "%s%,dms".formatted(handicapPrefix, this.statsData.giftHandicap());
+        int[] handicapPos = {LEFT_START_X, handicapLabelPos[1] + VALUE_Y_OFFSET};
+
+        String fastestLabel = this.strConfig.getStatsGiftFastestLabel().formatted(pow.getShortName());
+        int[] fastestLabelPos = {RIGHT_START_X, START_Y};
+        String fastestStr = this.statsData.giftFastest() == 0
+            ? this.strConfig.getUnavailable()
+            : "%,dms".formatted(this.statsData.giftFastest());
+        int[] fastestPos = {RIGHT_START_X, fastestLabelPos[1] + VALUE_Y_OFFSET};
+
+        String giftsOpenedLabel = this.strConfig.getStatsGiftOpenedLabel().formatted(pow.getShortPluralName());
+        int[] giftsOpenedLabelPos = {RIGHT_START_X, fastestLabelPos[1] + LABEL_Y_SPACING};
+        String giftsOpenedStr = "%,d".formatted(this.statsData.giftsOpened());
+        int[] giftsOpenedPos = {RIGHT_START_X, giftsOpenedLabelPos[1] + VALUE_Y_OFFSET};
+
+        String giftBucksLabel = this.strConfig.getStatsBestBucksLabel();
+        int[] giftBucksLabelPos = {RIGHT_START_X, giftsOpenedLabelPos[1] + LABEL_Y_SPACING};
+        String giftBucksStr = this.statsData.giftBestBucks() == 0
+            ? this.strConfig.getUnavailable()
+            : "%,d".formatted(this.statsData.giftBestBucks());
+        int[] giftBucksPos = {RIGHT_START_X, giftBucksLabelPos[1] + VALUE_Y_OFFSET};
+
+        String giftRarityLabel = this.strConfig.getStatsBestRarityLabel();
+        int[] giftRarityLabelPos = {RIGHT_START_X, giftBucksLabelPos[1] + LABEL_Y_SPACING};
+        String giftRarityStr = this.statsData.giftBestRarity() == null
+            ? this.strConfig.getUnavailable()
+            : "<>" + this.statsData.giftBestRarity() + "<>" +
+                this.config.getRarityConfigs().get(this.statsData.giftBestRarity()).getName();
+        int[] giftRarityPos = {RIGHT_START_X, giftRarityLabelPos[1] + VALUE_Y_OFFSET};
+
+        TextUtil.drawLabel(this.textDrawer, giftAmtLabel, giftAmtLabelPos);
+        TextUtil.drawValue(this.textDrawer, giftAmtStr, giftAmtPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, peakGiftAmtLabel, peakGiftAmtLabelPos);
+        TextUtil.drawValue(this.textDrawer, peakGiftAmtStr, peakGiftAmtPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, giftsUsedLabel, giftsUsedLabelPos);
+        TextUtil.drawValue(this.textDrawer, giftsUsedAmtStr, giftsUsedAmtPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, handicapLabel, handicapLabelPos);
+        TextUtil.drawValue(this.textDrawer, handicapStr, handicapPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, fastestLabel, fastestLabelPos);
+        TextUtil.drawValue(this.textDrawer, fastestStr, fastestPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, giftsOpenedLabel, giftsOpenedLabelPos);
+        TextUtil.drawValue(this.textDrawer, giftsOpenedStr, giftsOpenedPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, giftBucksLabel, giftBucksLabelPos);
+        TextUtil.drawValue(this.textDrawer, giftBucksStr, giftBucksPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, giftRarityLabel, giftRarityLabelPos);
+        TextUtil.drawValue(this.textDrawer, giftRarityStr, giftRarityPos, true);
+    }
+
+    private void drawPageEight() {
+        final int LEFT_START_X = 363;
+        final int RIGHT_START_X = 1103;
+        final int START_Y = 577;
+        final int LABEL_Y_SPACING = 145;
+
+        int[] questsCompletedLabelPos = {LEFT_START_X, START_Y};
+        String questsCompletedStr = "%,d".formatted(this.statsData.questsCompleted());
+        int[] questsCompletedPos = {LEFT_START_X, questsCompletedLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] fullQuestsCompletedLabelPos = {LEFT_START_X, questsCompletedLabelPos[1] + LABEL_Y_SPACING};
+        String fullQuestsCompletedStr = "%,d".formatted(this.statsData.fullQuestsCompleted());
+        int[] fullQuestsCompletedPos = {LEFT_START_X, fullQuestsCompletedLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] fastestQuestLabelPos = {LEFT_START_X, fullQuestsCompletedLabelPos[1] + LABEL_Y_SPACING};
+        String fastestQuestStr = this.statsData.fastestFullQuest() == 0
+            ? this.strConfig.getUnavailable()
+            : TimeUtil.getTimeDistance(0, this.statsData.fastestFullQuest(), false).substring(3);
+        int[] fastestQuestPos = {LEFT_START_X, fastestQuestLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] autoClaimLabelPos = {LEFT_START_X, fastestQuestLabelPos[1] + LABEL_Y_SPACING};
+        String autoClaimStr = this.statsData.questAutoClaim()
+            ? "<>green<>ENABLED"
+            : "<>error<>DISABLED";
+        int[] autoClaimPos = {LEFT_START_X, autoClaimLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] easyQuestsLabelPos = {RIGHT_START_X, START_Y};
+        String easyQuestsStr = "%,d".formatted(this.statsData.easyQuests());
+        int[] easyQuestsPos = {RIGHT_START_X, easyQuestsLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] mediumQuestsLabelPos = {RIGHT_START_X, easyQuestsLabelPos[1] + LABEL_Y_SPACING};
+        String mediumQuestsStr = "%,d".formatted(this.statsData.mediumQuests());
+        int[] mediumQuestsPos = {RIGHT_START_X, mediumQuestsLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] hardQuestsLabelPos = {RIGHT_START_X, mediumQuestsLabelPos[1] + LABEL_Y_SPACING};
+        String hardQuestsStr = "%,d".formatted(this.statsData.hardQuests());
+        int[] hardQuestsPos = {RIGHT_START_X, hardQuestsLabelPos[1] + VALUE_Y_OFFSET};
+
+        int[] veryHardQuestsLabelPos = {RIGHT_START_X, hardQuestsLabelPos[1] + LABEL_Y_SPACING};
+        String veryHardQuestsStr = "%,d".formatted(this.statsData.veryHardQuests());
+        int[] veryHardQuestsPos = {RIGHT_START_X, veryHardQuestsLabelPos[1] + VALUE_Y_OFFSET};
+
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsQuestsCompletedLabel(), questsCompletedLabelPos);
+        TextUtil.drawValue(this.textDrawer, questsCompletedStr, questsCompletedPos, true);
+
+        TextUtil.drawLabel(
+            this.textDrawer, this.strConfig.getStatsFullQuestsCompletedLabel(), fullQuestsCompletedLabelPos
+        );
+        TextUtil.drawValue(this.textDrawer, fullQuestsCompletedStr, fullQuestsCompletedPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsFastestFullQuestLabel(), fastestQuestLabelPos);
+        TextUtil.drawValue(this.textDrawer, fastestQuestStr, fastestQuestPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsQuestAutoClaimLabel(), autoClaimLabelPos);
+        TextUtil.drawValue(this.textDrawer, autoClaimStr, autoClaimPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsEasyQuestsLabel(), easyQuestsLabelPos);
+        TextUtil.drawValue(this.textDrawer, easyQuestsStr, easyQuestsPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsMediumQuestsLabel(), mediumQuestsLabelPos);
+        TextUtil.drawValue(this.textDrawer, mediumQuestsStr, mediumQuestsPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsHardQuestsLabel(), hardQuestsLabelPos);
+        TextUtil.drawValue(this.textDrawer, hardQuestsStr, hardQuestsPos, true);
+
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsVeryHardQuestsLabel(), veryHardQuestsLabelPos);
+        TextUtil.drawValue(this.textDrawer, veryHardQuestsStr, veryHardQuestsPos, true);
     }
 }
