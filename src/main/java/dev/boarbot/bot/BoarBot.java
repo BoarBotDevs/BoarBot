@@ -105,7 +105,7 @@ public class BoarBot implements Bot {
 
             File colorConfig = new File(basePath + "util/colors.json");
             this.config.setColorConfig(
-                    g.fromJson(this.getJson(colorConfig), new TypeToken<Map<String, String>>(){}.getType())
+                g.fromJson(this.getJson(colorConfig), new TypeToken<Map<String, String>>(){}.getType())
             );
 
             File constantConfig = new File(basePath + "util/constants.json");
@@ -188,11 +188,84 @@ public class BoarBot implements Bot {
                 log.error("There was a problem when creating font from font file %s".formatted(fontFile.getPath()));
             }
 
+            this.fixStrings();
+
             log.info("Successfully loaded config.");
         } catch (FileNotFoundException exception) {
             log.error("Unable to find 'config.json' in resources.");
             System.exit(-1);
         }
+    }
+
+    private void fixStrings() {
+        StringConfig strs = this.config.getStringConfig();
+        Map<String, CommandConfig> cmds = this.config.getCommandConfig();
+        Map<String, PowerupItemConfig> pows = this.config.getItemConfig().getPowerups();
+
+        strs.setNoSetup(strs.getNoSetup().formatted(
+            cmds.get("manage").getName(), cmds.get("manage").getSubcommands().get("setup").getName()
+        ));
+        strs.setError(strs.getError().formatted(
+            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("report").getName()
+        ));
+
+        strs.setSetupFinishedAll(strs.getSetupFinishedAll().formatted(
+            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("daily").getName()
+        ));
+        strs.setSetupInfoResponse1(strs.getSetupInfoResponse1().formatted(
+            cmds.get("manage").getName(), cmds.get("manage").getSubcommands().get("setup").getName()
+        ));
+        strs.setSetupInfoResponse2(strs.getSetupInfoResponse2().formatted(
+            cmds.get("manage").getName(), cmds.get("manage").getSubcommands().get("setup").getName()
+        ));
+
+        strs.setDailyUsed(strs.getDailyUsed().formatted(
+            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("daily").getName(), "%s"
+        ));
+        strs.setDailyFirstTime(strs.getDailyFirstTime().formatted(
+            pows.get("miracle").getPluralName(),
+            pows.get("gift").getPluralName(),
+            cmds.get("main").getName(),
+            cmds.get("main").getSubcommands().get("help").getName()
+        ));
+
+        strs.setDailyTitle(strs.getDailyTitle().formatted(strs.getMainItemName()));
+
+        strs.setProfileTotalLabel(strs.getProfileTotalLabel().formatted(strs.getMainItemPluralName()));
+        strs.setProfileDailiesLabel(strs.getProfileDailiesLabel().formatted(strs.getMainItemPluralName()));
+        strs.setProfileUniquesLabel(strs.getProfileUniquesLabel().formatted(strs.getMainItemPluralName()));
+        strs.setProfileStreakLabel(strs.getProfileStreakLabel().formatted(strs.getMainItemName()));
+        strs.setProfileNextDailyLabel(strs.getProfileNextDailyLabel().formatted(strs.getMainItemName()));
+
+        strs.setCompFavoriteSuccess(
+            strs.getCompFavoriteSuccess().formatted("%s", strs.getMainItemName().toLowerCase())
+        );
+        strs.setCompUnfavoriteSuccess(
+            strs.getCompUnfavoriteSuccess().formatted("%s", strs.getMainItemName().toLowerCase())
+        );
+        strs.setCompCloneTitle(strs.getCompCloneTitle().formatted(strs.getMainItemName()));
+        strs.setCompTransmuteConfirm(strs.getCompTransmuteConfirm().formatted("%s", "%s", strs.getMainItemName()));
+
+        strs.setStatsDailiesLabel(strs.getStatsDailiesLabel().formatted(strs.getMainItemPluralName()));
+        strs.setStatsDailiesMissedLabel(strs.getStatsDailiesMissedLabel().formatted(strs.getMainItemPluralName()));
+        strs.setStatsLastDailyLabel(strs.getStatsLastDailyLabel().formatted(strs.getMainItemName()));
+        strs.setStatsLastBoarLabel(strs.getStatsLastBoarLabel().formatted(strs.getMainItemName()));
+        strs.setStatsFavBoarLabel(strs.getStatsFavBoarLabel().formatted(strs.getMainItemName()));
+        strs.setStatsUniquesLabel(strs.getStatsUniquesLabel().formatted(strs.getMainItemPluralName()));
+        strs.setStatsStreakLabel(strs.getStatsStreakLabel().formatted(strs.getMainItemName()));
+        strs.setStatsMiraclesActiveLabel(
+            strs.getStatsMiraclesActiveLabel().formatted(pows.get("miracle").getPluralName())
+        );
+        strs.setStatsMiracleRollsLabel(
+            strs.getStatsMiracleRollsLabel().formatted(pows.get("miracle").getName())
+        );
+
+        strs.setNotificationSuccess(strs.getNotificationSuccess().formatted(
+            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("daily").getName()
+        ));
+        strs.setNotificationDailyReady(
+            strs.getNotificationDailyReady().formatted(strs.getMainItemName().toLowerCase())
+        );
     }
 
     private String getJson(File file) throws FileNotFoundException {

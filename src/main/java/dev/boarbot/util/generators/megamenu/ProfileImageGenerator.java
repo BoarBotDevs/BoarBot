@@ -134,18 +134,22 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
 
         int[] blessPos = {RIGHT_START_X, blessLabelPos[1] + VALUE_Y_OFFSET};
 
+        String streakBlessLabel = this.strConfig.getBlessCategory1() + " " + this.strConfig.getBlessingsNameVeryShort();
         int[] streakBlessLabelPos = {RIGHT_START_X, blessLabelPos[1] + LABEL_Y_SPACING};
         String streakBlessStr = TextUtil.getFractionStr(this.profileData.streakBless(), this.nums.getMaxStreakBless());
         int[] streakBlessPos = {RIGHT_START_X, streakBlessLabelPos[1] + VALUE_Y_OFFSET};
 
+        String questBlessLabel = this.strConfig.getBlessCategory2() + " " + this.strConfig.getBlessingsNameVeryShort();
         int[] questBlessLabelPos = {RIGHT_START_X, streakBlessLabelPos[1] + LABEL_Y_SPACING};
         String questBlessStr = TextUtil.getFractionStr(this.profileData.questBless(), this.nums.getMaxQuestBless());
         int[] questBlessPos = {RIGHT_START_X, questBlessLabelPos[1] + VALUE_Y_OFFSET};
 
+        String uniqueBlessLabel = this.strConfig.getBlessCategory3() + " " + this.strConfig.getBlessingsNameVeryShort();
         int[] uniqueBlessLabelPos = {RIGHT_RIGHT_START_X, RIGHT_RIGHT_START_Y};
         String uniqueBlessStr = TextUtil.getFractionStr(this.profileData.uniqueBless(), this.nums.getMaxUniqueBless());
-        int[] uniqueBlessPos = {RIGHT_START_X, uniqueBlessLabelPos[1] + VALUE_Y_OFFSET};
+        int[] uniqueBlessPos = {RIGHT_RIGHT_START_X, uniqueBlessLabelPos[1] + VALUE_Y_OFFSET};
 
+        String otherBlessLabel = this.strConfig.getBlessCategory4() + " " + this.strConfig.getBlessingsNameVeryShort();
         int[] otherBlessLabelPos = {RIGHT_RIGHT_START_X, uniqueBlessLabelPos[1] + LABEL_Y_SPACING};
         String otherBlessStr = TextUtil.getFractionStr(this.profileData.otherBless(), this.nums.getMaxOtherBless());
         int[] otherBlessPos = {otherBlessLabelPos[0], otherBlessLabelPos[1] + VALUE_Y_OFFSET};
@@ -170,7 +174,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
 
         this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.LEFT, this.colorConfig.get("font"), mediumFont);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileBucksLabel(), bucksLabelPos);
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getBucksPluralName(), bucksLabelPos);
         TextUtil.drawValue(this.textDrawer, bucksStr, bucksPos);
 
         TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileTotalLabel(), totalLabelPos);
@@ -191,19 +195,19 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileQuestResetLabel(), nextQuestLabelPos);
         TextUtil.drawValue(this.textDrawer, nextQuestStr, nextQuestPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileBlessingsLabel(), blessLabelPos);
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getBlessingsPluralName(), blessLabelPos);
         TextUtil.drawValue(this.textDrawer, blessStr, blessPos, false, blessHex);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileStreakBlessLabel(), streakBlessLabelPos);
+        TextUtil.drawLabel(this.textDrawer, streakBlessLabel, streakBlessLabelPos);
         TextUtil.drawValue(this.textDrawer, streakBlessStr, streakBlessPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileQuestBlessLabel(), questBlessLabelPos);
+        TextUtil.drawLabel(this.textDrawer, questBlessLabel, questBlessLabelPos);
         TextUtil.drawValue(this.textDrawer, questBlessStr, questBlessPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileUniqueBlessLabel(), uniqueBlessLabelPos);
+        TextUtil.drawLabel(this.textDrawer, uniqueBlessLabel, uniqueBlessLabelPos);
         TextUtil.drawValue(this.textDrawer, uniqueBlessStr, uniqueBlessPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileOtherBlessLabel(), otherBlessLabelPos);
+        TextUtil.drawLabel(this.textDrawer, otherBlessLabel, otherBlessLabelPos);
         TextUtil.drawValue(this.textDrawer, otherBlessStr, otherBlessPos);
 
         TextUtil.drawLabel(this.textDrawer, recentStr, RECENT_LABEL_POS);

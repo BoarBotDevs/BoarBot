@@ -1,5 +1,5 @@
 {
-  "boar": {
+  "main": {
     "name": "boar",
     "description": "Commands to play and interact with BoarBot",
     "subcommands": {
@@ -310,7 +310,7 @@
       }
     }
   },
-  "boar-manage": {
+  "manage": {
     "name": "boar-manage",
     "default_member_permissions": 32,
     "description": "Commands to manage BoarBot",
@@ -322,7 +322,7 @@
       }
     }
   },
-  "boar-dev": {
+  "dev": {
     "name": "boar-dev",
     "default_member_permissions": 0,
     "description": "Commands exclusive to developers of BoarBot",

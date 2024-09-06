@@ -531,7 +531,13 @@ public class BoarUser {
                 miracle_rolls,
                 highest_miracles_active,
                 miracle_best_bucks,
-                miracle_best_rarity
+                miracle_best_rarity,
+                (
+                    SELECT boars_info.rarity_id
+                    FROM boars_info, collected_boars
+                    WHERE collected_boars.user_id = ? AND collected_boars.boar_id = boars_info.boar_id
+                    ORDER BY edition DESC LIMIT 1
+                ) AS last_transmute_rarity
             FROM users
             WHERE user_id = ?;
         """;
@@ -540,9 +546,7 @@ public class BoarUser {
             SELECT prompt_id
             FROM prompt_stats
             WHERE user_id = ?
-            ORDER BY average_placement
-            DESC
-            LIMIT 3;
+            ORDER BY average_placement DESC LIMIT 3;
         """;
 
         String powAmtsQuery = """
@@ -551,27 +555,41 @@ public class BoarUser {
             WHERE user_id = ?;
         """;
 
+        String transmuteQuery = """
+            SELECT rarity_id, amount
+            FROM transmute_stats
+            WHERE user_id = ?;
+        """;
+
         try (
             PreparedStatement statement1 = connection.prepareStatement(mainQuery);
             PreparedStatement statement2 = connection.prepareStatement(promptQuery);
-            PreparedStatement statement3 = connection.prepareStatement(powAmtsQuery)
+            PreparedStatement statement3 = connection.prepareStatement(powAmtsQuery);
+            PreparedStatement statement4 = connection.prepareStatement(transmuteQuery)
         ) {
             statement1.setString(1, this.userID);
             statement1.setString(2, this.userID);
+            statement1.setString(3, this.userID);
 
             statement2.setString(1, this.userID);
 
             statement3.setString(1, this.userID);
 
+            statement4.setString(1, this.userID);
+
             try (
                 ResultSet results1 = statement1.executeQuery();
                 ResultSet results2 = statement2.executeQuery();
-                ResultSet results3 = statement3.executeQuery()
+                ResultSet results3 = statement3.executeQuery();
+                ResultSet results4 = statement4.executeQuery()
             ) {
                 List<String> topPrompts = new ArrayList<>();
+
                 Map<String, Integer> powAmts = new HashMap<>();
                 Map<String, Integer> powHighestAmts = new HashMap<>();
                 Map<String, Integer> powUsed = new HashMap<>();
+
+                Map<String, Integer> transmuteRarities = new HashMap<>();
 
                 while (results2.next()) {
                     topPrompts.add(results2.getString("prompt_id"));
@@ -583,6 +601,10 @@ public class BoarUser {
                     powAmts.put(powerupID, results3.getInt("amount"));
                     powHighestAmts.put(powerupID, results3.getInt("highest_amount"));
                     powUsed.put(powerupID, results3.getInt("amount_used"));
+                }
+
+                while (results4.next()) {
+                    transmuteRarities.put(results4.getString("rarity_id"), results4.getInt("amount"));
                 }
 
                 if (results1.next()) {
@@ -617,14 +639,16 @@ public class BoarUser {
                         results1.getInt("powerup_fastest_time"),
                         results1.getDouble("powerup_average_placement"),
                         topPrompts,
-                        powAmts.get("miracle"),
-                        powHighestAmts.get("miracle"),
+                        powAmts,
+                        powHighestAmts,
+                        powUsed,
                         results1.getInt("miracles_active"),
-                        powUsed.get("miracle"),
                         results1.getInt("miracle_rolls"),
                         results1.getInt("highest_miracles_active"),
                         results1.getInt("miracle_best_bucks"),
-                        results1.getString("miracle_best_rarity")
+                        results1.getString("miracle_best_rarity"),
+                        results1.getString("last_transmute_rarity"),
+                        transmuteRarities
                     );
                 }
             }

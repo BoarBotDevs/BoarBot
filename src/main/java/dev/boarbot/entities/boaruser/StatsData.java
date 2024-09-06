@@ -2,7 +2,9 @@ package dev.boarbot.entities.boaruser;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public record StatsData(
     long bucks,
@@ -35,14 +37,16 @@ public record StatsData(
     int fastestPowerup,
     double avgPowerupPlacement,
     List<String> bestPrompts,
-    int miraclesAmt,
-    int highestMiraclesAmt,
+    Map<String, Integer> powAmts,
+    Map<String, Integer> peakPowAmts,
+    Map<String, Integer> powUsed,
     int miraclesActive,
-    int miraclesUsed,
     int miracleRolls,
     int miraclesMostUsed,
     int miracleBestBucks,
-    String miracleBestRarity
+    String miracleBestRarity,
+    String lastTransmuteRarity,
+    Map<String, Integer> rarityTransmutes
 ) {
     public StatsData() {
         this(
@@ -76,14 +80,16 @@ public record StatsData(
             0,
             0,
             new ArrayList<>(),
+            new HashMap<>(),
+            new HashMap<>(),
+            new HashMap<>(),
             0,
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            null
+            null,
+            null,
+            new HashMap<>()
         );
     }
 }

@@ -28,6 +28,23 @@ public class StringConfig {
     private String banSuccess = "";
     private String invalidInput = "";
 
+    // Important names and symbols used widely
+
+    private String mainItemName = "";
+    private String mainItemPluralName = "";
+    private String bucksName = "";
+    private String bucksPluralName = "";
+    private String blessingsName = "";
+    private String blessingsPluralName = "";
+    private String blessingsNameShortened = "";
+    private String blessingsPluralNameShortened = "";
+    private String blessingsNameVeryShort = "";
+    private String blessingsSymbol = "";
+    private String blessCategory1 = "";
+    private String blessCategory2 = "";
+    private String blessCategory3 = "";
+    private String blessCategory4 = "";
+
     // Setup command messages
 
     private String setupCancelled = "";
@@ -52,23 +69,10 @@ public class StringConfig {
     private String firstTitle = "";
     private String dailyNoBoarFound = "";
 
-    // Give command messages/strings (also badges)
-
-    private String giveBoarChoiceTag = "";
-    private String giveBadgeChoiceTag = "";
-    private String giveBoar = "";
-    private String giveBadID = "";
-    private String giveTitle = "";
-    private String giveBadge = "";
-    private String giveBadgeTitle = "";
-    private String giveBadgeHas = "";
-    private String giftOpenTitle = "";
-
     // Mega Menu command strings
 
     private String megaMenuNoBadges = "";
     private String megaMenuDateLabel = "";
-    private String profileBucksLabel = "";
     private String profileTotalLabel = "";
     private String profileDailiesLabel = "";
     private String profileUniquesLabel = "";
@@ -76,11 +80,6 @@ public class StringConfig {
     private String profileNextDailyLabel = "";
     private String profileDailyReady = "";
     private String profileQuestResetLabel = "";
-    private String profileBlessingsLabel = "";
-    private String profileStreakBlessLabel = "";
-    private String profileUniqueBlessLabel = "";
-    private String profileQuestBlessLabel = "";
-    private String profileOtherBlessLabel = "";
     private String profileFavLabel = "";
     private String profileRecentLabel = "";
     private String compBlocked = "";
@@ -105,30 +104,18 @@ public class StringConfig {
     private String compNoSpecies = "";
     private String compUpdateLabel = "";
     private String compDefaultUpdate = "";
-    private String statsBucksLabel = "";
-    private String statsPeakBucksLabel = "";
+    private String statsTotalLabel = "";
+    private String statsPeakLabel = "";
+    private String statsUsedLabel = "";
     private String statsDailiesLabel = "";
     private String statsDailiesMissedLabel = "";
     private String statsLastDailyLabel = "";
     private String statsLastBoarLabel = "";
     private String statsFavBoarLabel = "";
-    private String statsTotalBoarsLabel = "";
-    private String statsPeakTotalBoarsLabel = "";
     private String statsUniquesLabel = "";
-    private String statsPeakUniquesLabel = "";
     private String statsStreakLabel = "";
-    private String statsPeakStreakLabel = "";
     private String statsNotificationLabel = "";
-    private String statsBlessingsLabel = "";
-    private String statsPeakBlessingsLabel = "";
-    private String statsStreakBlessLabel = "";
-    private String statsPeakStreakBlessLabel = "";
-    private String statsQuestBlessLabel = "";
-    private String statsPeakQuestBlessLabel = "";
-    private String statsUniqueBlessLabel = "";
-    private String statsPeakUniqueBlessLabel = "";
-    private String statsOtherBlessLabel = "";
-    private String statsPeakOtherBlessLabel = "";
+    private String statsBlessLabel = "";
     private String statsPowAttemptsLabel = "";
     private String statsPowWinsLabel = "";
     private String statsPowPerfectLabel = "";
@@ -137,100 +124,11 @@ public class StringConfig {
     private String statsPowBestLabel1 = "";
     private String statsPowBestLabel2 = "";
     private String statsPowBestLabel3 = "";
-    private String statsMiracleAmtLabel = "";
-    private String statsPeakMiracleAmtLabel = "";
     private String statsMiraclesActiveLabel = "";
-    private String statsMiraclesUsedLabel = "";
     private String statsMiracleRollsLabel = "";
     private String statsPeakMiracleRollLabel = "";
     private String statsMiracleBucksLabel = "";
     private String statsMiracleRarityLabel = "";
-
-    // Event strings
-
-    private String eventTitle = "";
-    private String eventEndedTitle = "";
-    private String eventsDisabled = "";
-    private String eventParticipated = "";
-    private String eventNobody = "";
-
-    // Powerup strings
-
-    private String powRightFull = "";
-    private String powRight = "";
-    private String powWrongFirst = "";
-    private String powWrongSecond = "";
-    private String powWrong = "";
-    private String powNoMore = "";
-    private String powTop = "";
-    private String powTopResult = "";
-    private String powAvg = "";
-    private String powAvgResult = "";
-    private String powAvgResultPlural = "";
-    private String powPrompt = "";
-    private String powResponse = "";
-    private String powResponseShort = "";
-    private String powReward = "";
-
-    // Market Strings
-
-    private String marketConfirmInstaBuy = "";
-    private String marketUpdatedInstaBuy = "";
-    private String marketConfirmInstaSell = "";
-    private String marketUpdatedInstaSell = "";
-    private String marketInstaComplete = "";
-    private String marketConfirmBuyOrder = "";
-    private String marketConfirmSellOrder = "";
-    private String marketOrderComplete = "";
-    private String marketConfirmUpdateIncrease = "";
-    private String marketConfirmUpdateDecrease = "";
-    private String marketUpdateComplete = "";
-    private String marketClaimComplete = "";
-    private String marketMaxItems = "";
-    private String marketCancelComplete = "";
-    private String marketNoRoom = "";
-    private String marketMustClaim = "";
-    private String marketNoBucks = "";
-    private String marketNoEdition = "";
-    private String marketNoEditionOrders = "";
-    private String marketNoItems = "";
-    private String marketNoOrders = "";
-    private String marketMaxOrders = "";
-    private String marketInvalid = "";
-    private String marketWrongEdition = "";
-    private String marketTooMany = "";
-    private String marketTooHigh = "";
-    private String marketEditionHigh = "";
-    private String marketHasEdition = "";
-    private String marketClosed = "";
-    private String marketTooYoung = "";
-    private String marketTooCheap = "";
-    private String marketTooExpensive = "";
-    private String marketBestOrder = "";
-    private String marketBSBuyNowLabel = "";
-    private String marketBSSellNowLabel = "";
-    private String marketBSBuyOrdLabel = "";
-    private String marketBSSellOrdLabel = "";
-    private String marketOrdSell = "";
-    private String marketOrdBuy = "";
-    private String marketOrdList = "";
-    private String marketOrdExpire = "";
-    private String marketOrdPriceLabel = "";
-    private String marketOrdFillLabel = "";
-    private String marketOrdClaimLabel = "";
-
-    // Powerup strings
-
-    private String giftConfirm = "";
-    private String giftFail = "";
-    private String giftOut = "";
-    private String giftSent = "";
-    private String giftNone = "";
-    private String giftFrom = "";
-    private String giftOpened = "";
-    private String giftOpenedWow = "";
-    private String miracleConfirm = "";
-    private String miracleSuccess = "";
 
     // Notification strings
 
@@ -241,20 +139,6 @@ public class StringConfig {
     private String notificationStopStr = "";
     private String notificationDisabledStr = "";
     private String[] notificationExtras = {};
-    private String notificationServerPing = "";
-
-    // Leaderboard strings
-
-    private String notInBoard = "";
-    private String boardHeader = "";
-    private String boardFooter = "";
-    private String deletedUsername = "";
-
-    // Quest strings
-
-    private String questCompletionBonus = "";
-    private String questFullyComplete = "";
-    private String questInvFull = "";
 
     // Report/Self-wipe strings
 
@@ -266,18 +150,7 @@ public class StringConfig {
 
     // Miscellaneous strings
 
-    private String blessingsName = "";
-    private String blessingsPluralName = "";
-    private String blessingsSymbol = "";
-    private String noParentChannel = "";
-    private String notValidChannel = "";
-    private String defaultSelectPlaceholder = "";
-    private String emptySelect = "";
-    private String channelOptionLabel = "";
     private String unavailable = "";
-    private String defaultImageName = "";
-    private String fontName = "";
-    private String commandDebugPrefix = "";
     private String pullLink = "";
     private String githubImg = "";
     private String supportLink = "";
