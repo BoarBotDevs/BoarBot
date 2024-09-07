@@ -42,6 +42,16 @@ public class PathConfig {
     private String collUnderlay = "";
     private String profUnderlay = "";
     private String compUnderlay = "";
+    private String powAnomUnderlay = "";
+    private String powCellNone = "";
+    private String powCellCommon = "";
+    private String powCellUncommon = "";
+    private String powCellRare = "";
+    private String powCellEpic = "";
+    private String powCellLegendary = "";
+    private String powCellMythic = "";
+    private String powCellDivine = "";
+    private String powCellEntropic = "";
     private String rarityBorder = "";
     private String favorite = "";
 

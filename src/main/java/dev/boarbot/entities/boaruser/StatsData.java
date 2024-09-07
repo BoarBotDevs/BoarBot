@@ -21,7 +21,7 @@ public record StatsData(
     int boarStreak,
     int highestStreak,
     boolean notificationsOn,
-    int blessings,
+    long blessings,
     int highestBlessings,
     int streakBless,
     int highestStreakBless,

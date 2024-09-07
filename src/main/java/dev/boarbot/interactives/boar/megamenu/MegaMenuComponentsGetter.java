@@ -25,6 +25,7 @@ class MegaMenuComponentsGetter {
     private List<SelectOption> filterOptions = new ArrayList<>();
     private List<SelectOption> sortOptions = new ArrayList<>();
     private List<SelectOption> interactOptions = new ArrayList<>();
+    private List<SelectOption> powOptions = new ArrayList<>();
 
     private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getMegaMenu();
 
@@ -39,7 +40,7 @@ class MegaMenuComponentsGetter {
             case MegaMenuView.COLLECTION -> getCompendiumCollectionComponents();
             case MegaMenuView.COMPENDIUM -> getCompendiumCollectionComponents(true);
             case MegaMenuView.EDITIONS -> getEditionsComponents();
-            case MegaMenuView.POWERUPS -> getCompendiumCollectionComponents();
+            case MegaMenuView.POWERUPS -> getPowerupsComponents();
             case MegaMenuView.QUESTS -> getCompendiumCollectionComponents();
             case MegaMenuView.BADGES -> getCompendiumCollectionComponents();
         };
@@ -167,6 +168,21 @@ class MegaMenuComponentsGetter {
         return new ActionRow[] {
             nav[0], nav[1], ActionRow.of(backRow)
         };
+    }
+
+    private ActionRow[] getPowerupsComponents() {
+        ActionRow[] nav = getNav();
+
+        if (this.powOptions.isEmpty()) {
+            this.makeSelectOptions(this.COMPONENTS.get("powSelect"));
+        }
+
+        List<ItemComponent> selectRow = InteractiveUtil.makeComponents(
+            this.interactive.getInteractionID(),
+            this.COMPONENTS.get("powSelect")
+        );
+
+        return new ActionRow[] {nav[0], nav[1], ActionRow.of(selectRow)};
     }
 
     private List<ItemComponent> getFilterRow() {
@@ -385,6 +401,7 @@ class MegaMenuComponentsGetter {
             }
             case "SORT_SELECT" -> this.sortOptions = options;
             case "INTERACT_SELECT" -> this.interactOptions = options;
+            case "POW_SELECT" -> this.powOptions = options;
         }
     }
 }

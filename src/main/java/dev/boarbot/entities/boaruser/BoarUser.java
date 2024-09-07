@@ -453,7 +453,6 @@ public class BoarUser {
                 unique_boars,
                 num_skyblock,
                 boar_streak,
-                blessings,
                 streak_bless,
                 quest_bless,
                 unique_bless,
@@ -476,7 +475,7 @@ public class BoarUser {
                         results.getInt("unique_boars"),
                         results.getInt("num_skyblock"),
                         results.getInt("boar_streak"),
-                        results.getInt("blessings"),
+                        this.getBlessings(connection),
                         results.getInt("streak_bless"),
                         results.getInt("unique_bless"),
                         results.getInt("quest_bless"),
@@ -508,7 +507,6 @@ public class BoarUser {
                 boar_streak,
                 highest_streak,
                 notifications_on,
-                blessings,
                 highest_blessings,
                 streak_bless,
                 highest_streak_bless,
@@ -666,7 +664,7 @@ public class BoarUser {
                         results1.getInt("boar_streak"),
                         results1.getInt("highest_streak"),
                         results1.getBoolean("notifications_on"),
-                        results1.getInt("blessings"),
+                        this.getBlessings(connection),
                         results1.getInt("highest_blessings"),
                         results1.getInt("streak_bless"),
                         results1.getInt("highest_streak_bless"),
@@ -713,6 +711,39 @@ public class BoarUser {
         }
 
         return statsData;
+    }
+
+    public PowerupsData getPowerupsData(Connection connection) throws SQLException {
+        PowerupsData powData;
+
+        String powQuery = """
+            SELECT powerup_id, amount
+            FROM collected_powerups
+            WHERE user_id = ?;
+        """;
+
+        try (
+            PreparedStatement statement = connection.prepareStatement(powQuery)
+        ) {
+            statement.setString(1, this.userID);
+
+            try (
+                ResultSet results = statement.executeQuery()
+            ) {
+                Map<String, Integer> powAmts = new HashMap<>();
+
+                while (results.next()) {
+                    powAmts.put(results.getString("powerup_id"), results.getInt("amount"));
+                }
+
+                powData = new PowerupsData(
+                    this.getBlessings(connection),
+                    powAmts
+                );
+            }
+        }
+
+        return powData;
     }
 
     public boolean canUseDaily(Connection connection) throws SQLException {

@@ -9,9 +9,7 @@ import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.modals.megamenu.CloneModalHandler;
-import dev.boarbot.modals.megamenu.FindBoarModalHandler;
-import dev.boarbot.modals.PageInputModalHandler;
+import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
@@ -90,7 +88,7 @@ class MegaMenuComponentHandler {
                         this.config.getModalConfig().get("pageInput")
                     );
 
-                    this.interactive.setModalHandler(new PageInputModalHandler(this.compEvent, this.interactive));
+                    this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
                     this.compEvent.replyModal(modal).complete();
                 }
 
@@ -104,7 +102,7 @@ class MegaMenuComponentHandler {
                         this.config.getModalConfig().get("findBoar")
                     );
 
-                    this.interactive.setModalHandler(new FindBoarModalHandler(this.compEvent, this.interactive));
+                    this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
                     this.compEvent.replyModal(modal).complete();
                 }
 
@@ -269,7 +267,7 @@ class MegaMenuComponentHandler {
                     ModalUtil.makeModalComponents(modalConfig.getComponents())
                 );
 
-                this.interactive.setModalHandler(new CloneModalHandler(this.compEvent, this.interactive));
+                this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
 
                 if (this.interactive.isStopped()) {
                     return;

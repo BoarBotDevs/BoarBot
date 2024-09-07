@@ -36,7 +36,7 @@ class MegaMenuGeneratorMaker {
             case MegaMenuView.COMPENDIUM -> this.makeCompendiumGen();
             case MegaMenuView.EDITIONS -> this.makeEditionsGen();
             case MegaMenuView.STATS -> this.makeStatsGen();
-            case MegaMenuView.POWERUPS -> this.makeCollectionGen();
+            case MegaMenuView.POWERUPS -> this.makePowerupsGen();
             case MegaMenuView.QUESTS -> this.makeCollectionGen();
             case MegaMenuView.BADGES -> this.makeCollectionGen();
         };
@@ -181,6 +181,32 @@ class MegaMenuGeneratorMaker {
             this.interactive.getBadgeIDs(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getStatsData()
+        );
+    }
+
+    private MegaMenuGenerator makePowerupsGen() throws SQLException {
+        boolean notUpdated = this.interactive.getViewsToUpdateData().get(this.view) == null ||
+            !this.interactive.getViewsToUpdateData().get(this.view);
+
+        if (notUpdated) {
+            try (Connection connection = DataUtil.getConnection()) {
+                this.interactive.setPowData(this.interactive.getBoarUser().getPowerupsData(connection));
+                this.interactive.getViewsToUpdateData().put(this.view, true);
+            }
+        }
+
+        this.interactive.setMaxPage(0);
+        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
+            this.interactive.setPrevPage(this.interactive.getPage());
+            this.interactive.setPage(this.interactive.getMaxPage());
+        }
+
+        return new PowerupsImageGenerator(
+            this.interactive.getPage(),
+            this.interactive.getBoarUser(),
+            this.interactive.getBadgeIDs(),
+            this.interactive.getFirstJoinedDate(),
+            this.interactive.getPowData()
         );
     }
 

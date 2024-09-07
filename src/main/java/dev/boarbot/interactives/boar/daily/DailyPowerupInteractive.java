@@ -10,7 +10,6 @@ import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ModalInteractive;
-import dev.boarbot.modals.MiracleAmountModalHandler;
 import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
@@ -84,7 +83,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                         ModalUtil.makeModalComponents(modalConfig.getComponents())
                     );
 
-                    this.modalHandler = new MiracleAmountModalHandler(compEvent, this);
+                    this.modalHandler = new ModalHandler(compEvent, this);
                     compEvent.replyModal(modal).complete();
                 }
 

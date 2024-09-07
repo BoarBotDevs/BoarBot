@@ -331,6 +331,39 @@
       "custom_id": "BACK",
       "label": "Go Back",
       "style": 2
+    },
+    "powSelect": {
+      "type": 3,
+      "custom_id": "POW_SELECT",
+      "min_values": 1,
+      "max_values": 1,
+      "placeholder": "Choose powerup...",
+      "options": [
+        {
+          "label": "Miracle Charms",
+          "value": "miracle",
+          "emoji": "<:miracle:1250135118744522802>",
+          "description": "Boosts your Boar Blessings"
+        },
+        {
+          "label": "Cloning Serums",
+          "value": "clone",
+          "emoji": "<:clone:1270806135657599068>",
+          "description": "Duplicates a boar"
+        },
+        {
+          "label": "Boar Gifts",
+          "value": "gift",
+          "emoji": "<:gift:1282041935799783424>",
+          "description": "Sends a gift to the current channel"
+        },
+        {
+          "label": "Transmutation Charges",
+          "value": "transmute",
+          "emoji": "<:transmute:1270807233701220454>",
+          "description": "Converts a boar to a boar of the next rarity"
+        }
+      ]
     }
   }
 }

@@ -2,7 +2,6 @@ package dev.boarbot.util.modal;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
-import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -17,12 +16,11 @@ public final class ModalUtil {
         return List.of(ActionRow.of(componentsMade));
     }
 
-    public static String findDuplicateModalHandler(String userID, Class<? extends ModalHandler> modalHandlerClass) {
+    public static String findDuplicateModalHandler(String userID) {
         for (String key : BoarBotApp.getBot().getModalHandlers().keySet()) {
             boolean isUserModalHandler = key.endsWith(userID);
-            boolean isSameType = modalHandlerClass.equals(BoarBotApp.getBot().getModalHandlers().get(key).getClass());
 
-            if (isUserModalHandler && isSameType) {
+            if (isUserModalHandler) {
                 return key;
             }
         }

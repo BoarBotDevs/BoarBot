@@ -536,17 +536,18 @@ public class StatsImageGenerator extends MegaMenuGenerator {
     }
 
     private void drawPageSix() {
-        final int LEFT_START_X = 315;
-        final int RIGHT_START_X = 1055;
-        final int LEFT_START_Y = 504;
-        final int RIGHT_START_Y = 355;
+        final int LEFT_START_X = 118;
+        final int MIDDLE_START_X = 618;
+        final int RIGHT_START_X = 1252;
+        final int EDGE_START_Y = 504;
+        final int MIDDLE_START_Y = 431;
         final int LABEL_Y_SPACING = 145;
 
         Map<String, RarityConfig> rarityConfigs = this.config.getRarityConfigs();
         PowerupItemConfig pow = this.itemConfig.getPowerups().get("clone");
 
         String cloneAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
-        int[] cloneAmtLabelPos = {LEFT_START_X, LEFT_START_Y};
+        int[] cloneAmtLabelPos = {LEFT_START_X, EDGE_START_Y};
         String cloneAmtStr = "%,d".formatted(this.statsData.powAmts().get("clone"));
         int[] cloneAmtPos = {LEFT_START_X, cloneAmtLabelPos[1] + VALUE_Y_OFFSET};
 
@@ -578,27 +579,38 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         );
         int[] totalClonedPos = {LEFT_START_X, totalClonedLabelPos[1] + VALUE_Y_OFFSET};
 
-        int curY = RIGHT_START_Y;
+        int curY = MIDDLE_START_Y;
+        int curCount = 1;
 
         for (String rarityKey : rarityConfigs.keySet()) {
             RarityConfig rarityConfig = rarityConfigs.get(rarityKey);
 
-            if (rarityConfig.getChargesNeeded() == 0) {
+            if (rarityConfig.getAvgClones() == 0) {
                 continue;
             }
 
+            int curX = curCount <= 6
+                ? MIDDLE_START_X
+                : RIGHT_START_X;
+
             String clonedRarityLabel = this.strConfig.getStatsClonedLabel()
                 .formatted("<>" + rarityKey + "<>" + rarityConfig.getPluralName());
-            int[] clonedRarityLabelPos = {RIGHT_START_X, curY};
+            int[] clonedRarityLabelPos = {curX, curY};
             String clonedRarityStr = this.statsData.rarityClones().get(rarityKey) == null
                 ? "0"
                 : "%,d".formatted(this.statsData.rarityClones().get(rarityKey));
-            int[] clonedRarityPos = {RIGHT_START_X, curY + VALUE_Y_OFFSET};
+            int[] clonedRarityPos = {curX, curY + VALUE_Y_OFFSET};
 
             TextUtil.drawLabel(this.textDrawer, clonedRarityLabel, clonedRarityLabelPos);
             TextUtil.drawValue(this.textDrawer, clonedRarityStr, clonedRarityPos, true);
 
-            curY += LABEL_Y_SPACING;
+            if (curCount == 6) {
+                curY = EDGE_START_Y;
+            } else {
+                curY += LABEL_Y_SPACING;
+            }
+
+            curCount++;
         }
 
         TextUtil.drawLabel(this.textDrawer, cloneAmtLabel, cloneAmtLabelPos);

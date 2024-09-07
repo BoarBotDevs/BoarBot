@@ -144,6 +144,11 @@ public class StringConfig {
     private String statsMediumQuestsLabel = "";
     private String statsHardQuestsLabel = "";
     private String statsVeryHardQuestsLabel = "";
+    private String powCellLabel = "";
+    private String powCellAmtLabel = "";
+    private String powCellEmptyLabel = "";
+    private String powCellErrorLabel = "";
+    private String powCellDriftLabel = "";
 
     // Notification strings
 

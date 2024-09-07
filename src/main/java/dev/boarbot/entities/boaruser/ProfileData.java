@@ -11,7 +11,7 @@ public record ProfileData(
     int uniqueBoars,
     int numSkyblock,
     int streak,
-    int blessings,
+    long blessings,
     int streakBless,
     int uniqueBless,
     int questBless,

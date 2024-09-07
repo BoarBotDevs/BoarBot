@@ -2,7 +2,9 @@ package dev.boarbot.modals;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.util.modal.ModalUtil;
+import dev.boarbot.util.time.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -13,21 +15,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public abstract class ModalHandler {
-    protected final BotConfig config = BoarBotApp.getBot().getConfig();
+public class ModalHandler {
+    private final BotConfig config = BoarBotApp.getBot().getConfig();
 
-    ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ModalInteractive receiver;
 
-    protected final GenericComponentInteractionCreateEvent compEvent;
-    protected final ComponentInteraction interaction;
-    protected final User user;
+    private final ComponentInteraction interaction;
+    private final User user;
 
-    protected ModalHandler(GenericComponentInteractionCreateEvent compEvent) {
-        this.compEvent = compEvent;
+    public ModalHandler(GenericComponentInteractionCreateEvent compEvent, ModalInteractive receiver) {
         this.interaction = compEvent.getInteraction();
         this.user = compEvent.getUser();
 
-        String duplicateModalKey = ModalUtil.findDuplicateModalHandler(this.user.getId(), this.getClass());
+        this.receiver = receiver;
+
+        String duplicateModalKey = ModalUtil.findDuplicateModalHandler(this.user.getId());
 
         if (duplicateModalKey != null) {
             try {
@@ -40,13 +42,17 @@ public abstract class ModalHandler {
 
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);
 
-        this.executor.submit(() -> this.delayStop(
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> this.delayStop(
             this.config.getNumberConfig().getInteractiveIdle()
         ));
-        this.executor.shutdown();
+        executor.shutdown();
     }
 
-    public abstract void execute(ModalInteractionEvent compEvent);
+    public void execute(ModalInteractionEvent modalEvent) {
+        this.receiver.attemptExecute(null, modalEvent, TimeUtil.getCurMilli());
+        this.stop();
+    }
 
     private void delayStop(long waitTime) {
         try {
