@@ -144,7 +144,9 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             this.miraclesToUse = 0;
             this.currentImageUpload = new EmbedImageGenerator(
-                strConfig.getDailyPowFailed() + " " + strConfig.getDailyPow()
+                strConfig.getNoPow()
+                    .formatted(this.config.getItemConfig().getPowerups().get("miracle").getPluralName()) +
+                        " " + strConfig.getDailyPow()
             ).generate().getFileUpload();
         } catch (SQLException exception) {
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
@@ -208,49 +210,39 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         PowerupItemConfig miracleConfig = this.config.getItemConfig().getPowerups().get("miracle");
 
         try {
-            String amountInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-            int amount = Integer.parseInt(amountInput);
-
-            if (amount <= 0) {
-                throw new NumberFormatException("Input must be greater than 0.");
-            }
-
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
 
             try (Connection connection = DataUtil.getConnection()) {
                 int numMiraclesHas = boarUser.getPowerupAmount(connection, "miracle");
 
-                if (amount > numMiraclesHas) {
-                    amount = numMiraclesHas;
+                String amountInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
+                int amount = Math.min(Integer.parseInt(amountInput), numMiraclesHas);
+
+                if (amount == 0) {
+                    throw new NumberFormatException();
                 }
 
                 if (amount > 0) {
                     long blessings = boarUser.getBlessings(connection, amount);
                     this.miraclesToUse = amount;
 
-                    String miracleStr = this.miraclesToUse == 1
-                        ? miracleConfig.getName()
-                        : miracleConfig.getPluralName();
-                    String blessHex = TextUtil.getBlessHex(blessings);
-                    String blessingsStr = blessings == 1
-                        ? strConfig.getBlessingsName()
-                        : strConfig.getBlessingsPluralName();
-
                     this.currentImageUpload = new EmbedImageGenerator(
-                        this.config.getStringConfig().getDailyPowAttempt().formatted(
+                        this.config.getStringConfig().getMiracleAttempt().formatted(
                             this.miraclesToUse,
-                            miracleStr,
-                            blessHex,
+                            this.miraclesToUse == 1
+                                ? miracleConfig.getName()
+                                : miracleConfig.getPluralName(),
+                            strConfig.getBlessingsPluralName(),
+                            TextUtil.getBlessHex(blessings),
                             blessings > 1000
                                 ? strConfig.getBlessingsSymbol() + " "
                                 : "",
-                            blessings,
-                            blessingsStr
+                            blessings
                         )
                     ).generate().getFileUpload();
                 } else {
                     this.currentImageUpload = new EmbedImageGenerator(
-                        strConfig.getDailyPowFailed() + " " + strConfig.getDailyPow()
+                        strConfig.getNoPow().formatted(miracleConfig.getPluralName()) + " " + strConfig.getDailyPow()
                     ).generate().getFileUpload();
                 }
             }

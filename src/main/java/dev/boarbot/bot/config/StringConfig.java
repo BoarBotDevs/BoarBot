@@ -60,8 +60,6 @@ public class StringConfig {
     // Daily command messages/strings
 
     private String dailyPow = "";
-    private String dailyPowAttempt = "";
-    private String dailyPowFailed = "";
     private String dailyUsed = "";
     private String dailyFirstTime = "";
     private String dailyUsedNotify = "";
@@ -92,7 +90,6 @@ public class StringConfig {
     private String compCloneFailed = "";
     private String compCloneTitle = "";
     private String compNoBoar = "";
-    private String compNoPow = "";
     private String compTransmuteConfirm = "";
     private String compTransmuteSuccess = "";
     private String compTransmuteFirst = "";
@@ -149,6 +146,8 @@ public class StringConfig {
     private String powCellEmptyLabel = "";
     private String powCellErrorLabel = "";
     private String powCellDriftLabel = "";
+    private String powCannotUse = "";
+    private String powMiracleSuccess = "";
 
     // Notification strings
 
@@ -170,6 +169,8 @@ public class StringConfig {
 
     // Miscellaneous strings
 
+    private String noPow = "";
+    private String miracleAttempt = "";
     private String unavailable = "";
     private String pullLink = "";
     private String githubImg = "";

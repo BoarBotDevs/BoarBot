@@ -35,6 +35,25 @@ class MegaMenuComponentsGetter {
     }
 
     public ActionRow[] getComponents() {
+        if (this.interactive.isAcknowledgeOpen()) {
+            List<ItemComponent> backRow = InteractiveUtil.makeComponents(
+                this.interactive.getInteractionID(),
+                this.COMPONENTS.get("backBtn")
+            );
+
+            return new ActionRow[] {ActionRow.of(backRow)};
+        }
+
+        if (this.interactive.isConfirmOpen()) {
+            List<ItemComponent> confirmRow = InteractiveUtil.makeComponents(
+                this.interactive.getInteractionID(),
+                this.COMPONENTS.get("cancelBtn"),
+                this.COMPONENTS.get("confirmBtn")
+            );
+
+            return new ActionRow[] {ActionRow.of(confirmRow)};
+        }
+
         return switch (this.interactive.getCurView()) {
             case MegaMenuView.PROFILE, MegaMenuView.STATS -> this.getNav();
             case MegaMenuView.COLLECTION -> getCompendiumCollectionComponents();
@@ -52,28 +71,6 @@ class MegaMenuComponentsGetter {
 
     private ActionRow[] getCompendiumCollectionComponents(boolean isCompendium) {
         List<ActionRow> actionRows = new ArrayList<>();
-
-        if (this.interactive.isAcknowledgeOpen()) {
-            List<ItemComponent> backRow = InteractiveUtil.makeComponents(
-                this.interactive.getInteractionID(),
-                this.COMPONENTS.get("backBtn")
-            );
-
-            actionRows.add(ActionRow.of(backRow));
-            return actionRows.toArray(new ActionRow[0]);
-        }
-
-        if (this.interactive.isConfirmOpen()) {
-            List<ItemComponent> confirmRow = InteractiveUtil.makeComponents(
-                this.interactive.getInteractionID(),
-                this.COMPONENTS.get("cancelBtn"),
-                this.COMPONENTS.get("confirmBtn")
-            );
-
-            actionRows.add(ActionRow.of(confirmRow));
-            return actionRows.toArray(new ActionRow[0]);
-        }
-
         ActionRow[] nav = getNav();
 
         List<ItemComponent> interactRow = null;

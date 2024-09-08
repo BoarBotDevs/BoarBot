@@ -6,6 +6,7 @@ import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
+import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
@@ -13,6 +14,7 @@ import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
+import dev.boarbot.util.graphics.TextUtil;
 import dev.boarbot.util.modal.ModalUtil;
 import lombok.extern.log4j.Log4j2;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -25,7 +27,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.List;
+import java.util.*;
 
 @Log4j2
 class MegaMenuComponentHandler {
@@ -60,7 +62,11 @@ class MegaMenuComponentHandler {
 
             String compID = this.compEvent.getComponentId().split(",")[1];
 
-            if (!compID.equals("PAGE") && !compID.equals("BOAR_FIND") && !compID.equals("INTERACT_SELECT")) {
+            Set<String> modalPossibleIDs = new HashSet<>(
+                Arrays.asList("PAGE", "BOAR_FIND", "INTERACT_SELECT", "POW_SELECT")
+            );
+
+            if (!modalPossibleIDs.contains(compID)) {
                 this.compEvent.deferEdit().queue();
             }
 
@@ -147,6 +153,8 @@ class MegaMenuComponentHandler {
                         this.interactive.setBoarPage(this.interactive.getCurBoarEntry().getKey());
                     }
                 }
+
+                case "POW_SELECT" -> doPowerup();
             }
         }
     }
@@ -179,15 +187,16 @@ class MegaMenuComponentHandler {
                     this.interactive.setNumClone(this.interactive.getBoarUser().getPowerupAmount(connection, "clone"));
 
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-                    int input = Math.min(Math.max(Integer.parseInt(inputStr), 1), this.interactive.getNumClone());
+                    int input = Math.min(Integer.parseInt(inputStr), this.interactive.getNumClone());
 
-                    int avgClones = this.config.getRarityConfigs().get(
-                        this.interactive.getCurRarityKey()
-                    ).getAvgClones();
+                    if (input == 0) {
+                        throw new NumberFormatException();
+                    }
 
-                    boolean cloneable = avgClones != 0 && input > 0;
+                    int avgClones = this.config.getRarityConfigs()
+                        .get(this.interactive.getCurRarityKey()).getAvgClones();
 
-                    if (cloneable) {
+                    if (avgClones != 0) {
                         boolean hasBoar = this.interactive.getBoarUser().hasBoar(
                             this.interactive.getCurBoarEntry().getKey(), connection
                         );
@@ -214,8 +223,65 @@ class MegaMenuComponentHandler {
                         this.interactive.setAcknowledgeImageGen(
                             new OverlayImageGenerator(
                                 null,
-                                strConfig.getCompNoPow().formatted(
+                                strConfig.getNoPow().formatted(
                                     this.config.getItemConfig().getPowerups().get("clone").getPluralName()
+                                )
+                            )
+                        );
+                    }
+                } catch (NumberFormatException exception1) {
+                    this.interactive.setAcknowledgeOpen(true);
+                    this.interactive.setAcknowledgeImageGen(
+                        new OverlayImageGenerator(null, strConfig.getInvalidInput())
+                    );
+                } catch (SQLException exception2) {
+                    log.error("Failed to get user data", exception2);
+                } finally {
+                    this.interactive.execute(null);
+                }
+            }
+
+            case "MIRACLE_AMOUNT" -> {
+                StringConfig strConfig = this.config.getStringConfig();
+                PowerupItemConfig miracleConfig = this.config.getItemConfig().getPowerups().get("miracle");
+
+                try (Connection connection = DataUtil.getConnection()) {
+                    this.interactive.setPowData(this.interactive.getBoarUser().getPowerupsData(connection));
+                    int numMiracles = this.interactive.getPowData().powAmts().get("miracle");
+
+                    String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
+                    int input = Math.min(Integer.parseInt(inputStr), numMiracles);
+
+                    if (input == 0) {
+                        throw new NumberFormatException();
+                    }
+
+                    if (input > 0) {
+                        long blessings = this.interactive.getBoarUser().getBlessings(connection, input);
+                        this.interactive.setNumTryCharm(input);
+
+                        this.interactive.setConfirmOpen(true);
+                        this.interactive.setConfirmString(
+                            strConfig.getMiracleAttempt().formatted(
+                                this.interactive.getNumTryCharm(),
+                                this.interactive.getNumTryCharm() == 1
+                                    ? miracleConfig.getName()
+                                    : miracleConfig.getPluralName(),
+                                strConfig.getBlessingsPluralName(),
+                                TextUtil.getBlessHex(blessings),
+                                blessings > 1000
+                                    ? strConfig.getBlessingsSymbol() + " "
+                                    : "",
+                                blessings
+                            )
+                        );
+                    } else {
+                        this.interactive.setAcknowledgeOpen(true);
+                        this.interactive.setAcknowledgeImageGen(
+                            new OverlayImageGenerator(
+                                null,
+                                strConfig.getNoPow().formatted(
+                                    this.config.getItemConfig().getPowerups().get("miracle").getPluralName()
                                 )
                             )
                         );
@@ -325,6 +391,46 @@ class MegaMenuComponentHandler {
                         new OverlayImageGenerator(null, BoarBotApp.getBot().getImageCacheMap().get("large" + curBoarID))
                     );
                 }
+            }
+        }
+    }
+
+    private void doPowerup() {
+        this.interactive.setPowerupUsing(
+            ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
+        );
+
+        switch (this.interactive.getPowerupUsing()) {
+            case "miracle" -> {
+                ModalConfig modalConfig = this.config.getModalConfig().get("miracleAmount");
+
+                Modal modal = new ModalImpl(
+                    ModalUtil.makeModalID(modalConfig.getId(), this.compEvent),
+                    modalConfig.getTitle(),
+                    ModalUtil.makeModalComponents(modalConfig.getComponents())
+                );
+
+                this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
+                this.compEvent.replyModal(modal).complete();
+            }
+
+            case "gift" -> {
+
+            }
+
+            case "clone", "transmute" -> {
+                this.compEvent.deferEdit().queue();
+
+                this.interactive.setAcknowledgeOpen(true);
+                this.interactive.setAcknowledgeImageGen(
+                    new OverlayImageGenerator(
+                        null,
+                        this.config.getStringConfig().getPowCannotUse().formatted(
+                            this.config.getItemConfig().getPowerups().get(this.interactive.getPowerupUsing())
+                                .getPluralName()
+                        )
+                    )
+                );
             }
         }
     }

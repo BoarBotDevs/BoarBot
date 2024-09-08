@@ -14,6 +14,7 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.generators.OverlayImageGenerator;
+import dev.boarbot.util.graphics.TextUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
@@ -55,6 +56,12 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     @Getter private boolean isSkyblockGuild;
 
+    @Getter @Setter private boolean confirmOpen = false;
+    @Getter @Setter private String confirmString;
+
+    @Getter @Setter private boolean acknowledgeOpen = false;
+    @Getter @Setter private OverlayImageGenerator acknowledgeImageGen;
+
     @Getter @Setter private boolean filterOpen = false;
     @Getter @Setter private int filterBits = 0;
 
@@ -64,11 +71,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter @Setter private boolean interactOpen = false;
     @Getter @Setter private InteractType interactType;
 
-    @Getter @Setter private boolean confirmOpen = false;
-    @Getter @Setter private String confirmString;
-
-    @Getter @Setter private boolean acknowledgeOpen = false;
-    @Getter @Setter private OverlayImageGenerator acknowledgeImageGen;
+    @Getter @Setter private String powerupUsing;
 
     @Getter private final BoarUser boarUser;
 
@@ -83,6 +86,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter @Setter private int numTransmute;
     @Getter @Setter private int numClone;
     @Getter @Setter private int numTryClone;
+    @Getter @Setter private int numTryCharm;
 
     @Getter @Setter private ProfileData profileData;
 
@@ -189,7 +193,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 try (Connection connection = DataUtil.getConnection()) {
                     boarUser.setSortVal(connection, this.sortVal);
                 }
-            } else if (this.interactOpen) {
+            } else if (this.interactType != null) {
                 switch (this.interactType) {
                     case FAVORITE -> this.doFavorite(boarUser);
                     case CLONE -> this.doClone(boarUser);
@@ -198,6 +202,15 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
                 this.acknowledgeOpen = true;
                 this.interactType = null;
+                this.confirmOpen = false;
+            } else if (this.powerupUsing != null) {
+                switch (this.powerupUsing) {
+                    case "miracle" -> this.doCharm(boarUser);
+                    case "gift" -> {}
+                }
+
+                this.acknowledgeOpen = true;
+                this.powerupUsing = null;
                 this.confirmOpen = false;
             }
         } catch (SQLException exception) {
@@ -279,7 +292,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 }
             } else {
                 this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, strConfig.getCompNoPow().formatted(powConfig.get("transmute").getPluralName())
+                    null, strConfig.getNoPow().formatted(powConfig.get("transmute").getPluralName())
                 );
             }
         }
@@ -337,7 +350,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 }
             } else {
                 this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, strConfig.getCompNoPow().formatted(powConfig.get("transmute").getPluralName())
+                    null, strConfig.getNoPow().formatted(powConfig.get("transmute").getPluralName())
                 );
             }
         }
@@ -371,6 +384,37 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                     newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook()
                 );
             });
+        }
+    }
+
+    private void doCharm(BoarUser boarUser) throws SQLException {
+        StringConfig strConfig = this.config.getStringConfig();
+
+        try (Connection connection = DataUtil.getConnection()) {
+            if (this.numTryCharm <= boarUser.getPowerupAmount(connection, this.powerupUsing)) {
+                boarUser.activateMiracles(connection, this.numTryCharm);
+
+                long blessings = this.boarUser.getBlessings(connection);
+                this.acknowledgeImageGen = new OverlayImageGenerator(
+                    null,
+                    strConfig.getPowMiracleSuccess().formatted(
+                        strConfig.getBlessingsPluralName(),
+                        TextUtil.getBlessHex(blessings),
+                        blessings > 1000
+                            ? strConfig.getBlessingsSymbol() + " "
+                            : "",
+                        blessings
+                    )
+                );
+
+                return;
+            }
+
+            this.acknowledgeImageGen = new OverlayImageGenerator(
+                null,
+                strConfig.getNoPow()
+                    .formatted(this.config.getItemConfig().getPowerups().get(this.powerupUsing).getPluralName())
+            );
         }
     }
 
