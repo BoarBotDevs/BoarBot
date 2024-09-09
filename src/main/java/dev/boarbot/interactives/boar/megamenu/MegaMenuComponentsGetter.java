@@ -60,7 +60,7 @@ class MegaMenuComponentsGetter {
             case MegaMenuView.COMPENDIUM -> getCompendiumCollectionComponents(true);
             case MegaMenuView.EDITIONS -> getEditionsComponents();
             case MegaMenuView.POWERUPS -> getPowerupsComponents();
-            case MegaMenuView.QUESTS -> getCompendiumCollectionComponents();
+            case MegaMenuView.QUESTS -> this.getNav();
             case MegaMenuView.BADGES -> getCompendiumCollectionComponents();
         };
     }

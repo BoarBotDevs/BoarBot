@@ -1,18 +1,7 @@
 package dev.boarbot.bot;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.config.*;
-import dev.boarbot.bot.config.commands.CommandConfig;
-import dev.boarbot.bot.config.commands.SubcommandConfig;
-import dev.boarbot.bot.config.components.ComponentConfig;
-import dev.boarbot.bot.config.items.BadgeItemConfig;
-import dev.boarbot.bot.config.items.BaseItemConfig;
-import dev.boarbot.bot.config.items.BoarItemConfig;
-import dev.boarbot.bot.config.items.PowerupItemConfig;
-import dev.boarbot.bot.config.modals.ModalConfig;
-import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.CommandListener;
@@ -20,27 +9,16 @@ import dev.boarbot.listeners.ComponentListener;
 import dev.boarbot.listeners.ModalListener;
 import dev.boarbot.listeners.StopMessageListener;
 import dev.boarbot.modals.ModalHandler;
-import dev.boarbot.util.boar.BoarUtil;
-import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.graphics.GraphicsUtil;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.utils.data.DataObject;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
-import java.sql.*;
 import java.util.*;
-import java.util.List;
 
 @Slf4j
 public class BoarBot implements Bot {
@@ -65,11 +43,10 @@ public class BoarBot implements Bot {
     public void create(BotType type) {
         this.botType = type;
 
-        this.loadConfig();
-        this.loadIntoDatabase("rarities");
-        this.loadIntoDatabase("boars");
-        this.loadIntoDatabase("quests");
-        this.loadCache();
+        ConfigLoader.loadConfig();
+        DatabaseLoader.loadIntoDatabase("rarities");
+        DatabaseLoader.loadIntoDatabase("boars");
+        CacheLoader.loadCache();
 
         this.jda = JDABuilder.createDefault(this.env.get("TOKEN"))
             .addEventListeners(
@@ -78,7 +55,7 @@ public class BoarBot implements Bot {
             .setActivity(Activity.customStatus("/boar help | boarbot.dev"))
             .build();
 
-        registerSubcommands();
+        CommandLoader.registerSubcommands();
     }
 
     @Override
@@ -92,295 +69,8 @@ public class BoarBot implements Bot {
     }
 
     @Override
-    public void loadConfig() {
-        try {
-            log.info("Attempting to load configs from 'src/main/resources/config'");
-
-            Gson g = new Gson();
-            String basePath = "src/%s/resources/config/".formatted(
-                this.botType == BotType.TEST ? "test" : "main"
-            );
-
-            File langConfig = new File(basePath + "lang/en_us.json");
-            this.config.setStringConfig(g.fromJson(this.getJson(langConfig), StringConfig.class));
-
-            File colorConfig = new File(basePath + "util/colors.json");
-            this.config.setColorConfig(
-                g.fromJson(this.getJson(colorConfig), new TypeToken<Map<String, String>>(){}.getType())
-            );
-
-            File constantConfig = new File(basePath + "util/constants.json");
-            this.config.setNumberConfig(g.fromJson(this.getJson(constantConfig), NumberConfig.class));
-
-            File pathConfig = new File(basePath + "util/paths.json");
-            this.config.setPathConfig(g.fromJson(this.getJson(pathConfig), PathConfig.class));
-
-            File mainConfig = new File(basePath + "config.json");
-            this.config.setMainConfig(g.fromJson(this.getJson(mainConfig), MainConfig.class));
-
-            File commandConfig = new File(basePath + "discord/commands.json");
-            this.config.setCommandConfig(
-                g.fromJson(this.getJson(commandConfig), new TypeToken<Map<String, CommandConfig>>(){}.getType())
-            );
-
-            File componentConfig = new File(basePath + "discord/components.json");
-            this.config.setComponentConfig(g.fromJson(this.getJson(componentConfig), ComponentConfig.class));
-
-            File modalConfig = new File(basePath + "discord/modals.json");
-            this.config.setModalConfig(
-                g.fromJson(this.getJson(modalConfig), new TypeToken<Map<String, ModalConfig>>(){}.getType())
-            );
-
-            File promptConfig = new File(basePath + "game/pow_prompts.json");
-            this.config.setPromptConfig(
-                g.fromJson(this.getJson(promptConfig), new TypeToken<Map<String, PromptConfig>>(){}.getType())
-            );
-
-            File questConfig = new File(basePath + "game/quests.json");
-            this.config.setQuestConfig(
-                g.fromJson(this.getJson(questConfig), new TypeToken<Map<String, QuestConfig>>(){}.getType())
-            );
-
-            File rarityConfigs = new File(basePath + "game/rarities.json");
-            this.config.setRarityConfigs(
-                g.fromJson(this.getJson(rarityConfigs), new TypeToken<Map<String, RarityConfig>>(){}.getType())
-            );
-
-            File badgeConfig = new File(basePath + "items/badges.json");
-            this.config.getItemConfig().setBadges(
-                g.fromJson(this.getJson(badgeConfig), new TypeToken<Map<String, BadgeItemConfig>>(){}.getType())
-            );
-
-            File boarConfig = new File(basePath + "items/boars.json");
-            this.config.getItemConfig().setBoars(
-                g.fromJson(this.getJson(boarConfig), new TypeToken<Map<String, BoarItemConfig>>(){}.getType())
-            );
-
-            File powerupConfig = new File(basePath + "items/powerups.json");
-            this.config.getItemConfig().setPowerups(
-                g.fromJson(this.getJson(powerupConfig), new TypeToken<Map<String, PowerupItemConfig>>(){}.getType())
-            );
-
-            for (BoarItemConfig boar : this.config.getItemConfig().getBoars().values()) {
-                this.setNames(boar);
-            }
-
-            for (BadgeItemConfig badge : this.config.getItemConfig().getBadges().values()) {
-                this.setNames(badge);
-            }
-
-            for (PowerupItemConfig powerup : this.config.getItemConfig().getPowerups().values()) {
-                this.setNames(powerup);
-            }
-
-            for (RarityConfig rarityConfig : this.getConfig().getRarityConfigs().values()) {
-                if (rarityConfig.getPluralName() == null) {
-                    rarityConfig.setPluralName(rarityConfig.getName() + "s");
-                }
-            }
-
-            File fontFile = new File(
-                this.config.getPathConfig().getFontAssets() + this.config.getPathConfig().getMainFont()
-            );
-
-            try {
-                this.font = Font.createFont(Font.TRUETYPE_FONT, fontFile);
-            } catch (Exception exception) {
-                log.error("There was a problem when creating font from font file %s".formatted(fontFile.getPath()));
-            }
-
-            this.fixStrings();
-
-            log.info("Successfully loaded config");
-        } catch (FileNotFoundException exception) {
-            log.error("Unable to find one or more config files in 'src/main/resources/config'");
-            System.exit(-1);
-        }
-    }
-
-    private void setNames(BaseItemConfig item) {
-        if (item.getPluralName() == null) {
-            item.setPluralName(item.getName() + "s");
-        }
-
-        if (item.getShortName() == null) {
-            item.setShortName(item.getName());
-        }
-
-        if (item.getShortPluralName() == null) {
-            item.setShortPluralName(item.getShortName() + "s");
-        }
-    }
-
-    private void fixStrings() {
-        StringConfig strs = this.config.getStringConfig();
-        Map<String, CommandConfig> cmds = this.config.getCommandConfig();
-        Map<String, PowerupItemConfig> pows = this.config.getItemConfig().getPowerups();
-
-        strs.setNoSetup(strs.getNoSetup().formatted(
-            cmds.get("manage").getName(), cmds.get("manage").getSubcommands().get("setup").getName()
-        ));
-        strs.setError(strs.getError().formatted(
-            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("report").getName()
-        ));
-
-        strs.setSetupFinishedAll(strs.getSetupFinishedAll().formatted(
-            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("daily").getName()
-        ));
-        strs.setSetupInfoResponse1(strs.getSetupInfoResponse1().formatted(
-            cmds.get("manage").getName(), cmds.get("manage").getSubcommands().get("setup").getName()
-        ));
-        strs.setSetupInfoResponse2(strs.getSetupInfoResponse2().formatted(
-            cmds.get("manage").getName(), cmds.get("manage").getSubcommands().get("setup").getName()
-        ));
-
-        strs.setDailyUsed(strs.getDailyUsed().formatted(
-            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("daily").getName(), "%s"
-        ));
-        strs.setDailyFirstTime(strs.getDailyFirstTime().formatted(
-            pows.get("miracle").getPluralName(),
-            pows.get("gift").getPluralName(),
-            cmds.get("main").getName(),
-            cmds.get("main").getSubcommands().get("help").getName()
-        ));
-
-        strs.setDailyTitle(strs.getDailyTitle().formatted(strs.getMainItemName()));
-
-        strs.setProfileTotalLabel(strs.getProfileTotalLabel().formatted(strs.getMainItemPluralName()));
-        strs.setProfileDailiesLabel(strs.getProfileDailiesLabel().formatted(strs.getMainItemPluralName()));
-        strs.setProfileUniquesLabel(strs.getProfileUniquesLabel().formatted(strs.getMainItemPluralName()));
-        strs.setProfileStreakLabel(strs.getProfileStreakLabel().formatted(strs.getMainItemName()));
-        strs.setProfileNextDailyLabel(strs.getProfileNextDailyLabel().formatted(strs.getMainItemName()));
-
-        strs.setCompFavoriteSuccess(
-            strs.getCompFavoriteSuccess().formatted("%s", strs.getMainItemName().toLowerCase())
-        );
-        strs.setCompUnfavoriteSuccess(
-            strs.getCompUnfavoriteSuccess().formatted("%s", strs.getMainItemName().toLowerCase())
-        );
-        strs.setCompCloneTitle(strs.getCompCloneTitle().formatted(strs.getMainItemName()));
-        strs.setCompTransmuteConfirm(strs.getCompTransmuteConfirm().formatted("%s", "%s", strs.getMainItemName()));
-
-        strs.setStatsDailiesLabel(strs.getStatsDailiesLabel().formatted(strs.getMainItemPluralName()));
-        strs.setStatsDailiesMissedLabel(strs.getStatsDailiesMissedLabel().formatted(strs.getMainItemPluralName()));
-        strs.setStatsLastDailyLabel(strs.getStatsLastDailyLabel().formatted(strs.getMainItemName()));
-        strs.setStatsLastBoarLabel(strs.getStatsLastBoarLabel().formatted(strs.getMainItemName()));
-        strs.setStatsFavBoarLabel(strs.getStatsFavBoarLabel().formatted(strs.getMainItemName()));
-        strs.setStatsUniquesLabel(strs.getStatsUniquesLabel().formatted(strs.getMainItemPluralName()));
-        strs.setStatsStreakLabel(strs.getStatsStreakLabel().formatted(strs.getMainItemName()));
-        strs.setStatsMiraclesActiveLabel(
-            strs.getStatsMiraclesActiveLabel().formatted(pows.get("miracle").getShortPluralName())
-        );
-        strs.setStatsMiracleRollsLabel(
-            strs.getStatsMiracleRollsLabel().formatted(pows.get("miracle").getShortName())
-        );
-
-        strs.setNotificationSuccess(strs.getNotificationSuccess().formatted(
-            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("daily").getName()
-        ));
-        strs.setNotificationDailyReady(
-            strs.getNotificationDailyReady().formatted(strs.getMainItemName().toLowerCase())
-        );
-    }
-
-    private String getJson(File file) throws FileNotFoundException {
-        Scanner reader = new Scanner(file);
-        StringBuilder jsonStr = new StringBuilder();
-
-        while (reader.hasNextLine()) {
-            jsonStr.append(reader.nextLine());
-        }
-
-        return jsonStr.toString();
-    }
-
-    private void loadIntoDatabase(String databaseType) {
-        try (
-            Connection connection = DataUtil.getConnection();
-            Statement statement = connection.createStatement()
-        ) {
-            StringBuilder sqlStatement = new StringBuilder();
-
-            if (databaseType.equals("rarities")) {
-                String resetQuery = """
-                    DELETE FROM rarities_info
-                    WHERE rarity_id = 'all_done';
-                """;
-
-                statement.executeUpdate(resetQuery);
-            }
-
-            String tableColumns = "(boar_id, rarity_id, is_skyblock)";
-
-            if (databaseType.equals("rarities")) {
-                tableColumns = "(rarity_id, prior_rarity_id, base_bucks, hunter_need)";
-            } else if (databaseType.equals("quests")) {
-                tableColumns = "(quest_id, easy_value, medium_value, hard_value, very_hard_value, value_type)";
-            }
-
-            sqlStatement.append("DELETE FROM %s_info;".formatted(databaseType));
-
-            statement.executeUpdate(sqlStatement.toString());
-            sqlStatement.setLength(0);
-
-            sqlStatement.append("INSERT INTO %s_info %s VALUES ".formatted(databaseType, tableColumns));
-
-            switch (databaseType) {
-                case "boars" -> {
-                    for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
-                        if (this.getConfig().getItemConfig().getBoars().get(boarID).isBlacklisted()) {
-                            continue;
-                        }
-
-                        int isSB = this.getConfig().getItemConfig().getBoars().get(boarID).isSB() ? 1 : 0;
-                        String rarityID = BoarUtil.findRarityKey(boarID);
-
-                        sqlStatement.append("('%s','%s',%d),".formatted(boarID, rarityID, isSB));
-                    }
-                }
-                case "rarities" -> {
-                    String priorRarityID = null;
-                    for (String rarityID : this.getConfig().getRarityConfigs().keySet()) {
-                        int score = this.getConfig().getRarityConfigs().get(rarityID).getBaseScore();
-                        int hunterNeed = this.getConfig().getRarityConfigs().get(rarityID).isHunterNeed() ? 1 : 0;
-
-                        sqlStatement.append("('%s','%s',%d,%d),".formatted(rarityID, priorRarityID, score, hunterNeed));
-                        priorRarityID = rarityID;
-                    }
-                }
-                case "quests" -> {
-                    for (String questID : this.getConfig().getQuestConfig().keySet()) {
-                        QuestConfig questConfig = this.getConfig().getQuestConfig().get(questID);
-
-                        sqlStatement.append("('%s','%s','%s','%s','%s','%s'),".formatted(
-                            questID,
-                            questConfig.getQuestVals()[0][0],
-                            questConfig.getQuestVals()[1][0],
-                            questConfig.getQuestVals()[2][0],
-                            questConfig.getQuestVals()[3][0],
-                            questConfig.getValType().toUpperCase()
-                        ));
-                    }
-                }
-            }
-
-            sqlStatement.setLength(sqlStatement.length() - 1);
-            sqlStatement.append(";");
-
-            statement.executeUpdate(sqlStatement.toString());
-
-            if (databaseType.equals("boars")) {
-                String resetQuery = """
-                    INSERT INTO rarities_info (rarity_id, prior_rarity_id, base_bucks, hunter_need)
-                    VALUES ('all_done', null, 0, 0)
-                """;
-
-                statement.executeUpdate(resetQuery);
-            }
-        } catch (SQLException exception) {
-            log.error("Something went wrong when loading config data into database.", exception);
-            System.exit(-1);
-        }
+    public Dotenv getEnv() {
+        return this.env;
     }
 
     @Override
@@ -388,118 +78,19 @@ public class BoarBot implements Bot {
         return this.config;
     }
 
-    private void loadCache() {
-        NumberConfig nums = this.getConfig().getNumberConfig();
-        PathConfig pathConfig = this.getConfig().getPathConfig();
-
-        int[] origin = {0, 0};
-        int[] largeBoarSize = nums.getLargeBoarSize();
-        int[] bigBoarSize = nums.getBigBoarSize();
-        int[] mediumBigBoarSize = nums.getMediumBigBoarSize();
-        int[] mediumBoarSize = nums.getMediumBoarSize();
-
-        log.info("Attempting to load boar images into cache");
-
-        for (String boarID : this.getConfig().getItemConfig().getBoars().keySet()) {
-            try {
-                BoarItemConfig boarInfo = this.getConfig().getItemConfig().getBoars().get(boarID);
-
-                if (boarInfo.getFile().isEmpty()) {
-                    throw new IllegalArgumentException("Failed to find file.");
-                }
-
-                String filePath = boarInfo.getStaticFile() != null
-                    ? pathConfig.getBoars() + boarInfo.getStaticFile()
-                    : pathConfig.getBoars() + boarInfo.getFile();
-
-                if (filePath.endsWith(".gif")) {
-                    throw new IllegalArgumentException("Animated file is missing a static version.");
-                }
-
-                BufferedImage largeBoarImage = new BufferedImage(
-                    largeBoarSize[0], largeBoarSize[1], BufferedImage.TYPE_INT_ARGB
-                );
-                Graphics2D largeBoarGraphics = largeBoarImage.createGraphics();
-
-                BufferedImage bigBoarImage = new BufferedImage(
-                    bigBoarSize[0], bigBoarSize[1], BufferedImage.TYPE_INT_ARGB
-                );
-                Graphics2D bigBoarGraphics = bigBoarImage.createGraphics();
-
-                BufferedImage mediumBigBoarImage = new BufferedImage(
-                    mediumBigBoarSize[0], mediumBigBoarSize[1], BufferedImage.TYPE_INT_ARGB
-                );
-                Graphics2D mediumBigBoarGraphics = mediumBigBoarImage.createGraphics();
-
-                BufferedImage mediumBoarImage = new BufferedImage(
-                    mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
-                );
-                Graphics2D mediumBoarGraphics = mediumBoarImage.createGraphics();
-
-                GraphicsUtil.drawImage(largeBoarGraphics, filePath, origin, largeBoarSize);
-                this.imageCacheMap.put("large" + boarID, largeBoarImage);
-
-                GraphicsUtil.drawImage(bigBoarGraphics, filePath, origin, bigBoarSize);
-                this.imageCacheMap.put("big" + boarID, bigBoarImage);
-
-                GraphicsUtil.drawImage(mediumBigBoarGraphics, filePath, origin, mediumBigBoarSize);
-                this.imageCacheMap.put("mediumBig" + boarID, mediumBigBoarImage);
-
-                GraphicsUtil.drawImage(mediumBoarGraphics, filePath, origin, mediumBoarSize);
-                this.imageCacheMap.put("medium" + boarID, mediumBoarImage);
-
-//                ItemImageGenerator itemGen = new ItemImageGenerator(null, "Daily Boar!", boarID);
-//                ByteArrayInputStream byteArrayIS = new ByteArrayInputStream(itemGen.generate(true));
-//                ImageIO.write(ImageIO.read(byteArrayIS), "png", new FileOutputStream("bubble/" + boarID + ".png"));
-            } catch (Exception exception) {
-                log.error("Failed to generate cache image for %s".formatted(boarID), exception);
-                System.exit(-1);
-            }
-        }
-
-        log.info("Successfully loaded all boar images into cache");
-
-        String rarityBorderPath = pathConfig.getMegaMenuAssets() + pathConfig.getRarityBorder();
-
-        log.info("Attempting to load rarity borders into cache");
-
-        for (String rarityID : this.getConfig().getRarityConfigs().keySet()) {
-            String color = this.getConfig().getColorConfig().get(rarityID);
-
-            BufferedImage rarityMediumBorderImage = new BufferedImage(
-                mediumBoarSize[0], mediumBoarSize[1], BufferedImage.TYPE_INT_ARGB
-            );
-            Graphics2D rarityMediumBorderG2D = rarityMediumBorderImage.createGraphics();
-
-            BufferedImage rarityMediumBigBorderImage = new BufferedImage(
-                mediumBigBoarSize[0], mediumBigBoarSize[1], BufferedImage.TYPE_INT_ARGB
-            );
-            Graphics2D rarityMediumBigBorderG2D = rarityMediumBigBorderImage.createGraphics();
-
-            try {
-                GraphicsUtil.drawRect(rarityMediumBorderG2D, origin, mediumBoarSize, color);
-                rarityMediumBorderG2D.setComposite(AlphaComposite.DstIn);
-                GraphicsUtil.drawImage(rarityMediumBorderG2D, rarityBorderPath, origin, mediumBoarSize);
-                rarityMediumBorderG2D.setComposite(AlphaComposite.SrcIn);
-                this.imageCacheMap.put("border" + rarityID, rarityMediumBorderImage);
-
-                GraphicsUtil.drawRect(rarityMediumBigBorderG2D, origin, mediumBigBoarSize, color);
-                rarityMediumBigBorderG2D.setComposite(AlphaComposite.DstIn);
-                GraphicsUtil.drawImage(rarityMediumBigBorderG2D, rarityBorderPath, origin, mediumBigBoarSize);
-                rarityMediumBigBorderG2D.setComposite(AlphaComposite.SrcIn);
-                this.imageCacheMap.put("borderMediumBig" + rarityID, rarityMediumBigBorderImage);
-            } catch (Exception exception) {
-                log.error("Failed to generate cache image for %s border".formatted(rarityID), exception);
-                System.exit(-1);
-            }
-        }
-
-        log.info("Successfully loaded all rarity borders into cache");
+    @Override
+    public void setFont(Font font) {
+        this.font = font;
     }
 
     @Override
     public Font getFont() {
         return this.font;
+    }
+
+    @Override
+    public void deployCommands() {
+        CommandLoader.deployCommands();
     }
 
     @Override
@@ -510,66 +101,6 @@ public class BoarBot implements Bot {
     @Override
     public Map<String, BufferedImage> getImageCacheMap() {
         return this.imageCacheMap;
-    }
-
-    @Override
-    public void deployCommands() {
-        Map<String, CommandConfig> commandData = this.config.getCommandConfig();
-
-        List<SlashCommandData> globalCommands = new ArrayList<>();
-        List<SlashCommandData> guildCommands = new ArrayList<>();
-
-        for (CommandConfig command : commandData.values()) {
-            Integer defaultPerms = command.getDefault_member_permissions();
-
-            if (defaultPerms != null && defaultPerms == 0) {
-                guildCommands.add(
-                    SlashCommandData.fromData(DataObject.fromJson(command.toString()))
-                );
-
-                continue;
-            }
-
-            globalCommands.add(
-                SlashCommandData.fromData(DataObject.fromJson(command.toString()))
-            );
-        }
-
-        Guild devGuild = this.jda.getGuildById(this.env.get("GUILD_ID"));
-
-        if (devGuild != null) {
-            devGuild.updateCommands().addCommands(guildCommands).complete();
-        }
-
-        this.jda.updateCommands().addCommands(globalCommands).complete();
-    }
-
-    @Override
-    public void registerSubcommands() {
-        Map<String, CommandConfig> commandData = config.getCommandConfig();
-
-        for (CommandConfig commandVal : commandData.values()) {
-            Map<String, SubcommandConfig> subcommandData = commandVal.getSubcommands();
-
-            for (SubcommandConfig subcommandVal : subcommandData.values()) {
-                try {
-                    Class<? extends Subcommand> subcommandClass = Class.forName(
-                        subcommandVal.getLocation()
-                    ).asSubclass(Subcommand.class);
-                    Constructor<? extends Subcommand> subcommandConstructor = subcommandClass.getDeclaredConstructor(
-                        SlashCommandInteractionEvent.class
-                    );
-
-                    this.subcommands.put(commandVal.getName() + subcommandVal.getName(), subcommandConstructor);
-                } catch (Exception exception) {
-                    log.error(
-                        "Failed to find constructor for '/%s %s'.".formatted(
-                            commandVal.getName(), subcommandVal.getName()
-                    ));
-                    System.exit(-1);
-                }
-            }
-        }
     }
 
     @Override

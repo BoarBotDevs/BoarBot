@@ -364,6 +364,11 @@
           "description": "Converts a boar to a boar of the next rarity"
         }
       ]
+    },
+    "claimBtn": {
+      "custom_id": "CLAIM",
+      "label": "Claim Quest Rewards",
+      "style": 3
     }
   },
   "gift": {

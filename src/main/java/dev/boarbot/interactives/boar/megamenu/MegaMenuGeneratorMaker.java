@@ -9,6 +9,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.data.QuestDataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.generators.megamenu.*;
 
@@ -37,7 +38,7 @@ class MegaMenuGeneratorMaker {
             case MegaMenuView.EDITIONS -> this.makeEditionsGen();
             case MegaMenuView.STATS -> this.makeStatsGen();
             case MegaMenuView.POWERUPS -> this.makePowerupsGen();
-            case MegaMenuView.QUESTS -> this.makeCollectionGen();
+            case MegaMenuView.QUESTS -> this.makeQuestsGen();
             case MegaMenuView.BADGES -> this.makeCollectionGen();
         };
     }
@@ -207,6 +208,34 @@ class MegaMenuGeneratorMaker {
             this.interactive.getBadgeIDs(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getPowData()
+        );
+    }
+
+    private MegaMenuGenerator makeQuestsGen() throws SQLException {
+        boolean notUpdated = this.interactive.getViewsToUpdateData().get(this.view) == null ||
+            !this.interactive.getViewsToUpdateData().get(this.view);
+
+        if (notUpdated) {
+            try (Connection connection = DataUtil.getConnection()) {
+                this.interactive.setQuestData(this.interactive.getBoarUser().getQuestsData(connection));
+                this.interactive.setQuestIDs(QuestDataUtil.getQuests(connection));
+                this.interactive.getViewsToUpdateData().put(this.view, true);
+            }
+        }
+
+        this.interactive.setMaxPage(0);
+        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
+            this.interactive.setPrevPage(this.interactive.getPage());
+            this.interactive.setPage(this.interactive.getMaxPage());
+        }
+
+        return new QuestsImageGenerator(
+            this.interactive.getPage(),
+            this.interactive.getBoarUser(),
+            this.interactive.getBadgeIDs(),
+            this.interactive.getFirstJoinedDate(),
+            this.interactive.getQuestData(),
+            this.interactive.getQuestIDs()
         );
     }
 

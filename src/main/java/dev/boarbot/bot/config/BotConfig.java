@@ -5,6 +5,7 @@ import dev.boarbot.bot.config.components.ComponentConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
+import dev.boarbot.bot.config.quests.QuestConfig;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

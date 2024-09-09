@@ -759,7 +759,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         int[] fullQuestsCompletedPos = {LEFT_START_X, fullQuestsCompletedLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] fastestQuestLabelPos = {LEFT_START_X, fullQuestsCompletedLabelPos[1] + LABEL_Y_SPACING};
-        String fastestQuestStr = this.statsData.fastestFullQuest() == 0
+        String fastestQuestStr = this.statsData.fastestFullQuest() > TimeUtil.getOneDayMilli() * 7
             ? this.strConfig.getUnavailable()
             : TimeUtil.getTimeDistance(0, this.statsData.fastestFullQuest(), false).substring(3);
         int[] fastestQuestPos = {LEFT_START_X, fastestQuestLabelPos[1] + VALUE_Y_OFFSET};

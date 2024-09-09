@@ -1,4 +1,4 @@
-package dev.boarbot.bot.config;
+package dev.boarbot.bot.config.quests;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +17,6 @@ import lombok.ToString;
 public class QuestConfig {
     private String description = "";
     private String descriptionAlt = "";
-    private String lowerReward = "";
-    private String higherReward = "";
-    private String valType = "";
-    private int[][] questVals = {};
+    private boolean disabled = false;
+    private IndivQuestConfig[] questVals = {};
 }

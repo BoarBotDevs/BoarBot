@@ -5,9 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class GuildDataUtil {
-    public static ArrayList<String> getValidChannelIDs(Connection connection, String guildID) throws SQLException {
+    public static List<String> getValidChannelIDs(Connection connection, String guildID) throws SQLException {
         ArrayList<String> channelIDs = new ArrayList<>();
 
         String query = "SELECT channel_one, channel_two, channel_three FROM guilds WHERE guild_id = ?";

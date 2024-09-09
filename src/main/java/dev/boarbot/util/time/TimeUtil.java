@@ -40,6 +40,10 @@ public final class TimeUtil {
         return 1000 * 60 * 60 * 24;
     }
 
+    public static long getLastQuestResetMilli() {
+        return TimeUtil.getQuestResetMilli() - TimeUtil.getOneDayMilli() * 7;
+    }
+
     public static long getQuestResetMilli() {
         LocalDateTime dateTime = LocalDate.now(ZoneOffset.UTC).atStartOfDay().minusMinutes(1);
         int dayOfWeek = dateTime.getDayOfWeek().getValue();

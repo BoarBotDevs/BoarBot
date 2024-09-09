@@ -568,17 +568,23 @@ public class BoarUser {
                 gifts_opened,
                 gift_fastest,
                 gift_best_bucks,
-                gift_best_rarity,
-                total_quests_completed,
-                total_full_quests_completed,
-                fastest_full_quest,
-                quest_auto_claim,
-                easy_quests_completed,
-                medium_quests_completed,
-                hard_quests_completed,
-                very_hard_quests_completed
+                gift_best_rarity
             FROM users
             WHERE user_id = ?;
+        """;
+
+        String questQuery = """
+            SELECT
+                num_completed,
+                num_full_completed,
+                fastest_full_millis,
+                auto_claim,
+                easy_completed,
+                medium_completed,
+                hard_completed,
+                very_hard_completed
+            FROM user_quests
+            WHERE user_id = ?
         """;
 
         String promptQuery = """
@@ -608,10 +614,11 @@ public class BoarUser {
 
         try (
             PreparedStatement statement1 = connection.prepareStatement(mainQuery);
-            PreparedStatement statement2 = connection.prepareStatement(promptQuery);
-            PreparedStatement statement3 = connection.prepareStatement(powAmtsQuery);
-            PreparedStatement statement4 = connection.prepareStatement(transmuteQuery);
-            PreparedStatement statement5 = connection.prepareStatement(cloneQuery)
+            PreparedStatement statement2 = connection.prepareStatement(questQuery);
+            PreparedStatement statement3 = connection.prepareStatement(promptQuery);
+            PreparedStatement statement4 = connection.prepareStatement(powAmtsQuery);
+            PreparedStatement statement5 = connection.prepareStatement(transmuteQuery);
+            PreparedStatement statement6 = connection.prepareStatement(cloneQuery)
         ) {
             statement1.setString(1, this.userID);
             statement1.setString(2, this.userID);
@@ -626,12 +633,15 @@ public class BoarUser {
 
             statement5.setString(1, this.userID);
 
+            statement6.setString(1, this.userID);
+
             try (
                 ResultSet results1 = statement1.executeQuery();
                 ResultSet results2 = statement2.executeQuery();
                 ResultSet results3 = statement3.executeQuery();
                 ResultSet results4 = statement4.executeQuery();
-                ResultSet results5 = statement5.executeQuery()
+                ResultSet results5 = statement5.executeQuery();
+                ResultSet results6 = statement6.executeQuery()
             ) {
                 List<String> topPrompts = new ArrayList<>();
 
@@ -642,27 +652,27 @@ public class BoarUser {
                 Map<String, Integer> transmuteRarities = new HashMap<>();
                 Map<String, Integer> cloneRarities = new HashMap<>();
 
-                while (results2.next()) {
-                    topPrompts.add(results2.getString("prompt_id"));
-                }
-
                 while (results3.next()) {
-                    String powerupID = results3.getString("powerup_id");
-
-                    powAmts.put(powerupID, results3.getInt("amount"));
-                    powHighestAmts.put(powerupID, results3.getInt("highest_amount"));
-                    powUsed.put(powerupID, results3.getInt("amount_used"));
+                    topPrompts.add(results3.getString("prompt_id"));
                 }
 
                 while (results4.next()) {
-                    transmuteRarities.put(results4.getString("rarity_id"), results4.getInt("amount"));
+                    String powerupID = results4.getString("powerup_id");
+
+                    powAmts.put(powerupID, results4.getInt("amount"));
+                    powHighestAmts.put(powerupID, results4.getInt("highest_amount"));
+                    powUsed.put(powerupID, results4.getInt("amount_used"));
                 }
 
                 while (results5.next()) {
-                    cloneRarities.put(results5.getString("rarity_id"), results5.getInt("amount"));
+                    transmuteRarities.put(results5.getString("rarity_id"), results5.getInt("amount"));
                 }
 
-                if (results1.next()) {
+                while (results6.next()) {
+                    cloneRarities.put(results6.getString("rarity_id"), results6.getInt("amount"));
+                }
+
+                if (results1.next() && results2.next()) {
                     statsData = new StatsData(
                         results1.getLong("total_bucks"),
                         results1.getLong("highest_bucks"),
@@ -711,14 +721,14 @@ public class BoarUser {
                         results1.getInt("gift_fastest"),
                         results1.getInt("gift_best_bucks"),
                         results1.getString("gift_best_rarity"),
-                        results1.getInt("total_quests_completed"),
-                        results1.getInt("total_full_quests_completed"),
-                        results1.getInt("fastest_full_quest"),
-                        results1.getBoolean("quest_auto_claim"),
-                        results1.getInt("easy_quests_completed"),
-                        results1.getInt("medium_quests_completed"),
-                        results1.getInt("hard_quests_completed"),
-                        results1.getInt("very_hard_quests_completed")
+                        results2.getInt("num_completed"),
+                        results2.getInt("num_full_completed"),
+                        results2.getLong("fastest_full_millis"),
+                        results2.getBoolean("auto_claim"),
+                        results2.getInt("easy_completed"),
+                        results2.getInt("medium_completed"),
+                        results2.getInt("hard_completed"),
+                        results2.getInt("very_hard_completed")
                     );
                 }
             }
@@ -736,14 +746,10 @@ public class BoarUser {
             WHERE user_id = ?;
         """;
 
-        try (
-            PreparedStatement statement = connection.prepareStatement(powQuery)
-        ) {
+        try (PreparedStatement statement = connection.prepareStatement(powQuery)) {
             statement.setString(1, this.userID);
 
-            try (
-                ResultSet results = statement.executeQuery()
-            ) {
+            try (ResultSet results = statement.executeQuery()) {
                 Map<String, Integer> powAmts = new HashMap<>();
 
                 while (results.next()) {
@@ -758,6 +764,70 @@ public class BoarUser {
         }
 
         return powData;
+    }
+
+    public QuestData getQuestsData(Connection connection) throws SQLException {
+        QuestData questData = new QuestData();
+
+        String questQuery = """
+            SELECT
+                one_progress,
+                one_claimed,
+                two_progress,
+                two_claimed,
+                three_progress,
+                three_claimed,
+                four_progress,
+                four_claimed,
+                five_progress,
+                five_claimed,
+                six_progress,
+                six_claimed,
+                seven_progress,
+                seven_claimed,
+                num_completed,
+                num_full_completed,
+                full_claimed
+            FROM user_quests
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(questQuery)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    List<Integer> questProgress = new ArrayList<>();
+                    List<Boolean> questClaims = new ArrayList<>();
+
+                    questProgress.add(results.getInt("one_progress"));
+                    questProgress.add(results.getInt("two_progress"));
+                    questProgress.add(results.getInt("three_progress"));
+                    questProgress.add(results.getInt("four_progress"));
+                    questProgress.add(results.getInt("five_progress"));
+                    questProgress.add(results.getInt("six_progress"));
+                    questProgress.add(results.getInt("seven_progress"));
+
+                    questClaims.add(results.getBoolean("one_claimed"));
+                    questClaims.add(results.getBoolean("two_claimed"));
+                    questClaims.add(results.getBoolean("three_claimed"));
+                    questClaims.add(results.getBoolean("four_claimed"));
+                    questClaims.add(results.getBoolean("five_claimed"));
+                    questClaims.add(results.getBoolean("six_claimed"));
+                    questClaims.add(results.getBoolean("seven_claimed"));
+
+                    questData = new QuestData(
+                        questProgress,
+                        questClaims,
+                        results.getInt("num_completed"),
+                        results.getInt("num_full_completed"),
+                        results.getBoolean("full_claimed")
+                    );
+                }
+            }
+        }
+
+        return questData;
     }
 
     public boolean canUseDaily(Connection connection) throws SQLException {

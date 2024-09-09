@@ -26,7 +26,7 @@
       },
       "bucks": {
         "weight": 800,
-        "rewardStr": "+<>bucks<>%,d %s",
+        "rewardStr": "<>font<>+<>bucks<>%,d %s",
         "subOutcomes": {
           "small": {
             "weight": 90,
@@ -47,7 +47,7 @@
       },
       "powerup": {
         "weight": 390,
-        "rewardStr": "+<>powerup<>%,d %s",
+        "rewardStr": "<>font<>+<>powerup<>%,d %s",
         "subOutcomes": {
           "clone": {
             "weight": 50,

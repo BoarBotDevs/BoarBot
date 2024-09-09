@@ -5,6 +5,7 @@ import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.modals.ModalHandler;
+import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 
 import java.awt.*;
@@ -16,13 +17,13 @@ public interface Bot {
     void create(BotType type);
     BotType getBotType();
     JDA getJDA();
-    void loadConfig();
+    Dotenv getEnv();
     BotConfig getConfig();
+    void setFont(Font font);
     Font getFont();
+    void deployCommands();
     Map<String, byte[]> getByteCacheMap();
     Map<String, BufferedImage> getImageCacheMap();
-    void deployCommands();
-    void registerSubcommands();
     Map<String, Constructor<? extends Subcommand>> getSubcommands();
     Map<String, Interactive> getInteractives();
     Map<String, ModalHandler> getModalHandlers();

@@ -150,6 +150,13 @@ public class StringConfig {
     private String powMiracleSuccess = "";
     private String powGiftConfirm = "";
     private String powGiftSuccess = "";
+    private String questResetLabel = "";
+    private String questAmtLabel = "";
+    private String questFullAmtLabel = "";
+    private String questBonusLabel = "";
+    private String questNoBonusLabel = "";
+    private String questUnclaimedBonusLabel = "";
+    private String questClaimedBonusLabel = "";
 
     // Notification strings
 
