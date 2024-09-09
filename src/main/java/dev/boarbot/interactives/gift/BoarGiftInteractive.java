@@ -354,6 +354,20 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
             } else if (this.outcomeType == OutcomeType.POWERUP) {
                 this.givePowerup(boarUser);
             }
+
+            if (this.outcomeType != null) {
+                try (Connection connection = DataUtil.getConnection()) {
+                    List<String> rarityKeys = new ArrayList<>();
+
+                    for (String boarID : this.boarIDs) {
+                        rarityKeys.add(BoarUtil.findRarityKey(boarID));
+                    }
+
+                    boarUser.openGift(
+                        connection, this.numBucks, rarityKeys, this.giftWinner.getId().equals(boarUser.getUserID())
+                    );
+                }
+            }
         } catch (SQLException exception) {
             log.error("Failed to get user data", exception);
         }

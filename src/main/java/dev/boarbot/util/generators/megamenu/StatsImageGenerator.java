@@ -708,7 +708,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         int[] giftBucksLabelPos = {RIGHT_START_X, giftsOpenedLabelPos[1] + LABEL_Y_SPACING};
         String giftBucksStr = this.statsData.giftBestBucks() == 0
             ? this.strConfig.getUnavailable()
-            : "%,d".formatted(this.statsData.giftBestBucks());
+            : "<>bucks<>$%,d".formatted(this.statsData.giftBestBucks());
         int[] giftBucksPos = {RIGHT_START_X, giftBucksLabelPos[1] + VALUE_Y_OFFSET};
 
         String giftRarityLabel = this.strConfig.getStatsBestRarityLabel();

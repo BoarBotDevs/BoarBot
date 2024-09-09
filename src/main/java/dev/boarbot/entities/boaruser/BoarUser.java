@@ -1098,6 +1098,46 @@ public class BoarUser {
         }
     }
 
+    public void openGift(Connection connection, int bucks, List<String> rarityKeys, boolean incOpen) throws SQLException {
+        String bestRarity = null;
+
+        String bestRarityQuery = """
+            SELECT gift_best_rarity
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(bestRarityQuery)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    bestRarity = results.getString("gift_best_rarity");
+                    for (String rarityKey : rarityKeys) {
+                        bestRarity = BoarUtil.getHigherRarity(bestRarity, rarityKey);
+                    }
+                }
+            }
+        }
+
+        String openGiftQuery = """
+            UPDATE users
+            SET
+                gifts_opened = gifts_opened + ?,
+                gift_best_bucks = GREATEST(gift_best_bucks, ?),
+                gift_best_rarity = ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(openGiftQuery)) {
+            statement.setInt(1, incOpen ? 1 : 0);
+            statement.setInt(2, bucks);
+            statement.setString(3, bestRarity);
+            statement.setString(4, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
     public List<String> getCurrentBadges(Connection connection) throws SQLException {
         String query = """
             SELECT badge_id

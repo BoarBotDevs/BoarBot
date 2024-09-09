@@ -40,11 +40,11 @@ public final class BoarUtil {
         BotConfig config = BoarBotApp.getBot().getConfig();
 
         for (String rarityID : config.getRarityConfigs().keySet()) {
-            if (rarityID.equals(rarity1)) {
+            if (rarity1 == null || rarityID.equals(rarity1)) {
                 return rarity2;
             }
 
-            if (rarityID.equals(rarity2)) {
+            if (rarity2 == null || rarityID.equals(rarity2)) {
                 return rarity1;
             }
         }
