@@ -1,8 +1,11 @@
 package dev.boarbot.bot.config.items;
 
+import dev.boarbot.api.util.Weighted;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.Map;
 
 /**
  * {@link OutcomeConfig OutcomeConfig.java}
@@ -14,8 +17,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class OutcomeConfig {
+public class OutcomeConfig implements Weighted {
     private int weight = 0;
-    private String category = "";
-    private SubOutcomeConfig[] subOutcomes = {};
+    private String rewardStr;
+    private Map<String, SubOutcomeConfig> subOutcomes;
 }

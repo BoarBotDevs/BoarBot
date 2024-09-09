@@ -3,6 +3,7 @@ package dev.boarbot.util.interactive;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.components.SelectOptionConfig;
+import dev.boarbot.interactives.gift.BoarGiftInteractive;
 import dev.boarbot.interactives.Interactive;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -126,6 +127,20 @@ public final class InteractiveUtil {
 
             if (isUserInteractive && isSameType) {
                 return key;
+            }
+        }
+
+        return null;
+    }
+
+    public static Interactive getGiftInteractive(String interactID) {
+        for (String key : BoarBotApp.getBot().getInteractives().keySet()) {
+            Interactive interactive = BoarBotApp.getBot().getInteractives().get(key);
+
+            if (key.startsWith(interactID) && interactive.getClass().equals(BoarGiftInteractive.class)) {
+                return interactive;
+            } else if (key.startsWith(interactID)) {
+                return null;
             }
         }
 

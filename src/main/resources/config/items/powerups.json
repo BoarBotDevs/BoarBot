@@ -12,63 +12,61 @@
     "file": "BoarGift.png",
     "description": "A gift that can be sent to and opened by other people. Contains boar bucks, boars, rare surprises, and more.",
     "rewardAmt": 1,
-    "outcomes": [
-      {
+    "outcomes": {
+      "special": {
         "weight": 10,
-        "category": "Special Boar",
-        "suboutcomes": [
-          {
-            "weight": 9,
-            "name": "santa"
+        "subOutcomes": {
+          "santa": {
+            "weight": 9
           },
-          {
-            "weight": 1,
-            "name": "underwear"
+          "underwear": {
+            "weight": 1
           }
-        ]
+        }
       },
-      {
+      "bucks": {
         "weight": 800,
-        "category": "Boar Bucks",
-        "suboutcomes": [
-          {
+        "rewardStr": "+<>bucks<>%,d %s",
+        "subOutcomes": {
+          "small": {
             "weight": 90,
-            "name": "+%@ Boar Bucks"
+            "minBucks": 1,
+            "maxBucks": 5
           },
-          {
+          "medium": {
             "weight": 9,
-            "name": "+%@ Boar Bucks"
+            "minBucks": 10,
+            "maxBucks": 50
           },
-          {
+          "large": {
             "weight": 1,
-            "name": "+%@ Boar Bucks"
+            "minBucks": 100,
+            "maxBucks": 500
           }
-        ]
+        }
       },
-      {
+      "powerup": {
         "weight": 390,
-        "category": "Powerups",
-        "suboutcomes": [
-          {
+        "rewardStr": "+<>powerup<>%,d %s",
+        "subOutcomes": {
+          "clone": {
             "weight": 50,
-            "name": "+1 Cloning Serum"
+            "rewardAmt": 1
           },
-          {
+          "miracle": {
             "weight": 45,
-            "name": "+1 Miracle Charm"
+            "rewardAmt": 1
           },
-          {
+          "transmute": {
             "weight": 5,
-            "name": "+1 Transmutation Charge"
+            "rewardAmt": 1
           }
-        ]
+        }
       },
-      {
-        "weight": 800,
-        "category": "Random Boar",
-        "suboutcomes": []
+      "boar": {
+        "weight": 800
       }
-    ]
+    }
   },
   "transmute": {
     "name": "Transmutation Charge",

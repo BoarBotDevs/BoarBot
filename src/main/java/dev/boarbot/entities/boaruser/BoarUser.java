@@ -209,6 +209,20 @@ public class BoarUser {
         boarIDs.addAll(newBoarIDs);
     }
 
+    public void giveBucks(Connection connection, long amount) throws SQLException {
+        String query = """
+            UPDATE users
+            SET total_bucks = total_bucks + ?
+            WHERE user_id = ?
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setLong(1, amount);
+            statement.setString(2, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
     public boolean hasBoar(String boarID, Connection connection) throws SQLException {
         String query = """
             SELECT boar_id
@@ -1014,6 +1028,72 @@ public class BoarUser {
             statement.setInt(1, totalBucks);
             statement.setString(2, bestRarity);
             statement.setString(3, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public int getGiftHandicap(Connection connection) throws SQLException {
+        this.addUser(connection);
+        int handicap = 0;
+
+        String query = """
+            SELECT gift_handicap
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    handicap = results.getInt("gift_handicap");
+                }
+            }
+        }
+
+        return handicap;
+    }
+
+    public void updateGiftHandicap(Connection connection, long value) throws SQLException {
+        int MAX_HANDICAP_WEIGHT = 20;
+
+        long handicapValue = value * -1;
+        if (handicapValue < this.config.getNumberConfig().getGiftMaxHandicap() * -1) {
+            String handicapQuery = """
+                SELECT gift_handicap
+                FROM users
+                WHERE user_id = ?;
+            """;
+
+            try (PreparedStatement statement = connection.prepareStatement(handicapQuery)) {
+                statement.setString(1, this.userID);
+                try (ResultSet results = statement.executeQuery()) {
+                    if (results.next()) {
+                        handicapValue = results.getLong("gift_handicap");
+                    }
+                }
+            }
+        }
+
+        String updateQuery = """
+            UPDATE users
+            SET
+                gift_handicap = GREATEST(
+                    ((gift_handicap * gift_handicap_weight) + ?) / (gift_handicap_weight + 1),
+                    ?
+                ),
+                gift_handicap_weight = LEAST(gift_handicap_weight + 1, ?),
+                gift_fastest = LEAST(gift_fastest, ?)
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setLong(1, handicapValue);
+            statement.setLong(2, handicapValue);
+            statement.setInt(3, MAX_HANDICAP_WEIGHT);
+            statement.setLong(4, value);
+            statement.setString(5, this.userID);
             statement.executeUpdate();
         }
     }

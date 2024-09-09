@@ -43,6 +43,9 @@ public class NumberConfig {
     private int interactiveIdle = 0;
     private int interactiveHardStop = 0;
     private int openDelay = 0;
+    private int giftLowWait = 0;
+    private int giftHighWait = 0;
+    private int giftMaxHandicap = 0;
 
     // Boar sizes
 

@@ -388,12 +388,16 @@ public class StatsImageGenerator extends MegaMenuGenerator {
 
         String miracleAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
         int[] miracleAmtLabelPos = {LEFT_START_X, START_Y};
-        String miracleAmtStr = "%,d".formatted(this.statsData.powAmts().get("miracle"));
+        String miracleAmtStr = this.statsData.powAmts().get("miracle") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.powAmts().get("miracle"));
         int[] miracleAmtPos = {LEFT_START_X, miracleAmtLabelPos[1] + VALUE_Y_OFFSET};
 
         String peakMiracleAmtLabel = this.strConfig.getStatsPeakLabel().formatted(pow.getShortPluralName());
         int[] peakMiracleAmtLabelPos = {LEFT_START_X, miracleAmtLabelPos[1] + LABEL_Y_SPACING};
-        String peakMiracleAmtStr = "%,d".formatted(this.statsData.peakPowAmts().get("miracle"));
+        String peakMiracleAmtStr = this.statsData.peakPowAmts().get("miracle") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.peakPowAmts().get("miracle"));
         int[] peakMiracleAmtPos = {LEFT_START_X, peakMiracleAmtLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] miraclesActiveLabelPos = {LEFT_START_X, peakMiracleAmtLabelPos[1] + LABEL_Y_SPACING};
@@ -402,7 +406,9 @@ public class StatsImageGenerator extends MegaMenuGenerator {
 
         String miraclesUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getShortPluralName());
         int[] miraclesUsedLabelPos = {LEFT_START_X, miraclesActiveLabelPos[1] + LABEL_Y_SPACING};
-        String miraclesUsedStr = "%,d".formatted(this.statsData.powUsed().get("miracle"));
+        String miraclesUsedStr = this.statsData.powUsed().get("miracle") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.powUsed().get("miracle"));
         int[] miraclesUsedPos = {LEFT_START_X, miraclesUsedLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] miracleRollsLabelPos = {RIGHT_START_X, START_Y};
@@ -465,17 +471,23 @@ public class StatsImageGenerator extends MegaMenuGenerator {
 
         String transmuteAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
         int[] transmuteAmtLabelPos = {LEFT_START_X, LEFT_START_Y};
-        String transmuteAmtStr = "%,d".formatted(this.statsData.powAmts().get("transmute"));
+        String transmuteAmtStr = this.statsData.powAmts().get("transmute") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.powAmts().get("transmute"));
         int[] transmuteAmtPos = {LEFT_START_X, transmuteAmtLabelPos[1] + VALUE_Y_OFFSET};
 
         String peakTransmuteAmtLabel = this.strConfig.getStatsPeakLabel().formatted(pow.getShortPluralName());
         int[] peakTransmuteAmtLabelPos = {LEFT_START_X, transmuteAmtLabelPos[1] + LABEL_Y_SPACING};
-        String peakTransmuteAmtStr = "%,d".formatted(this.statsData.peakPowAmts().get("transmute"));
+        String peakTransmuteAmtStr = this.statsData.peakPowAmts().get("transmute") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.peakPowAmts().get("transmute"));
         int[] peakTransmuteAmtPos = {LEFT_START_X, peakTransmuteAmtLabelPos[1] + VALUE_Y_OFFSET};
 
         String transmuteUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getShortPluralName());
         int[] transmuteUsedLabelPos = {LEFT_START_X, peakTransmuteAmtLabelPos[1] + LABEL_Y_SPACING};
-        String transmuteUsedStr = "%,d".formatted(this.statsData.powUsed().get("transmute"));
+        String transmuteUsedStr = this.statsData.powUsed().get("transmute") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.powUsed().get("transmute"));
         int[] transmuteUsedPos = {LEFT_START_X, transmuteUsedLabelPos[1] + VALUE_Y_OFFSET};
 
         String lastTransmuteLabel = this.strConfig.getStatsTransmuteLastLabel();
@@ -548,17 +560,23 @@ public class StatsImageGenerator extends MegaMenuGenerator {
 
         String cloneAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
         int[] cloneAmtLabelPos = {LEFT_START_X, EDGE_START_Y};
-        String cloneAmtStr = "%,d".formatted(this.statsData.powAmts().get("clone"));
+        String cloneAmtStr = this.statsData.powAmts().get("clone") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.powAmts().get("clone"));
         int[] cloneAmtPos = {LEFT_START_X, cloneAmtLabelPos[1] + VALUE_Y_OFFSET};
 
         String peakCloneAmtLabel = this.strConfig.getStatsPeakLabel().formatted(pow.getShortPluralName());
         int[] peakCloneAmtLabelPos = {LEFT_START_X, cloneAmtLabelPos[1] + LABEL_Y_SPACING};
-        String peakCloneAmtStr = "%,d".formatted(this.statsData.peakPowAmts().get("clone"));
+        String peakCloneAmtStr = this.statsData.peakPowAmts().get("clone") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.peakPowAmts().get("clone"));
         int[] peakCloneAmtPos = {LEFT_START_X, peakCloneAmtLabelPos[1] + VALUE_Y_OFFSET};
 
         String clonesUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getShortPluralName());
         int[] clonesUsedLabelPos = {LEFT_START_X, peakCloneAmtLabelPos[1] + LABEL_Y_SPACING};
-        String clonesUsedStr = "%,d".formatted(this.statsData.powUsed().get("clone"));
+        String clonesUsedStr = this.statsData.powUsed().get("clone") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.powUsed().get("clone"));
         int[] clonesUsedPos = {LEFT_START_X, clonesUsedLabelPos[1] + VALUE_Y_OFFSET};
 
         String lastCloneLabel = this.strConfig.getStatsCloneLastLabel();
@@ -639,17 +657,23 @@ public class StatsImageGenerator extends MegaMenuGenerator {
 
         String giftAmtLabel = this.strConfig.getStatsTotalLabel().formatted(pow.getShortPluralName());
         int[] giftAmtLabelPos = {LEFT_START_X, START_Y};
-        String giftAmtStr = "%,d".formatted(this.statsData.powAmts().get("gift"));
+        String giftAmtStr = this.statsData.powAmts().get("gift") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.powAmts().get("gift"));
         int[] giftAmtPos = {LEFT_START_X, giftAmtLabelPos[1] + VALUE_Y_OFFSET};
 
         String peakGiftAmtLabel = this.strConfig.getStatsPeakLabel().formatted(pow.getShortPluralName());
         int[] peakGiftAmtLabelPos = {LEFT_START_X, giftAmtLabelPos[1] + LABEL_Y_SPACING};
-        String peakGiftAmtStr = "%,d".formatted(this.statsData.peakPowAmts().get("gift"));
+        String peakGiftAmtStr = this.statsData.peakPowAmts().get("gift") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.peakPowAmts().get("gift"));
         int[] peakGiftAmtPos = {LEFT_START_X, peakGiftAmtLabelPos[1] + VALUE_Y_OFFSET};
 
         String giftsUsedLabel = this.strConfig.getStatsUsedLabel().formatted(pow.getShortPluralName());
         int[] giftsUsedLabelPos = {LEFT_START_X, peakGiftAmtLabelPos[1] + LABEL_Y_SPACING};
-        String giftsUsedAmtStr = "%,d".formatted(this.statsData.powUsed().get("gift"));
+        String giftsUsedAmtStr = this.statsData.powUsed().get("gift") == null
+            ? "0"
+            : "%,d".formatted(this.statsData.powUsed().get("gift"));
         int[] giftsUsedAmtPos = {LEFT_START_X, giftsUsedLabelPos[1] + VALUE_Y_OFFSET};
 
         String handicapLabel = this.strConfig.getStatsGiftHandicapLabel();
@@ -670,7 +694,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
 
         String fastestLabel = this.strConfig.getStatsGiftFastestLabel().formatted(pow.getShortName());
         int[] fastestLabelPos = {RIGHT_START_X, START_Y};
-        String fastestStr = this.statsData.giftFastest() == 0
+        String fastestStr = this.statsData.giftFastest() == this.nums.getInteractiveIdle()
             ? this.strConfig.getUnavailable()
             : "%,dms".formatted(this.statsData.giftFastest());
         int[] fastestPos = {RIGHT_START_X, fastestLabelPos[1] + VALUE_Y_OFFSET};

@@ -14,4 +14,5 @@ public class ComponentConfig {
     private Map<String, IndivComponentConfig> setup = new HashMap<>();
     private Map<String, IndivComponentConfig> daily = new HashMap<>();
     private Map<String, IndivComponentConfig> megaMenu = new HashMap<>();
+    private Map<String, IndivComponentConfig> gift = new HashMap<>();
 }

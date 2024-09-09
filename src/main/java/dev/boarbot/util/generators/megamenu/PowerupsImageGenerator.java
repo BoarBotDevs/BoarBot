@@ -50,7 +50,9 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
         String anomalousUnderlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getPowAnomUnderlay();
         String cellPath = this.pathConfig.getMegaMenuAssets();
 
-        int numTransmute = this.powData.powAmts().get("transmute");
+        int numTransmute = this.powData.powAmts().get("transmute") == null
+            ? 0
+            : this.powData.powAmts().get("transmute");
         String cellValueStr = this.strConfig.getPowCellAmtLabel();
         String transmuteRarityKey = null;
 
@@ -117,15 +119,21 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
         int[] blessingsPos = {LEFT_START_X, blessingsLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] miraclesLabelPos = {LEFT_START_X, blessingsLabelPos[1] + LABEL_Y_SPACING};
-        String miraclesStr = "%,d".formatted(this.powData.powAmts().get("miracle"));
+        String miraclesStr = this.powData.powAmts().get("miracle") == null
+            ? "0"
+            : "%,d".formatted(this.powData.powAmts().get("miracle"));
         int[] miraclesPos = {LEFT_START_X, miraclesLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] cloneLabelPos = {LEFT_START_X, miraclesLabelPos[1] + LABEL_Y_SPACING};
-        String cloneStr = "%,d".formatted(this.powData.powAmts().get("clone"));
+        String cloneStr = this.powData.powAmts().get("clone") == null
+            ? "0"
+            : "%,d".formatted(this.powData.powAmts().get("clone"));
         int[] clonePos = {LEFT_START_X, cloneLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] giftsLabelPos = {LEFT_START_X, cloneLabelPos[1] + LABEL_Y_SPACING};
-        String giftsStr = "%,d".formatted(this.powData.powAmts().get("gift"));
+        String giftsStr = this.powData.powAmts().get("gift") == null
+            ? "0"
+            : "%,d".formatted(this.powData.powAmts().get("gift"));
         int[] giftsPos = {LEFT_START_X, giftsLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] cellLabelPos = {RIGHT_TEXT_X, RIGHT_LABEL_Y};

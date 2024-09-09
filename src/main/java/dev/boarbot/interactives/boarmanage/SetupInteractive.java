@@ -9,9 +9,9 @@ import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
+import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -40,7 +40,7 @@ public class SetupInteractive extends Interactive {
 
     private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getSetup();
 
-    public SetupInteractive(SlashCommandInteractionEvent initEvent) {
+    public SetupInteractive(Interaction initEvent) {
         super(initEvent);
     }
 

@@ -55,7 +55,7 @@ public final class GraphicsUtil {
         g2d.drawImage(GraphicsUtil.getImage(path), pos[0], pos[1], size[0], size[1], null);
     }
 
-    private static Image getImage(String path) throws URISyntaxException, IOException {
+    public static Image getImage(String path) throws URISyntaxException, IOException {
         Image image;
 
         if (path.startsWith("http")) {

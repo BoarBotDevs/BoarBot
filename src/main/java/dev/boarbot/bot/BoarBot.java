@@ -302,19 +302,12 @@ public class BoarBot implements Bot {
             StringBuilder sqlStatement = new StringBuilder();
 
             if (databaseType.equals("rarities")) {
-                String resetQuery1 = """
+                String resetQuery = """
                     DELETE FROM rarities_info
                     WHERE rarity_id = 'all_done';
                 """;
 
-                statement.executeUpdate(resetQuery1);
-
-                String resetQuery2 = """
-                    INSERT INTO rarities_info (rarity_id, prior_rarity_id, base_bucks, hunter_need)
-                    VALUES ('all_done', null, 0, 0)
-                """;
-
-                statement.executeUpdate(resetQuery2);
+                statement.executeUpdate(resetQuery);
             }
 
             String tableColumns = "(boar_id, rarity_id, is_skyblock)";
@@ -375,6 +368,15 @@ public class BoarBot implements Bot {
             sqlStatement.append(";");
 
             statement.executeUpdate(sqlStatement.toString());
+
+            if (databaseType.equals("boars")) {
+                String resetQuery = """
+                    INSERT INTO rarities_info (rarity_id, prior_rarity_id, base_bucks, hunter_need)
+                    VALUES ('all_done', null, 0, 0)
+                """;
+
+                statement.executeUpdate(resetQuery);
+            }
         } catch (SQLException exception) {
             log.error("Something went wrong when loading config data into database.", exception);
             System.exit(-1);

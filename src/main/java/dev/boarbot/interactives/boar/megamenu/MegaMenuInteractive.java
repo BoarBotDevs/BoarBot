@@ -6,8 +6,11 @@ import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.entities.boaruser.*;
+import dev.boarbot.interactives.Interactive;
+import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.ModalInteractive;
+import dev.boarbot.interactives.gift.BoarGiftInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
@@ -206,7 +209,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             } else if (this.powerupUsing != null) {
                 switch (this.powerupUsing) {
                     case "miracle" -> this.doCharm(boarUser);
-                    case "gift" -> {}
+                    case "gift" -> this.doGift(boarUser);
                 }
 
                 this.acknowledgeOpen = true;
@@ -306,7 +309,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 String title = this.config.getStringConfig().getCompCloneTitle();
 
                 ItemInteractive.sendInteractive(
-                    newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook()
+                    newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
                 );
             });
         }
@@ -381,7 +384,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 String title = this.config.getStringConfig().getCompTransmuteTitle();
 
                 ItemInteractive.sendInteractive(
-                    newBoarIDs, bucksGotten, editions, this.user, title, this.compEvent.getHook()
+                    newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
                 );
             });
         }
@@ -414,6 +417,30 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 null,
                 strConfig.getNoPow()
                     .formatted(this.config.getItemConfig().getPowerups().get(this.powerupUsing).getPluralName())
+            );
+        }
+    }
+
+    private void doGift(BoarUser boarUser) throws SQLException {
+        StringConfig strConfig = this.config.getStringConfig();
+        PowerupItemConfig powConfig = this.config.getItemConfig().getPowerups().get(this.powerupUsing);
+
+        try (Connection connection = DataUtil.getConnection()) {
+            if (boarUser.getPowerupAmount(connection, this.powerupUsing) > 0) {
+                this.acknowledgeImageGen = new OverlayImageGenerator(
+                    null, strConfig.getPowGiftSuccess().formatted(powConfig.getName())
+                );
+
+                Interactive giftInteractive = InteractiveFactory.constructInteractive(
+                    this.compEvent, true, BoarGiftInteractive.class
+                );
+                giftInteractive.execute(null);
+
+                return;
+            }
+
+            this.acknowledgeImageGen = new OverlayImageGenerator(
+                null, strConfig.getNoPow().formatted(powConfig.getPluralName())
             );
         }
     }

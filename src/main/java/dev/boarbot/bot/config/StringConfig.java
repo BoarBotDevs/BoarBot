@@ -148,6 +148,8 @@ public class StringConfig {
     private String powCellDriftLabel = "";
     private String powCannotUse = "";
     private String powMiracleSuccess = "";
+    private String powGiftConfirm = "";
+    private String powGiftSuccess = "";
 
     // Notification strings
 
@@ -171,6 +173,9 @@ public class StringConfig {
 
     private String noPow = "";
     private String miracleAttempt = "";
+    private String giftSelfOpen = "";
+    private String giftTitle = "";
+    private String giftOpened = "";
     private String unavailable = "";
     private String pullLink = "";
     private String githubImg = "";

@@ -400,6 +400,9 @@ class MegaMenuComponentHandler {
             ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
         );
 
+        StringConfig strConfig = this.config.getStringConfig();
+        PowerupItemConfig powConfig = this.config.getItemConfig().getPowerups().get(this.interactive.getPowerupUsing());
+
         switch (this.interactive.getPowerupUsing()) {
             case "miracle" -> {
                 ModalConfig modalConfig = this.config.getModalConfig().get("miracleAmount");
@@ -415,7 +418,10 @@ class MegaMenuComponentHandler {
             }
 
             case "gift" -> {
+                this.compEvent.deferEdit().queue();
 
+                this.interactive.setConfirmOpen(true);
+                this.interactive.setConfirmString(strConfig.getPowGiftConfirm().formatted(powConfig.getName()));
             }
 
             case "clone", "transmute" -> {
@@ -424,11 +430,7 @@ class MegaMenuComponentHandler {
                 this.interactive.setAcknowledgeOpen(true);
                 this.interactive.setAcknowledgeImageGen(
                     new OverlayImageGenerator(
-                        null,
-                        this.config.getStringConfig().getPowCannotUse().formatted(
-                            this.config.getItemConfig().getPowerups().get(this.interactive.getPowerupUsing())
-                                .getPluralName()
-                        )
+                        null, strConfig.getPowCannotUse().formatted(powConfig.getPluralName())
                     )
                 );
             }

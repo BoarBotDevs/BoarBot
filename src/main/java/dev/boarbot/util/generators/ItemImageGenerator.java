@@ -314,7 +314,7 @@ public class ItemImageGenerator extends ImageGenerator {
                 nums.getBorder() * 2
             ));
 
-            int[] giftingPos = {BOX_TEXT_X, BOX_FOUR_Y + BOX_TEXT_Y_OFFSET};
+            int[] giftingPos = {USER_TAG_X, BOX_FOUR_Y + BOX_TEXT_Y_OFFSET};
 
             textDrawer.setText(giftingUsername);
             textDrawer.setPos(giftingPos);
@@ -373,12 +373,6 @@ public class ItemImageGenerator extends ImageGenerator {
     }
 
     public static List<ItemImageGenerator> getItemImageGenerators(
-        List<String> boarIDs, List<Integer> bucksGotten, User user, String title
-    ) {
-        return ItemImageGenerator.getItemImageGenerators(boarIDs, bucksGotten, user, title, null);
-    }
-
-    public static List<ItemImageGenerator> getItemImageGenerators(
         List<String> boarIDs, List<Integer> bucksGotten, User user, String title, User giftingUser
     ) {
         BotConfig config = BoarBotApp.getBot().getConfig();
@@ -395,6 +389,18 @@ public class ItemImageGenerator extends ImageGenerator {
 
             itemGens.add(boarItemGen);
         }
+
+        return itemGens;
+    }
+
+    public static List<ItemImageGenerator> getItemImageGenerators(
+        String itemName, String filePath, String colorKey, User user, String title, User giftingUser
+    ) {
+        List<ItemImageGenerator> itemGens = new ArrayList<>();
+
+        itemGens.add(new ItemImageGenerator(
+            user, title, itemName, filePath, colorKey, giftingUser, 0
+        )) ;
 
         return itemGens;
     }

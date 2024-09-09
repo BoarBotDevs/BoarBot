@@ -40,9 +40,10 @@ public class ItemInteractive extends Interactive {
         Interaction interaction,
         List<ItemImageGenerator> itemGens,
         List<String> boarIDs,
-        List<Integer> boarEditions
+        List<Integer> boarEditions,
+        boolean isMsg
     ) {
-        super(interaction);
+        super(interaction, isMsg);
         this.itemGens = itemGens;
         this.boarIDs = boarIDs;
         this.boarEditions = boarEditions;
@@ -51,6 +52,10 @@ public class ItemInteractive extends Interactive {
     }
 
     private void makeSelectOptions(List<String> boarIDs, List<Integer> boarEditions) {
+        if (this.boarIDs == null) {
+            return;
+        }
+
         Map<String, RarityConfig> rarityConfigs = this.config.getRarityConfigs();
         List<SelectOption> selectableBoars = new ArrayList<>();
 
@@ -107,8 +112,11 @@ public class ItemInteractive extends Interactive {
 
         try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {
             MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(imageToSend)
-                .setComponents(this.getCurComponents());
+                .setFiles(imageToSend);
+
+            if (this.boarIDs != null) {
+                editedMsg.setComponents(this.getCurComponents());
+            }
 
             if (this.isStopped) {
                 return;
@@ -135,8 +143,11 @@ public class ItemInteractive extends Interactive {
 
         try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {
             MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(imageToSend)
-                .setComponents(this.getCurComponents()[0]);
+                .setFiles(imageToSend);
+
+            if (this.boarIDs != null) {
+                editedMsg.setComponents(this.getCurComponents()[0]);
+            }
 
             this.updateInteractive(editedMsg.build());
         } catch (Exception exception) {
@@ -214,16 +225,38 @@ public class ItemInteractive extends Interactive {
         List<String> boarIDs,
         List<Integer> bucksGotten,
         List<Integer> editions,
+        User giftingUser,
         User user,
         String title,
-        InteractionHook hook
+        InteractionHook hook,
+        boolean isMsg
     ) {
         List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
-            boarIDs, bucksGotten, user, title
+            boarIDs, bucksGotten, user, title, giftingUser
         );
 
         Interactive interactive = InteractiveFactory.constructItemInteractive(
-            hook.getInteraction(), itemGens, boarIDs, editions
+            hook.getInteraction(), itemGens, boarIDs, editions, isMsg
+        );
+        interactive.execute(null);
+    }
+
+    public static void sendInteractive(
+        String itemName,
+        String filePath,
+        String colorKey,
+        User giftingUser,
+        User user,
+        String title,
+        InteractionHook hook,
+        boolean isMsg
+    ) {
+        List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
+            itemName, filePath, colorKey, user, title, giftingUser
+        );
+
+        Interactive interactive = InteractiveFactory.constructItemInteractive(
+            hook.getInteraction(), itemGens, null, null, isMsg
         );
         interactive.execute(null);
     }

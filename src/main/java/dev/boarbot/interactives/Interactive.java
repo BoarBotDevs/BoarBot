@@ -12,8 +12,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.InteractionType;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -36,19 +35,24 @@ public abstract class Interactive {
     protected InteractionHook hook;
     protected Message msg;
 
+    private final boolean isMsg;
+
     protected long curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getInteractiveIdle();
     protected long hardStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getInteractiveHardStop();
     protected long lastEndTime = 0;
     protected boolean isStopped = false;
 
     protected Interactive(Interaction interaction) {
+        this(interaction, false);
+    }
+
+    protected Interactive(Interaction interaction, boolean isMsg) {
         this.interaction = interaction;
         this.interactionID = interaction.getId();
         this.guildID = interaction.getGuild().getId();
         this.user = interaction.getUser();
-        this.hook = interaction.getType() == InteractionType.COMMAND
-            ? ((SlashCommandInteraction) interaction).getHook()
-            : null;
+        this.hook = ((IDeferrableCallback) interaction).getHook();
+        this.isMsg = isMsg;
 
         String duplicateInteractiveKey = InteractiveUtil.findDuplicateInteractive(this.user.getId(), this.getClass());
 
@@ -85,36 +89,41 @@ public abstract class Interactive {
     public abstract ActionRow[] getCurComponents();
 
     public void updateInteractive(MessageEditData editedMsg) {
-        if (this.hook == null && this.msg == null) {
+        if (this.msg == null && this.isMsg) {
             this.msg = ((ComponentInteraction) this.interaction).getHook().sendMessage(
                 MessageCreateData.fromEditData(editedMsg)
             ).complete();
+            return;
         }
 
-        if (this.hook != null) {
-            this.hook.editOriginal(editedMsg).complete();
-        } else {
+        if (this.msg != null) {
             this.msg.editMessage(editedMsg).complete();
+        } else {
+            this.hook.editOriginal(editedMsg).complete();
         }
     }
 
     public void updateComponents(ActionRow... rows) {
-        if (this.hook == null && this.msg == null) {
+        if (this.msg == null && this.isMsg) {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }
 
-        if (this.hook != null) {
-            this.hook.editOriginalComponents(rows).complete();
-        } else {
+        if (this.msg != null) {
             this.msg.editMessageComponents(rows).complete();
+        } else {
+            this.hook.editOriginalComponents(rows).complete();
         }
     }
 
     public void deleteInteractiveMessage() {
-        if (this.hook != null) {
-            this.hook.deleteOriginal().complete();
-        } else {
+        if (this.msg == null && this.isMsg) {
+            throw new IllegalStateException("The interactive hasn't been initialized yet!");
+        }
+
+        if (this.msg != null) {
             this.msg.delete().complete();
+        } else {
+            this.hook.deleteOriginal().complete();
         }
     }
 

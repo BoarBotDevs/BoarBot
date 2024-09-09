@@ -365,5 +365,18 @@
         }
       ]
     }
+  },
+  "gift": {
+    "fillerBtn": {
+      "custom_id": "FILLER",
+      "label": "️",
+      "style": 2,
+      "disabled": true
+    },
+    "claimBtn": {
+      "custom_id": "CLAIM",
+      "emoji": "\uD83C\uDF81",
+      "style": 3
+    }
   }
 }

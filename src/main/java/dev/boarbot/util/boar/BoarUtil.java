@@ -7,7 +7,6 @@ import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.util.time.TimeUtil;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,7 +52,7 @@ public final class BoarUtil {
         return rarity1;
     }
 
-    public static List<String> getRandBoarIDs(long blessings, boolean isSkyblockGuild) throws SQLException {
+    public static List<String> getRandBoarIDs(long blessings, boolean isSkyblockGuild) {
         BotConfig config = BoarBotApp.getBot().getConfig();
 
         List<String> boarsObtained = new ArrayList<>();

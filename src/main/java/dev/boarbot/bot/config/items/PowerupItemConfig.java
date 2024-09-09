@@ -4,10 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 @Setter
 @ToString
 public class PowerupItemConfig extends BaseItemConfig {
     private Integer rewardAmt;
-    private OutcomeConfig[] outcomes;
+    private Map<String, OutcomeConfig> outcomes = new HashMap<>();
 }

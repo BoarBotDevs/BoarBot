@@ -2,6 +2,7 @@ package dev.boarbot.listeners;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -32,6 +33,10 @@ public class ComponentListener extends ListenerAdapter implements Runnable {
             initInteractionID + this.event.getUser().getId()
         );
         long startTime = TimeUtil.getCurMilli();
+
+        if (interactive == null) {
+            interactive = InteractiveUtil.getGiftInteractive(initInteractionID);
+        }
 
         if (interactive != null) {
             interactive.attemptExecute(this.event, startTime);

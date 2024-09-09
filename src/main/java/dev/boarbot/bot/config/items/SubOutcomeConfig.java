@@ -1,5 +1,6 @@
 package dev.boarbot.bot.config.items;
 
+import dev.boarbot.api.util.Weighted;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,7 +15,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class SubOutcomeConfig {
+public class SubOutcomeConfig implements Weighted {
     private int weight = 0;
-    private String name = "";
+    private Integer minBucks;
+    private Integer maxBucks;
+    private Integer rewardAmt;
 }

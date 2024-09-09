@@ -10,9 +10,9 @@ import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -30,7 +30,7 @@ public class DailyNotifyInteractive extends Interactive {
 
     private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getDaily();
 
-    public DailyNotifyInteractive(SlashCommandInteractionEvent initEvent) {
+    public DailyNotifyInteractive(Interaction initEvent) {
         super(initEvent);
     }
 

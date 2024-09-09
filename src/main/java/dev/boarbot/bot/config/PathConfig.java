@@ -59,6 +59,8 @@ public class PathConfig {
 
     private String mainFont = "";
     private String circleMask = "";
+    private String giftBucks = "";
+    private String giftImage = "";
 
     // Python scripts
 
