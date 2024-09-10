@@ -24,9 +24,7 @@ public class QuestsSubcommand extends Subcommand {
         this.interaction.deferReply().complete();
 
         try {
-            Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(
-                this.event, MegaMenuView.QUESTS
-            );
+            Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.QUESTS);
             interactive.execute(null);
         } catch (SQLException exception) {
             log.error("Failed to find user data.", exception);

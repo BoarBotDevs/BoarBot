@@ -23,8 +23,11 @@ src/main/resources/assets/images/items/boars/*
 !src/main/resources/assets/images/items/boars/SpookyBoar.png
 !src/main/resources/assets/images/items/boars/SantaBoar.png
 src/main/resources/assets/images/items/badges/*
-!src/main/resources/assets/images/items/badges/Hunter.png
-!src/main/resources/assets/images/items/badges/Athlete.png
+!src/main/resources/assets/images/items/badges/Researcher.png
+!src/main/resources/assets/images/items/badges/ResearcherSpecial.png
+!src/main/resources/assets/images/items/badges/Athlete3rd.png
+!src/main/resources/assets/images/items/badges/Athlete2nd.png
+!src/main/resources/assets/images/items/badges/Athlete1st.png
 src/main/java/dev/boarbot/util/boar/GuessInterpreter.ts
 src/main/resources/config/config.json
 src/main/resources/config/game/rarities.json

@@ -24,9 +24,7 @@ public class ProfileSubcommand extends Subcommand {
         this.interaction.deferReply().complete();
 
         try {
-            Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(
-                this.event, MegaMenuView.PROFILE
-            );
+            Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.PROFILE);
             interactive.execute(null);
         } catch (SQLException exception) {
             log.error("Failed to find user data.", exception);

@@ -2,6 +2,7 @@ package dev.boarbot.entities.boaruser;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.entities.boaruser.data.*;
 import dev.boarbot.interactives.boar.megamenu.SortType;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
@@ -1208,21 +1209,25 @@ public class BoarUser {
         }
     }
 
-    public List<String> getCurrentBadges(Connection connection) throws SQLException {
+    public List<BadgeData> getCurrentBadges(Connection connection) throws SQLException {
         String query = """
-            SELECT badge_id
+            SELECT badge_id, badge_tier, obtained_timestamp
             FROM collected_badges
-            WHERE user_id = ? AND has_badge = true;
+            WHERE user_id = ? AND `exists` = true;
         """;
 
-        List<String> badgeIDs = new ArrayList<>();
+        List<BadgeData> badgeIDs = new ArrayList<>();
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, this.userID);
 
             try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
-                    badgeIDs.add(results.getString("badge_id"));
+                    badgeIDs.add(new BadgeData(
+                        results.getString("badge_id"),
+                        results.getInt("badge_tier"),
+                        results.getTimestamp("obtained_timestamp").getTime()
+                    ));
                 }
             }
         }

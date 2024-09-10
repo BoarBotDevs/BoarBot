@@ -11,6 +11,7 @@ import java.util.Map;
 @Setter
 @ToString
 public class PowerupItemConfig extends BaseItemConfig {
+    private String file = "";
     private Integer rewardAmt;
     private Map<String, OutcomeConfig> outcomes = new HashMap<>();
 }

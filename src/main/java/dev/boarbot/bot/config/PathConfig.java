@@ -53,6 +53,7 @@ public class PathConfig {
     private String powCellDivine = "";
     private String powCellEntropic = "";
     private String questUnderlay = "";
+    private String badgeUnderlay = "";
     private String rarityBorder = "";
     private String favorite = "";
 

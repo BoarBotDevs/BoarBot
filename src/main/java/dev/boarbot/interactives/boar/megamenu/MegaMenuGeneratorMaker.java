@@ -31,7 +31,7 @@ class MegaMenuGeneratorMaker {
     public MegaMenuGenerator make() throws SQLException {
         this.view = this.interactive.getCurView();
 
-        return switch (this.interactive.getCurView()) {
+        return switch (this.view) {
             case MegaMenuView.PROFILE -> this.makeProfileGen();
             case MegaMenuView.COLLECTION -> this.makeCollectionGen();
             case MegaMenuView.COMPENDIUM -> this.makeCompendiumGen();
@@ -39,7 +39,7 @@ class MegaMenuGeneratorMaker {
             case MegaMenuView.STATS -> this.makeStatsGen();
             case MegaMenuView.POWERUPS -> this.makePowerupsGen();
             case MegaMenuView.QUESTS -> this.makeQuestsGen();
-            case MegaMenuView.BADGES -> this.makeCollectionGen();
+            case MegaMenuView.BADGES -> this.makeBadgesGen();
         };
     }
 
@@ -63,7 +63,7 @@ class MegaMenuGeneratorMaker {
         return new ProfileImageGenerator(
             this.interactive.getPage(),
             this.interactive.getBoarUser(),
-            this.interactive.getBadgeIDs(),
+            this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getFavoriteID(),
             this.interactive.isSkyblockGuild(),
@@ -84,7 +84,7 @@ class MegaMenuGeneratorMaker {
         return new CollectionImageGenerator(
             this.interactive.getPage(),
             this.interactive.getBoarUser(),
-            this.interactive.getBadgeIDs(),
+            this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getFilteredBoars()
         );
@@ -96,9 +96,6 @@ class MegaMenuGeneratorMaker {
 
         if (this.interactive.getFilteredBoars().isEmpty()) {
             this.interactive.setCurView(MegaMenuView.COLLECTION);
-            this.interactive.setInteractOpen(false);
-            this.interactive.setSortOpen(false);
-            this.interactive.setFilterOpen(false);
 
             this.interactive.setAcknowledgeOpen(true);
             this.interactive.setAcknowledgeImageGen(
@@ -132,7 +129,7 @@ class MegaMenuGeneratorMaker {
         return new CompendiumImageGenerator(
             this.interactive.getPage(),
             this.interactive.getBoarUser(),
-            this.interactive.getBadgeIDs(),
+            this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getFavoriteID() != null &&
                 this.interactive.getFavoriteID().equals(this.interactive.getCurBoarEntry().getKey()),
@@ -153,7 +150,7 @@ class MegaMenuGeneratorMaker {
         return new EditionsImageGenerator(
             this.interactive.getPage(),
             this.interactive.getBoarUser(),
-            this.interactive.getBadgeIDs(),
+            this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getCurBoarEntry()
         );
@@ -179,7 +176,7 @@ class MegaMenuGeneratorMaker {
         return new StatsImageGenerator(
             this.interactive.getPage(),
             this.interactive.getBoarUser(),
-            this.interactive.getBadgeIDs(),
+            this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getStatsData()
         );
@@ -205,7 +202,7 @@ class MegaMenuGeneratorMaker {
         return new PowerupsImageGenerator(
             this.interactive.getPage(),
             this.interactive.getBoarUser(),
-            this.interactive.getBadgeIDs(),
+            this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getPowData()
         );
@@ -232,10 +229,40 @@ class MegaMenuGeneratorMaker {
         return new QuestsImageGenerator(
             this.interactive.getPage(),
             this.interactive.getBoarUser(),
-            this.interactive.getBadgeIDs(),
+            this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getQuestData(),
             this.interactive.getQuestIDs()
+        );
+    }
+
+    private MegaMenuGenerator makeBadgesGen() throws SQLException {
+        if (this.interactive.getBadges().isEmpty()) {
+            if (this.interactive.getPrevView() == null || this.interactive.getPrevView().equals(MegaMenuView.BADGES)) {
+                this.interactive.setCurView(MegaMenuView.PROFILE);
+            } else {
+                this.interactive.setCurView(this.interactive.getPrevView());
+            }
+
+            this.interactive.setAcknowledgeOpen(true);
+            this.interactive.setAcknowledgeImageGen(
+                new OverlayImageGenerator(null, this.config.getStringConfig().getBadgeBlocked())
+            );
+
+            return this.make();
+        }
+
+        this.interactive.setMaxPage(this.interactive.getBadges().size()-1);
+        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
+            this.interactive.setPrevPage(this.interactive.getPage());
+            this.interactive.setPage(this.interactive.getMaxPage());
+        }
+
+        return new BadgesImageGenerator(
+            this.interactive.getPage(),
+            this.interactive.getBoarUser(),
+            this.interactive.getBadges(),
+            this.interactive.getFirstJoinedDate()
         );
     }
 

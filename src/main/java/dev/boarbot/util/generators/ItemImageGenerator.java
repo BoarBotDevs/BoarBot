@@ -59,15 +59,15 @@ public class ItemImageGenerator extends ImageGenerator {
     @Getter @Setter private User giftingUser;
     @Getter @Setter private long bucks;
 
-    public ItemImageGenerator(User user, String title, String itemID, boolean isBadge, User giftingUser, long bucks) {
+    public ItemImageGenerator(User user, String title, String itemID, int badgeTier, User giftingUser, long bucks) {
         this.user = user;
         this.title = title;
         this.itemID = itemID;
 
-        if (isBadge) {
+        if (badgeTier >= 0) {
             BadgeItemConfig badgeInfo = this.config.getItemConfig().getBadges().get(itemID);
-            this.itemName = badgeInfo.getName();
-            this.filePath = this.config.getPathConfig().getBadges() + badgeInfo.getFile();
+            this.itemName = badgeInfo.getName().formatted(badgeTier+1);
+            this.filePath = this.config.getPathConfig().getBadges() + badgeInfo.getFiles()[badgeTier];
             this.staticFilePath = null;
             this.colorKey = "badge";
         } else {
@@ -384,7 +384,7 @@ public class ItemImageGenerator extends ImageGenerator {
             }
 
             ItemImageGenerator boarItemGen = new ItemImageGenerator(
-                user, title, boarIDs.get(i), false, giftingUser, bucksGotten.get(i)
+                user, title, boarIDs.get(i), -1, giftingUser, bucksGotten.get(i)
             );
 
             itemGens.add(boarItemGen);

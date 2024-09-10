@@ -4,6 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
@@ -40,12 +41,12 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
     public CompendiumImageGenerator(
         int page,
         BoarUser boarUser,
-        List<String> badgeIDs,
+        List<BadgeData> badges,
         String firstJoinedDate,
         boolean isFavorite,
         Map.Entry<String, BoarInfo> boarEntry
     ) {
-        super(page, boarUser, badgeIDs, firstJoinedDate);
+        super(page, boarUser, badges, firstJoinedDate);
         this.boarID = boarEntry.getKey();
         this.boarInfo = boarEntry.getValue();
         this.isFavorite = isFavorite;

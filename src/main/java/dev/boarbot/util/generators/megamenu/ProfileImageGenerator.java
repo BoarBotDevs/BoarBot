@@ -4,7 +4,8 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
-import dev.boarbot.entities.boaruser.ProfileData;
+import dev.boarbot.entities.boaruser.data.BadgeData;
+import dev.boarbot.entities.boaruser.data.ProfileData;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
@@ -43,13 +44,13 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
     public ProfileImageGenerator(
         int page,
         BoarUser boarUser,
-        List<String> badgeIDs,
+        List<BadgeData> badges,
         String firstJoinedDate,
         String favoriteID,
         boolean isSkyblockGuild,
         ProfileData profileData
     ) {
-        super(page, boarUser, badgeIDs, firstJoinedDate);
+        super(page, boarUser, badges, firstJoinedDate);
         this.profileData = profileData;
         this.favoriteID = favoriteID;
 
@@ -58,7 +59,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
             RarityConfig boarRarity = this.config.getRarityConfigs().get(BoarUtil.findRarityKey(boarID));
             BoarItemConfig boar = this.itemConfig.getBoars().get(boarID);
 
-            boolean countableUnique = !boar.isBlacklisted() && boarRarity.isHunterNeed();
+            boolean countableUnique = !boar.isBlacklisted() && boarRarity.isResearcherNeed();
             boolean skyblockBlocked = boar.isSB() && !isSkyblockGuild && this.profileData.numSkyblock() == 0;
 
             if (countableUnique && !skyblockBlocked) {

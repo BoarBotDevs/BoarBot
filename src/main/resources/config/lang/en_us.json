@@ -127,6 +127,8 @@
   "questNoBonusLabel": "<>silver<>UNAVAILABLE",
   "questUnclaimedBonusLabel": "<>error<>UNCLAIMED",
   "questClaimedBonusLabel": "<>green<>CLAIMED",
+  "badgeBlocked": "<>error<>This user has no badges!",
+  "badgeObtainedLabel": "Obtained On",
   "notificationSuccess": "You've successfully enabled notifications! You'll be notified when /%s %s is available again. \n\nTo disable notifications, simply message me STOP at any time.",
   "notificationFailed": "Failed to enable notifications! I'm unable to DM you. To fix this, invite me to a server where you have DMs open (Right click the server > Privacy Settings > Enable Direct Messages).",
   "notificationSuccessReply": "Success! You should've received a DM from me.",

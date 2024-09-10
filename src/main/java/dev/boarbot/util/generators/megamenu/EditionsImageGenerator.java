@@ -2,6 +2,7 @@ package dev.boarbot.util.generators.megamenu;
 
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
@@ -29,11 +30,11 @@ public class EditionsImageGenerator extends MegaMenuGenerator {
     public EditionsImageGenerator(
         int page,
         BoarUser boarUser,
-        List<String> badgeIDs,
+        List<BadgeData> badges,
         String firstJoinedDate,
         Map.Entry<String, BoarInfo> boarEntry
     ) {
-        super(page, boarUser, badgeIDs, firstJoinedDate);
+        super(page, boarUser, badges, firstJoinedDate);
         this.boarID = boarEntry.getKey();
         this.boarInfo = boarEntry.getValue();
     }

@@ -24,9 +24,7 @@ public class BadgesSubcommand extends Subcommand {
         this.interaction.deferReply().complete();
 
         try {
-            Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(
-                this.event, MegaMenuView.BADGES
-            );
+            Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.BADGES);
             interactive.execute(null);
         } catch (SQLException exception) {
             log.error("Failed to find user data.", exception);

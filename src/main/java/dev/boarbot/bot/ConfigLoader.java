@@ -99,6 +99,7 @@ class ConfigLoader {
             }
 
             for (BadgeItemConfig badge : config.getItemConfig().getBadges().values()) {
+                badge.setName(badge.getName() + " T%d");
                 setNames(badge);
             }
 
@@ -113,7 +114,7 @@ class ConfigLoader {
             }
 
             File fontFile = new File(
-                    config.getPathConfig().getFontAssets() + config.getPathConfig().getMainFont()
+                config.getPathConfig().getFontAssets() + config.getPathConfig().getMainFont()
             );
 
             try {

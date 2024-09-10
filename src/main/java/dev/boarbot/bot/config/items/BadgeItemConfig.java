@@ -8,6 +8,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class BadgeItemConfig extends BaseItemConfig {
-    private String staticFile;
-    private String description = "";
+    private String[] files = {};
+    private String[] descriptions = {};
 }

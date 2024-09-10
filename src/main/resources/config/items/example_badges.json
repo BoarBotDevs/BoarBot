@@ -1,12 +1,26 @@
 {
-  "hunter": {
-    "name": "Boar Hunter",
-    "file": "Hunter.png",
-    "description": "Given to users that have collected all non-Special boars"
+  "researcher": {
+    "name": "Boar Researcher",
+    "files": [
+      "Researcher.png",
+      "ResearcherSpecial.png"
+    ],
+    "descriptions": [
+      "Rewarded to users that have collected all boars. (Excluding <>special<>Special Boars<>font<>)",
+      "Rewarded to users that have collected all boars. (Including <>special<>Special Boars<>font<>)"
+    ]
   },
   "athlete": {
     "name": "Boarthlete",
-    "file": "Athlete.png",
-    "description": "Given to users that are currently #1 on a leaderboard"
+    "files": [
+      "Athlete3rd.png",
+      "Athlete2nd.png",
+      "Athlete1st.png"
+    ],
+    "descriptions": [
+      "Rewarded to users that are currently #3 on any leaderboard.",
+      "Rewarded to users that are currently #2 on any leaderboard.",
+      "Rewarded to users that are currently #1 on any leaderboard."
+    ]
   }
 }

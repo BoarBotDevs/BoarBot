@@ -3,7 +3,8 @@ package dev.boarbot.util.generators.megamenu;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
-import dev.boarbot.entities.boaruser.PowerupsData;
+import dev.boarbot.entities.boaruser.data.BadgeData;
+import dev.boarbot.entities.boaruser.data.PowerupsData;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
@@ -34,11 +35,11 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
     public PowerupsImageGenerator(
         int page,
         BoarUser boarUser,
-        List<String> badgeIDs,
+        List<BadgeData> badges,
         String firstJoinedDate,
         PowerupsData powData
     ) {
-        super(page, boarUser, badgeIDs, firstJoinedDate);
+        super(page, boarUser, badges, firstJoinedDate);
         this.powData = powData;
     }
 

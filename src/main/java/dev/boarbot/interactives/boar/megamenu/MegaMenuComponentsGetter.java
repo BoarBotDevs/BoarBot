@@ -55,23 +55,22 @@ class MegaMenuComponentsGetter {
         }
 
         return switch (this.interactive.getCurView()) {
-            case MegaMenuView.PROFILE, MegaMenuView.STATS -> this.getNav();
-            case MegaMenuView.COLLECTION -> getCompendiumCollectionComponents();
-            case MegaMenuView.COMPENDIUM -> getCompendiumCollectionComponents(true);
-            case MegaMenuView.EDITIONS -> getEditionsComponents();
-            case MegaMenuView.POWERUPS -> getPowerupsComponents();
-            case MegaMenuView.QUESTS -> this.getNav();
-            case MegaMenuView.BADGES -> getCompendiumCollectionComponents();
+            case MegaMenuView.PROFILE, MegaMenuView.STATS, MegaMenuView.BADGES -> this.getNav();
+            case MegaMenuView.COLLECTION -> this.getCompendiumCollectionComponents();
+            case MegaMenuView.COMPENDIUM -> this.getCompendiumCollectionComponents(true);
+            case MegaMenuView.EDITIONS -> this.getEditionsComponents();
+            case MegaMenuView.POWERUPS -> this.getPowerupsComponents();
+            case MegaMenuView.QUESTS -> this.getQuestsComponents();
         };
     }
 
     private ActionRow[] getCompendiumCollectionComponents() {
-        return getCompendiumCollectionComponents(false);
+        return this.getCompendiumCollectionComponents(false);
     }
 
     private ActionRow[] getCompendiumCollectionComponents(boolean isCompendium) {
         List<ActionRow> actionRows = new ArrayList<>();
-        ActionRow[] nav = getNav();
+        ActionRow[] nav = this.getNav();
 
         List<ItemComponent> interactRow = null;
 
@@ -92,11 +91,11 @@ class MegaMenuComponentsGetter {
         List<ItemComponent> selectRow = null;
 
         if (this.interactive.isFilterOpen()) {
-            selectRow = getFilterRow();
+            selectRow = this.getFilterRow();
         } else if (this.interactive.isSortOpen()) {
-            selectRow = getSortRow();
+            selectRow = this.getSortRow();
         } else if (this.interactive.isInteractOpen()) {
-            selectRow = getInteractRow();
+            selectRow = this.getInteractRow();
         }
 
         Button interactBtn = null;
@@ -132,7 +131,7 @@ class MegaMenuComponentsGetter {
     }
 
     private ActionRow[] getEditionsComponents() {
-        ActionRow[] nav = getNav();
+        ActionRow[] nav = this.getNav();
 
         List<ItemComponent> backRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
@@ -168,7 +167,7 @@ class MegaMenuComponentsGetter {
     }
 
     private ActionRow[] getPowerupsComponents() {
-        ActionRow[] nav = getNav();
+        ActionRow[] nav = this.getNav();
 
         if (this.powOptions.isEmpty()) {
             this.makeSelectOptions(this.COMPONENTS.get("powSelect"));
@@ -180,6 +179,10 @@ class MegaMenuComponentsGetter {
         );
 
         return new ActionRow[] {nav[0], nav[1], ActionRow.of(selectRow)};
+    }
+
+    private ActionRow[] getQuestsComponents() {
+        return this.getNav();
     }
 
     private List<ItemComponent> getFilterRow() {

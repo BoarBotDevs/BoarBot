@@ -3,7 +3,8 @@ package dev.boarbot.util.generators.megamenu;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
-import dev.boarbot.entities.boaruser.StatsData;
+import dev.boarbot.entities.boaruser.data.BadgeData;
+import dev.boarbot.entities.boaruser.data.StatsData;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
@@ -29,11 +30,11 @@ public class StatsImageGenerator extends MegaMenuGenerator {
     public StatsImageGenerator(
         int page,
         BoarUser boarUser,
-        List<String> badgeIDs,
+        List<BadgeData> badges,
         String firstJoinedDate,
         StatsData statsData
     ) {
-        super(page, boarUser, badgeIDs, firstJoinedDate);
+        super(page, boarUser, badges, firstJoinedDate);
         this.statsData = statsData;
     }
 

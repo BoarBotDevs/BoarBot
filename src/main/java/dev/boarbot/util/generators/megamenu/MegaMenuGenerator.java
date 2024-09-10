@@ -5,6 +5,7 @@ import dev.boarbot.bot.config.PathConfig;
 import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
 import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.graphics.Align;
@@ -41,17 +42,17 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
     protected int page;
     protected BoarUser boarUser;
 
-    protected List<String> badgeIDs;
+    protected List<BadgeData> badges;
     protected String firstJoinedDate;
 
     protected TextDrawer textDrawer;
 
     public MegaMenuGenerator(
-        int page, BoarUser boarUser, List<String> badgeIDs, String firstJoinedDate
+        int page, BoarUser boarUser, List<BadgeData> badges, String firstJoinedDate
     ) {
         this.page = page;
         this.boarUser = boarUser;
-        this.badgeIDs = badgeIDs;
+        this.badges = badges;
         this.firstJoinedDate = firstJoinedDate;
     }
 
@@ -91,29 +92,31 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         textDrawer.setPos(DATE_POS);
         textDrawer.drawText();
 
-        if (this.badgeIDs.isEmpty()) {
+        if (this.badges.isEmpty()) {
             textDrawer.setText(this.strConfig.getMegaMenuNoBadges());
             textDrawer.setColorVal(this.colorConfig.get("font"));
             textDrawer.setPos(NO_BADGE_POS);
             textDrawer.drawText();
         }
 
-        if (!this.badgeIDs.isEmpty()) {
-            int curBadgeStartX = BADGE_START_X - (BADGE_SPACING / 2 * (this.badgeIDs.size() - 1));
+        if (!this.badges.isEmpty()) {
+            int curBadgeStartX = BADGE_START_X - (BADGE_SPACING / 2 * (this.badges.size() - 1));
 
             g2d.setPaint(Color.decode(this.colorConfig.get("mid")));
             g2d.fill(new RoundRectangle2D.Double(
                 curBadgeStartX - this.nums.getBorder(),
                 BADGE_Y - this.nums.getBorder(),
-                this.nums.getBorder() * 2 + (this.badgeIDs.size() - 1) * BADGE_SPACING + BADGE_SIZE[0],
+                this.nums.getBorder() * 2 + (this.badges.size() - 1) * BADGE_SPACING + BADGE_SIZE[0],
                 this.nums.getBorder() * 2 + BADGE_SIZE[1],
                 this.nums.getBorder() * 2,
                 this.nums.getBorder() * 2
             ));
 
-            for (int i=0; i<this.badgeIDs.size(); i++) {
-                String badgeID = this.badgeIDs.get(i);
-                String badgePath = this.pathConfig.getBadges() + this.itemConfig.getBadges().get(badgeID).getFile();
+            for (int i=0; i<this.badges.size(); i++) {
+                String badgeID = this.badges.get(i).badgeID();
+                int badgeTier = this.badges.get(i).badgeTier();
+                String badgePath = this.pathConfig.getBadges() +
+                    this.itemConfig.getBadges().get(badgeID).getFiles()[badgeTier];
                 int[] badgePos = {curBadgeStartX + i * BADGE_SPACING, BADGE_Y};
 
                 GraphicsUtil.drawImage(g2d, badgePath, badgePos, BADGE_SIZE);

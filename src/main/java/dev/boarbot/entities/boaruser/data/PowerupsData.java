@@ -1,4 +1,4 @@
-package dev.boarbot.entities.boaruser;
+package dev.boarbot.entities.boaruser.data;
 
 import java.util.HashMap;
 import java.util.Map;

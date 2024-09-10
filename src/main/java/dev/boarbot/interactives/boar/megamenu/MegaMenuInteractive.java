@@ -6,6 +6,7 @@ import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.entities.boaruser.*;
+import dev.boarbot.entities.boaruser.data.*;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
@@ -79,7 +80,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter private final BoarUser boarUser;
 
     @Getter private String firstJoinedDate;
-    @Getter private List<String> badgeIDs;
+    @Getter private List<BadgeData> badges;
     @Getter @Setter private String favoriteID;
 
     @Getter @Setter private Map<String, BoarInfo> ownedBoars;
@@ -156,7 +157,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                     this.favoriteID = this.boarUser.getFavoriteID(connection);
 
                     this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.guildID);
-                    this.badgeIDs = this.boarUser.getCurrentBadges(connection);
+                    this.badges = this.boarUser.getCurrentBadges(connection);
                     this.viewsToUpdateData.replaceAll((k, v) -> false);
                 }
             }

@@ -24,7 +24,7 @@ public class RarityConfig {
     private boolean fromDaily = false;
     private int chargesNeeded = 0;
     private int avgClones = 0;
-    private boolean hunterNeed = false;
+    private boolean researcherNeed = false;
     private boolean givesFirstBoar = false;
     private boolean hidden = false;
     private boolean showEdition = false;

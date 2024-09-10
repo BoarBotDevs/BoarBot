@@ -46,6 +46,7 @@ public class BoarBot implements Bot {
         ConfigLoader.loadConfig();
         DatabaseLoader.loadIntoDatabase("rarities");
         DatabaseLoader.loadIntoDatabase("boars");
+        DatabaseLoader.loadIntoDatabase("badges");
         CacheLoader.loadCache();
 
         this.jda = JDABuilder.createDefault(this.env.get("TOKEN"))

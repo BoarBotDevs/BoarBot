@@ -12,5 +12,4 @@ public abstract class BaseItemConfig {
     private String pluralName;
     private String shortName;
     private String shortPluralName;
-    private String file = "";
 }

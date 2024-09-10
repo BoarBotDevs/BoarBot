@@ -161,7 +161,7 @@
       "badges": {
         "name": "badges",
         "description": "View a user's badges",
-        "location": "dev.boarbot.commands.boar.megamenu.QuestsSubcommand",
+        "location": "dev.boarbot.commands.boar.megamenu.BadgesSubcommand",
         "options": [
           {
             "name": "user",

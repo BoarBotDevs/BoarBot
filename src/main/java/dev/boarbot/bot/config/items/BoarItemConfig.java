@@ -9,6 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class BoarItemConfig extends BaseItemConfig {
+    private String file = "";
     private String staticFile;
     private String description = "";
     private String classification = BoarBotApp.getBot().getConfig().getStringConfig().getCompNoSpecies();

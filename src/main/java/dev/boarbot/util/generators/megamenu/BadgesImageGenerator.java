@@ -1,100 +1,84 @@
 package dev.boarbot.util.generators.megamenu;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.entities.boaruser.BoarInfo;
+import dev.boarbot.bot.config.items.BadgeItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Map;
 
 public class BadgesImageGenerator extends MegaMenuGenerator {
-    public static final int BOARS_PER_PAGE = 15;
-
-    private static final int MAX_BOARS = 9999999;
     private static final int[] ORIGIN = {0, 0};
-    private static final int START_X = 25;
-    private static final int START_Y = 266;
-    private static final int NUM_COLS = 5;
-    private static final int AMOUNT_X_OFFSET = 15;
-    private static final int AMOUNT_Y_OFFSET = 49;
-    private static final int AMOUNT_BOX_WIDTH_OFFSET = 30;
-    private static final int AMOUNT_BOX_HEIGHT = 59;
+    private static final int[] LEFT_POS = {484, 762};
+    private static final int VALUE_Y_OFFSET = 78;
+    private static final int[] RARITY_POS = {1431, 403};
+    private static final int[] NAME_POS = {1431, 469};
+    private static final int[] BADGE_POS = {1108, 475};
+    private static final int RIGHT_WIDTH = 800;
+    private static final int[] DESCRIPTION_POS = {1431, 1169};
 
-    private final Map<String, BoarInfo> boarInfos;
-
-    public BadgesImageGenerator(
-        int page,
-        BoarUser boarUser,
-        List<String> badgeIDs,
-        String firstJoinedDate,
-        Map<String, BoarInfo> boarInfos
-    ) {
-        super(page, boarUser, badgeIDs, firstJoinedDate);
-        this.boarInfos = boarInfos;
+    public BadgesImageGenerator(int page, BoarUser boarUser, List<BadgeData> badges, String firstJoinedDate) {
+        super(page, boarUser, badges, firstJoinedDate);
     }
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        int border = nums.getBorder();
-        int[] boarImageSize = this.nums.getMediumBoarSize();
+        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getBadgeUnderlay();
 
-        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getCollUnderlay();
+        int mediumFont = this.nums.getFontMedium();
+        int smallestFont = this.nums.getFontSmallest();
+
+        BadgeItemConfig badge = this.itemConfig.getBadges().get(this.badges.get(this.page).badgeID());
+        int badgeTier = this.badges.get(this.page).badgeTier();
+        long badgeObtained = this.badges.get(this.page).obtainedTimestamp();
+
+        String badgeFile = this.pathConfig.getBadges() + badge.getFiles()[badgeTier];
+        String badgeDescription = badge.getDescriptions()[badgeTier];
 
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
 
-        String[] boarIDs = this.boarInfos.keySet().toArray(new String[0]);
-        int lastBoarIndex = Math.min((this.page+1)*BOARS_PER_PAGE, boarIDs.length);
+        this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, this.colorConfig.get("font"), mediumFont);
 
-        for (int i=this.page*BOARS_PER_PAGE; i<lastBoarIndex; i++) {
-            String boarID = boarIDs[i];
-            int relativeIndex = i - this.page*BOARS_PER_PAGE;
+        String obtainedStr = Instant.ofEpochMilli(badgeObtained)
+            .atOffset(ZoneOffset.UTC)
+            .format(TimeUtil.getDateFormatter());
+        int[] obtainedPos = {LEFT_POS[0], LEFT_POS[1] + VALUE_Y_OFFSET};
 
-            int[] boarPos = {
-                    START_X + (relativeIndex % NUM_COLS) * (boarImageSize[0] + this.nums.getBorder()),
-                    START_Y + (relativeIndex / NUM_COLS) * (boarImageSize[1] + this.nums.getBorder())
-            };
+        TextUtil.drawLabel(this.textDrawer, this.strConfig.getBadgeObtainedLabel(), LEFT_POS);
+        TextUtil.drawValue(this.textDrawer, obtainedStr, obtainedPos);
 
-            int[] amountPos = new int[] {boarPos[0] + AMOUNT_X_OFFSET, boarPos[1] + AMOUNT_Y_OFFSET};
-            String amount = "%,d".formatted(Math.min(this.boarInfos.get(boarID).getAmount(), MAX_BOARS));
-            TextDrawer textDrawer = new TextDrawer(
-                    g2d, amount, amountPos, Align.LEFT, this.colorConfig.get("font"), this.nums.getFontMedium()
-            );
-            FontMetrics fm = g2d.getFontMetrics();
-            int[] rectangleSize = new int[] {
-                    fm.stringWidth(amount) + AMOUNT_BOX_WIDTH_OFFSET + border,
-                    AMOUNT_BOX_HEIGHT + border
-            };
+        this.textDrawer.setText("BADGE");
+        this.textDrawer.setPos(RARITY_POS);
+        this.textDrawer.setFontSize(mediumFont);
+        this.textDrawer.setColorVal(this.colorConfig.get("badge"));
+        this.textDrawer.setWidth(RIGHT_WIDTH);
+        this.textDrawer.drawText();
 
-            BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get("medium" + boarID);
-            g2d.drawImage(boarImage, boarPos[0], boarPos[1], null);
+        this.textDrawer.setText(badge.getName().formatted(badgeTier+1));
+        this.textDrawer.setPos(NAME_POS);
+        this.textDrawer.setColorVal(this.colorConfig.get("font"));
+        this.textDrawer.drawText();
 
-            BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get(
-                    "border" + this.boarInfos.get(boarID).getRarityID()
-            );
-            g2d.drawImage(rarityBorderImage, boarPos[0], boarPos[1], null);
+        GraphicsUtil.drawImage(g2d, badgeFile, BADGE_POS, this.nums.getMediumBigBoarSize());
 
-            g2d.setPaint(Color.decode(this.colorConfig.get("dark")));
-            g2d.fill(new RoundRectangle2D.Double(
-                    boarPos[0]-border,
-                    boarPos[1]-border,
-                    rectangleSize[0],
-                    rectangleSize[1],
-                    this.nums.getBorder() * 2,
-                    this.nums.getBorder() * 2
-            ));
-            textDrawer.drawText();
-        }
+        this.textDrawer.setText(badgeDescription);
+        this.textDrawer.setPos(DESCRIPTION_POS);
+        this.textDrawer.setFontSize(smallestFont);
+        this.textDrawer.setWrap(true);
+        this.textDrawer.drawText();
 
         this.drawTopInfo();
         return this;
