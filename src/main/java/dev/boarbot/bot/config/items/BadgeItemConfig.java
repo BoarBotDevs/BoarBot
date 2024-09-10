@@ -7,7 +7,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class BadgeItemConfig extends BaseItemConfig {
+public class BadgeItemConfig {
+    private String[] names = {};
     private String[] files = {};
     private String[] descriptions = {};
 }

@@ -18,7 +18,5 @@ import java.util.Map;
 public class PromptConfig {
     private String name = "";
     private String description = "";
-    private int rightStyle = 0;
-    private int wrongStyle = 0;
     private Map<String, IndivPromptConfig> prompts = new HashMap<>();
 }

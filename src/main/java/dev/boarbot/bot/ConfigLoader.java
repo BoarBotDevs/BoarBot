@@ -98,11 +98,6 @@ class ConfigLoader {
                 setNames(boar);
             }
 
-            for (BadgeItemConfig badge : config.getItemConfig().getBadges().values()) {
-                badge.setName(badge.getName() + " T%d");
-                setNames(badge);
-            }
-
             for (PowerupItemConfig powerup : config.getItemConfig().getPowerups().values()) {
                 setNames(powerup);
             }

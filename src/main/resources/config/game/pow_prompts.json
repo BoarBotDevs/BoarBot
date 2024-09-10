@@ -2,8 +2,6 @@
   "emojiFind": {
     "name": "Emojis",
     "description": "Click the emoji that's different from the others!",
-    "rightStyle": 1,
-    "wrongStyle": 1,
     "prompts": {
       "frown1": {
         "name": "Frowns",
@@ -69,12 +67,10 @@
   },
   "trivia": {
     "name": "Trivia",
-    "rightStyle": 1,
-    "wrongStyle": 1,
     "prompts": {
       "normal1": {
         "name": "Normal Boar",
-        "description": "What is normal boar?",
+        "description": "What is Normal Boar?",
         "choices": [
           "Unremarkable",
           "Unexceptional",
@@ -177,8 +173,6 @@
   "fast": {
     "name": "Quick Click",
     "description": "Click the green button!",
-    "rightStyle": 3,
-    "wrongStyle": 4,
     "prompts": {
       "one": {
         "name": "One",
@@ -202,11 +196,9 @@
       }
     }
   },
-  "time": {
+  "clock": {
     "name": "Telling Time",
     "description": "Click the clock that's set to %@!",
-    "rightStyle": 1,
-    "wrongStyle": 1,
     "prompts": {
       "one": {
         "name": "1:00",

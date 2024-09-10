@@ -67,7 +67,7 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
         this.textDrawer.setWidth(RIGHT_WIDTH);
         this.textDrawer.drawText();
 
-        this.textDrawer.setText(badge.getName().formatted(badgeTier+1));
+        this.textDrawer.setText(badge.getNames()[badgeTier].formatted(badgeTier+1));
         this.textDrawer.setPos(NAME_POS);
         this.textDrawer.setColorVal(this.colorConfig.get("font"));
         this.textDrawer.drawText();

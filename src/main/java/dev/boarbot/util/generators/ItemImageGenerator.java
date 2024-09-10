@@ -66,7 +66,7 @@ public class ItemImageGenerator extends ImageGenerator {
 
         if (badgeTier >= 0) {
             BadgeItemConfig badgeInfo = this.config.getItemConfig().getBadges().get(itemID);
-            this.itemName = badgeInfo.getName().formatted(badgeTier+1);
+            this.itemName = badgeInfo.getNames()[badgeTier].formatted(badgeTier+1);
             this.filePath = this.config.getPathConfig().getBadges() + badgeInfo.getFiles()[badgeTier];
             this.staticFilePath = null;
             this.colorKey = "badge";

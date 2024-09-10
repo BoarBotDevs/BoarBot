@@ -1,6 +1,9 @@
 {
   "researcher": {
-    "name": "Boar Researcher",
+    "names": [
+      "Boarvestigator",
+      "Boarcheologist"
+    ],
     "files": [
       "Researcher.png",
       "ResearcherSpecial.png"
@@ -11,7 +14,11 @@
     ]
   },
   "athlete": {
-    "name": "Boarthlete",
+    "names": [
+      "Skilled Boarthlete",
+      "Advanced Boarthlete",
+      "Elite Boarthlete"
+    ],
     "files": [
       "Athlete3rd.png",
       "Athlete2nd.png",
