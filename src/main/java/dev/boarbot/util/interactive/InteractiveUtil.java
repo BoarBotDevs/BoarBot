@@ -120,19 +120,6 @@ public final class InteractiveUtil {
         return madeComponents;
     }
 
-    public static String findDuplicateInteractive(String userID, Class<? extends Interactive> interactiveClass) {
-        for (String key : BoarBotApp.getBot().getInteractives().keySet()) {
-            boolean isUserInteractive = key.endsWith(userID);
-            boolean isSameType = interactiveClass.equals(BoarBotApp.getBot().getInteractives().get(key).getClass());
-
-            if (isUserInteractive && isSameType) {
-                return key;
-            }
-        }
-
-        return null;
-    }
-
     public static Interactive getGiftInteractive(String interactID) {
         for (String key : BoarBotApp.getBot().getInteractives().keySet()) {
             Interactive interactive = BoarBotApp.getBot().getInteractives().get(key);

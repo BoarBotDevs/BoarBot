@@ -39,6 +39,7 @@
   "powNumStopHelp": 10,
   "interactiveIdle": 120000,
   "interactiveHardStop": 300000,
+  "giftIdle": 30000,
   "giftLowWait": 3000,
   "giftHighWait": 6000,
   "giftMaxHandicap": 1500,

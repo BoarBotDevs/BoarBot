@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.interactions.Interaction;
 
 @Setter
 @Getter
-public abstract class ModalInteractive extends Interactive {
+public abstract class ModalInteractive extends UserInteractive {
     protected ModalHandler modalHandler = null;
 
     protected ModalInteractive(Interaction interaction) {
@@ -24,7 +24,7 @@ public abstract class ModalInteractive extends Interactive {
             return;
         }
 
-        this.curStopTime = TimeUtil.getCurMilli() + this.config.getNumberConfig().getInteractiveIdle();
+        this.curStopTime = TimeUtil.getCurMilli() + config.getNumberConfig().getInteractiveIdle();
 
         if (compEvent != null) {
             this.execute(compEvent);

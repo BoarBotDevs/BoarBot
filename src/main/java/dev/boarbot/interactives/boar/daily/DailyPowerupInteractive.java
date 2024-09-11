@@ -1,6 +1,5 @@
 package dev.boarbot.interactives.boar.daily;
 
-import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
@@ -47,7 +46,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     private final DailySubcommand callingObj;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getDaily();
+    private final Map<String, IndivComponentConfig> COMPONENTS = config.getComponentConfig().getDaily();
 
     public DailyPowerupInteractive(SlashCommandInteractionEvent initEvent, DailySubcommand callingObj) {
         super(initEvent);
@@ -75,7 +74,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             switch(compID) {
                 case "POW_SELECT" -> {
-                    ModalConfig modalConfig = this.config.getModalConfig().get("miracleAmount");
+                    ModalConfig modalConfig = config.getModalConfig().get("miracleAmount");
 
                     Modal modal = new ModalImpl(
                         ModalUtil.makeModalID(modalConfig.getId(), compEvent),
@@ -108,8 +107,6 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     private void sendResponse() {
         try {
-            StringConfig strConfig = this.config.getStringConfig();
-
             if (this.firstMsg) {
                 this.currentImageUpload = new EmbedImageGenerator(strConfig.getDailyPow()).generate().getFileUpload();
             }
@@ -140,12 +137,10 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 return;
             }
 
-            StringConfig strConfig = this.config.getStringConfig();
-
             this.miraclesToUse = 0;
             this.currentImageUpload = new EmbedImageGenerator(
                 strConfig.getNoPow()
-                    .formatted(this.config.getItemConfig().getPowerups().get("miracle").getPluralName()) +
+                    .formatted(config.getItemConfig().getPowerups().get("miracle").getPluralName()) +
                         " " + strConfig.getDailyPow()
             ).generate().getFileUpload();
         } catch (SQLException exception) {
@@ -206,8 +201,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
     public void modalExecute(ModalInteractionEvent modalEvent) {
         modalEvent.deferEdit().complete();
 
-        StringConfig strConfig = this.config.getStringConfig();
-        PowerupItemConfig miracleConfig = this.config.getItemConfig().getPowerups().get("miracle");
+        PowerupItemConfig miracleConfig = config.getItemConfig().getPowerups().get("miracle");
 
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
@@ -227,7 +221,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                     this.miraclesToUse = amount;
 
                     this.currentImageUpload = new EmbedImageGenerator(
-                        this.config.getStringConfig().getMiracleAttempt().formatted(
+                        strConfig.getMiracleAttempt().formatted(
                             this.miraclesToUse,
                             this.miraclesToUse == 1
                                 ? miracleConfig.getName()

@@ -18,7 +18,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 class MegaMenuGeneratorMaker {
-    private final BotConfig config = BoarBotApp.getBot().getConfig();
+    private final static BotConfig config = BoarBotApp.getBot().getConfig();
 
     private final MegaMenuInteractive interactive;
     private MegaMenuView view;
@@ -99,7 +99,7 @@ class MegaMenuGeneratorMaker {
 
             this.interactive.setAcknowledgeOpen(true);
             this.interactive.setAcknowledgeImageGen(
-                new OverlayImageGenerator(null, this.config.getStringConfig().getCompBlocked())
+                new OverlayImageGenerator(null, config.getStringConfig().getCompBlocked())
             );
 
             return this.makeCollectionGen();
@@ -246,7 +246,7 @@ class MegaMenuGeneratorMaker {
 
             this.interactive.setAcknowledgeOpen(true);
             this.interactive.setAcknowledgeImageGen(
-                new OverlayImageGenerator(null, this.config.getStringConfig().getBadgeBlocked())
+                new OverlayImageGenerator(null, config.getStringConfig().getBadgeBlocked())
             );
 
             return this.make();
@@ -297,7 +297,7 @@ class MegaMenuGeneratorMaker {
 
     private void refreshFilterSort() {
         this.interactive.setFilteredBoars(new LinkedHashMap<>());
-        Map<String, RarityConfig> rarities = this.config.getRarityConfigs();
+        Map<String, RarityConfig> rarities = config.getRarityConfigs();
         int[] rarityBitShift = new int[] {1 + rarities.size()};
 
         List<String> newKeySet = new ArrayList<>(rarities.keySet());
@@ -387,7 +387,7 @@ class MegaMenuGeneratorMaker {
                 continue;
             }
 
-            BoarItemConfig boar = this.config.getItemConfig().getBoars().get(boarID);
+            BoarItemConfig boar = config.getItemConfig().getBoars().get(boarID);
             boolean boarShouldHide = rarity.isHidden() || boar.isSecret();
 
             // No filter

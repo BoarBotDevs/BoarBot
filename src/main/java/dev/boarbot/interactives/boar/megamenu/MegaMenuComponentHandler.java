@@ -2,6 +2,7 @@ package dev.boarbot.interactives.boar.megamenu;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.bot.config.NumberConfig;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
@@ -31,7 +32,11 @@ import java.util.*;
 
 @Log4j2
 class MegaMenuComponentHandler {
-    private final BotConfig config = BoarBotApp.getBot().getConfig();
+    protected static final BotConfig config = BoarBotApp.getBot().getConfig();
+    protected static final StringConfig strConfig = config.getStringConfig();
+    protected static final NumberConfig nums = config.getNumberConfig();
+    protected static final Map<String, ModalConfig> modalConfig = config.getModalConfig();
+    protected static final ItemConfig itemConfig = config.getItemConfig();
 
     private final MegaMenuInteractive interactive;
     private GenericComponentInteractionCreateEvent compEvent;
@@ -90,9 +95,7 @@ class MegaMenuComponentHandler {
                 }
 
                 case "PAGE" -> {
-                    Modal modal = this.makeModal(
-                        this.config.getModalConfig().get("pageInput")
-                    );
+                    Modal modal = this.makeModal(modalConfig.get("pageInput"));
 
                     this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
                     this.compEvent.replyModal(modal).complete();
@@ -104,9 +107,7 @@ class MegaMenuComponentHandler {
                 }
 
                 case "BOAR_FIND" -> {
-                    Modal modal = this.makeModal(
-                        this.config.getModalConfig().get("findBoar")
-                    );
+                    Modal modal = this.makeModal(modalConfig.get("findBoar"));
 
                     this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
                     this.compEvent.replyModal(modal).complete();
@@ -181,8 +182,6 @@ class MegaMenuComponentHandler {
             }
 
             case "CLONE_AMOUNT" -> {
-                StringConfig strConfig = this.config.getStringConfig();
-
                 try (Connection connection = DataUtil.getConnection()) {
                     this.interactive.setNumClone(this.interactive.getBoarUser().getPowerupAmount(connection, "clone"));
 
@@ -193,8 +192,7 @@ class MegaMenuComponentHandler {
                         throw new NumberFormatException();
                     }
 
-                    int avgClones = this.config.getRarityConfigs()
-                        .get(this.interactive.getCurRarityKey()).getAvgClones();
+                    int avgClones = config.getRarityConfigs().get(this.interactive.getCurRarityKey()).getAvgClones();
 
                     if (avgClones != 0) {
                         boolean hasBoar = this.interactive.getBoarUser().hasBoar(
@@ -204,7 +202,7 @@ class MegaMenuComponentHandler {
                         if (hasBoar) {
                             this.confirmClone(input);
                         } else {
-                            String boarName = this.config.getItemConfig().getBoars().get(
+                            String boarName = config.getItemConfig().getBoars().get(
                                 this.interactive.getCurBoarEntry().getKey()
                             ).getName();
 
@@ -223,9 +221,7 @@ class MegaMenuComponentHandler {
                         this.interactive.setAcknowledgeImageGen(
                             new OverlayImageGenerator(
                                 null,
-                                strConfig.getNoPow().formatted(
-                                    this.config.getItemConfig().getPowerups().get("clone").getPluralName()
-                                )
+                                strConfig.getNoPow().formatted(itemConfig.getPowerups().get("clone").getPluralName())
                             )
                         );
                     }
@@ -242,8 +238,7 @@ class MegaMenuComponentHandler {
             }
 
             case "MIRACLE_AMOUNT" -> {
-                StringConfig strConfig = this.config.getStringConfig();
-                PowerupItemConfig miracleConfig = this.config.getItemConfig().getPowerups().get("miracle");
+                PowerupItemConfig miracleConfig = itemConfig.getPowerups().get("miracle");
 
                 try (Connection connection = DataUtil.getConnection()) {
                     this.interactive.setPowData(this.interactive.getBoarUser().getPowerupsData(connection));
@@ -280,9 +275,7 @@ class MegaMenuComponentHandler {
                         this.interactive.setAcknowledgeImageGen(
                             new OverlayImageGenerator(
                                 null,
-                                strConfig.getNoPow().formatted(
-                                    this.config.getItemConfig().getPowerups().get("miracle").getPluralName()
-                                )
+                                strConfig.getNoPow().formatted(itemConfig.getPowerups().get("miracle").getPluralName())
                             )
                         );
                     }
@@ -325,12 +318,12 @@ class MegaMenuComponentHandler {
             }
 
             case CLONE -> {
-                ModalConfig modalConfig = this.config.getModalConfig().get("cloneAmount");
+                ModalConfig curModalConfig = modalConfig.get("cloneAmount");
 
                 Modal modal = new ModalImpl(
-                    ModalUtil.makeModalID(modalConfig.getId(), this.compEvent),
-                    modalConfig.getTitle(),
-                    ModalUtil.makeModalComponents(modalConfig.getComponents())
+                    ModalUtil.makeModalID(curModalConfig.getId(), this.compEvent),
+                        curModalConfig.getTitle(),
+                    ModalUtil.makeModalComponents(curModalConfig.getComponents())
                 );
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
@@ -348,13 +341,13 @@ class MegaMenuComponentHandler {
 
                 String nextRarityKey = BoarUtil.getNextRarityKey(this.interactive.getCurRarityKey());
 
-                String boarPluralName = this.config.getItemConfig().getBoars().get(
+                String boarPluralName = itemConfig.getBoars().get(
                     this.interactive.getCurBoarEntry().getKey()
                 ).getPluralName();
 
-                this.interactive.setConfirmString(this.config.getStringConfig().getCompTransmuteConfirm().formatted(
+                this.interactive.setConfirmString(strConfig.getCompTransmuteConfirm().formatted(
                     "<>" + this.interactive.getCurRarityKey() + "<>" + boarPluralName,
-                    "<>" + nextRarityKey + "<>" + this.config.getRarityConfigs().get(nextRarityKey).getName()
+                    "<>" + nextRarityKey + "<>" + config.getRarityConfigs().get(nextRarityKey).getName()
                 ));
             }
 
@@ -376,15 +369,13 @@ class MegaMenuComponentHandler {
                 this.interactive.setAcknowledgeOpen(true);
 
                 String curBoarID = this.interactive.getCurBoarEntry().getKey();
-                BoarItemConfig curBoar = this.config.getItemConfig().getBoars().get(curBoarID);
+                BoarItemConfig curBoar = itemConfig.getBoars().get(curBoarID);
 
                 if (curBoar.getStaticFile() != null) {
-                    String filePath = this.config.getPathConfig().getBoars() + curBoar.getFile();
+                    String filePath = config.getPathConfig().getBoars() + curBoar.getFile();
 
                     this.interactive.setAcknowledgeImageGen(
-                        new OverlayImageGenerator(
-                            null, filePath, this.config.getNumberConfig().getLargeBoarSize()
-                        )
+                        new OverlayImageGenerator(null, filePath, nums.getLargeBoarSize())
                     );
                 } else {
                     this.interactive.setAcknowledgeImageGen(
@@ -400,17 +391,16 @@ class MegaMenuComponentHandler {
             ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
         );
 
-        StringConfig strConfig = this.config.getStringConfig();
-        PowerupItemConfig powConfig = this.config.getItemConfig().getPowerups().get(this.interactive.getPowerupUsing());
+        PowerupItemConfig powConfig = itemConfig.getPowerups().get(this.interactive.getPowerupUsing());
 
         switch (this.interactive.getPowerupUsing()) {
             case "miracle" -> {
-                ModalConfig modalConfig = this.config.getModalConfig().get("miracleAmount");
+                ModalConfig curModalConfig = modalConfig.get("miracleAmount");
 
                 Modal modal = new ModalImpl(
-                    ModalUtil.makeModalID(modalConfig.getId(), this.compEvent),
-                    modalConfig.getTitle(),
-                    ModalUtil.makeModalComponents(modalConfig.getComponents())
+                    ModalUtil.makeModalID(curModalConfig.getId(), this.compEvent),
+                    curModalConfig.getTitle(),
+                    ModalUtil.makeModalComponents(curModalConfig.getComponents())
                 );
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
@@ -475,10 +465,7 @@ class MegaMenuComponentHandler {
     }
 
     private void confirmClone(int input) {
-        ItemConfig itemConfig = this.config.getItemConfig();
-        StringConfig strConfig = this.config.getStringConfig();
-
-        RarityConfig rarity = this.config.getRarityConfigs().get(this.interactive.getCurRarityKey());
+        RarityConfig rarity = config.getRarityConfigs().get(this.interactive.getCurRarityKey());
         int avgClones = rarity.getAvgClones();
 
         boolean tooMany = input / avgClones > 25 || input / avgClones == 25 && input % avgClones > 0;

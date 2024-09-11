@@ -1,8 +1,6 @@
 package dev.boarbot.interactives.gift;
 
 import dev.boarbot.api.util.Weighted;
-import dev.boarbot.bot.config.NumberConfig;
-import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.items.OutcomeConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
@@ -12,6 +10,7 @@ import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ItemInteractive;
+import dev.boarbot.interactives.UserInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
@@ -43,8 +42,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public class BoarGiftInteractive extends Interactive implements Synchronizable {
-    private final PowerupItemConfig giftConfig = this.config.getItemConfig().getPowerups().get("gift");
+public class BoarGiftInteractive extends UserInteractive implements Synchronizable {
+    private final PowerupItemConfig giftConfig = config.getItemConfig().getPowerups().get("gift");
 
     private FileUpload giftImage;
 
@@ -67,10 +66,10 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
     private List<String> boarIDs = new ArrayList<>();
     private int numBucks = 0;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getGift();
+    private final Map<String, IndivComponentConfig> components = config.getComponentConfig().getGift();
 
     public BoarGiftInteractive(Interaction interaction, boolean isMsg) {
-        super(interaction, isMsg);
+        super(interaction, isMsg, nums.getGiftIdle());
 
         try {
             this.giftImage = new GiftImageGenerator(this.user.getName()).generate().getFileUpload();
@@ -90,7 +89,6 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
         if (compEvent == null) {
             this.sendResponse();
 
-            NumberConfig nums = this.config.getNumberConfig();
             int randWaitTime = (int) (Math.random() * (nums.getGiftHighWait() - nums.getGiftLowWait())) +
                 nums.getGiftLowWait();
 
@@ -107,14 +105,11 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
             compEvent.deferEdit().queue();
 
             try {
-                MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(
-                    new EmbedImageGenerator(this.config.getStringConfig().getGiftSelfOpen()
-                ).generate().getFileUpload());
+                MessageCreateBuilder msg = new MessageCreateBuilder()
+                    .setFiles(new EmbedImageGenerator(strConfig.getGiftSelfOpen()).generate().getFileUpload());
                 compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
             } catch (IOException exception) {
-                log.error(
-                    "An error occurred while sending self gift open message.", exception
-                );
+                log.error("An error occurred while sending self gift open message.", exception);
             }
 
             return;
@@ -130,7 +125,7 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
         this.giftTimes.put(compEvent.getUser(), userTime);
         this.giftInteractions.put(compEvent.getUser(), compEvent);
 
-        if (userTime > this.config.getNumberConfig().getGiftMaxHandicap()) {
+        if (userTime > nums.getGiftMaxHandicap()) {
             this.giveGift();
         }
     }
@@ -164,7 +159,7 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
-                Thread.sleep(this.config.getNumberConfig().getGiftMaxHandicap());
+                Thread.sleep(nums.getGiftMaxHandicap());
             } catch (InterruptedException exception) {
                 if (!this.isStopped) {
                     this.stop(StopType.EXPIRED);
@@ -212,7 +207,7 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
 
         try {
             MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(
-                new EmbedImageGenerator(this.config.getStringConfig().getGiftOpened().formatted(
+                new EmbedImageGenerator(strConfig.getGiftOpened().formatted(
                     this.giftTimes.get(this.giftWinner)
                 )).generate().getFileUpload()
             );
@@ -386,7 +381,7 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
         }
 
         CompletableFuture.runAsync(() -> {
-            String title = this.config.getStringConfig().getGiftTitle();
+            String title = strConfig.getGiftTitle();
             ItemInteractive.sendInteractive(
                 this.boarIDs,
                 bucksGotten,
@@ -410,7 +405,6 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
         }
 
         CompletableFuture.runAsync(() -> {
-            StringConfig strConfig = this.config.getStringConfig();
             String title = strConfig.getGiftTitle();
 
             String rewardStr = this.outcomeConfig.getRewardStr().formatted(
@@ -420,7 +414,7 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
                     : strConfig.getBucksPluralName()
             );
 
-            String filePath = this.config.getPathConfig().getOtherAssets() + this.config.getPathConfig().getGiftBucks();
+            String filePath = config.getPathConfig().getOtherAssets() + config.getPathConfig().getGiftBucks();
 
             ItemInteractive.sendInteractive(
                 rewardStr,
@@ -445,8 +439,7 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
         }
 
         CompletableFuture.runAsync(() -> {
-            StringConfig strConfig = this.config.getStringConfig();
-            PowerupItemConfig powConfig = this.config.getItemConfig().getPowerups().get(this.subOutcomeType.toString());
+            PowerupItemConfig powConfig = config.getItemConfig().getPowerups().get(this.subOutcomeType.toString());
             String title = strConfig.getGiftTitle();
 
             String rewardStr = this.outcomeConfig.getRewardStr().formatted(
@@ -456,7 +449,7 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
                     : powConfig.getPluralName()
             );
 
-            String filePath = this.config.getPathConfig().getPowerups() + powConfig.getFile();
+            String filePath = config.getPathConfig().getPowerups() + powConfig.getFile();
 
             ItemInteractive.sendInteractive(
                 rewardStr,
@@ -493,31 +486,31 @@ public class BoarGiftInteractive extends Interactive implements Synchronizable {
         int claimIndex = (int) (Math.random() * SIDE_LENGTH);
 
         for (int i=0; i<SIDE_LENGTH; i++) {
-            List<ItemComponent> components = new ArrayList<>();
+            List<ItemComponent> rowComponents = new ArrayList<>();
 
             for (int j=0; j<SIDE_LENGTH; j++) {
                 int curIndex = i*SIDE_LENGTH+j;
 
                 if (this.enabled && curIndex == claimIndex) {
-                    components.add(
+                    rowComponents.add(
                         InteractiveUtil.makeComponents(
                             this.interactionID,
-                            this.COMPONENTS.get("claimBtn")
+                                components.get("claimBtn")
                         ).getFirst()
                     );
                     continue;
                 }
 
-                components.add(
+                rowComponents.add(
                     InteractiveUtil.makeComponents(
                         this.interactionID,
                         Integer.toString(curIndex),
-                        this.COMPONENTS.get("fillerBtn")
+                        components.get("fillerBtn")
                     ).getFirst()
                 );
             }
 
-            rows.add(ActionRow.of(components));
+            rows.add(ActionRow.of(rowComponents));
         }
 
         return rows.toArray(new ActionRow[0]);

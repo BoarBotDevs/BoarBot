@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class ItemInteractive extends Interactive {
+public class ItemInteractive extends UserInteractive {
     private int page = 0;
     private final List<ItemImageGenerator> itemGens;
     private List<SelectOption> selectableBoars;
@@ -34,7 +34,7 @@ public class ItemInteractive extends Interactive {
     private final List<String> boarIDs;
     private final List<Integer> boarEditions;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getDaily();
+    private final static Map<String, IndivComponentConfig> components = config.getComponentConfig().getDaily();
 
     public ItemInteractive(
         Interaction interaction,
@@ -56,7 +56,7 @@ public class ItemInteractive extends Interactive {
             return;
         }
 
-        Map<String, RarityConfig> rarityConfigs = this.config.getRarityConfigs();
+        Map<String, RarityConfig> rarityConfigs = config.getRarityConfigs();
         List<SelectOption> selectableBoars = new ArrayList<>();
 
         for (int i=0; i<boarIDs.size(); i++) {
@@ -72,7 +72,7 @@ public class ItemInteractive extends Interactive {
                 description += " (Edition #%,d)".formatted(boarEditions.get(i));
             }
 
-            String boarName = this.config.getItemConfig().getBoars().get(boarIDs.get(i)).getName();
+            String boarName = config.getItemConfig().getBoars().get(boarIDs.get(i)).getName();
             SelectOption boarOption = SelectOption.of(boarName, Integer.toString(i))
                 .withEmoji(InteractiveUtil.parseEmoji(rarityConfig.getEmoji()))
                 .withDescription(description);
@@ -205,14 +205,14 @@ public class ItemInteractive extends Interactive {
 
     private ActionRow[] getComponents() {
         List<ItemComponent> boarSelect = InteractiveUtil.makeComponents(
-            this.interactionID, this.COMPONENTS.get("boarSelect")
+            this.interactionID, components.get("boarSelect")
         );
         List<ItemComponent> navRow = InteractiveUtil.makeComponents(
             this.interactionID,
-            this.COMPONENTS.get("leftFullBtn"),
-            this.COMPONENTS.get("leftBtn"),
-            this.COMPONENTS.get("rightBtn"),
-            this.COMPONENTS.get("rightFullBtn")
+            components.get("leftFullBtn"),
+            components.get("leftBtn"),
+            components.get("rightBtn"),
+            components.get("rightFullBtn")
         );
 
         return new ActionRow[] {

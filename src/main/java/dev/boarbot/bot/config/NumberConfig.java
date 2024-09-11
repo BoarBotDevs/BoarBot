@@ -42,6 +42,7 @@ public class NumberConfig {
 
     private int interactiveIdle = 0;
     private int interactiveHardStop = 0;
+    private int giftIdle = 0;
     private int openDelay = 0;
     private int giftLowWait = 0;
     private int giftHighWait = 0;

@@ -1,8 +1,8 @@
 package dev.boarbot.interactives.boarmanage;
 
-import dev.boarbot.bot.config.StringConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.interactives.UserInteractive;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.generators.EmbedImageGenerator;
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class SetupInteractive extends Interactive {
+public class SetupInteractive extends UserInteractive {
     private int page = 0;
     private FileUpload currentImageUpload;
 
@@ -38,7 +38,7 @@ public class SetupInteractive extends Interactive {
     private List<GuildChannel> chosenChannels = new ArrayList<>();
     private boolean isSb = false;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getSetup();
+    private final Map<String, IndivComponentConfig> COMPONENTS = config.getComponentConfig().getSetup();
 
     public SetupInteractive(Interaction initEvent) {
         super(initEvent);
@@ -74,9 +74,8 @@ public class SetupInteractive extends Interactive {
     private void sendResponse() {
         try {
             if (this.page == 0) {
-                this.currentImageUpload = new EmbedImageGenerator(
-                    this.config.getStringConfig().getSetupUnfinished1()
-                ).generate().getFileUpload();
+                this.currentImageUpload = new EmbedImageGenerator(strConfig.getSetupUnfinished1()).generate()
+                    .getFileUpload();
             }
 
             MessageEditBuilder editedMsg = new MessageEditBuilder()
@@ -99,8 +98,6 @@ public class SetupInteractive extends Interactive {
     }
 
     public void doSb(String compID) throws IOException {
-        StringConfig strConfig = this.config.getStringConfig();
-
         this.selected = true;
         this.isSb = compID.equals("SB_YES");
 
@@ -110,8 +107,6 @@ public class SetupInteractive extends Interactive {
     }
 
     public void doNext() throws IOException {
-        StringConfig strConfig = this.config.getStringConfig();
-
         if (this.page != 0) {
             this.stop(StopType.FINISHED);
             return;
@@ -124,7 +119,6 @@ public class SetupInteractive extends Interactive {
     }
 
     public void doInfo(GenericComponentInteractionCreateEvent compEvent) throws IOException {
-        StringConfig strConfig = this.config.getStringConfig();
         FileUpload imageUpload;
 
         if (this.page == 0) {
@@ -144,8 +138,7 @@ public class SetupInteractive extends Interactive {
 
     @Override
     public void stop(StopType type) throws IOException {
-        StringConfig strConfig = this.config.getStringConfig();
-        Map<String, String> colorConfig = this.config.getColorConfig();
+        Map<String, String> colorConfig = config.getColorConfig();
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 

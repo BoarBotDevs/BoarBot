@@ -4,6 +4,7 @@ import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.interactives.UserInteractive;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
@@ -25,10 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class DailyNotifyInteractive extends Interactive {
+public class DailyNotifyInteractive extends UserInteractive {
     private ActionRow[] curComponents = new ActionRow[0];
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = this.config.getComponentConfig().getDaily();
+    private final Map<String, IndivComponentConfig> COMPONENTS = config.getComponentConfig().getDaily();
 
     public DailyNotifyInteractive(Interaction initEvent) {
         super(initEvent);
@@ -44,7 +45,7 @@ public class DailyNotifyInteractive extends Interactive {
 
         String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), false);
         dailyResetDistance = dailyResetDistance.substring(dailyResetDistance.indexOf(' ')+1);
-        String replyStr = this.config.getStringConfig().getDailyUsed().formatted(dailyResetDistance);
+        String replyStr = strConfig.getDailyUsed().formatted(dailyResetDistance);
 
         try {
             EmbedImageGenerator embedGen = new EmbedImageGenerator(replyStr);
@@ -54,7 +55,7 @@ public class DailyNotifyInteractive extends Interactive {
                 .setComponents();
 
             compEvent.getUser().openPrivateChannel().complete().sendMessage(
-                this.config.getStringConfig().getNotificationSuccess()
+                strConfig.getNotificationSuccess()
             ).complete();
 
             if (!this.isStopped) {
@@ -72,7 +73,7 @@ public class DailyNotifyInteractive extends Interactive {
             );
         } catch (ErrorResponseException exception) {
             EmbedImageGenerator embedGen = new EmbedImageGenerator(
-                this.config.getStringConfig().getNotificationFailed(), this.config.getColorConfig().get("error")
+                strConfig.getNotificationFailed(), config.getColorConfig().get("error")
             );
 
             try {
