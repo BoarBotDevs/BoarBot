@@ -28,14 +28,18 @@ public class ComponentListener extends ListenerAdapter implements Runnable {
 
     @Override
     public void run() {
-        String initInteractionID = this.event.getComponentId().split(",")[0];
+        String interactiveBaseID = this.event.getComponentId().split(",")[0];
         Interactive interactive = BoarBotApp.getBot().getInteractives().get(
-            initInteractionID + this.event.getUser().getId()
+            interactiveBaseID + "," + this.event.getUser().getId()
         );
         long startTime = TimeUtil.getCurMilli();
 
         if (interactive == null) {
-            interactive = InteractiveUtil.getGiftInteractive(initInteractionID);
+            interactive = InteractiveUtil.getEventInteractive(interactiveBaseID);
+        }
+
+        if (interactive == null) {
+            interactive = InteractiveUtil.getGiftInteractive(interactiveBaseID);
         }
 
         if (interactive != null) {

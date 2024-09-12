@@ -162,7 +162,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         }
 
         if (type == StopType.EXPIRED) {
-            this.deleteInteractiveMessage();
+            this.deleteInteractive();
         }
     }
 

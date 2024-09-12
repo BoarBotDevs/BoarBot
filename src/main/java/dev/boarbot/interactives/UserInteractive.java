@@ -4,7 +4,6 @@ import dev.boarbot.util.interactive.StopType;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
@@ -21,7 +20,7 @@ public abstract class UserInteractive extends Interactive {
     @Getter protected final String interactionID;
     @Getter protected final User user;
     protected final InteractionHook hook;
-    protected Message msg;
+    private Message msg;
     private final boolean isMsg;
 
     protected UserInteractive(Interaction interaction) {
@@ -41,11 +40,12 @@ public abstract class UserInteractive extends Interactive {
         this.isMsg = isMsg;
     }
 
-    protected UserInteractive(Interaction interaction, boolean isMsg, long waitTime) {
+    protected UserInteractive(Interaction interaction, boolean isMsg, long waitTime, long hardTime) {
         super(
             interaction.getId() + "," + interaction.getUser().getId(),
             Objects.requireNonNull(interaction.getGuild()).getId(),
-            waitTime
+            waitTime,
+            hardTime
         );
 
         this.interaction = interaction;
@@ -55,40 +55,37 @@ public abstract class UserInteractive extends Interactive {
         this.isMsg = isMsg;
     }
 
-    public abstract void execute(GenericComponentInteractionCreateEvent compEvent);
-    public abstract ActionRow[] getCurComponents();
-
     @Override
-    public void updateInteractive(MessageEditData editedMsg) {
+    public Message updateInteractive(MessageEditData editedMsg) {
         if (this.msg == null && this.isMsg) {
             this.msg = ((ComponentInteraction) this.interaction).getHook().sendMessage(
-                    MessageCreateData.fromEditData(editedMsg)
+                MessageCreateData.fromEditData(editedMsg)
             ).complete();
-            return;
+            return this.msg;
         }
 
         if (this.msg != null) {
-            this.msg.editMessage(editedMsg).complete();
-        } else {
-            this.hook.editOriginal(editedMsg).complete();
+            return this.msg.editMessage(editedMsg).complete();
         }
+
+        return this.hook.editOriginal(editedMsg).complete();
     }
 
     @Override
-    public void updateComponents(ActionRow... rows) {
+    public Message updateComponents(ActionRow... rows) {
         if (this.msg == null && this.isMsg) {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }
 
         if (this.msg != null) {
-            this.msg.editMessageComponents(rows).complete();
-        } else {
-            this.hook.editOriginalComponents(rows).complete();
+            return this.msg.editMessageComponents(rows).complete();
         }
+
+        return this.hook.editOriginalComponents(rows).complete();
     }
 
     @Override
-    public void deleteInteractiveMessage() {
+    public void deleteInteractive() {
         if (this.msg == null && this.isMsg) {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }

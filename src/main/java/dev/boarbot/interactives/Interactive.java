@@ -8,6 +8,7 @@ import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
@@ -30,19 +31,20 @@ public abstract class Interactive {
 
     protected long waitTime;
     protected long curStopTime;
-    protected final static long hardStopTime = TimeUtil.getCurMilli() + nums.getInteractiveHardStop();
+    protected final long hardStopTime;
     protected long lastEndTime = 0;
     protected boolean isStopped = false;
 
     protected Interactive(String interactiveID, String guildID) {
-        this(interactiveID, guildID, nums.getInteractiveIdle());
+        this(interactiveID, guildID, nums.getInteractiveIdle(), nums.getInteractiveHardStop());
     }
 
-    protected Interactive(String interactiveID, String guildID, long waitTime) {
+    protected Interactive(String interactiveID, String guildID, long waitTime, long hardStop) {
         this.interactiveID = interactiveID;
         this.guildID = guildID;
         this.waitTime = waitTime;
         this.curStopTime = TimeUtil.getCurMilli() + waitTime;
+        this.hardStopTime = TimeUtil.getCurMilli() + hardStop;
 
         String duplicateInteractiveKey = this.findDuplicateKey();
 
@@ -88,9 +90,9 @@ public abstract class Interactive {
     public abstract void execute(GenericComponentInteractionCreateEvent compEvent);
     public abstract ActionRow[] getCurComponents();
 
-    public abstract void updateInteractive(MessageEditData editedMsg);
-    public abstract void updateComponents(ActionRow... rows);
-    public abstract void deleteInteractiveMessage();
+    public abstract Message updateInteractive(MessageEditData editedMsg);
+    public abstract Message updateComponents(ActionRow... rows);
+    public abstract void deleteInteractive();
 
     private void tryStop(long waitTime) {
         try {

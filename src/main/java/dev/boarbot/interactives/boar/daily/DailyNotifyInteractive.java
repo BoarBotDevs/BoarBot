@@ -98,7 +98,7 @@ public class DailyNotifyInteractive extends UserInteractive {
             return;
         }
 
-        this.deleteInteractiveMessage();
+        this.deleteInteractive();
     }
 
     @Override

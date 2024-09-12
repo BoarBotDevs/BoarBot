@@ -69,7 +69,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     private final Map<String, IndivComponentConfig> components = config.getComponentConfig().getGift();
 
     public BoarGiftInteractive(Interaction interaction, boolean isMsg) {
-        super(interaction, isMsg, nums.getGiftIdle());
+        super(interaction, isMsg, nums.getGiftIdle(), nums.getGiftIdle());
 
         try {
             this.giftImage = new GiftImageGenerator(this.user.getName()).generate().getFileUpload();
@@ -474,7 +474,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         switch (stopType) {
-            case EXPIRED -> this.deleteInteractiveMessage();
+            case EXPIRED -> this.deleteInteractive();
             case FINISHED -> this.updateComponents();
         }
     }

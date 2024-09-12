@@ -3,6 +3,7 @@ package dev.boarbot.util.interactive;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.components.SelectOptionConfig;
+import dev.boarbot.interactives.event.EventInteractive;
 import dev.boarbot.interactives.gift.BoarGiftInteractive;
 import dev.boarbot.interactives.Interactive;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -31,10 +32,6 @@ public final class InteractiveUtil {
 
     public static List<ItemComponent> makeComponents(String id, List<IndivComponentConfig> components) {
         return InteractiveUtil.makeComponents(id, "", components.toArray(new IndivComponentConfig[0]));
-    }
-
-    public static List<ItemComponent> makeComponents(String id, String extra, List<IndivComponentConfig> components) {
-        return InteractiveUtil.makeComponents(id, extra, components.toArray(new IndivComponentConfig[0]));
     }
 
     public static List<ItemComponent> makeComponents(String id, String extra, IndivComponentConfig... components) {
@@ -120,13 +117,27 @@ public final class InteractiveUtil {
         return madeComponents;
     }
 
-    public static Interactive getGiftInteractive(String interactID) {
+    public static Interactive getEventInteractive(String interactiveBaseID) {
         for (String key : BoarBotApp.getBot().getInteractives().keySet()) {
             Interactive interactive = BoarBotApp.getBot().getInteractives().get(key);
 
-            if (key.startsWith(interactID) && interactive.getClass().equals(BoarGiftInteractive.class)) {
+            if (key.startsWith(interactiveBaseID) && interactive instanceof EventInteractive) {
                 return interactive;
-            } else if (key.startsWith(interactID)) {
+            } else if (key.startsWith(interactiveBaseID)) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    public static Interactive getGiftInteractive(String interactiveBaseID) {
+        for (String key : BoarBotApp.getBot().getInteractives().keySet()) {
+            Interactive interactive = BoarBotApp.getBot().getInteractives().get(key);
+
+            if (key.startsWith(interactiveBaseID) && interactive instanceof BoarGiftInteractive) {
+                return interactive;
+            } else if (key.startsWith(interactiveBaseID)) {
                 return null;
             }
         }
