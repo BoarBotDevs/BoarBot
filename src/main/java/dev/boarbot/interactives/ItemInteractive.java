@@ -34,7 +34,7 @@ public class ItemInteractive extends UserInteractive {
     private final List<String> boarIDs;
     private final List<Integer> boarEditions;
 
-    private final static Map<String, IndivComponentConfig> components = config.getComponentConfig().getDaily();
+    private final static Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getDaily();
 
     public ItemInteractive(
         Interaction interaction,
@@ -56,11 +56,10 @@ public class ItemInteractive extends UserInteractive {
             return;
         }
 
-        Map<String, RarityConfig> rarityConfigs = config.getRarityConfigs();
         List<SelectOption> selectableBoars = new ArrayList<>();
 
         for (int i=0; i<boarIDs.size(); i++) {
-            RarityConfig rarityConfig = rarityConfigs.get(this.itemGens.get(i).getColorKey());
+            RarityConfig rarityConfig = RARITIES.get(this.itemGens.get(i).getColorKey());
 
             String description = rarityConfig.getName() + " Boar";
 
@@ -72,7 +71,7 @@ public class ItemInteractive extends UserInteractive {
                 description += " (Edition #%,d)".formatted(boarEditions.get(i));
             }
 
-            String boarName = config.getItemConfig().getBoars().get(boarIDs.get(i)).getName();
+            String boarName = BOARS.get(boarIDs.get(i)).getName();
             SelectOption boarOption = SelectOption.of(boarName, Integer.toString(i))
                 .withEmoji(InteractiveUtil.parseEmoji(rarityConfig.getEmoji()))
                 .withDescription(description);

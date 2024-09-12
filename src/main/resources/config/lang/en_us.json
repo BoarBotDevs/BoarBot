@@ -165,6 +165,7 @@
   "giftOpened": "You opened the gift in <>silver<>%,dms<>font<>!",
   "giftTitle": "Gift Opened!",
   "unavailable": "N/A",
+  "empty": "️",
   "pullLink": "https:<>api.github.com/repos/BoarBotDevs/BoarBot/pulls?state=closed&base=main",
   "githubImg": "https:<>github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
   "supportLink": "https:<>www.patreon.com/BoarBotDevs",

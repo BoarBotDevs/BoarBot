@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 public class QuestsImageGenerator extends MegaMenuGenerator {
-    private static final int[] ORIGIN = {0, 0};
     private static final int QUEST_WIDTH = 815;
     private static final int QUEST_X = 57;
     private static final int QUEST_START_Y = 305;
@@ -56,7 +55,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getQuestUnderlay();
+        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getQuestUnderlay();
 
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
@@ -64,7 +63,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
 
         this.textDrawer = new TextDrawer(
-            g2d, "", ORIGIN, Align.LEFT, this.colorConfig.get("font"), this.nums.getFontMedium(), QUEST_WIDTH
+            g2d, "", ORIGIN, Align.LEFT, COLORS.get("font"), NUMS.getFontMedium(), QUEST_WIDTH
         );
 
         for (int i=0; i<this.questIDs.size(); i++) {
@@ -86,27 +85,27 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
 
         int[] bonusLabelPos = {RIGHT_X, fullCompleteLabelPos[1] + RIGHT_Y_SPACING};
 
-        String bonusStr = this.strConfig.getQuestNoBonusLabel();
+        String bonusStr = STRS.getQuestNoBonusLabel();
         if (this.allQuestsDone && this.questData.fullClaimed()) {
-            bonusStr = this.strConfig.getQuestClaimedBonusLabel();
+            bonusStr = STRS.getQuestClaimedBonusLabel();
         } else if (this.allQuestsDone) {
-            bonusStr = this.strConfig.getQuestUnclaimedBonusLabel();
+            bonusStr = STRS.getQuestUnclaimedBonusLabel();
         }
 
         int[] bonusPos = {RIGHT_X, bonusLabelPos[1] + RIGHT_VALUE_Y_OFFSET};
 
         this.textDrawer.setAlign(Align.CENTER);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getQuestResetLabel(), resetLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getQuestResetLabel(), resetLabelPos);
         TextUtil.drawValue(this.textDrawer, resetStr, resetPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsQuestsCompletedLabel(), completeLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getStatsQuestsCompletedLabel(), completeLabelPos);
         TextUtil.drawValue(this.textDrawer, completeStr, completePos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getStatsFullQuestsCompletedLabel(), fullCompleteLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getStatsFullQuestsCompletedLabel(), fullCompleteLabelPos);
         TextUtil.drawValue(this.textDrawer, fullCompleteStr, fullCompletePos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getQuestBonusLabel(), bonusLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getQuestBonusLabel(), bonusLabelPos);
         TextUtil.drawValue(this.textDrawer, bonusStr, bonusPos);
 
         this.drawTopInfo();
@@ -123,7 +122,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
         String questStr = this.getQuestStr(this.questIDs.get(index), index);
 
         this.textDrawer.setText(questStr);
-        this.textDrawer.setFontSize(this.nums.getFontSmallMedium());
+        this.textDrawer.setFontSize(NUMS.getFontSmallMedium());
         this.textDrawer.setPos(new int[] {QUEST_X, QUEST_START_Y + index * QUEST_Y_SPACING});
         this.textDrawer.setAlign(Align.LEFT);
         this.textDrawer.setWidth(QUEST_WIDTH);
@@ -132,7 +131,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     }
 
     private String getQuestStr(String questID, int index) {
-        QuestConfig questConfig = this.config.getQuestConfig().get(questID);
+        QuestConfig questConfig = CONFIG.getQuestConfig().get(questID);
         String requirement = questConfig.getQuestVals()[index/2].getRequirement();
 
         return switch (questID) {
@@ -148,7 +147,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
                 char firstChar = requirement.charAt(0);
                 boolean isVowel = firstChar == 'a' || firstChar == 'e' || firstChar == 'i' || firstChar == 'o' ||
                     firstChar == 'u';
-                String rarityName = this.config.getRarityConfigs().get(requirement).getName();
+                String rarityName = RARITIES.get(requirement).getName();
 
                 yield isVowel
                     ? questConfig.getDescriptionAlt().formatted(requirement, rarityName)
@@ -160,13 +159,13 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
             case "sendGifts", "openGifts" -> {
                 boolean isMultiple = Integer.parseInt(requirement) > 1;
                 String giftStr = isMultiple
-                    ? this.itemConfig.getPowerups().get("gift").getPluralName()
-                    : this.itemConfig.getPowerups().get("gift").getName();
+                    ? POWS.get("gift").getPluralName()
+                    : POWS.get("gift").getName();
 
                 yield questConfig.getDescription().formatted(requirement, giftStr);
             }
 
-            default -> this.strConfig.getUnavailable();
+            default -> STRS.getUnavailable();
         };
     }
 
@@ -176,7 +175,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
         );
 
         this.textDrawer.setText(questValue);
-        this.textDrawer.setFontSize(this.nums.getFontMedium());
+        this.textDrawer.setFontSize(NUMS.getFontMedium());
         this.textDrawer.setPos(new int[] {QUEST_X, QUEST_START_Y + index * QUEST_Y_SPACING + QUEST_VALUE_Y_OFFSET});
         this.textDrawer.setWidth(-1);
 
@@ -184,7 +183,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     }
 
     private String getQuestValue(String questID, int progress, int index) {
-        QuestConfig questConfig = this.config.getQuestConfig().get(questID);
+        QuestConfig questConfig = CONFIG.getQuestConfig().get(questID);
         String requirement = questConfig.getQuestVals()[index/2].getRequirement();
         String questValue = "<>%s<>%d/%d";
 
@@ -216,14 +215,14 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     }
 
     private void drawReward(Graphics2D g2d, int index) throws IOException, URISyntaxException {
-        IndivQuestConfig indivQuestConfig = this.config.getQuestConfig()
-            .get(this.questIDs.get(index)).getQuestVals()[index/2];
+        IndivQuestConfig indivQuestConfig = CONFIG.getQuestConfig().get(this.questIDs.get(index))
+            .getQuestVals()[index/2];
         String rewardType = indivQuestConfig.getRewardType();
         int rewardAmt = indivQuestConfig.getRewardAmt();
 
         if (rewardType.equals("bucks")) {
             this.textDrawer.setText("+<>bucks<>$%d".formatted(rewardAmt));
-            this.textDrawer.setFontSize(this.nums.getFontMedium());
+            this.textDrawer.setFontSize(NUMS.getFontMedium());
             this.textDrawer.setPos(new int[] {BUCKS_X, BUCKS_START_Y + index * QUEST_Y_SPACING});
             this.textDrawer.setAlign(Align.RIGHT);
             this.textDrawer.setWidth(-1);
@@ -232,10 +231,10 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
             return;
         }
 
-        String filePath = this.pathConfig.getPowerups() + this.itemConfig.getPowerups().get(rewardType).getFile();
+        String filePath = PATHS.getPowerups() + POWS.get(rewardType).getFile();
 
         this.textDrawer.setText("+<>powerup<>%d".formatted(rewardAmt));
-        this.textDrawer.setFontSize(this.nums.getFontSmallest());
+        this.textDrawer.setFontSize(NUMS.getFontSmallest());
         this.textDrawer.setPos(new int[] {POW_TEXT_X, POW_TEXT_START_Y + index * QUEST_Y_SPACING});
         this.textDrawer.setAlign(Align.RIGHT);
         this.textDrawer.setWidth(-1);

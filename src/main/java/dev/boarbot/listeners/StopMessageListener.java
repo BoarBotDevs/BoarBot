@@ -1,7 +1,6 @@
 package dev.boarbot.listeners;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.util.data.DataUtil;
@@ -15,9 +14,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @Slf4j
-public class StopMessageListener extends ListenerAdapter implements Runnable {
-    private final BotConfig config = BoarBotApp.getBot().getConfig();
-
+public class StopMessageListener extends ListenerAdapter implements Runnable, Configured {
     private MessageReceivedEvent event = null;
 
     public StopMessageListener() {
@@ -64,7 +61,7 @@ public class StopMessageListener extends ListenerAdapter implements Runnable {
                         boarUser.setNotifications(connection, null);
                         boarUser.decRefs();
 
-                        this.event.getMessage().reply(this.config.getStringConfig().getNotificationDisabledStr()).queue();
+                        this.event.getMessage().reply(STRS.getNotificationDisabledStr()).queue();
                     }
 
                     break;

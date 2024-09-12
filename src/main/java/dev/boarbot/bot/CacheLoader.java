@@ -1,9 +1,8 @@
 package dev.boarbot.bot;
 
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.bot.config.NumberConfig;
-import dev.boarbot.bot.config.PathConfig;
+import dev.boarbot.api.util.Configured;
+
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -13,18 +12,14 @@ import java.awt.image.BufferedImage;
 import java.util.Map;
 
 @Slf4j
-class CacheLoader {
-    private final static BotConfig config = BoarBotApp.getBot().getConfig();
-    private final static NumberConfig nums = config.getNumberConfig();
-    private final static PathConfig pathConfig = config.getPathConfig();
-
+class CacheLoader implements Configured {
     private final static Map<String, BufferedImage> imageCacheMap = BoarBotApp.getBot().getImageCacheMap();
 
     private final static int[] ORIGIN = {0, 0};
-    private final static int[] LARGE_SIZE = nums.getLargeBoarSize();
-    private final static int[] BIG_SIZE = nums.getBigBoarSize();
-    private final static int[] MEDIUM_BIG_SIZE = nums.getMediumBigBoarSize();
-    private final static int[] MEDIUM_SIZE = nums.getMediumBoarSize();
+    private final static int[] LARGE_SIZE = NUMS.getLargeBoarSize();
+    private final static int[] BIG_SIZE = NUMS.getBigBoarSize();
+    private final static int[] MEDIUM_BIG_SIZE = NUMS.getMediumBigBoarSize();
+    private final static int[] MEDIUM_SIZE = NUMS.getMediumBoarSize();
 
     public static void loadCache() {
         loadBoars();
@@ -34,17 +29,17 @@ class CacheLoader {
     private static void loadBoars() {
         log.info("Attempting to load boar images into cache");
 
-        for (String boarID : config.getItemConfig().getBoars().keySet()) {
+        for (String boarID : BOARS.keySet()) {
             try {
-                BoarItemConfig boarInfo = config.getItemConfig().getBoars().get(boarID);
+                BoarItemConfig boarInfo = BOARS.get(boarID);
 
                 if (boarInfo.getFile().isEmpty()) {
                     throw new IllegalArgumentException("Failed to find file.");
                 }
 
                 String filePath = boarInfo.getStaticFile() != null
-                    ? pathConfig.getBoars() + boarInfo.getStaticFile()
-                    : pathConfig.getBoars() + boarInfo.getFile();
+                    ? PATHS.getBoars() + boarInfo.getStaticFile()
+                    : PATHS.getBoars() + boarInfo.getFile();
 
                 if (filePath.endsWith(".gif")) {
                     throw new IllegalArgumentException("Animated file is missing a static version.");
@@ -91,12 +86,12 @@ class CacheLoader {
     }
 
     private static void loadBorders() {
-        String rarityBorderPath = pathConfig.getMegaMenuAssets() + pathConfig.getRarityBorder();
+        String rarityBorderPath = PATHS.getMegaMenuAssets() + PATHS.getRarityBorder();
 
         log.info("Attempting to load rarity borders into cache");
 
-        for (String rarityID : config.getRarityConfigs().keySet()) {
-            String color = config.getColorConfig().get(rarityID);
+        for (String rarityID : RARITIES.keySet()) {
+            String color = COLORS.get(rarityID);
 
             BufferedImage rarityMediumBorderImage = new BufferedImage(
                 MEDIUM_SIZE[0], MEDIUM_SIZE[1], BufferedImage.TYPE_INT_ARGB

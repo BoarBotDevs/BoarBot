@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -191,12 +192,14 @@ public class GuildDataUtil {
     private static void tryAddPowerupMessage(
         String messageID, List<TextChannel> guildChannels, int index, Set<Message> messages
     ) {
-        Message message = messageID != null && guildChannels.size() > index
-            ? guildChannels.get(index).retrieveMessageById(messageID).complete()
-            : null;
-        if (message != null) {
-            messages.add(message);
-        }
+        try {
+            Message message = messageID != null && guildChannels.size() > index
+                ? guildChannels.get(index).retrieveMessageById(messageID).complete()
+                : null;
+            if (message != null) {
+                messages.add(message);
+            }
+        } catch (ErrorResponseException ignored) {}
     }
 
 }

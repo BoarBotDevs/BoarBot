@@ -38,7 +38,7 @@ public class SetupInteractive extends UserInteractive {
     private List<GuildChannel> chosenChannels = new ArrayList<>();
     private boolean isSb = false;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = config.getComponentConfig().getSetup();
+    private final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getSetup();
 
     public SetupInteractive(Interaction initEvent) {
         super(initEvent);
@@ -74,7 +74,7 @@ public class SetupInteractive extends UserInteractive {
     private void sendResponse() {
         try {
             if (this.page == 0) {
-                this.currentImageUpload = new EmbedImageGenerator(strConfig.getSetupUnfinished1()).generate()
+                this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupUnfinished1()).generate()
                     .getFileUpload();
             }
 
@@ -102,7 +102,7 @@ public class SetupInteractive extends UserInteractive {
         this.isSb = compID.equals("SB_YES");
 
         this.currentImageUpload = new EmbedImageGenerator(
-            strConfig.getSetupFinished2() + (this.isSb ? "<>green<>Yes" : "<>error<>No")
+            STRS.getSetupFinished2() + (this.isSb ? "<>green<>Yes" : "<>error<>No")
         ).generate().getFileUpload();
     }
 
@@ -115,20 +115,16 @@ public class SetupInteractive extends UserInteractive {
         this.selected = false;
         this.page = 1;
 
-        this.currentImageUpload = new EmbedImageGenerator(strConfig.getSetupUnfinished2()).generate().getFileUpload();
+        this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupUnfinished2()).generate().getFileUpload();
     }
 
     public void doInfo(GenericComponentInteractionCreateEvent compEvent) throws IOException {
         FileUpload imageUpload;
 
         if (this.page == 0) {
-            imageUpload = new EmbedImageGenerator(
-                strConfig.getSetupInfoResponse1()
-            ).generate().getFileUpload();
+            imageUpload = new EmbedImageGenerator(STRS.getSetupInfoResponse1()).generate().getFileUpload();
         } else {
-            imageUpload = new EmbedImageGenerator(
-                strConfig.getSetupInfoResponse2()
-            ).generate().getFileUpload();
+            imageUpload = new EmbedImageGenerator(STRS.getSetupInfoResponse2()).generate().getFileUpload();
         }
 
         MessageCreateBuilder infoMsg = new MessageCreateBuilder();
@@ -138,7 +134,6 @@ public class SetupInteractive extends UserInteractive {
 
     @Override
     public void stop(StopType type) throws IOException {
-        Map<String, String> colorConfig = config.getColorConfig();
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 
@@ -148,13 +143,11 @@ public class SetupInteractive extends UserInteractive {
 
         switch (type) {
             case StopType.CANCELLED -> this.currentImageUpload = new EmbedImageGenerator(
-                strConfig.getSetupCancelled(),
-                colorConfig.get("error")
+                STRS.getSetupCancelled(), COLORS.get("error")
             ).generate().getFileUpload();
 
             case StopType.EXPIRED -> this.currentImageUpload = new EmbedImageGenerator(
-                strConfig.getSetupExpired(),
-                colorConfig.get("error")
+                STRS.getSetupExpired(), COLORS.get("error")
             ).generate().getFileUpload();
 
             case StopType.FINISHED -> {
@@ -182,10 +175,8 @@ public class SetupInteractive extends UserInteractive {
                     log.error("Failed to add guild to database!", exception);
                 }
 
-                this.currentImageUpload = new EmbedImageGenerator(
-                    strConfig.getSetupFinishedAll(),
-                    colorConfig.get("green")
-                ).generate().getFileUpload();
+                this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupFinishedAll(), COLORS.get("green"))
+                    .generate().getFileUpload();
             }
         }
 

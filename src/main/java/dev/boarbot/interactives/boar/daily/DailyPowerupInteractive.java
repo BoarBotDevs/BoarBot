@@ -46,7 +46,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     private final DailySubcommand callingObj;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = config.getComponentConfig().getDaily();
+    private final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getDaily();
 
     public DailyPowerupInteractive(SlashCommandInteractionEvent initEvent, DailySubcommand callingObj) {
         super(initEvent);
@@ -74,7 +74,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             switch(compID) {
                 case "POW_SELECT" -> {
-                    ModalConfig modalConfig = config.getModalConfig().get("miracleAmount");
+                    ModalConfig modalConfig = CONFIG.getModalConfig().get("miracleAmount");
 
                     Modal modal = new ModalImpl(
                         ModalUtil.makeModalID(modalConfig.getId(), compEvent),
@@ -108,7 +108,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
     private void sendResponse() {
         try {
             if (this.firstMsg) {
-                this.currentImageUpload = new EmbedImageGenerator(strConfig.getDailyPow()).generate().getFileUpload();
+                this.currentImageUpload = new EmbedImageGenerator(STRS.getDailyPow()).generate().getFileUpload();
             }
 
             this.firstMsg = false;
@@ -139,9 +139,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             this.miraclesToUse = 0;
             this.currentImageUpload = new EmbedImageGenerator(
-                strConfig.getNoPow()
-                    .formatted(config.getItemConfig().getPowerups().get("miracle").getPluralName()) +
-                        " " + strConfig.getDailyPow()
+                STRS.getNoPow().formatted(POWS.get("miracle").getPluralName()) + " " + STRS.getDailyPow()
             ).generate().getFileUpload();
         } catch (SQLException exception) {
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
@@ -201,7 +199,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
     public void modalExecute(ModalInteractionEvent modalEvent) {
         modalEvent.deferEdit().complete();
 
-        PowerupItemConfig miracleConfig = config.getItemConfig().getPowerups().get("miracle");
+        PowerupItemConfig miracleConfig = POWS.get("miracle");
 
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
@@ -221,22 +219,22 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                     this.miraclesToUse = amount;
 
                     this.currentImageUpload = new EmbedImageGenerator(
-                        strConfig.getMiracleAttempt().formatted(
+                        STRS.getMiracleAttempt().formatted(
                             this.miraclesToUse,
                             this.miraclesToUse == 1
                                 ? miracleConfig.getName()
                                 : miracleConfig.getPluralName(),
-                            strConfig.getBlessingsPluralName(),
+                            STRS.getBlessingsPluralName(),
                             TextUtil.getBlessHex(blessings),
                             blessings > 1000
-                                ? strConfig.getBlessingsSymbol() + " "
+                                ? STRS.getBlessingsSymbol() + " "
                                 : "",
                             blessings
                         )
                     ).generate().getFileUpload();
                 } else {
                     this.currentImageUpload = new EmbedImageGenerator(
-                        strConfig.getNoPow().formatted(miracleConfig.getPluralName()) + " " + strConfig.getDailyPow()
+                        STRS.getNoPow().formatted(miracleConfig.getPluralName()) + " " + STRS.getDailyPow()
                     ).generate().getFileUpload();
                 }
             }
@@ -244,9 +242,8 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             boarUser.decRefs();
         } catch (NumberFormatException exception1) {
             try {
-                this.currentImageUpload = new EmbedImageGenerator(
-                    strConfig.getInvalidInput() + " " + strConfig.getDailyPow()
-                ).generate().getFileUpload();
+                this.currentImageUpload = new EmbedImageGenerator(STRS.getInvalidInput() + " " + STRS.getDailyPow())
+                    .generate().getFileUpload();
             } catch (IOException exception2) {
                 log.error("Failed to generate invalid input response.", exception2);
             }

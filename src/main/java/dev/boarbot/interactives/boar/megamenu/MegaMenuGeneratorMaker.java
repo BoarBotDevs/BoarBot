@@ -1,7 +1,6 @@
 package dev.boarbot.interactives.boar.megamenu;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
@@ -17,9 +16,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-class MegaMenuGeneratorMaker {
-    private final static BotConfig config = BoarBotApp.getBot().getConfig();
-
+class MegaMenuGeneratorMaker implements Configured {
     private final MegaMenuInteractive interactive;
     private MegaMenuView view;
 
@@ -98,9 +95,7 @@ class MegaMenuGeneratorMaker {
             this.interactive.setCurView(MegaMenuView.COLLECTION);
 
             this.interactive.setAcknowledgeOpen(true);
-            this.interactive.setAcknowledgeImageGen(
-                new OverlayImageGenerator(null, config.getStringConfig().getCompBlocked())
-            );
+            this.interactive.setAcknowledgeImageGen(new OverlayImageGenerator(null, STRS.getCompBlocked()));
 
             return this.makeCollectionGen();
         }
@@ -245,9 +240,7 @@ class MegaMenuGeneratorMaker {
             }
 
             this.interactive.setAcknowledgeOpen(true);
-            this.interactive.setAcknowledgeImageGen(
-                new OverlayImageGenerator(null, config.getStringConfig().getBadgeBlocked())
-            );
+            this.interactive.setAcknowledgeImageGen(new OverlayImageGenerator(null, STRS.getBadgeBlocked()));
 
             return this.make();
         }
@@ -297,14 +290,13 @@ class MegaMenuGeneratorMaker {
 
     private void refreshFilterSort() {
         this.interactive.setFilteredBoars(new LinkedHashMap<>());
-        Map<String, RarityConfig> rarities = config.getRarityConfigs();
-        int[] rarityBitShift = new int[] {1 + rarities.size()};
+        int[] rarityBitShift = new int[] {1 + RARITIES.size()};
 
-        List<String> newKeySet = new ArrayList<>(rarities.keySet());
+        List<String> newKeySet = new ArrayList<>(RARITIES.keySet());
         Collections.reverse(newKeySet);
 
         for (String rarityKey : newKeySet) {
-            this.applyFilter(rarities.get(rarityKey), rarityKey, rarityBitShift);
+            this.applyFilter(RARITIES.get(rarityKey), rarityKey, rarityBitShift);
         }
 
         LinkedHashMap<String, BoarInfo> sortedBoars = new LinkedHashMap<>();
@@ -387,7 +379,7 @@ class MegaMenuGeneratorMaker {
                 continue;
             }
 
-            BoarItemConfig boar = config.getItemConfig().getBoars().get(boarID);
+            BoarItemConfig boar = BOARS.get(boarID);
             boolean boarShouldHide = rarity.isHidden() || boar.isSecret();
 
             // No filter

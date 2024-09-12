@@ -23,9 +23,9 @@ import java.util.Scanner;
 
 @Slf4j
 class ConfigLoader {
+    private static final BotConfig config = BoarBotApp.getBot().getConfig();
+    
     public static void loadConfig() {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-        
         try {
             log.info("Attempting to load configs from 'src/main/resources/config'");
 
@@ -108,21 +108,21 @@ class ConfigLoader {
                 }
             }
 
-            File fontFile = new File(
-                config.getPathConfig().getFontAssets() + config.getPathConfig().getMainFont()
-            );
+            File fontFile = new File(config.getPathConfig().getFontAssets() + config.getPathConfig().getMainFont());
 
             try {
                 BoarBotApp.getBot().setFont(Font.createFont(Font.TRUETYPE_FONT, fontFile));
             } catch (Exception exception) {
-                log.error("There was a problem when creating font from font file %s".formatted(fontFile.getPath()));
+                log.error(
+                    "There was a problem when creating font from font file %s".formatted(fontFile.getPath()), exception
+                );
             }
 
             fixStrings();
 
             log.info("Successfully loaded config");
         } catch (FileNotFoundException exception) {
-            log.error("Unable to find one or more config files in 'src/main/resources/config'");
+            log.error("Unable to find one or more config files in 'src/main/resources/config'", exception);
             System.exit(-1);
         }
     }
@@ -142,10 +142,9 @@ class ConfigLoader {
     }
 
     private static void fixStrings() {
-        BotConfig config = BoarBotApp.getBot().getConfig();
         StringConfig strs = config.getStringConfig();
-        Map<String, CommandConfig> cmds = config.getCommandConfig();
         Map<String, PowerupItemConfig> pows = config.getItemConfig().getPowerups();
+        Map<String, CommandConfig> cmds = config.getCommandConfig();
 
         strs.setNoSetup(strs.getNoSetup().formatted(
             cmds.get("manage").getName(), cmds.get("manage").getSubcommands().get("setup").getName()

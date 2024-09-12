@@ -1,7 +1,7 @@
 package dev.boarbot.util.graphics;
 
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,9 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TextDrawer {
-    private final BotConfig config = BoarBotApp.getBot().getConfig();
-
+public class TextDrawer implements Configured {
     @Getter @Setter private Graphics2D g2d;
 
     @Getter @Setter private String text;
@@ -167,7 +165,7 @@ public class TextDrawer {
                 String curColorVal = colorInput;
 
                 if (!colorInput.startsWith("#")) {
-                    curColorVal = this.config.getColorConfig().get(colorInput);
+                    curColorVal = COLORS.get(colorInput);
                 }
 
                 this.colorValsList.add(curColorVal);

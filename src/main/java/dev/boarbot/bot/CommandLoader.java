@@ -1,7 +1,7 @@
 package dev.boarbot.bot;
 
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.commands.SubcommandConfig;
 import dev.boarbot.commands.Subcommand;
@@ -17,11 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-class CommandLoader {
-    private final static BotConfig config = BoarBotApp.getBot().getConfig();
-
+class CommandLoader implements Configured {
     public static void deployCommands() {
-        Map<String, CommandConfig> commandData = config.getCommandConfig();
+        Map<String, CommandConfig> commandData = CONFIG.getCommandConfig();
 
         List<SlashCommandData> globalCommands = new ArrayList<>();
         List<SlashCommandData> guildCommands = new ArrayList<>();
@@ -47,7 +45,7 @@ class CommandLoader {
     }
 
     public static void registerSubcommands() {
-        Map<String, CommandConfig> commandData = config.getCommandConfig();
+        Map<String, CommandConfig> commandData = CONFIG.getCommandConfig();
 
         for (CommandConfig commandVal : commandData.values()) {
             Map<String, SubcommandConfig> subcommandData = commandVal.getSubcommands();
@@ -64,7 +62,8 @@ class CommandLoader {
                 } catch (Exception exception) {
                     log.error(
                         "Failed to find constructor for '/%s %s'."
-                            .formatted(commandVal.getName(), subcommandVal.getName())
+                            .formatted(commandVal.getName(), subcommandVal.getName()),
+                        exception
                     );
                     System.exit(-1);
                 }

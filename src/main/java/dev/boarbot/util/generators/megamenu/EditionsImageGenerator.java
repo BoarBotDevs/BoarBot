@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 public class EditionsImageGenerator extends MegaMenuGenerator {
-    private static final int[] ORIGIN = {0, 0};
     private static final int START_Y = 720;
     private static final int VALUE_Y_OFFSET = 78;
     private static final int LABEL_Y_SPACING = 198;
@@ -44,13 +43,13 @@ public class EditionsImageGenerator extends MegaMenuGenerator {
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        int bigFont = this.nums.getFontBig();
+        int bigFont = NUMS.getFontBig();
 
-        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getMegaMenuBase();
+        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getMegaMenuBase();
 
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
 
-        TextDrawer textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, this.colorConfig.get("font"), bigFont);
+        TextDrawer textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), bigFont);
 
         int xPos = this.generatedImage.getWidth() / 2;
         int pageNumEditions = Math.min(this.boarInfo.getEditions().size(), (this.page + 1) * 5) - this.page * 5;
@@ -60,14 +59,12 @@ public class EditionsImageGenerator extends MegaMenuGenerator {
             int curIndex = this.page * 5 + i;
 
             String editionText = "<>%s<>%s<>font<> #%d".formatted(
-                this.boarInfo.getRarityID(),
-                this.itemConfig.getBoars().get(this.boarID).getName(),
-                this.boarInfo.getEditions().get(curIndex)
+                this.boarInfo.getRarityID(), BOARS.get(this.boarID).getName(), this.boarInfo.getEditions().get(curIndex)
             );
 
             textDrawer.setText(editionText);
             textDrawer.setPos(new int[] {xPos, curStartY + i * LABEL_Y_SPACING});
-            textDrawer.setColorVal(this.colorConfig.get("font"));
+            textDrawer.setColorVal(COLORS.get("font"));
             textDrawer.drawText();
 
             textDrawer.setText(
@@ -76,7 +73,7 @@ public class EditionsImageGenerator extends MegaMenuGenerator {
                     .format(TimeUtil.getTimeFormatter())
             );
             textDrawer.setPos(new int[] {xPos, curStartY + i * LABEL_Y_SPACING + VALUE_Y_OFFSET});
-            textDrawer.setColorVal(this.colorConfig.get("silver"));
+            textDrawer.setColorVal(COLORS.get("silver"));
             textDrawer.drawText();
         }
 

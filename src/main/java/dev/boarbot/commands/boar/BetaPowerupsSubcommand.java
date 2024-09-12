@@ -3,6 +3,7 @@ package dev.boarbot.commands.boar;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
+import dev.boarbot.events.PowerupEventHandler;
 import dev.boarbot.util.data.DataUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -18,6 +19,8 @@ public class BetaPowerupsSubcommand extends Subcommand {
 
     @Override
     public void execute() {
+        new PowerupEventHandler().sendEvent();
+
         try (Connection connection = DataUtil.getConnection()) {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
 

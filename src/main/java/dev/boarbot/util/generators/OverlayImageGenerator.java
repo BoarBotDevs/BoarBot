@@ -77,8 +77,8 @@ public class OverlayImageGenerator extends ImageGenerator {
                 0,
                 this.generatedImage.getWidth(),
                 this.generatedImage.getHeight(),
-                this.config.getNumberConfig().getBorder() * 2,
-                this.config.getNumberConfig().getBorder() * 2
+                NUMS.getBorder() * 2,
+                NUMS.getBorder() * 2
             ));
         }
 
@@ -98,11 +98,11 @@ public class OverlayImageGenerator extends ImageGenerator {
     }
 
     private OverlayImageGenerator drawText(Graphics2D g2d) {
-        float fontSize = this.config.getNumberConfig().getFontBig();
+        float fontSize = NUMS.getFontBig();
         int[] pos = this.pos == null
             ? new int[] {this.generatedImage.getWidth() / 2, this.generatedImage.getHeight() / 2 + (int) (fontSize / 2)}
             : this.pos;
-        String fontColor = this.config.getColorConfig().get("font");
+        String fontColor = COLORS.get("font");
 
         TextDrawer textDrawer = new TextDrawer(
             g2d,
@@ -139,8 +139,8 @@ public class OverlayImageGenerator extends ImageGenerator {
 
             Process pythonProcess = new ProcessBuilder(
                 "python",
-                this.config.getPathConfig().getApplyScript(),
-                g.toJson(this.config.getNumberConfig()),
+                PATHS.getApplyScript(),
+                g.toJson(NUMS),
                 this.path,
                 "[%d, %d]".formatted(pos[0], pos[1]),
                 "[%d, %d]".formatted(this.size[0], this.size[1])

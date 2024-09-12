@@ -1,9 +1,5 @@
 package dev.boarbot.util.generators.megamenu;
 
-import dev.boarbot.bot.config.NumberConfig;
-import dev.boarbot.bot.config.PathConfig;
-import dev.boarbot.bot.config.StringConfig;
-import dev.boarbot.bot.config.items.ItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
@@ -21,12 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class MegaMenuGenerator extends ImageGenerator {
-    protected final NumberConfig nums = this.config.getNumberConfig();
-    protected final PathConfig pathConfig = this.config.getPathConfig();
-    protected final StringConfig strConfig = this.config.getStringConfig();
-    protected final ItemConfig itemConfig = this.config.getItemConfig();
-    protected final Map<String, String> colorConfig = this.config.getColorConfig();
-
     protected static final int[] IMAGE_SIZE = {1920, 1403};
     protected static final int[] USER_AVATAR_POS = {882, 25};
     protected static final int USER_AVATAR_WIDTH = 156;
@@ -44,8 +34,6 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
 
     protected List<BadgeData> badges;
     protected String firstJoinedDate;
-
-    protected TextDrawer textDrawer;
 
     public MegaMenuGenerator(
         int page, BoarUser boarUser, List<BadgeData> badges, String firstJoinedDate
@@ -79,22 +67,22 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         GraphicsUtil.drawCircleImage(g2d, userAvatar, USER_AVATAR_POS, USER_AVATAR_WIDTH);
 
         TextDrawer textDrawer = new TextDrawer(
-            g2d, userString, USER_TAG_POS, Align.CENTER, colorConfig.get("font"), this.nums.getFontMedium()
+            g2d, userString, USER_TAG_POS, Align.CENTER, COLORS.get("font"), NUMS.getFontMedium()
         );
         textDrawer.drawText();
 
-        textDrawer.setText(this.strConfig.getMegaMenuDateLabel());
+        textDrawer.setText(STRS.getMegaMenuDateLabel());
         textDrawer.setPos(DATE_LABEL_POS);
         textDrawer.drawText();
 
         textDrawer.setText(this.firstJoinedDate);
-        textDrawer.setColorVal(this.colorConfig.get("silver"));
+        textDrawer.setColorVal(COLORS.get("silver"));
         textDrawer.setPos(DATE_POS);
         textDrawer.drawText();
 
         if (this.badges.isEmpty()) {
-            textDrawer.setText(this.strConfig.getMegaMenuNoBadges());
-            textDrawer.setColorVal(this.colorConfig.get("font"));
+            textDrawer.setText(STRS.getMegaMenuNoBadges());
+            textDrawer.setColorVal(COLORS.get("font"));
             textDrawer.setPos(NO_BADGE_POS);
             textDrawer.drawText();
         }
@@ -102,21 +90,20 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         if (!this.badges.isEmpty()) {
             int curBadgeStartX = BADGE_START_X - (BADGE_SPACING / 2 * (this.badges.size() - 1));
 
-            g2d.setPaint(Color.decode(this.colorConfig.get("mid")));
+            g2d.setPaint(Color.decode(COLORS.get("mid")));
             g2d.fill(new RoundRectangle2D.Double(
-                curBadgeStartX - this.nums.getBorder(),
-                BADGE_Y - this.nums.getBorder(),
-                this.nums.getBorder() * 2 + (this.badges.size() - 1) * BADGE_SPACING + BADGE_SIZE[0],
-                this.nums.getBorder() * 2 + BADGE_SIZE[1],
-                this.nums.getBorder() * 2,
-                this.nums.getBorder() * 2
+                curBadgeStartX - NUMS.getBorder(),
+                BADGE_Y - NUMS.getBorder(),
+                NUMS.getBorder() * 2 + (this.badges.size() - 1) * BADGE_SPACING + BADGE_SIZE[0],
+                NUMS.getBorder() * 2 + BADGE_SIZE[1],
+                NUMS.getBorder() * 2,
+                NUMS.getBorder() * 2
             ));
 
             for (int i=0; i<this.badges.size(); i++) {
                 String badgeID = this.badges.get(i).badgeID();
                 int badgeTier = this.badges.get(i).badgeTier();
-                String badgePath = this.pathConfig.getBadges() +
-                    this.itemConfig.getBadges().get(badgeID).getFiles()[badgeTier];
+                String badgePath = PATHS.getBadges() + BADGES.get(badgeID).getFiles()[badgeTier];
                 int[] badgePos = {curBadgeStartX + i * BADGE_SPACING, BADGE_Y};
 
                 GraphicsUtil.drawImage(g2d, badgePath, badgePos, BADGE_SIZE);

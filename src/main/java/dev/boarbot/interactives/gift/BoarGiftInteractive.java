@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ import java.util.concurrent.Executors;
 
 @Slf4j
 public class BoarGiftInteractive extends UserInteractive implements Synchronizable {
-    private final PowerupItemConfig giftConfig = config.getItemConfig().getPowerups().get("gift");
+    private final PowerupItemConfig giftConfig = POWS.get("gift");
 
     private FileUpload giftImage;
 
@@ -66,14 +67,14 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     private List<String> boarIDs = new ArrayList<>();
     private int numBucks = 0;
 
-    private final Map<String, IndivComponentConfig> components = config.getComponentConfig().getGift();
+    private final Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getGift();
 
     public BoarGiftInteractive(Interaction interaction, boolean isMsg) {
-        super(interaction, isMsg, nums.getGiftIdle(), nums.getGiftIdle());
+        super(interaction, isMsg, NUMS.getGiftIdle(), NUMS.getGiftIdle());
 
         try {
             this.giftImage = new GiftImageGenerator(this.user.getName()).generate().getFileUpload();
-        } catch (IOException exception) {
+        } catch (IOException | URISyntaxException exception) {
             log.error("Failed to generate gift image", exception);
         }
 
@@ -85,12 +86,17 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     }
 
     @Override
+    public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
+        this.execute(compEvent);
+    }
+
+    @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
         if (compEvent == null) {
             this.sendResponse();
 
-            int randWaitTime = (int) (Math.random() * (nums.getGiftHighWait() - nums.getGiftLowWait())) +
-                nums.getGiftLowWait();
+            int randWaitTime = (int) (Math.random() * (NUMS.getGiftHighWait() - NUMS.getGiftLowWait())) +
+                NUMS.getGiftLowWait();
 
             this.enabled = true;
 
@@ -106,7 +112,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder()
-                    .setFiles(new EmbedImageGenerator(strConfig.getGiftSelfOpen()).generate().getFileUpload());
+                    .setFiles(new EmbedImageGenerator(STRS.getGiftSelfOpen()).generate().getFileUpload());
                 compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
             } catch (IOException exception) {
                 log.error("An error occurred while sending self gift open message.", exception);
@@ -125,7 +131,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         this.giftTimes.put(compEvent.getUser(), userTime);
         this.giftInteractions.put(compEvent.getUser(), compEvent);
 
-        if (userTime > nums.getGiftMaxHandicap()) {
+        if (userTime > NUMS.getGiftMaxHandicap()) {
             this.giveGift();
         }
     }
@@ -159,7 +165,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
-                Thread.sleep(nums.getGiftMaxHandicap());
+                Thread.sleep(NUMS.getGiftMaxHandicap());
             } catch (InterruptedException exception) {
                 if (!this.isStopped) {
                     this.stop(StopType.EXPIRED);
@@ -207,7 +213,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         try {
             MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(
-                new EmbedImageGenerator(strConfig.getGiftOpened().formatted(
+                new EmbedImageGenerator(STRS.getGiftOpened().formatted(
                     this.giftTimes.get(this.giftWinner)
                 )).generate().getFileUpload()
             );
@@ -381,7 +387,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         CompletableFuture.runAsync(() -> {
-            String title = strConfig.getGiftTitle();
+            String title = STRS.getGiftTitle();
             ItemInteractive.sendInteractive(
                 this.boarIDs,
                 bucksGotten,
@@ -405,16 +411,16 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         CompletableFuture.runAsync(() -> {
-            String title = strConfig.getGiftTitle();
+            String title = STRS.getGiftTitle();
 
             String rewardStr = this.outcomeConfig.getRewardStr().formatted(
                 this.numBucks,
                 this.numBucks == 1
-                    ? strConfig.getBucksName()
-                    : strConfig.getBucksPluralName()
+                    ? STRS.getBucksName()
+                    : STRS.getBucksPluralName()
             );
 
-            String filePath = config.getPathConfig().getOtherAssets() + config.getPathConfig().getGiftBucks();
+            String filePath = PATHS.getOtherAssets() + PATHS.getGiftBucks();
 
             ItemInteractive.sendInteractive(
                 rewardStr,
@@ -439,8 +445,8 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         CompletableFuture.runAsync(() -> {
-            PowerupItemConfig powConfig = config.getItemConfig().getPowerups().get(this.subOutcomeType.toString());
-            String title = strConfig.getGiftTitle();
+            PowerupItemConfig powConfig = POWS.get(this.subOutcomeType.toString());
+            String title = STRS.getGiftTitle();
 
             String rewardStr = this.outcomeConfig.getRewardStr().formatted(
                 this.subOutcomeConfig.getRewardAmt(),
@@ -449,7 +455,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     : powConfig.getPluralName()
             );
 
-            String filePath = config.getPathConfig().getPowerups() + powConfig.getFile();
+            String filePath = PATHS.getPowerups() + powConfig.getFile();
 
             ItemInteractive.sendInteractive(
                 rewardStr,

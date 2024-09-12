@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 public class DailySubcommand extends Subcommand implements Synchronizable {
@@ -59,7 +60,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), false);
             dailyResetDistance = dailyResetDistance.substring(dailyResetDistance.indexOf(' ')+1);
 
-            String replyStr = this.config.getStringConfig().getDailyUsed().formatted(dailyResetDistance);
+            String replyStr = STRS.getDailyUsed().formatted(dailyResetDistance);
 
             MessageEditBuilder editedMsg = new MessageEditBuilder();
 
@@ -69,7 +70,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 );
                 editedMsg.setComponents(interactive.getCurComponents());
 
-                replyStr += " " + this.config.getStringConfig().getDailyUsedNotify();
+                replyStr += " " + STRS.getDailyUsedNotify();
             }
 
             try {
@@ -92,7 +93,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
-            if (!boarUser.canUseDaily(connection) && !this.config.getMainConfig().isUnlimitedBoars()) {
+            if (!boarUser.canUseDaily(connection) && !CONFIG.getMainConfig().isUnlimitedBoars()) {
                 this.canDaily = false;
                 this.notificationsOn = boarUser.getNotificationStatus(connection);
                 return;
@@ -111,7 +112,9 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             this.isFirstDaily = boarUser.isFirstDaily();
 
             long blessings = boarUser.getBlessings(connection);
-            boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.interaction.getGuild().getId());
+            boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
+                connection, Objects.requireNonNull(this.interaction.getGuild()).getId()
+            );
             this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
             boarUser.addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
@@ -122,7 +125,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     }
 
     private void sendResponse() {
-        String title = this.config.getStringConfig().getDailyTitle();
+        String title = STRS.getDailyTitle();
 
         ItemInteractive.sendInteractive(
             this.boarIDs, this.bucksGotten, this.boarEditions, null, this.user, title, this.interaction.getHook(), false
@@ -130,7 +133,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
         if (this.isFirstDaily) {
             try {
-                EmbedImageGenerator embedGen = new EmbedImageGenerator(this.config.getStringConfig().getDailyFirstTime());
+                EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getDailyFirstTime());
                 this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
             } catch (IOException exception) {
                 log.error("Failed to generate first daily reward image.", exception);

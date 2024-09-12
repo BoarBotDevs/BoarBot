@@ -1,7 +1,6 @@
 package dev.boarbot.entities.boaruser;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.data.*;
 import dev.boarbot.interactives.boar.megamenu.SortType;
 import dev.boarbot.util.boar.BoarObtainType;
@@ -17,9 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class BoarUser {
-    private final BotConfig config = BoarBotApp.getBot().getConfig();
-
+public class BoarUser implements Configured {
     @Getter private final User user;
     @Getter private final String userID;
 
@@ -198,7 +195,7 @@ public class BoarUser {
 
                         String rarityKey = BoarUtil.findRarityKey(boarID);
 
-                        if (curEdition == 1 && this.config.getRarityConfigs().get(rarityKey).isGivesFirstBoar()) {
+                        if (curEdition == 1 && RARITIES.get(rarityKey).isGivesFirstBoar()) {
                             this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions);
                         }
                     }
@@ -265,9 +262,9 @@ public class BoarUser {
             VALUES (?, ?, ?)
             RETURNING edition;
         """;
-        String firstBoarID = this.config.getMainConfig().getFirstBoarID();
+        String firstBoarID = CONFIG.getMainConfig().getFirstBoarID();
 
-        if (!this.config.getItemConfig().getBoars().containsKey(firstBoarID)) {
+        if (!BOARS.containsKey(firstBoarID)) {
             return;
         }
 
@@ -941,13 +938,13 @@ public class BoarUser {
                 if (results.next()) {
                     int miraclesActive = results.getInt("miracles_active");
                     blessings = results.getLong("blessings");
-                    int miracleIncreaseMax = this.config.getNumberConfig().getMiracleIncreaseMax();
+                    int miracleIncreaseMax = NUMS.getMiracleIncreaseMax();
 
                     int activesLeft = miraclesActive+extraActive;
                     for (; activesLeft>0; activesLeft--) {
                         long amountToAdd = (long) Math.min(Math.ceil(blessings * 0.1), miracleIncreaseMax);
 
-                        if (amountToAdd == this.config.getNumberConfig().getMiracleIncreaseMax()) {
+                        if (amountToAdd == NUMS.getMiracleIncreaseMax()) {
                             break;
                         }
 
@@ -1130,7 +1127,7 @@ public class BoarUser {
         int MAX_HANDICAP_WEIGHT = 20;
 
         long handicapValue = value * -1;
-        if (handicapValue < this.config.getNumberConfig().getGiftMaxHandicap() * -1) {
+        if (handicapValue < NUMS.getGiftMaxHandicap() * -1) {
             String handicapQuery = """
                 SELECT gift_handicap
                 FROM users

@@ -2,7 +2,6 @@ package dev.boarbot.util.generators;
 
 import com.google.gson.Gson;
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.*;
 import dev.boarbot.bot.config.items.BadgeItemConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.util.boar.BoarUtil;
@@ -23,13 +22,11 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public class ItemImageGenerator extends ImageGenerator {
     public static final int[] IMAGE_SIZE = {930, 1080};
 
-    private static final int[] ORIGIN = {0, 0};
     private static final int[] ITEM_POS = {33, 174};
     private static final int[] TITLE_POS = {473, 77};
     private static final int[] NAME_POS = {473, 115};
@@ -65,17 +62,17 @@ public class ItemImageGenerator extends ImageGenerator {
         this.itemID = itemID;
 
         if (badgeTier >= 0) {
-            BadgeItemConfig badgeInfo = this.config.getItemConfig().getBadges().get(itemID);
+            BadgeItemConfig badgeInfo = BADGES.get(itemID);
             this.itemName = badgeInfo.getNames()[badgeTier];
-            this.filePath = this.config.getPathConfig().getBadges() + badgeInfo.getFiles()[badgeTier];
+            this.filePath = PATHS.getBadges() + badgeInfo.getFiles()[badgeTier];
             this.staticFilePath = null;
             this.colorKey = "badge";
         } else {
-            BoarItemConfig boarInfo = this.config.getItemConfig().getBoars().get(itemID);
+            BoarItemConfig boarInfo = BOARS.get(itemID);
             this.itemName = boarInfo.getName();
-            this.filePath = this.config.getPathConfig().getBoars() + boarInfo.getFile();
+            this.filePath = PATHS.getBoars() + boarInfo.getFile();
             this.staticFilePath = boarInfo.getStaticFile() != null
-                ? this.config.getPathConfig().getBoars() + boarInfo.getStaticFile()
+                ? PATHS.getBoars() + boarInfo.getStaticFile()
                 : null;
             this.colorKey = BoarUtil.findRarityKey(itemID);
         }
@@ -151,11 +148,7 @@ public class ItemImageGenerator extends ImageGenerator {
         Gson g = new Gson();
 
         Process pythonProcess = new ProcessBuilder(
-            "python",
-            this.config.getPathConfig().getMakeImageScript(),
-            g.toJson(this.config.getPathConfig()),
-            g.toJson(this.config.getNumberConfig()),
-            this.filePath
+            "python", PATHS.getMakeImageScript(), g.toJson(PATHS), g.toJson(NUMS), this.filePath
         ).start();
 
         this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.generatedImageBytes);
@@ -166,10 +159,10 @@ public class ItemImageGenerator extends ImageGenerator {
 
         Process pythonProcess = new ProcessBuilder(
             "python",
-            this.config.getPathConfig().getOverlayScript(),
-            g.toJson(this.config.getPathConfig()),
-            g.toJson(this.config.getColorConfig()),
-            g.toJson(this.config.getNumberConfig()),
+            PATHS.getOverlayScript(),
+            g.toJson(PATHS),
+            g.toJson(COLORS),
+            g.toJson(NUMS),
             this.user.getEffectiveAvatarUrl(),
             this.user.getName(),
             "%,d".formatted(this.bucks),
@@ -181,20 +174,16 @@ public class ItemImageGenerator extends ImageGenerator {
     }
 
     private void generateStatic(boolean makeWithItem) throws IOException, URISyntaxException {
-        NumberConfig nums = this.config.getNumberConfig();
-        PathConfig pathConfig = this.config.getPathConfig();
-        Map<String, String> colorConfig = this.config.getColorConfig();
+        String itemAssetsFolder = PATHS.getItemAssets();
+        String underlayPath = itemAssetsFolder + PATHS.getItemUnderlay();
+        String backplatePath = itemAssetsFolder + PATHS.getItemBackplate();
 
-        String itemAssetsFolder = pathConfig.getItemAssets();
-        String underlayPath = itemAssetsFolder + pathConfig.getItemUnderlay();
-        String backplatePath = itemAssetsFolder + pathConfig.getItemBackplate();
-
-        int[] itemSize = nums.getBigBoarSize();
+        int[] itemSize = NUMS.getBigBoarSize();
 
         BufferedImage generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        GraphicsUtil.drawRect(g2d, ORIGIN, IMAGE_SIZE, colorConfig.get(colorKey));
+        GraphicsUtil.drawRect(g2d, ORIGIN, IMAGE_SIZE, COLORS.get(colorKey));
         g2d.setComposite(AlphaComposite.DstIn);
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
         g2d.setComposite(AlphaComposite.SrcOver);
@@ -212,15 +201,15 @@ public class ItemImageGenerator extends ImageGenerator {
             this.title,
             TITLE_POS,
             Align.CENTER,
-            colorConfig.get("font"),
-            nums.getFontMedium()
+            COLORS.get("font"),
+            NUMS.getFontMedium()
         );
 
         textDrawer.drawText();
 
         textDrawer.setText(this.itemName);
         textDrawer.setPos(NAME_POS);
-        textDrawer.setColorVal(colorConfig.get(this.colorKey));
+        textDrawer.setColorVal(COLORS.get(this.colorKey));
         textDrawer.setWidth(itemSize[0]);
 
         textDrawer.drawText();
@@ -243,21 +232,18 @@ public class ItemImageGenerator extends ImageGenerator {
     }
 
     private BufferedImage generateUserImageData() throws IOException, URISyntaxException {
-        NumberConfig nums = this.config.getNumberConfig();
-        Map<String, String> colorConfig = this.config.getColorConfig();
-
         int userBoxY = BOX_ONE_Y;
 
         String userAvatar = this.user.getEffectiveAvatarUrl();
         String username = this.user.getName().substring(
-            0, Math.min(this.user.getName().length(), this.config.getNumberConfig().getMaxUsernameLength())
+            0, Math.min(this.user.getName().length(), NUMS.getMaxUsernameLength())
         );
 
         BufferedImage userDataImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = userDataImage.createGraphics();
 
         TextDrawer textDrawer = new TextDrawer(
-            g2d, "", ORIGIN, Align.LEFT, colorConfig.get("font"), nums.getFontSmallMedium()
+            g2d, "", ORIGIN, Align.LEFT, COLORS.get("font"), NUMS.getFontSmallMedium()
         );
         FontMetrics fm = g2d.getFontMetrics();
 
@@ -266,18 +252,18 @@ public class ItemImageGenerator extends ImageGenerator {
 
             String giftingUserAvatar = this.giftingUser.getEffectiveAvatarUrl();
             String giftingUsername = this.giftingUser.getName().substring(
-                0, Math.min(this.giftingUser.getName().length(), this.config.getNumberConfig().getMaxUsernameLength())
+                0, Math.min(this.giftingUser.getName().length(), NUMS.getMaxUsernameLength())
             );
 
-            g2d.setPaint(Color.decode(colorConfig.get("dark")));
-            g2d.fillRect(BOX_X, BOX_ONE_Y, nums.getBorder(), BOX_HEIGHT);
+            g2d.setPaint(Color.decode(COLORS.get("dark")));
+            g2d.fillRect(BOX_X, BOX_ONE_Y, NUMS.getBorder(), BOX_HEIGHT);
             g2d.fill(new RoundRectangle2D.Double(
                 BOX_X,
                 BOX_ONE_Y,
                 fm.stringWidth("To") + BOX_TEXT_EXTRA,
                 BOX_HEIGHT,
-                nums.getBorder() * 2,
-                nums.getBorder() * 2
+                NUMS.getBorder() * 2,
+                NUMS.getBorder() * 2
             ));
 
             int[] toPos = {BOX_TEXT_X, BOX_ONE_Y + BOX_TEXT_Y_OFFSET};
@@ -286,15 +272,15 @@ public class ItemImageGenerator extends ImageGenerator {
             textDrawer.setPos(toPos);
             textDrawer.drawText();
 
-            g2d.setPaint(Color.decode(colorConfig.get("dark")));
-            g2d.fillRect(BOX_X, BOX_THREE_Y, nums.getBorder(), BOX_HEIGHT);
+            g2d.setPaint(Color.decode(COLORS.get("dark")));
+            g2d.fillRect(BOX_X, BOX_THREE_Y, NUMS.getBorder(), BOX_HEIGHT);
             g2d.fill(new RoundRectangle2D.Double(
                 BOX_X,
                 BOX_THREE_Y,
                 fm.stringWidth("From") + BOX_TEXT_EXTRA,
                 BOX_HEIGHT,
-                nums.getBorder() * 2,
-                nums.getBorder() * 2
+                NUMS.getBorder() * 2,
+                NUMS.getBorder() * 2
             ));
 
             int[] fromPos = {BOX_TEXT_X, BOX_THREE_Y + BOX_TEXT_Y_OFFSET};
@@ -303,15 +289,15 @@ public class ItemImageGenerator extends ImageGenerator {
             textDrawer.setPos(fromPos);
             textDrawer.drawText();
 
-            g2d.setPaint(Color.decode(colorConfig.get("dark")));
-            g2d.fillRect(BOX_X, BOX_FOUR_Y, nums.getBorder(), BOX_HEIGHT);
+            g2d.setPaint(Color.decode(COLORS.get("dark")));
+            g2d.fillRect(BOX_X, BOX_FOUR_Y, NUMS.getBorder(), BOX_HEIGHT);
             g2d.fill(new RoundRectangle2D.Double(
                 BOX_X,
                 BOX_FOUR_Y,
                 fm.stringWidth(giftingUsername) + USER_BOX_EXTRA,
                 BOX_HEIGHT,
-                nums.getBorder() * 2,
-                nums.getBorder() * 2
+                NUMS.getBorder() * 2,
+                NUMS.getBorder() * 2
             ));
 
             int[] giftingPos = {USER_TAG_X, BOX_FOUR_Y + BOX_TEXT_Y_OFFSET};
@@ -325,15 +311,15 @@ public class ItemImageGenerator extends ImageGenerator {
             GraphicsUtil.drawCircleImage(g2d, giftingUserAvatar, giftingAvatarPos, USER_AVATAR_WIDTH);
         }
 
-        g2d.setPaint(Color.decode(colorConfig.get("dark")));
-        g2d.fillRect(BOX_X, userBoxY, nums.getBorder(), BOX_HEIGHT);
+        g2d.setPaint(Color.decode(COLORS.get("dark")));
+        g2d.fillRect(BOX_X, userBoxY, NUMS.getBorder(), BOX_HEIGHT);
         g2d.fill(new RoundRectangle2D.Double(
             BOX_X,
             userBoxY,
             fm.stringWidth(username) + USER_BOX_EXTRA,
             BOX_HEIGHT,
-            nums.getBorder() * 2,
-            nums.getBorder() * 2
+            NUMS.getBorder() * 2,
+            NUMS.getBorder() * 2
         ));
 
         int[] userPos = {USER_TAG_X, userBoxY + BOX_TEXT_Y_OFFSET};
@@ -349,15 +335,15 @@ public class ItemImageGenerator extends ImageGenerator {
         if (this.bucks > 0 && this.giftingUser == null) {
             String formattedBucks = "%,d".formatted(this.bucks);
 
-            g2d.setPaint(Color.decode(colorConfig.get("dark")));
-            g2d.fillRect(BOX_X, BOX_TWO_Y, nums.getBorder(), BOX_HEIGHT);
+            g2d.setPaint(Color.decode(COLORS.get("dark")));
+            g2d.fillRect(BOX_X, BOX_TWO_Y, NUMS.getBorder(), BOX_HEIGHT);
             g2d.fill(new RoundRectangle2D.Double(
                 BOX_X,
                 BOX_TWO_Y,
                 fm.stringWidth("+$" + formattedBucks) + BOX_TEXT_EXTRA,
                 BOX_HEIGHT,
-                nums.getBorder() * 2,
-                nums.getBorder() * 2
+                NUMS.getBorder() * 2,
+                NUMS.getBorder() * 2
             ));
 
             int[] bucksPos = {BOX_TEXT_X, BOX_TWO_Y + BOX_TEXT_Y_OFFSET};
@@ -368,19 +354,18 @@ public class ItemImageGenerator extends ImageGenerator {
         }
 
         return userDataImage.getSubimage(
-            BOX_X, BOX_ONE_Y, nums.getBigBoarSize()[0], BOX_FOUR_Y + BOX_HEIGHT - BOX_ONE_Y
+            BOX_X, BOX_ONE_Y, NUMS.getBigBoarSize()[0], BOX_FOUR_Y + BOX_HEIGHT - BOX_ONE_Y
         );
     }
 
     public static List<ItemImageGenerator> getItemImageGenerators(
         List<String> boarIDs, List<Integer> bucksGotten, User user, String title, User giftingUser
     ) {
-        BotConfig config = BoarBotApp.getBot().getConfig();
         List<ItemImageGenerator> itemGens = new ArrayList<>();
 
         for (int i=0; i<boarIDs.size(); i++) {
-            if (boarIDs.get(i).equals(config.getMainConfig().getFirstBoarID())) {
-                title = config.getStringConfig().getFirstTitle();
+            if (boarIDs.get(i).equals(CONFIG.getMainConfig().getFirstBoarID())) {
+                title = STRS.getFirstTitle();
             }
 
             ItemImageGenerator boarItemGen = new ItemImageGenerator(

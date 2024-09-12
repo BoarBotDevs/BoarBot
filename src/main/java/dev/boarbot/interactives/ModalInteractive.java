@@ -24,7 +24,7 @@ public abstract class ModalInteractive extends UserInteractive {
             return;
         }
 
-        this.curStopTime = TimeUtil.getCurMilli() + config.getNumberConfig().getInteractiveIdle();
+        this.curStopTime = TimeUtil.getCurMilli() + NUMS.getInteractiveIdle();
 
         if (compEvent != null) {
             this.execute(compEvent);

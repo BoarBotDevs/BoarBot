@@ -1,7 +1,6 @@
 package dev.boarbot.commands;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
@@ -14,11 +13,10 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
-public abstract class Subcommand {
-    protected final BotConfig config = BoarBotApp.getBot().getConfig();
-
+public abstract class Subcommand implements Configured {
     protected final SlashCommandInteractionEvent event;
     protected final SlashCommandInteraction interaction;
     protected final User user;
@@ -33,16 +31,14 @@ public abstract class Subcommand {
 
     protected boolean canInteract() {
         try (Connection connection = DataUtil.getConnection()) {
-            String guildID = this.interaction.getGuild().getId();
+            String guildID = Objects.requireNonNull(this.interaction.getGuild()).getId();
             String channelID = this.interaction.getChannelId();
 
             List<String> validChannelIDs = GuildDataUtil.getValidChannelIDs(connection, guildID);
             boolean isSetup = !validChannelIDs.isEmpty();
             boolean isValidChannel = validChannelIDs.contains(channelID);
 
-            EmbedImageGenerator embedGen = new EmbedImageGenerator(
-                this.config.getStringConfig().getNoSetup(), this.config.getColorConfig().get("error")
-            );
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getNoSetup(), COLORS.get("error"));
 
             if (!isSetup) {
                 this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
@@ -50,7 +46,7 @@ public abstract class Subcommand {
             }
 
             if (!isValidChannel) {
-                embedGen.setStr(this.config.getStringConfig().getWrongChannel());
+                embedGen.setStr(STRS.getWrongChannel());
                 this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
                 return false;
             }

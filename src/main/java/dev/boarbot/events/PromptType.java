@@ -1,4 +1,4 @@
-package dev.boarbot.interactives.event;
+package dev.boarbot.events;
 
 public enum PromptType {
     EMOJI_FIND("emojiFind"),

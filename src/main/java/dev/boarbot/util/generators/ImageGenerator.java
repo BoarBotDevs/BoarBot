@@ -1,7 +1,7 @@
 package dev.boarbot.util.generators;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
+import dev.boarbot.util.graphics.TextDrawer;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
@@ -11,12 +11,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public abstract class ImageGenerator {
-    protected BotConfig config = BoarBotApp.getBot().getConfig();
+public abstract class ImageGenerator implements Configured {
+    protected static final int[] ORIGIN = {0, 0};
 
     protected byte[] generatedImageBytes;
     protected BufferedImage generatedImage;
     protected boolean animated = false;
+
+    protected TextDrawer textDrawer;
 
     public abstract ImageGenerator generate() throws IOException, URISyntaxException;
 

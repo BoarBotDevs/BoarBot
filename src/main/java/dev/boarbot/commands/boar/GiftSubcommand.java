@@ -41,11 +41,8 @@ public class GiftSubcommand extends Subcommand {
         if (noGift) {
             try {
                 MessageCreateBuilder messageBuilder = new MessageCreateBuilder().setFiles(
-                    new EmbedImageGenerator(
-                        this.config.getStringConfig().getNoPow().formatted(
-                            this.config.getItemConfig().getPowerups().get("gift").getPluralName()
-                        )
-                    ).generate().getFileUpload()
+                    new EmbedImageGenerator(STRS.getNoPow().formatted(POWS.get("gift").getPluralName())).generate()
+                        .getFileUpload()
                 );
 
                 this.interaction.reply(messageBuilder.build()).setEphemeral(true).complete();

@@ -1,7 +1,6 @@
 package dev.boarbot.bot;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.BadgeItemConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
@@ -10,31 +9,28 @@ import dev.boarbot.util.data.DataUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 @Slf4j
-class DatabaseLoader {
-    private final static BotConfig config = BoarBotApp.getBot().getConfig();
-
+class DatabaseLoader implements Configured {
     public static void loadIntoDatabase(String databaseType) {
-        try (
-            Connection connection = DataUtil.getConnection();
-            Statement statement = connection.createStatement()
-        ) {
+        try (Connection connection = DataUtil.getConnection()) {
             if (databaseType.equals("rarities")) {
                 String resetQuery = """
                     DELETE FROM rarities_info
                     WHERE rarity_id = 'all_done';
                 """;
 
-                statement.executeUpdate(resetQuery);
+                try (PreparedStatement statement = connection.prepareStatement(resetQuery)) {
+                    statement.executeUpdate();
+                }
             }
 
             if (databaseType.equals("badges")) {
-                fixBadges(statement);
+                fixBadges(connection);
             } else {
-                fixInfoTables(databaseType, statement);
+                fixInfoTables(databaseType, connection);
             }
 
             if (databaseType.equals("boars")) {
@@ -43,7 +39,9 @@ class DatabaseLoader {
                     VALUES ('all_done', null, 0, 0)
                 """;
 
-                statement.executeUpdate(resetQuery);
+                try (PreparedStatement statement = connection.prepareStatement(resetQuery)) {
+                    statement.executeUpdate();
+                }
             }
         } catch (SQLException exception) {
             log.error("Something went wrong when loading config data into database.", exception);
@@ -51,89 +49,111 @@ class DatabaseLoader {
         }
     }
 
-    private static void fixBadges(Statement statement) throws SQLException {
+    private static void fixBadges(Connection connection) throws SQLException {
         String removeAllUpdate = """
             UPDATE collected_badges
             SET `exists` = false;
         """;
 
-        statement.executeUpdate(removeAllUpdate);
+        String restoreBadgeUpdate = """
+            UPDATE collected_badges
+            SET `exists` = true
+            WHERE badge_id = ? AND badge_tier = ?;
+        """;
 
-        for (String badgeID : config.getItemConfig().getBadges().keySet()) {
-            BadgeItemConfig badge = config.getItemConfig().getBadges().get(badgeID);
+        try (
+            PreparedStatement statement1 = connection.prepareStatement(removeAllUpdate);
+            PreparedStatement statement2 = connection.prepareStatement(restoreBadgeUpdate)
+        ) {
+            statement1.executeUpdate();
 
-            for (int i=0; i<badge.getFiles().length; i++) {
-                String restoreBadgeUpdate = """
-                    UPDATE collected_badges
-                    SET `exists` = true
-                    WHERE badge_id = '%s' AND badge_tier = '%d';
-                """.formatted(badgeID, i);
+            for (String badgeID : BADGES.keySet()) {
+                BadgeItemConfig badge = BADGES.get(badgeID);
 
-                statement.executeUpdate(restoreBadgeUpdate);
+                for (int i=0; i<badge.getFiles().length; i++) {
+                    statement2.setString(1, badgeID);
+                    statement2.setInt(2, i);
+                    statement2.addBatch();
+                }
             }
+
+            statement2.executeBatch();
         }
     }
 
-    private static void fixInfoTables(String databaseType, Statement statement) throws SQLException {
-        StringBuilder sqlStatement = new StringBuilder();
+    private static void fixInfoTables(String databaseType, Connection connection) throws SQLException {
+        String truncateTable = switch (databaseType) {
+            case "rarities" -> "TRUNCATE rarities_info;";
+            case "boars" -> "TRUNCATE boars_info;";
+            default -> null;
+        };
 
-        sqlStatement.append("TRUNCATE %s_info;".formatted(databaseType));
-        statement.executeUpdate(sqlStatement.toString());
-        sqlStatement.setLength(0);
-
-        String tableColumns = getTableColumns(databaseType);
-
-        sqlStatement.append("INSERT INTO %s_info %s VALUES ".formatted(databaseType, tableColumns));
-        appendQuery(databaseType, sqlStatement);
-        sqlStatement.setLength(sqlStatement.length() - 1);
-        sqlStatement.append(";");
-
-        statement.executeUpdate(sqlStatement.toString());
-    }
-
-    private static String getTableColumns(String databaseType) {
-        if (databaseType.equals("boars")) {
-            return "(boar_id, rarity_id, is_skyblock)";
+        if (truncateTable == null) {
+            return;
         }
 
-        return "(rarity_id, prior_rarity_id, base_bucks, researcher_need)";
-    }
+        String curUpdate = switch (databaseType) {
+            case "rarities" -> """
+                INSERT INTO rarities_info (rarity_id, prior_rarity_id, base_bucks, researcher_need)
+                VALUES (?, ?, ?, ?);
+            """;
+            case "boars" -> """
+                INSERT INTO boars_info (boar_id, rarity_id, is_skyblock)
+                VALUES (?, ?, ?);
+            """;
+            default -> null;
+        };
 
-    private static void appendQuery(String databaseType, StringBuilder sqlStatement) {
-        if (databaseType.equals("boars")) {
-            appendBoarQuery(sqlStatement);
-        } else if (databaseType.equals("rarities")) {
-            appendRarityQuery(sqlStatement);
+        try (
+            PreparedStatement statement1 = connection.prepareStatement(truncateTable);
+            PreparedStatement statement2 = connection.prepareStatement(curUpdate)
+        ) {
+            statement1.setString(1, databaseType + "_info");
+            statement1.executeUpdate();
+
+            if (databaseType.equals("rarities")) {
+                addRarityBatches(statement2);
+            } else {
+                addBoarBatches(statement2);
+            }
+
+            statement2.executeBatch();
         }
     }
 
-    private static void appendBoarQuery(StringBuilder sqlStatement) {
-        for (String boarID : config.getItemConfig().getBoars().keySet()) {
-            BoarItemConfig boar = config.getItemConfig().getBoars().get(boarID);
+    private static void addBoarBatches(PreparedStatement statement) throws SQLException {
+        for (String boarID : BOARS.keySet()) {
+            BoarItemConfig boar = BOARS.get(boarID);
 
             if (boar.isBlacklisted()) {
                 continue;
             }
 
-            int isSB = boar.isSB() ? 1 : 0;
             String rarityID = BoarUtil.findRarityKey(boarID);
 
-            sqlStatement.append("('%s','%s',%d),".formatted(boarID, rarityID, isSB));
+            statement.setString(1, boarID);
+            statement.setString(2, rarityID);
+            statement.setBoolean(3, boar.isSB());
+            statement.addBatch();
         }
     }
 
-    private static void appendRarityQuery(StringBuilder sqlStatement) {
+    private static void addRarityBatches(PreparedStatement statement) throws SQLException {
         String priorRarityID = null;
-        for (String rarityID : config.getRarityConfigs().keySet()) {
-            RarityConfig rarityConfig = config.getRarityConfigs().get(rarityID);
-            int score = rarityConfig.getBaseScore();
-            int researcherNeed = rarityConfig.isResearcherNeed() ? 1 : 0;
+
+        for (String rarityID : RARITIES.keySet()) {
+            RarityConfig rarityConfig = RARITIES.get(rarityID);
 
             if (priorRarityID != null) {
                 priorRarityID = "'%s'".formatted(priorRarityID);
             }
 
-            sqlStatement.append("('%s',%s,%d,%d),".formatted(rarityID, priorRarityID, score, researcherNeed));
+            statement.setString(1, rarityID);
+            statement.setString(2, priorRarityID);
+            statement.setInt(3, rarityConfig.getBaseBucks());
+            statement.setBoolean(4, rarityConfig.isResearcherNeed());
+            statement.addBatch();
+
             priorRarityID = rarityID;
         }
     }

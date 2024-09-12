@@ -172,7 +172,7 @@
   },
   "fast": {
     "name": "Quick Click",
-    "description": "Click the green button!",
+    "description": "Click the blue button!",
     "prompts": {
       "one": {
         "name": "One",
@@ -198,7 +198,7 @@
   },
   "clock": {
     "name": "Telling Time",
-    "description": "Click the clock that's set to %@!",
+    "description": "Click the clock that's set to %s!",
     "prompts": {
       "one": {
         "name": "1:00",

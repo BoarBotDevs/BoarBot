@@ -186,6 +186,7 @@ public class StringConfig {
     private String giftTitle = "";
     private String giftOpened = "";
     private String unavailable = "";
+    private String empty = "";
     private String pullLink = "";
     private String githubImg = "";
     private String supportLink = "";

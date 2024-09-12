@@ -29,7 +29,7 @@ import java.util.Map;
 public class DailyNotifyInteractive extends UserInteractive {
     private ActionRow[] curComponents = new ActionRow[0];
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = config.getComponentConfig().getDaily();
+    private final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getDaily();
 
     public DailyNotifyInteractive(Interaction initEvent) {
         super(initEvent);
@@ -45,7 +45,7 @@ public class DailyNotifyInteractive extends UserInteractive {
 
         String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), false);
         dailyResetDistance = dailyResetDistance.substring(dailyResetDistance.indexOf(' ')+1);
-        String replyStr = strConfig.getDailyUsed().formatted(dailyResetDistance);
+        String replyStr = STRS.getDailyUsed().formatted(dailyResetDistance);
 
         try {
             EmbedImageGenerator embedGen = new EmbedImageGenerator(replyStr);
@@ -54,9 +54,7 @@ public class DailyNotifyInteractive extends UserInteractive {
                 .setFiles(embedGen.generate().getFileUpload())
                 .setComponents();
 
-            compEvent.getUser().openPrivateChannel().complete().sendMessage(
-                strConfig.getNotificationSuccess()
-            ).complete();
+            compEvent.getUser().openPrivateChannel().complete().sendMessage(STRS.getNotificationSuccess()).complete();
 
             if (!this.isStopped) {
                 this.updateInteractive(editedMsg.build());
@@ -72,9 +70,7 @@ public class DailyNotifyInteractive extends UserInteractive {
                 "An error occurred while attempting to update message after enabling notifications.", exception
             );
         } catch (ErrorResponseException exception) {
-            EmbedImageGenerator embedGen = new EmbedImageGenerator(
-                strConfig.getNotificationFailed(), config.getColorConfig().get("error")
-            );
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getNotificationFailed(), COLORS.get("error"));
 
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());

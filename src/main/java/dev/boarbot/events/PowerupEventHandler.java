@@ -3,23 +3,33 @@ package dev.boarbot.events;
 import dev.boarbot.interactives.event.PowerupEventInteractive;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class PowerupEventHandler extends EventHandler {
-    private static final List<Message> curMessages = new ArrayList<>();
+    @Getter private static final List<Message> curMessages = new ArrayList<>();
     private static final Set<Message> priorMessages = new HashSet<>();
+
+    @Getter private final PromptType promptType;
+    @Getter private final String promptID;
+
+    public PowerupEventHandler() {
+        PromptType[] promptTypes = PromptType.values();
+        this.promptType = promptTypes[(int) (Math.random() * promptTypes.length)];
+
+        String[] promptIDs = CONFIG.getPromptConfig().get(this.promptType.toString()).getPrompts().keySet()
+            .toArray(new String[0]);
+        this.promptID = promptIDs[(int) (Math.random() * promptIDs.length)];
+    }
 
     @Override
     public void sendEvent() {
@@ -37,11 +47,8 @@ public class PowerupEventHandler extends EventHandler {
 
     @Override
     protected PowerupEventInteractive sendInteractive(TextChannel channel) throws InsufficientPermissionException {
-        PowerupEventInteractive interactive = new PowerupEventInteractive(channel);
-        Message interactiveMsg = interactive.updateInteractive(new MessageEditBuilder().setContent("hello!").build());
-
-        curMessages.add(interactiveMsg);
-
+        PowerupEventInteractive interactive = new PowerupEventInteractive(channel, null, this);
+        interactive.execute(null);
         return interactive;
     }
 
@@ -63,7 +70,9 @@ public class PowerupEventHandler extends EventHandler {
 
     private void removePriorEvent() {
         for (Message msg : priorMessages) {
-            msg.delete().queue();
+            try {
+                msg.delete().queue();
+            } catch (ErrorResponseException ignored) {}
         }
     }
 

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 public class CompendiumImageGenerator extends MegaMenuGenerator {
-    private static final int[] ORIGIN = {0, 0};
     private static final int[] FAV_POS = {130, 472};
     private static final int[] LEFT_START_POS = {484, 392};
     private static final int VALUE_Y_OFFSET = 78;
@@ -54,13 +53,13 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getCompUnderlay();
-        String favoritePath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getFavorite();
+        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getCompUnderlay();
+        String favoritePath = PATHS.getMegaMenuAssets() + PATHS.getFavorite();
 
-        int smallestFont = this.nums.getFontSmallest();
-        int mediumFont = this.nums.getFontMedium();
+        int smallestFont = NUMS.getFontSmallest();
+        int mediumFont = NUMS.getFontMedium();
 
-        BoarItemConfig boar = this.itemConfig.getBoars().get(this.boarID);
+        BoarItemConfig boar = BOARS.get(this.boarID);
 
         int[] amountPos = {LEFT_START_POS[0], LEFT_START_POS[1] + VALUE_Y_OFFSET};
 
@@ -77,18 +76,18 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         int[] updatePos = {updateLabelPos[0], updateLabelPos[1] + VALUE_Y_OFFSET};
 
         String rarityKey = BoarUtil.findRarityKey(this.boarID);
-        String rarityName = this.config.getRarityConfigs().get(rarityKey).getName();
+        String rarityName = RARITIES.get(rarityKey).getName();
 
         String firstObtained = this.boarInfo.getFirstObtained() > -1
             ? Instant.ofEpochMilli(this.boarInfo.getFirstObtained())
                 .atOffset(ZoneOffset.UTC)
                 .format(TimeUtil.getDateFormatter())
-            : this.config.getStringConfig().getUnavailable();
+            : STRS.getUnavailable();
         String lastObtained = this.boarInfo.getLastObtained() > -1
             ? Instant.ofEpochMilli(this.boarInfo.getLastObtained())
                 .atOffset(ZoneOffset.UTC)
                 .format(TimeUtil.getDateFormatter())
-            : this.config.getStringConfig().getUnavailable();
+            : STRS.getUnavailable();
 
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
@@ -100,43 +99,41 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         }
 
         this.textDrawer = new TextDrawer(
-            g2d, this.strConfig.getCompAmountLabel(), LEFT_START_POS, Align.CENTER, this.colorConfig.get("font"), mediumFont
+            g2d, STRS.getCompAmountLabel(), LEFT_START_POS, Align.CENTER, COLORS.get("font"), mediumFont
         );
         this.textDrawer.drawText();
 
         this.drawValue("%,d".formatted(this.boarInfo.getAmount()), amountPos);
 
-        this.drawLabel(this.strConfig.getCompOldestLabel(), oldestLabelPos);
+        this.drawLabel(STRS.getCompOldestLabel(), oldestLabelPos);
         this.drawValue(firstObtained, oldestPos);
 
-        this.drawLabel(this.strConfig.getCompNewestLabel(), newestLabelPos);
+        this.drawLabel(STRS.getCompNewestLabel(), newestLabelPos);
         this.drawValue(lastObtained, newestPos);
 
-        this.drawLabel(this.strConfig.getCompSpeciesLabel(), classLabelPos);
+        this.drawLabel(STRS.getCompSpeciesLabel(), classLabelPos);
         this.drawValue(this.boarInfo.getAmount() > 0
             ? boar.getClassification()
-            : this.strConfig.getCompNoSpecies(),
+            : STRS.getCompNoSpecies(),
         classPos);
 
-        this.drawLabel(this.strConfig.getCompUpdateLabel(), updateLabelPos);
+        this.drawLabel(STRS.getCompUpdateLabel(), updateLabelPos);
         this.drawValue(boar.getUpdate(), updatePos);
 
         this.textDrawer.setText(rarityName.toUpperCase());
         this.textDrawer.setPos(RARITY_POS);
         this.textDrawer.setFontSize(mediumFont);
-        this.textDrawer.setColorVal(this.colorConfig.get(rarityKey));
+        this.textDrawer.setColorVal(COLORS.get(rarityKey));
         this.textDrawer.setWidth(RIGHT_WIDTH);
         this.textDrawer.drawText();
 
         this.textDrawer.setText(boar.getName());
         this.textDrawer.setPos(NAME_POS);
-        this.textDrawer.setColorVal(this.colorConfig.get("font"));
+        this.textDrawer.setColorVal(COLORS.get("font"));
         this.textDrawer.drawText();
 
         if (this.boarInfo.getAmount() > 0) {
-            BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get(
-                "mediumBig" + this.boarID
-            );
+            BufferedImage boarImage = BoarBotApp.getBot().getImageCacheMap().get("mediumBig" + this.boarID);
             g2d.drawImage(boarImage, BOAR_POS[0], BOAR_POS[1], null);
         }
 
@@ -157,22 +154,22 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
     }
 
     private void drawLabel(String text, int[] pos) {
-        int mediumFont = this.nums.getFontMedium();
+        int mediumFont = NUMS.getFontMedium();
 
         this.textDrawer.setText(text);
         this.textDrawer.setPos(pos);
         this.textDrawer.setFontSize(mediumFont);
-        this.textDrawer.setColorVal(this.colorConfig.get("font"));
+        this.textDrawer.setColorVal(COLORS.get("font"));
         this.textDrawer.drawText();
     }
 
     private void drawValue(String text, int[] pos) {
-        int bigFont = this.nums.getFontBig();
+        int bigFont = NUMS.getFontBig();
 
         this.textDrawer.setText(text);
         this.textDrawer.setPos(pos);
         this.textDrawer.setFontSize(bigFont);
-        this.textDrawer.setColorVal(this.colorConfig.get("silver"));
+        this.textDrawer.setColorVal(COLORS.get("silver"));
         this.textDrawer.drawText();
     }
 }

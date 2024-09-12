@@ -5,6 +5,7 @@ import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
@@ -23,6 +24,11 @@ public abstract class EventInteractive extends Interactive {
     protected EventInteractive(TextChannel channel, long waitTime, long hardTime) {
         super(Long.toString(TimeUtil.getCurMilli()), channel.getGuild().getId(), waitTime, hardTime);
         this.channel = channel;
+    }
+
+    @Override
+    public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
+        this.execute(compEvent);
     }
 
     @Override

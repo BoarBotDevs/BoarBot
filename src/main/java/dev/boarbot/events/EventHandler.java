@@ -1,5 +1,6 @@
 package dev.boarbot.events;
 
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.interactives.event.EventInteractive;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 @Slf4j
-public abstract class EventHandler {
+public abstract class EventHandler implements Configured {
     protected Set<String> failedGuilds = new HashSet<>();
     protected Set<EventInteractive> eventInteractives = new HashSet<>();
 

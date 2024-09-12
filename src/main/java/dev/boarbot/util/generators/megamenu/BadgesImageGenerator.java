@@ -18,7 +18,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 public class BadgesImageGenerator extends MegaMenuGenerator {
-    private static final int[] ORIGIN = {0, 0};
     private static final int[] LEFT_POS = {484, 762};
     private static final int VALUE_Y_OFFSET = 78;
     private static final int[] RARITY_POS = {1431, 403};
@@ -33,16 +32,16 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getBadgeUnderlay();
+        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getBadgeUnderlay();
 
-        int mediumFont = this.nums.getFontMedium();
-        int smallestFont = this.nums.getFontSmallest();
+        int mediumFont = NUMS.getFontMedium();
+        int smallestFont = NUMS.getFontSmallest();
 
-        BadgeItemConfig badge = this.itemConfig.getBadges().get(this.badges.get(this.page).badgeID());
+        BadgeItemConfig badge = BADGES.get(this.badges.get(this.page).badgeID());
         int badgeTier = this.badges.get(this.page).badgeTier();
         long badgeObtained = this.badges.get(this.page).obtainedTimestamp();
 
-        String badgeFile = this.pathConfig.getBadges() + badge.getFiles()[badgeTier];
+        String badgeFile = PATHS.getBadges() + badge.getFiles()[badgeTier];
         String badgeDescription = badge.getDescriptions()[badgeTier];
 
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
@@ -50,29 +49,29 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
 
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
 
-        this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, this.colorConfig.get("font"), mediumFont);
+        this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), mediumFont);
 
         String obtainedStr = Instant.ofEpochMilli(badgeObtained)
             .atOffset(ZoneOffset.UTC)
             .format(TimeUtil.getDateFormatter());
         int[] obtainedPos = {LEFT_POS[0], LEFT_POS[1] + VALUE_Y_OFFSET};
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getBadgeObtainedLabel(), LEFT_POS);
+        TextUtil.drawLabel(this.textDrawer, STRS.getBadgeObtainedLabel(), LEFT_POS);
         TextUtil.drawValue(this.textDrawer, obtainedStr, obtainedPos);
 
         this.textDrawer.setText("BADGE");
         this.textDrawer.setPos(RARITY_POS);
         this.textDrawer.setFontSize(mediumFont);
-        this.textDrawer.setColorVal(this.colorConfig.get("badge"));
+        this.textDrawer.setColorVal(COLORS.get("badge"));
         this.textDrawer.setWidth(RIGHT_WIDTH);
         this.textDrawer.drawText();
 
         this.textDrawer.setText(badge.getNames()[badgeTier]);
         this.textDrawer.setPos(NAME_POS);
-        this.textDrawer.setColorVal(this.colorConfig.get("font"));
+        this.textDrawer.setColorVal(COLORS.get("font"));
         this.textDrawer.drawText();
 
-        GraphicsUtil.drawImage(g2d, badgeFile, BADGE_POS, this.nums.getMediumBigBoarSize());
+        GraphicsUtil.drawImage(g2d, badgeFile, BADGE_POS, NUMS.getMediumBigBoarSize());
 
         this.textDrawer.setText(badgeDescription);
         this.textDrawer.setPos(DESCRIPTION_POS);

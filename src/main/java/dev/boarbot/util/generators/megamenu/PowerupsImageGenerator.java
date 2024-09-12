@@ -1,7 +1,5 @@
 package dev.boarbot.util.generators.megamenu;
 
-import dev.boarbot.bot.config.RarityConfig;
-import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.entities.boaruser.data.PowerupsData;
@@ -15,10 +13,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 
 public class PowerupsImageGenerator extends MegaMenuGenerator {
-    private static final int[] ORIGIN = {0, 0};
     private static final int LEFT_START_X = 480;
     private static final int LEFT_START_Y = 484;
     private static final int RIGHT_TEXT_X = 1393;
@@ -45,77 +41,73 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        Map<String, PowerupItemConfig> pows = this.itemConfig.getPowerups();
-        Map<String, RarityConfig> rarityConfig = this.config.getRarityConfigs();
-        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getMegaMenuBase();
-        String anomalousUnderlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getPowAnomUnderlay();
-        String cellPath = this.pathConfig.getMegaMenuAssets();
+        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getMegaMenuBase();
+        String anomalousUnderlayPath = PATHS.getMegaMenuAssets() + PATHS.getPowAnomUnderlay();
+        String cellPath = PATHS.getMegaMenuAssets();
 
         int numTransmute = this.powData.powAmts().get("transmute") == null
             ? 0
             : this.powData.powAmts().get("transmute");
-        String cellValueStr = this.strConfig.getPowCellAmtLabel();
+        String cellValueStr = STRS.getPowCellAmtLabel();
         String transmuteRarityKey = null;
 
-        if (numTransmute == rarityConfig.get("common").getChargesNeeded()) {
-            cellPath += this.pathConfig.getPowCellCommon();
+        if (numTransmute == RARITIES.get("common").getChargesNeeded()) {
+            cellPath += PATHS.getPowCellCommon();
             transmuteRarityKey = "common";
-        } else if (numTransmute == rarityConfig.get("uncommon").getChargesNeeded()) {
-            cellPath += this.pathConfig.getPowCellUncommon();
+        } else if (numTransmute == RARITIES.get("uncommon").getChargesNeeded()) {
+            cellPath += PATHS.getPowCellUncommon();
             transmuteRarityKey = "uncommon";
-        } else if (numTransmute == rarityConfig.get("rare").getChargesNeeded()) {
-            cellPath += this.pathConfig.getPowCellRare();
+        } else if (numTransmute == RARITIES.get("rare").getChargesNeeded()) {
+            cellPath += PATHS.getPowCellRare();
             transmuteRarityKey = "rare";
-        } else if (numTransmute == rarityConfig.get("epic").getChargesNeeded()) {
-            cellPath += this.pathConfig.getPowCellEpic();
+        } else if (numTransmute == RARITIES.get("epic").getChargesNeeded()) {
+            cellPath += PATHS.getPowCellEpic();
             transmuteRarityKey = "epic";
-        } else if (numTransmute == rarityConfig.get("legendary").getChargesNeeded()) {
-            cellPath += this.pathConfig.getPowCellLegendary();
+        } else if (numTransmute == RARITIES.get("legendary").getChargesNeeded()) {
+            cellPath += PATHS.getPowCellLegendary();
             transmuteRarityKey = "legendary";
-        } else if (numTransmute == rarityConfig.get("mythic").getChargesNeeded()) {
-            cellPath += this.pathConfig.getPowCellMythic();
+        } else if (numTransmute == RARITIES.get("mythic").getChargesNeeded()) {
+            cellPath += PATHS.getPowCellMythic();
             transmuteRarityKey = "mythic";
-        } else if (numTransmute == rarityConfig.get("divine").getChargesNeeded()) {
-            cellPath += this.pathConfig.getPowCellDivine();
+        } else if (numTransmute == RARITIES.get("divine").getChargesNeeded()) {
+            cellPath += PATHS.getPowCellDivine();
             transmuteRarityKey = "divine";
-        } else if (numTransmute > rarityConfig.get("divine").getChargesNeeded()) {
-            cellPath += this.pathConfig.getPowCellEntropic();
-            cellValueStr = this.strConfig.getPowCellErrorLabel();
+        } else if (numTransmute > RARITIES.get("divine").getChargesNeeded()) {
+            cellPath += PATHS.getPowCellEntropic();
+            cellValueStr = STRS.getPowCellErrorLabel();
         } else {
-            cellPath += this.pathConfig.getPowCellNone();
-            cellValueStr = this.strConfig.getPowCellEmptyLabel();
+            cellPath += PATHS.getPowCellNone();
+            cellValueStr = STRS.getPowCellEmptyLabel();
         }
 
         if (transmuteRarityKey != null) {
             cellValueStr = cellValueStr.formatted(
                 transmuteRarityKey,
-                rarityConfig.get(transmuteRarityKey).getName(),
+                RARITIES.get(transmuteRarityKey).getName(),
                 numTransmute,
-                rarityConfig.get("divine").getChargesNeeded()
+                RARITIES.get("divine").getChargesNeeded()
             );
         }
 
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        if (numTransmute <= rarityConfig.get("divine").getChargesNeeded()) {
+        if (numTransmute <= RARITIES.get("divine").getChargesNeeded()) {
             GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
         } else {
             GraphicsUtil.drawImage(g2d, anomalousUnderlayPath, ORIGIN, IMAGE_SIZE);
         }
 
-        if (numTransmute <= rarityConfig.get("divine").getChargesNeeded()) {
+        if (numTransmute <= RARITIES.get("divine").getChargesNeeded()) {
             GraphicsUtil.drawImage(g2d, cellPath, CELL_POS, CELL_SIZE);
         }
 
-        this.textDrawer = new TextDrawer(
-            g2d, "", ORIGIN, Align.CENTER, this.colorConfig.get("font"), this.nums.getFontMedium()
-        );
+        this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), NUMS.getFontMedium());
 
         int[] blessingsLabelPos = {LEFT_START_X, LEFT_START_Y};
         String blessHex = TextUtil.getBlessHex(this.powData.blessings());
         String blessingsStr = this.powData.blessings() > 1000
-            ? "%s %,d".formatted(this.strConfig.getBlessingsSymbol(), this.powData.blessings())
+            ? "%s %,d".formatted(STRS.getBlessingsSymbol(), this.powData.blessings())
             : "%,d".formatted(this.powData.blessings());
         int[] blessingsPos = {LEFT_START_X, blessingsLabelPos[1] + VALUE_Y_OFFSET};
 
@@ -140,24 +132,24 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
         int[] cellLabelPos = {RIGHT_TEXT_X, RIGHT_LABEL_Y};
         int[] cellValuePos = {RIGHT_TEXT_X, RIGHT_VALUE_Y};
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getBlessingsPluralName(), blessingsLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getBlessingsPluralName(), blessingsLabelPos);
         TextUtil.drawValue(this.textDrawer, blessingsStr, blessingsPos, false, blessHex);
 
-        TextUtil.drawLabel(this.textDrawer, pows.get("miracle").getPluralName(), miraclesLabelPos);
+        TextUtil.drawLabel(this.textDrawer, POWS.get("miracle").getPluralName(), miraclesLabelPos);
         TextUtil.drawValue(this.textDrawer, miraclesStr, miraclesPos);
 
-        TextUtil.drawLabel(this.textDrawer, pows.get("clone").getPluralName(), cloneLabelPos);
+        TextUtil.drawLabel(this.textDrawer, POWS.get("clone").getPluralName(), cloneLabelPos);
         TextUtil.drawValue(this.textDrawer, cloneStr, clonePos);
 
-        TextUtil.drawLabel(this.textDrawer, pows.get("gift").getPluralName(), giftsLabelPos);
+        TextUtil.drawLabel(this.textDrawer, POWS.get("gift").getPluralName(), giftsLabelPos);
         TextUtil.drawValue(this.textDrawer, giftsStr, giftsPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getPowCellLabel(), cellLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getPowCellLabel(), cellLabelPos);
         TextUtil.drawLabel(this.textDrawer, cellValueStr, cellValuePos);
 
-        if (numTransmute > rarityConfig.get("divine").getChargesNeeded()) {
-            String cellDriftStr = this.strConfig.getPowCellDriftLabel()
-                .formatted(numTransmute - rarityConfig.get("divine").getChargesNeeded());
+        if (numTransmute > RARITIES.get("divine").getChargesNeeded()) {
+            String cellDriftStr = STRS.getPowCellDriftLabel()
+                .formatted(numTransmute - RARITIES.get("divine").getChargesNeeded());
             int[] cellDriftPos = {RIGHT_TEXT_X, RIGHT_DRIFT_Y};
 
             TextUtil.drawLabel(this.textDrawer, cellDriftStr, cellDriftPos);

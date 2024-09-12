@@ -1,7 +1,6 @@
 package dev.boarbot.interactives.boar.megamenu;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.components.SelectOptionConfig;
@@ -10,15 +9,14 @@ import dev.boarbot.util.interactive.InteractiveUtil;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
 
 import java.util.*;
 
-class MegaMenuComponentsGetter {
-    private final static BotConfig config = BoarBotApp.getBot().getConfig();
-
+class MegaMenuComponentsGetter implements Configured {
     private final MegaMenuInteractive interactive;
 
     private List<SelectOption> navOptions = new ArrayList<>();
@@ -27,7 +25,7 @@ class MegaMenuComponentsGetter {
     private List<SelectOption> interactOptions = new ArrayList<>();
     private List<SelectOption> powOptions = new ArrayList<>();
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = config.getComponentConfig().getMegaMenu();
+    private final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getMegaMenu();
 
     public MegaMenuComponentsGetter(MegaMenuInteractive interactive) {
         this.interactive = interactive;
@@ -99,6 +97,8 @@ class MegaMenuComponentsGetter {
         }
 
         Button interactBtn = null;
+        Button filterBtn = ((Button) filterSortRow.getFirst());
+        Button sortBtn = ((Button) filterSortRow.get(1));
 
         if (interactRow != null) {
             interactBtn = ((Button) interactRow.get(1)).asDisabled();
@@ -110,17 +110,24 @@ class MegaMenuComponentsGetter {
             interactBtn = interactBtn.withDisabled(false);
         }
 
-        if (interactRow != null) {
-            interactRow.set(1, interactBtn);
-        }
-
         actionRows.add(nav[0]);
         actionRows.add(nav[1]);
 
         if (interactRow != null) {
+            interactRow.set(1, interactBtn);
             actionRows.add(ActionRow.of(interactRow));
         }
 
+        if (this.interactive.getFilterBits() != 1) {
+            filterBtn = filterBtn.withStyle(ButtonStyle.SUCCESS);
+        }
+
+        if (this.interactive.getSortVal() != SortType.RARITY_D) {
+            sortBtn = sortBtn.withStyle(ButtonStyle.SUCCESS);
+        }
+
+        filterSortRow.set(0, filterBtn);
+        filterSortRow.set(1, sortBtn);
         actionRows.add(ActionRow.of(filterSortRow));
 
         if (selectRow != null) {
@@ -138,8 +145,8 @@ class MegaMenuComponentsGetter {
             this.COMPONENTS.get("backBtn")
         );
 
-        String rarityEmoji = config.getRarityConfigs().get(this.interactive.getCurRarityKey()).getEmoji();
-        String boarName = config.getItemConfig().getBoars().get(this.interactive.getCurBoarEntry().getKey()).getName();
+        String rarityEmoji = RARITIES.get(this.interactive.getCurRarityKey()).getEmoji();
+        String boarName = BOARS.get(this.interactive.getCurBoarEntry().getKey()).getName();
 
         List<SelectOption> selectOptions = new ArrayList<>(this.navOptions);
         selectOptions.add(
@@ -271,7 +278,7 @@ class MegaMenuComponentsGetter {
             selectOptions.set(0, selectOptions.getFirst().withDescription("Unfavorite this boar"));
         }
 
-        RarityConfig curRarity = config.getRarityConfigs().get(this.interactive.getCurRarityKey());
+        RarityConfig curRarity = RARITIES.get(this.interactive.getCurRarityKey());
 
         boolean cloneable = curRarity.getAvgClones() != 0 && this.interactive.getNumClone() > 0;
         boolean transmutable = curRarity.getChargesNeeded() != 0 &&
@@ -373,7 +380,6 @@ class MegaMenuComponentsGetter {
         switch (selectMenu.getCustom_id()) {
             case "VIEW_SELECT" -> this.navOptions = options;
             case "FILTER_SELECT" ->  {
-                Map<String, RarityConfig> rarities = config.getRarityConfigs();
                 Set<String> ownedRarities = new HashSet<>();
 
                 for (BoarInfo boarInfo : this.interactive.getOwnedBoars().values()) {
@@ -381,7 +387,7 @@ class MegaMenuComponentsGetter {
                 }
 
                 int rarityBits = 4;
-                for (Map.Entry<String, RarityConfig> rarityEntry : rarities.entrySet()) {
+                for (Map.Entry<String, RarityConfig> rarityEntry : RARITIES.entrySet()) {
                     String rarityKey = rarityEntry.getKey();
                     RarityConfig rarity = rarityEntry.getValue();
 

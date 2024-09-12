@@ -1,8 +1,6 @@
 package dev.boarbot.util.generators;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.bot.config.PathConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.python.PythonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +14,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 @Slf4j
-public final class ItemImageGrouper {
+public final class ItemImageGrouper implements Configured {
     private static final int[] IMAGE_SIZE = ItemImageGenerator.IMAGE_SIZE;
     private static final int HORIZ_PADDING = 135;
     private static final int SHADOW_WIDTH = 35;
@@ -24,10 +22,6 @@ public final class ItemImageGrouper {
     public static FileUpload groupItems(
         List<ItemImageGenerator> itemGens, int page
     ) throws IOException, URISyntaxException {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-
-        PathConfig pathConfig = config.getPathConfig();
-
         byte[] leftImageBytes = null;
         byte[] middleImageBytes = itemGens.get(page).generate().getBytes();
         byte[] rightImageBytes = null;
@@ -67,7 +61,7 @@ public final class ItemImageGrouper {
             int[] shadowSize = {SHADOW_WIDTH, smallImageSize[1]};
 
             GraphicsUtil.drawImage(
-                g2d, pathConfig.getItemAssets() + pathConfig.getItemShadowLeft(), shadowPos, shadowSize
+                g2d, PATHS.getItemAssets() + PATHS.getItemShadowLeft(), shadowPos, shadowSize
             );
         }
 
@@ -88,7 +82,7 @@ public final class ItemImageGrouper {
             int[] shadowSize = {SHADOW_WIDTH, smallImageSize[1]};
 
             GraphicsUtil.drawImage(
-                g2d, pathConfig.getItemAssets() + pathConfig.getItemShadowRight(), shadowPos, shadowSize
+                g2d, PATHS.getItemAssets() + PATHS.getItemShadowRight(), shadowPos, shadowSize
             );
         }
 
@@ -99,7 +93,7 @@ public final class ItemImageGrouper {
 
             Process pythonProcess = new ProcessBuilder(
                 "python",
-                config.getPathConfig().getGroupScript(),
+                PATHS.getGroupScript(),
                 Integer.toString(resultByteArray.length),
                 Integer.toString(middleImageBytes.length)
             ).start();

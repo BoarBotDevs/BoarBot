@@ -63,6 +63,7 @@ public class PathConfig {
     private String circleMask = "";
     private String giftBucks = "";
     private String giftImage = "";
+    private String eventUnderlay = "";
 
     // Python scripts
 

@@ -1,12 +1,12 @@
 package dev.boarbot.entities.boaruser;
 
-import dev.boarbot.BoarBotApp;
+import dev.boarbot.api.util.Configured;
 import lombok.Getter;
 
 import java.util.*;
 
 @Getter
-public class BoarInfo implements Comparable<BoarInfo> {
+public class BoarInfo implements Comparable<BoarInfo>, Configured {
     private int amount;
     private final String rarityID;
     private long firstObtained = -1;
@@ -17,8 +17,8 @@ public class BoarInfo implements Comparable<BoarInfo> {
     private final static Map<String, Integer> rarityMap = new HashMap<>();
 
     static {
-        int i = BoarBotApp.getBot().getConfig().getRarityConfigs().keySet().size()-1;
-        for (String rarityID : BoarBotApp.getBot().getConfig().getRarityConfigs().keySet()) {
+        int i = RARITIES.keySet().size()-1;
+        for (String rarityID : RARITIES.keySet()) {
             BoarInfo.rarityMap.put(rarityID, i);
             i--;
         }

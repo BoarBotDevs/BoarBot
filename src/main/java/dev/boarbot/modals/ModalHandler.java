@@ -1,7 +1,7 @@
 package dev.boarbot.modals;
 
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.util.modal.ModalUtil;
 import dev.boarbot.util.time.TimeUtil;
@@ -15,9 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public class ModalHandler {
-    private final BotConfig config = BoarBotApp.getBot().getConfig();
-
+public class ModalHandler implements Configured {
     private final ModalInteractive receiver;
 
     private final ComponentInteraction interaction;
@@ -43,9 +41,7 @@ public class ModalHandler {
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> this.delayStop(
-            this.config.getNumberConfig().getInteractiveIdle()
-        ));
+        executor.submit(() -> this.delayStop(NUMS.getInteractiveIdle()));
         executor.shutdown();
     }
 

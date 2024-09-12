@@ -1,9 +1,7 @@
 package dev.boarbot.interactives;
 
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
-import dev.boarbot.bot.config.NumberConfig;
-import dev.boarbot.bot.config.StringConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
@@ -19,11 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public abstract class Interactive {
-    protected static final BotConfig config = BoarBotApp.getBot().getConfig();
-    protected static final StringConfig strConfig = config.getStringConfig();
-    protected static final NumberConfig nums = config.getNumberConfig();
-
+public abstract class Interactive implements Configured {
     protected static final Map<String, Interactive> interactives = BoarBotApp.getBot().getInteractives();
 
     @Getter protected final String interactiveID;
@@ -36,7 +30,7 @@ public abstract class Interactive {
     protected boolean isStopped = false;
 
     protected Interactive(String interactiveID, String guildID) {
-        this(interactiveID, guildID, nums.getInteractiveIdle(), nums.getInteractiveHardStop());
+        this(interactiveID, guildID, NUMS.getInteractiveIdle(), NUMS.getInteractiveHardStop());
     }
 
     protected Interactive(String interactiveID, String guildID, long waitTime, long hardStop) {

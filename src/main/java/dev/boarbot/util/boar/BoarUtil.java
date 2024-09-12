@@ -1,21 +1,17 @@
 package dev.boarbot.util.boar;
 
-import dev.boarbot.BoarBotApp;
-import dev.boarbot.bot.config.BotConfig;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
-import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class BoarUtil {
+public final class BoarUtil implements Configured {
     public static String findRarityKey(String boarID) {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-
-        for (String rarityKey : config.getRarityConfigs().keySet()) {
-            boolean boarNotExist = !Arrays.asList(config.getRarityConfigs().get(rarityKey).getBoars()).contains(boarID);
+        for (String rarityKey : RARITIES.keySet()) {
+            boolean boarNotExist = !Arrays.asList(RARITIES.get(rarityKey).getBoars()).contains(boarID);
 
             if (boarNotExist) {
                 continue;
@@ -28,8 +24,7 @@ public final class BoarUtil {
     }
 
     public static String getNextRarityKey(String rarityKey) {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-        Iterator<String> iterator = config.getRarityConfigs().keySet().iterator();
+        Iterator<String> iterator = RARITIES.keySet().iterator();
 
         while (!iterator.next().equals(rarityKey));
 
@@ -37,9 +32,7 @@ public final class BoarUtil {
     }
 
     public static String getHigherRarity(String rarity1, String rarity2) {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-
-        for (String rarityID : config.getRarityConfigs().keySet()) {
+        for (String rarityID : RARITIES.keySet()) {
             if (rarity1 == null || rarityID.equals(rarity1)) {
                 return rarity2;
             }
@@ -53,8 +46,6 @@ public final class BoarUtil {
     }
 
     public static List<String> getRandBoarIDs(long blessings, boolean isSkyblockGuild) {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-
         List<String> boarsObtained = new ArrayList<>();
 
         Map<String, Double> weights = new HashMap<>();
@@ -64,14 +55,13 @@ public final class BoarUtil {
         double newMaxWeight = 0;
         String newMaxWeightKey = "";
 
-        Map<String, RarityConfig> rarities = config.getRarityConfigs();
-        int rarityIncreaseConst = config.getNumberConfig().getRarityIncreaseConst();
+        int rarityIncreaseConst = NUMS.getRarityIncreaseConst();
 
-        for (String rarityKey : rarities.keySet()) {
-            double weight = rarities.get(rarityKey).getWeight();
+        for (String rarityKey : RARITIES.keySet()) {
+            double weight = RARITIES.get(rarityKey).getWeight();
 
             maxWeight = Math.max(maxWeight, weight);
-            weights.put(rarityKey, rarities.get(rarityKey).getWeight());
+            weights.put(rarityKey, RARITIES.get(rarityKey).getWeight());
         }
 
         for (String weightKey : weights.keySet()) {
@@ -162,14 +152,13 @@ public final class BoarUtil {
     }
 
     public static String findValid(String rarityKey, boolean isSkyblockGuild) {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-        RarityConfig rarityConfig = config.getRarityConfigs().get(rarityKey);
+        RarityConfig rarityConfig = RARITIES.get(rarityKey);
 
         double randBoar = Math.random();
         List<String> validBoars = new ArrayList<>();
 
         for (String boarID : rarityConfig.getBoars()) {
-            BoarItemConfig boarConfig = config.getItemConfig().getBoars().get(boarID);
+            BoarItemConfig boarConfig = BOARS.get(boarID);
             boolean blacklisted = boarConfig.isBlacklisted();
             boolean isSecret = boarConfig.isSecret();
             boolean isSkyblockBoar = boarConfig.isSB();
@@ -186,20 +175,5 @@ public final class BoarUtil {
         }
 
         return validBoars.get((int) (randBoar * validBoars.size()));
-    }
-
-    public static String getPromptStr(String promptID) {
-        BotConfig config = BoarBotApp.getBot().getConfig();
-        Map<String, PromptConfig> promptConfig = config.getPromptConfig();
-
-        for (PromptConfig promptType : promptConfig.values()) {
-            for (String prompt : promptType.getPrompts().keySet()) {
-                if (promptID.equals(prompt)) {
-                    return "%s - %s".formatted(promptType.getName(), promptType.getPrompts().get(prompt).getName());
-                }
-            }
-        }
-
-        return config.getStringConfig().getUnavailable();
     }
 }

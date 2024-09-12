@@ -22,7 +22,6 @@ import java.util.List;
 public class ProfileImageGenerator extends MegaMenuGenerator {
     private final int maxUniques;
 
-    private static final int[] ORIGIN = {0, 0};
     private static final int LEFT_START_X = 70;
     private static final int LEFT_START_Y = 350;
     private static final int VALUE_Y_OFFSET = 78;
@@ -55,9 +54,9 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         this.favoriteID = favoriteID;
 
         int maxUniques = 0;
-        for (String boarID : this.itemConfig.getBoars().keySet()) {
-            RarityConfig boarRarity = this.config.getRarityConfigs().get(BoarUtil.findRarityKey(boarID));
-            BoarItemConfig boar = this.itemConfig.getBoars().get(boarID);
+        for (String boarID : BOARS.keySet()) {
+            RarityConfig boarRarity = RARITIES.get(BoarUtil.findRarityKey(boarID));
+            BoarItemConfig boar = BOARS.get(boarID);
 
             boolean countableUnique = !boar.isBlacklisted() && boarRarity.isResearcherNeed();
             boolean skyblockBlocked = boar.isSB() && !isSkyblockGuild && this.profileData.numSkyblock() == 0;
@@ -75,8 +74,8 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        int mediumFont = this.nums.getFontMedium();
-        int bigFont = this.nums.getFontBig();
+        int mediumFont = NUMS.getFontMedium();
+        int bigFont = NUMS.getFontBig();
 
         int[] bucksLabelPos = {LEFT_START_X, LEFT_START_Y};
         String bucksStr = "<>bucks<>$%,d".formatted(this.profileData.boarBucks());
@@ -94,8 +93,8 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         FontMetrics fm = g2d.getFontMetrics();
 
         int maxStrLen = Math.max(
-            fm.stringWidth(this.strConfig.getProfileUniquesLabel()),
-            fm.stringWidth(this.strConfig.getProfileTotalLabel())
+            fm.stringWidth(STRS.getProfileUniquesLabel()),
+            fm.stringWidth(STRS.getProfileTotalLabel())
         );
 
         g2d.setFont(BoarBotApp.getBot().getFont().deriveFont((float) bigFont));
@@ -125,78 +124,78 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
 
         String blessHex = TextUtil.getBlessHex(this.profileData.blessings());
         String blessStr = "%,d<>silver<>/<>blessing2<>%,d".formatted(
-            this.profileData.blessings(), this.nums.getMaxStreakBless() + this.nums.getMaxQuestBless() +
-                this.nums.getMaxUniqueBless() + this.nums.getMaxOtherBless()
+            this.profileData.blessings(), NUMS.getMaxStreakBless() + NUMS.getMaxQuestBless() +
+                NUMS.getMaxUniqueBless() + NUMS.getMaxOtherBless()
         );
 
         if (this.profileData.blessings() > 1000) {
-            blessStr = this.strConfig.getBlessingsSymbol() + " " + blessStr;
+            blessStr = STRS.getBlessingsSymbol() + " " + blessStr;
         }
 
         int[] blessPos = {RIGHT_START_X, blessLabelPos[1] + VALUE_Y_OFFSET};
 
-        String streakBlessLabel = this.strConfig.getBlessCategory1() + " " + this.strConfig.getBlessingsNameVeryShort();
+        String streakBlessLabel = STRS.getBlessCategory1() + " " + STRS.getBlessingsNameVeryShort();
         int[] streakBlessLabelPos = {RIGHT_START_X, blessLabelPos[1] + LABEL_Y_SPACING};
-        String streakBlessStr = TextUtil.getFractionStr(this.profileData.streakBless(), this.nums.getMaxStreakBless());
+        String streakBlessStr = TextUtil.getFractionStr(this.profileData.streakBless(), NUMS.getMaxStreakBless());
         int[] streakBlessPos = {RIGHT_START_X, streakBlessLabelPos[1] + VALUE_Y_OFFSET};
 
-        String questBlessLabel = this.strConfig.getBlessCategory2() + " " + this.strConfig.getBlessingsNameVeryShort();
+        String questBlessLabel = STRS.getBlessCategory2() + " " + STRS.getBlessingsNameVeryShort();
         int[] questBlessLabelPos = {RIGHT_START_X, streakBlessLabelPos[1] + LABEL_Y_SPACING};
-        String questBlessStr = TextUtil.getFractionStr(this.profileData.questBless(), this.nums.getMaxQuestBless());
+        String questBlessStr = TextUtil.getFractionStr(this.profileData.questBless(), NUMS.getMaxQuestBless());
         int[] questBlessPos = {RIGHT_START_X, questBlessLabelPos[1] + VALUE_Y_OFFSET};
 
-        String uniqueBlessLabel = this.strConfig.getBlessCategory3() + " " + this.strConfig.getBlessingsNameVeryShort();
+        String uniqueBlessLabel = STRS.getBlessCategory3() + " " + STRS.getBlessingsNameVeryShort();
         int[] uniqueBlessLabelPos = {RIGHT_RIGHT_START_X, RIGHT_RIGHT_START_Y};
-        String uniqueBlessStr = TextUtil.getFractionStr(this.profileData.uniqueBless(), this.nums.getMaxUniqueBless());
+        String uniqueBlessStr = TextUtil.getFractionStr(this.profileData.uniqueBless(), NUMS.getMaxUniqueBless());
         int[] uniqueBlessPos = {RIGHT_RIGHT_START_X, uniqueBlessLabelPos[1] + VALUE_Y_OFFSET};
 
-        String otherBlessLabel = this.strConfig.getBlessCategory4() + " " + this.strConfig.getBlessingsNameVeryShort();
+        String otherBlessLabel = STRS.getBlessCategory4() + " " + STRS.getBlessingsNameVeryShort();
         int[] otherBlessLabelPos = {RIGHT_RIGHT_START_X, uniqueBlessLabelPos[1] + LABEL_Y_SPACING};
-        String otherBlessStr = TextUtil.getFractionStr(this.profileData.otherBless(), this.nums.getMaxOtherBless());
+        String otherBlessStr = TextUtil.getFractionStr(this.profileData.otherBless(), NUMS.getMaxOtherBless());
         int[] otherBlessPos = {otherBlessLabelPos[0], otherBlessLabelPos[1] + VALUE_Y_OFFSET};
 
         String recentRarityKey = this.profileData.lastBoarID() == null
             ? ""
             : BoarUtil.findRarityKey(this.profileData.lastBoarID());
         String recentStr = this.profileData.lastBoarID() == null
-            ? this.strConfig.getProfileRecentLabel()
-            : "<>%s<>%s".formatted(recentRarityKey, this.strConfig.getProfileRecentLabel());
+            ? STRS.getProfileRecentLabel()
+            : "<>%s<>%s".formatted(recentRarityKey, STRS.getProfileRecentLabel());
 
         String favoriteRarityKey = this.favoriteID == null
             ? ""
             : BoarUtil.findRarityKey(this.favoriteID);
         String favoriteStr = this.favoriteID == null
-            ? this.strConfig.getProfileFavLabel()
-            : "<>%s<>%s".formatted(favoriteRarityKey, this.strConfig.getProfileFavLabel());
+            ? STRS.getProfileFavLabel()
+            : "<>%s<>%s".formatted(favoriteRarityKey, STRS.getProfileFavLabel());
 
-        String underlayPath = this.pathConfig.getMegaMenuAssets() + this.pathConfig.getProfUnderlay();
+        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getProfUnderlay();
 
         GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
 
-        this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.LEFT, this.colorConfig.get("font"), mediumFont);
+        this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.LEFT, COLORS.get("font"), mediumFont);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getBucksPluralName(), bucksLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getBucksPluralName(), bucksLabelPos);
         TextUtil.drawValue(this.textDrawer, bucksStr, bucksPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileTotalLabel(), totalLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getProfileTotalLabel(), totalLabelPos);
         TextUtil.drawValue(this.textDrawer, totalBoarStr, totalPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileUniquesLabel(), uniquesLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getProfileUniquesLabel(), uniquesLabelPos);
         TextUtil.drawValue(this.textDrawer, uniqueBoarsStr, uniquesPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileDailiesLabel(), dailyLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getProfileDailiesLabel(), dailyLabelPos);
         TextUtil.drawValue(this.textDrawer, dailyStr, dailyPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileStreakLabel(), streakLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getProfileStreakLabel(), streakLabelPos);
         TextUtil.drawValue(this.textDrawer, streakStr, streakPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileNextDailyLabel(), BOTTOM_START_POS);
+        TextUtil.drawLabel(this.textDrawer, STRS.getProfileNextDailyLabel(), BOTTOM_START_POS);
         TextUtil.drawValue(this.textDrawer, nextDailyStr, nextDailyPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getProfileQuestResetLabel(), nextQuestLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getProfileQuestResetLabel(), nextQuestLabelPos);
         TextUtil.drawValue(this.textDrawer, nextQuestStr, nextQuestPos);
 
-        TextUtil.drawLabel(this.textDrawer, this.strConfig.getBlessingsPluralName(), blessLabelPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getBlessingsPluralName(), blessLabelPos);
         TextUtil.drawValue(this.textDrawer, blessStr, blessPos, false, blessHex);
 
         TextUtil.drawLabel(this.textDrawer, streakBlessLabel, streakBlessLabelPos);
@@ -250,7 +249,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
         String nextDailyStr;
 
         if (dailyReady) {
-            nextDailyStr = "<>green<>" + this.strConfig.getProfileDailyReady();
+            nextDailyStr = "<>green<>" + STRS.getProfileDailyReady();
             nextDailyStr += showTime
                 ? " <>silver<>(%s%s<>silver<>)".formatted(
                     distanceColor, TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), true)
