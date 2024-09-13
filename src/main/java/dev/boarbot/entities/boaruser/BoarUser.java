@@ -1,5 +1,6 @@
 package dev.boarbot.entities.boaruser;
 
+import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.data.*;
 import dev.boarbot.interactives.boar.megamenu.SortType;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class BoarUser implements Configured {
-    @Getter private final User user;
+    private User user;
     @Getter private final String userID;
 
     private boolean isFirstDaily = false;
@@ -28,6 +29,18 @@ public class BoarUser implements Configured {
         this.user = user;
         this.userID = user.getId();
         this.incRefs();
+    }
+
+    public BoarUser(String userID) throws SQLException {
+        this.userID = userID;
+        this.incRefs();
+    }
+
+    public User getUser() {
+        if (this.user == null) {
+            this.user = BoarBotApp.getBot().getJDA().retrieveUserById(this.userID).complete();
+        }
+        return this.user;
     }
 
     private void addUser(Connection connection) throws SQLException {
@@ -532,11 +545,11 @@ public class BoarUser implements Configured {
                 powerup_wins,
                 powerup_perfects,
                 powerup_fastest_time,
-                (
+                COALESCE((
                     SELECT SUM(average_placement) / GREATEST(COUNT(average_placement), 1)
                     FROM prompt_stats
                     WHERE user_id = ?
-                ) AS powerup_average_placement,
+                ), -1) AS powerup_average_placement,
                 miracles_active,
                 miracle_rolls,
                 highest_miracles_active,
@@ -1230,6 +1243,97 @@ public class BoarUser implements Configured {
         }
 
         return badgeIDs;
+    }
+
+    public void applyPowEventWin(Connection connection, String powerupID, int powAmt, long time) throws SQLException {
+        this.addUser(connection);
+
+        String query = """
+            UPDATE users
+            SET
+                powerup_attempts = powerup_attempts + 1,
+                powerup_wins = powerup_wins + 1,
+                powerup_fastest_time = LEAST(powerup_fastest_time, ?)
+            WHERE user_id = ?;
+        """;
+
+        this.addPowerup(connection, powerupID, powAmt);
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setLong(1, time);
+            statement.setString(2, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public void applyPowEventFail(Connection connection) throws SQLException {
+        this.addUser(connection);
+
+        String query = """
+            UPDATE users
+            SET powerup_attempts = powerup_attempts + 1
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public void addPerfectPowerup(Connection connection) throws SQLException {
+        this.addUser(connection);
+
+        String query = """
+            UPDATE users
+            SET powerup_perfects = powerup_perfects + 1
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+            statement.executeUpdate();
+        }
+    }
+
+    public void addPrompt(Connection connection, String promptID, double placement) throws SQLException {
+        this.addUser(connection);
+        this.insertPromptIfNotExist(connection, promptID);
+
+        String updateQuery = """
+            UPDATE prompt_stats
+            SET
+                average_placement = ((average_placement * wins) + ?) / (wins + 1),
+                wins = wins + 1
+            WHERE user_id = ? AND prompt_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setDouble(1, placement);
+            statement.setString(2, this.userID);
+            statement.setString(3, promptID);
+            statement.executeUpdate();
+        }
+    }
+
+    private void insertPromptIfNotExist(Connection connection, String promptID) throws SQLException {
+        String query = """
+            INSERT INTO prompt_stats (user_id, prompt_id)
+            SELECT ?, ?
+            WHERE NOT EXISTS (
+                SELECT unique_id
+                FROM prompt_stats
+                WHERE user_id = ? AND prompt_id = ?
+            );
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.userID);
+            statement.setString(2, promptID);
+            statement.setString(3, this.userID);
+            statement.setString(4, promptID);
+            statement.execute();
+        }
     }
 
     public synchronized void incRefs() throws SQLException {

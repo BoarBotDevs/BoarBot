@@ -120,7 +120,7 @@
       },
       "chocolate1": {
         "name": "Chocolate Boar",
-        "description": "What year was Chocolate Boar pulled off shelves?",
+        "description": "What year was <>uncommon<>Chocolate Boar<>font<> pulled off shelves?",
         "choices": [
           "1999",
           "1995",
@@ -130,7 +130,7 @@
       },
       "matrix1": {
         "name": "Matrix Boar",
-        "description": "What color pill does Matrix Boar keep taking?",
+        "description": "What color pill does <>uncommon<>Matrix Boar<>font<> keep taking?",
         "choices": [
           "Red",
           "Blue",
@@ -140,7 +140,7 @@
       },
       "sketch1": {
         "name": "Sketch Boar",
-        "description": "What should you NOT leave Sketch Boar by?",
+        "description": "What should you NOT leave <>uncommon<>Sketch Boar<>font<> by?",
         "choices": [
           "Printer",
           "Boartist",
@@ -150,7 +150,7 @@
       },
       "buff1": {
         "name": "Buff Boar",
-        "description": "What can Buff Boar crush with its bare hands?",
+        "description": "What can <>uncommon<>Buff Boar<>font<> crush with its bare hands?",
         "choices": [
           "Rocks",
           "Bricks",
@@ -160,7 +160,7 @@
       },
       "keyboard1": {
         "name": "KeyBOARd",
-        "description": "Where is KeyBOARd highly rated?",
+        "description": "Where is <>rare<>KeyBOARd<>font<> highly rated?",
         "choices": [
           "Boarmazon",
           "Amazboarn",
@@ -198,7 +198,7 @@
   },
   "clock": {
     "name": "Telling Time",
-    "description": "Click the clock that's set to %s!",
+    "description": "Click the clock that's set to <>silver<>%s<>font<>!",
     "prompts": {
       "one": {
         "name": "1:00",

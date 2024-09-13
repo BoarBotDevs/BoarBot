@@ -3,7 +3,6 @@ package dev.boarbot.util.generators;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.TextDrawer;
-import lombok.Setter;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,7 +13,7 @@ public class EmbedImageGenerator extends ImageGenerator {
 
     private String str;
     private String pureStr;
-    @Setter private String color;
+    private String color;
 
     private final Font font = BoarBotApp.getBot().getFont().deriveFont((float) NUMS.getFontBig());
 
@@ -28,9 +27,15 @@ public class EmbedImageGenerator extends ImageGenerator {
         this.color = color == null ? COLORS.get("font") : color;
     }
 
-    public void setStr(String str) {
+    public EmbedImageGenerator setStr(String str) {
         this.str = str;
         this.pureStr = str.replaceAll("<>(.*?)<>", "");
+        return this;
+    }
+
+    public EmbedImageGenerator setColor(String color) {
+        this.color = color;
+        return this;
     }
 
     @Override

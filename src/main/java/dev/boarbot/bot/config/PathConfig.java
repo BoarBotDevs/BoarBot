@@ -64,6 +64,7 @@ public class PathConfig {
     private String giftBucks = "";
     private String giftImage = "";
     private String eventUnderlay = "";
+    private String powIcon = "";
 
     // Python scripts
 

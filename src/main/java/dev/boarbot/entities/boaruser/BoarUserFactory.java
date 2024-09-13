@@ -24,7 +24,12 @@ public class BoarUserFactory {
             return boarUser;
         }
 
-        BoarUserFactory.boarUsers.put(user.getId(), new BoarUser(user));
+        if (user == null) {
+            BoarUserFactory.boarUsers.put(userID, new BoarUser(userID));
+        } else {
+            BoarUserFactory.boarUsers.put(userID, new BoarUser(user));
+        }
+
         return BoarUserFactory.boarUsers.get(userID);
     }
 

@@ -2,7 +2,6 @@ package dev.boarbot.util.generators.megamenu;
 
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
-import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.entities.boaruser.data.StatsData;
@@ -324,33 +323,33 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         int[] powPerfectPos = {LEFT_START_X, powPerfectLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] powFastLabelPos = {LEFT_START_X, powPerfectLabelPos[1] + LABEL_Y_SPACING};
-        String powFastStr = this.statsData.fastestPowerup() == 0
+        String powFastStr = this.statsData.fastestPowerup() == 120000
             ? STRS.getUnavailable()
             : "%,dms".formatted(this.statsData.fastestPowerup());
         int[] powFastPos = {LEFT_START_X, powFastLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] powAvgLabelPos = {RIGHT_START_X, START_Y};
-        String powAvgStr = this.statsData.avgPowerupPlacement() == 0
+        String powAvgStr = this.statsData.avgPowerupPlacement() == -1
             ? STRS.getUnavailable()
-            : "Top %,.2f%%".formatted(this.statsData.avgPowerupPlacement());
+            : "Top %,.2f%%".formatted(this.statsData.avgPowerupPlacement() * 100);
         int[] powAvgPos = {RIGHT_START_X, powAvgLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] powBestOneLabelPos = {RIGHT_START_X, powAvgLabelPos[1] + LABEL_Y_SPACING};
         String powBestOneStr = this.statsData.bestPrompts().isEmpty()
             ? STRS.getUnavailable()
-            : this.getPromptStr(this.statsData.bestPrompts().getFirst());
+            : BoarUtil.getPromptStr(this.statsData.bestPrompts().getFirst());
         int[] powBestOnePos = {RIGHT_START_X, powBestOneLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] powBestTwoLabelPos = {RIGHT_START_X, powBestOneLabelPos[1] + LABEL_Y_SPACING};
         String powBestTwoStr = this.statsData.bestPrompts().size() < 2
             ? STRS.getUnavailable()
-            : this.getPromptStr(this.statsData.bestPrompts().get(1));
+            : BoarUtil.getPromptStr(this.statsData.bestPrompts().get(1));
         int[] powBestTwoPos = {RIGHT_START_X, powBestTwoLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] powBestThreeLabelPos = {RIGHT_START_X, powBestTwoLabelPos[1] + LABEL_Y_SPACING};
         String powBestThreeStr = this.statsData.bestPrompts().size() < 3
             ? STRS.getUnavailable()
-            : this.getPromptStr(this.statsData.bestPrompts().get(2));
+            : BoarUtil.getPromptStr(this.statsData.bestPrompts().get(2));
         int[] powBestThreePos = {RIGHT_START_X, powBestThreeLabelPos[1] + VALUE_Y_OFFSET};
 
         TextUtil.drawLabel(this.textDrawer, STRS.getStatsPowAttemptsLabel(), powAttemptsLabelPos);
@@ -808,17 +807,5 @@ public class StatsImageGenerator extends MegaMenuGenerator {
 
         TextUtil.drawLabel(this.textDrawer, STRS.getStatsVeryHardQuestsLabel(), veryHardQuestsLabelPos);
         TextUtil.drawValue(this.textDrawer, veryHardQuestsStr, veryHardQuestsPos, true);
-    }
-
-    private String getPromptStr(String promptID) {
-        for (PromptConfig promptType : CONFIG.getPromptConfig().values()) {
-            for (String prompt : promptType.getPrompts().keySet()) {
-                if (promptID.equals(prompt)) {
-                    return "%s - %s".formatted(promptType.getName(), promptType.getPrompts().get(prompt).getName());
-                }
-            }
-        }
-
-        return STRS.getUnavailable();
     }
 }

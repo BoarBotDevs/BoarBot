@@ -12,13 +12,13 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
 public abstract class Interactive implements Configured {
-    protected static final Map<String, Interactive> interactives = BoarBotApp.getBot().getInteractives();
+    protected static final ConcurrentMap<String, Interactive> interactives = BoarBotApp.getBot().getInteractives();
 
     @Getter protected final String interactiveID;
     @Getter protected final String guildID;
@@ -59,7 +59,7 @@ public abstract class Interactive implements Configured {
     }
 
     protected String findDuplicateKey() {
-        for (String key : BoarBotApp.getBot().getInteractives().keySet()) {
+        for (String key : interactives.keySet()) {
             boolean isSameUser = this instanceof UserInteractive && key.endsWith(this.interactiveID.split(",")[1]);
             boolean isSameType = this.getClass().equals(interactives.get(key).getClass());
 

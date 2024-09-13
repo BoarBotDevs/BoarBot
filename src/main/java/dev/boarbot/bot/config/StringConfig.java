@@ -160,6 +160,23 @@ public class StringConfig {
     private String badgeBlocked = "";
     private String badgeObtainedLabel = "";
 
+    // Event strings
+
+    private String powEventLabel = "";
+    private String powEventEndLabel = "";
+    private String powEventReward = "";
+    private String powEventFastLabel = "";
+    private String powEventFastVal = "";
+    private String powEventAvgLabel = "";
+    private String powEventAvgVal = "";
+    private String powEventAvgPluralVal = "";
+    private String powEventPromptLabel = "";
+    private String powEventNobody = "";
+    private String powEventAttempted = "";
+    private String powEventSuccess = "";
+    private String powEventIncorrect = "";
+    private String powEventFail = "";
+
     // Notification strings
 
     private String notificationSuccess = "";

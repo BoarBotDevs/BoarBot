@@ -159,8 +159,8 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             }
         }
 
-        this.sendResponse();
         this.giftEnabledTimestamp = TimeUtil.getCurMilli();
+        this.sendResponse();
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {

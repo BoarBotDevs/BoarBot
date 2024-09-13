@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 public interface Bot {
     void create(BotType type);
@@ -25,6 +26,6 @@ public interface Bot {
     Map<String, byte[]> getByteCacheMap();
     Map<String, BufferedImage> getImageCacheMap();
     Map<String, Constructor<? extends Subcommand>> getSubcommands();
-    Map<String, Interactive> getInteractives();
+    ConcurrentMap<String, Interactive> getInteractives();
     Map<String, ModalHandler> getModalHandlers();
 }

@@ -17,12 +17,12 @@ public abstract class EventInteractive extends Interactive {
     private Message msg;
 
     protected EventInteractive(TextChannel channel) {
-        super(Long.toString(TimeUtil.getCurMilli()), channel.getGuild().getId());
+        super(channel.getId() + TimeUtil.getCurMilli(), channel.getGuild().getId());
         this.channel = channel;
     }
 
     protected EventInteractive(TextChannel channel, long waitTime, long hardTime) {
-        super(Long.toString(TimeUtil.getCurMilli()), channel.getGuild().getId(), waitTime, hardTime);
+        super(channel.getId() + TimeUtil.getCurMilli(), channel.getGuild().getId(), waitTime, hardTime);
         this.channel = channel;
     }
 

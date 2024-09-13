@@ -3,6 +3,7 @@ package dev.boarbot.util.boar;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
+import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.util.*;
@@ -175,5 +176,17 @@ public final class BoarUtil implements Configured {
         }
 
         return validBoars.get((int) (randBoar * validBoars.size()));
+    }
+
+    public static String getPromptStr(String promptID) {
+        for (PromptConfig promptType : CONFIG.getPromptConfig().values()) {
+            for (String prompt : promptType.getPrompts().keySet()) {
+                if (promptID.equals(prompt)) {
+                    return "%s - %s".formatted(promptType.getName(), promptType.getPrompts().get(prompt).getName());
+                }
+            }
+        }
+
+        return STRS.getUnavailable();
     }
 }

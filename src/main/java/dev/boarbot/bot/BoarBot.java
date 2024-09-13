@@ -19,6 +19,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 public class BoarBot implements Bot {
@@ -34,7 +36,7 @@ public class BoarBot implements Bot {
     private final Map<String, BufferedImage> imageCacheMap = new HashMap<>();
 
     private final Map<String, Constructor<? extends Subcommand>> subcommands = new HashMap<>();
-    private final Map<String, Interactive> interactives = new HashMap<>();
+    private final ConcurrentMap<String, Interactive> interactives = new ConcurrentHashMap<>();
     private final Map<String, ModalHandler> modalHandlers = new HashMap<>();
 
     private BotType botType;
@@ -110,7 +112,7 @@ public class BoarBot implements Bot {
     }
 
     @Override
-    public Map<String, Interactive> getInteractives() {
+    public ConcurrentMap<String, Interactive> getInteractives() {
         return this.interactives;
     }
 

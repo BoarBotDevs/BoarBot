@@ -34,6 +34,7 @@
   "giftBucks": "BoarBucksGift.png",
   "giftImage": "BoarGiftImage.png",
   "eventUnderlay": "EventUnderlay.png",
+  "powIcon": "PowerupIcon.png",
   "makeImageScript": "src/main/resources/assets/scripts/make_animated_image.py",
   "overlayScript": "src/main/resources/assets/scripts/user_animated_overlay.py",
   "groupScript": "src/main/resources/assets/scripts/animated_item_grouper.py",
