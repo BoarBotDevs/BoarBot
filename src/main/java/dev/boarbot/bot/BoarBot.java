@@ -4,10 +4,7 @@ import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.config.*;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
-import dev.boarbot.listeners.CommandListener;
-import dev.boarbot.listeners.ComponentListener;
-import dev.boarbot.listeners.ModalListener;
-import dev.boarbot.listeners.StopMessageListener;
+import dev.boarbot.listeners.*;
 import dev.boarbot.modals.ModalHandler;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +50,11 @@ public class BoarBot implements Bot {
 
         this.jda = JDABuilder.createDefault(this.env.get("TOKEN"))
             .addEventListeners(
-                new StopMessageListener(), new CommandListener(), new ComponentListener(), new ModalListener()
+                new StopMessageListener(),
+                new CommandListener(),
+                new ComponentListener(),
+                new ModalListener(),
+                new ReadyListener()
             )
             .setActivity(Activity.customStatus("/boar help | boarbot.dev"))
             .build();

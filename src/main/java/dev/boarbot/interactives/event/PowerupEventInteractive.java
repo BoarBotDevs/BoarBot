@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -167,9 +168,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
 
         try {
             this.updateComponents(ActionRow.of(tabulatingBtn));
-        } catch (Exception exception) {
-            log.error("Failed to update embed.", exception);
-        }
+        } catch (ErrorResponseException ignored) {}
 
         this.eventHandler.decNumActive();
     }

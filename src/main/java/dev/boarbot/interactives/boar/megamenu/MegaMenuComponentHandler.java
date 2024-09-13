@@ -14,7 +14,7 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.graphics.TextUtil;
 import dev.boarbot.util.modal.ModalUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -27,7 +27,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 
-@Log4j2
+@Slf4j
 class MegaMenuComponentHandler implements Configured {
     protected static final Map<String, ModalConfig> MODALS = CONFIG.getModalConfig();
 

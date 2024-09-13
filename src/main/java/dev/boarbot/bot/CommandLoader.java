@@ -19,6 +19,8 @@ import java.util.Map;
 @Slf4j
 class CommandLoader implements Configured {
     public static void deployCommands() {
+        log.info("Deploying commands...");
+
         Map<String, CommandConfig> commandData = CONFIG.getCommandConfig();
 
         List<SlashCommandData> globalCommands = new ArrayList<>();
@@ -42,6 +44,7 @@ class CommandLoader implements Configured {
         }
 
         BoarBotApp.getBot().getJDA().updateCommands().addCommands(globalCommands).complete();
+        log.info("Commands successfully deployed");
     }
 
     public static void registerSubcommands() {
