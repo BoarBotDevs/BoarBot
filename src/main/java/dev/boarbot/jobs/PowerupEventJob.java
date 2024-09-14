@@ -20,7 +20,6 @@ public class PowerupEventJob implements Job, Configured {
             int delay = (int) (Math.random() * NUMS.getPowPlusMinusMins() * 2 * 60000);
             Thread.sleep(delay);
         } catch (InterruptedException ignored) {}
-        log.info("Sending Powerup Event...");
 
         PowerupEventHandler eventHandler = new PowerupEventHandler();
         eventHandler.sendEvent();

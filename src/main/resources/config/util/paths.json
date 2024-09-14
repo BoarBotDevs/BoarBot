@@ -1,12 +1,12 @@
 {
   "logsFolder": "logs/",
-  "boars": "src/main/resources/assets/images/items/boars/",
-  "badges": "src/main/resources/assets/images/items/badges/",
-  "powerups": "src/main/resources/assets/images/items/powerups/",
-  "itemAssets": "src/main/resources/assets/images/items/",
-  "megaMenuAssets": "src/main/resources/assets/images/megamenu/",
-  "otherAssets": "src/main/resources/assets/images/other/",
-  "fontAssets": "src/main/resources/assets/font/",
+  "boars": "assets/images/items/boars/",
+  "badges": "assets/images/items/badges/",
+  "powerups": "assets/images/items/powerups/",
+  "itemAssets": "assets/images/items/",
+  "megaMenuAssets": "assets/images/megamenu/",
+  "otherAssets": "assets/images/other/",
+  "fontAssets": "assets/font/",
   "itemUnderlay": "ItemUnderlay.png",
   "itemBackplate": "ItemBackplate.png",
   "itemShadowLeft": "ShadowLeft.png",
@@ -35,8 +35,9 @@
   "giftImage": "BoarGiftImage.png",
   "eventUnderlay": "EventUnderlay.png",
   "powIcon": "PowerupIcon.png",
-  "makeImageScript": "src/main/resources/assets/scripts/make_animated_image.py",
-  "overlayScript": "src/main/resources/assets/scripts/user_animated_overlay.py",
-  "groupScript": "src/main/resources/assets/scripts/animated_item_grouper.py",
-  "applyScript": "src/main/resources/assets/scripts/apply_animated.py"
+  "checkMark": "Checkmark.png",
+  "makeImageScript": "python/make_animated_image.py",
+  "overlayScript": "python/user_animated_overlay.py",
+  "groupScript": "python/animated_item_grouper.py",
+  "applyScript": "python/apply_animated.py"
 }

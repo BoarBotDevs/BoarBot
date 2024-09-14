@@ -147,30 +147,46 @@ public class ItemImageGenerator extends ImageGenerator {
     private void generateAnimated() throws IOException {
         Gson g = new Gson();
 
+        byte[] animatedImage = {};
+
+        try {
+            animatedImage = GraphicsUtil.getImageBytes(this.filePath);
+        } catch (Exception exception) {
+            log.error("Failed to get animated item image", exception);
+        }
+
         Process pythonProcess = new ProcessBuilder(
-            "python", PATHS.getMakeImageScript(), g.toJson(PATHS), g.toJson(NUMS), this.filePath
+            "python",
+            PATHS.getMakeImageScript(),
+            g.toJson(NUMS),
+            Integer.toString(this.generatedImageBytes.length),
+            Integer.toString(animatedImage.length)
         ).start();
 
-        this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.generatedImageBytes);
+        this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.generatedImageBytes, animatedImage);
     }
 
     private void addAnimatedUser() throws IOException {
-        Gson g = new Gson();
+        byte[] userOverlayBytes = {};
+
+        try {
+            BufferedImage userOverlay = this.generateUserImageData();
+
+            ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+            ImageIO.write(userOverlay, "png", byteArrayOS);
+            userOverlayBytes = byteArrayOS.toByteArray();
+        } catch (Exception exception) {
+            log.error("Failed to get animated user image", exception);
+        }
 
         Process pythonProcess = new ProcessBuilder(
             "python",
             PATHS.getOverlayScript(),
-            g.toJson(PATHS),
-            g.toJson(COLORS),
-            g.toJson(NUMS),
-            this.user.getEffectiveAvatarUrl(),
-            this.user.getName(),
-            "%,d".formatted(this.bucks),
-            this.giftingUser == null ? "" : this.giftingUser.getEffectiveAvatarUrl(),
-            this.giftingUser == null ? "" : this.giftingUser.getName()
+            Integer.toString(this.generatedImageBytes.length),
+            Integer.toString(userOverlayBytes.length)
         ).start();
 
-        this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.generatedImageBytes);
+        this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.generatedImageBytes, userOverlayBytes);
     }
 
     private void generateStatic(boolean makeWithItem) throws IOException, URISyntaxException {

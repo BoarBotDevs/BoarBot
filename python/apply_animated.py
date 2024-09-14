@@ -5,23 +5,23 @@ import json
 import sys
 
 num_config = json.loads(sys.argv[1])
-overlay_path = sys.argv[2]
-overlay_pos = tuple(json.loads(sys.argv[3]))
-overlay_size = tuple(json.loads(sys.argv[4]))
+overlay_pos = tuple(json.loads(sys.argv[2]))
+overlay_size = tuple(json.loads(sys.argv[3]))
+base_len = json.loads(sys.argv[4])
+overlay_len = json.loads(sys.argv[5])
 
-base_bytes = sys.stdin.buffer.read()
+image_bytes = sys.stdin.buffer.read()
+base_image_bytes = image_bytes[:base_len]
+overlay_image_bytes = image_bytes[base_len:base_len+overlay_len]
 
-overlay_image = Image.open(overlay_path)
-base_image = Image.open(BytesIO(base_bytes)).convert('RGBA')
-
-base_image_size = (base_image.width, base_image.height)
+base_image = Image.open(BytesIO(base_image_bytes)).convert('RGBA')
+overlay_image = Image.open(BytesIO(overlay_image_bytes))
 
 frames = []
 durations = []
 
 for frame in ImageSequence.Iterator(overlay_image):
-    new_frame = Image.new('RGBA', base_image_size)
-    new_frame.paste(base_image, (0, 0))
+    new_frame = base_image.copy()
 
     frame = frame.copy().resize(overlay_size).convert('RGBA')
     new_frame.paste(frame, overlay_pos, mask=frame)

@@ -130,9 +130,9 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
-            if (this.miraclesToUse <= boarUser.getPowerupAmount(connection, "miracle")) {
+            if (this.miraclesToUse <= boarUser.powQuery().getPowerupAmount(connection, "miracle")) {
                 this.stop(StopType.FINISHED);
-                boarUser.activateMiracles(connection, this.miraclesToUse);
+                boarUser.powQuery().activateMiracles(connection, this.miraclesToUse);
                 this.callingObj.execute();
                 return;
             }
@@ -205,7 +205,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
 
             try (Connection connection = DataUtil.getConnection()) {
-                int numMiraclesHas = boarUser.getPowerupAmount(connection, "miracle");
+                int numMiraclesHas = boarUser.powQuery().getPowerupAmount(connection, "miracle");
 
                 String amountInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                 int amount = Math.min(Integer.parseInt(amountInput), numMiraclesHas);
@@ -215,7 +215,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 }
 
                 if (amount > 0) {
-                    long blessings = boarUser.getBlessings(connection, amount);
+                    long blessings = boarUser.baseQuery().getBlessings(connection, amount);
                     this.miraclesToUse = amount;
 
                     this.currentImageUpload = new EmbedImageGenerator(

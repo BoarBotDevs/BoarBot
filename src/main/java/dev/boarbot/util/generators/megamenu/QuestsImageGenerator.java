@@ -215,6 +215,12 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     }
 
     private void drawReward(Graphics2D g2d, int index) throws IOException, URISyntaxException {
+        if (this.questData.questClaims().get(index)) {
+            String checkPath = PATHS.getOtherAssets() + PATHS.getCheckMark();
+            GraphicsUtil.drawImage(g2d, checkPath, new int[] {POW_X, POW_START_Y + index * QUEST_Y_SPACING}, POW_SIZE);
+            return;
+        }
+
         IndivQuestConfig indivQuestConfig = CONFIG.getQuestConfig().get(this.questIDs.get(index))
             .getQuestVals()[index/2];
         String rewardType = indivQuestConfig.getRewardType();

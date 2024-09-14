@@ -46,7 +46,7 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setProfileData(this.interactive.getBoarUser().getProfileData(connection));
+                this.interactive.setProfileData(this.interactive.getBoarUser().megaQuery().getProfileData(connection));
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
@@ -157,7 +157,7 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setStatsData(this.interactive.getBoarUser().getStatsData(connection));
+                this.interactive.setStatsData(this.interactive.getBoarUser().megaQuery().getStatsData(connection));
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
@@ -183,7 +183,7 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setPowData(this.interactive.getBoarUser().getPowerupsData(connection));
+                this.interactive.setPowData(this.interactive.getBoarUser().megaQuery().getPowerupsData(connection));
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
@@ -209,7 +209,7 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setQuestData(this.interactive.getBoarUser().getQuestsData(connection));
+                this.interactive.setQuestData(this.interactive.getBoarUser().megaQuery().getQuestsData(connection));
                 this.interactive.setQuestIDs(QuestDataUtil.getQuests(connection));
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
@@ -265,20 +265,24 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setOwnedBoars(this.interactive.getBoarUser().getOwnedBoarInfo(connection));
+                this.interactive.setOwnedBoars(this.interactive.getBoarUser().megaQuery().getOwnedBoarInfo(connection));
 
                 if (this.view == MegaMenuView.COMPENDIUM) {
-                    this.interactive.setFavoriteID(this.interactive.getBoarUser().getFavoriteID(connection));
-                    this.interactive.setNumTransmute(
-                        this.interactive.getBoarUser().getPowerupAmount(connection, "transmute")
+                    this.interactive.setFavoriteID(
+                        this.interactive.getBoarUser().megaQuery().getFavoriteID(connection)
                     );
-                    this.interactive.setNumClone(this.interactive.getBoarUser().getPowerupAmount(connection, "clone"));
+                    this.interactive.setNumTransmute(
+                        this.interactive.getBoarUser().powQuery().getPowerupAmount(connection, "transmute")
+                    );
+                    this.interactive.setNumClone(
+                        this.interactive.getBoarUser().powQuery().getPowerupAmount(connection, "clone")
+                    );
                 }
 
                 BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
 
-                this.interactive.setFilterBits(interBoarUser.getFilterBits(connection));
-                this.interactive.setSortVal(interBoarUser.getSortVal(connection));
+                this.interactive.setFilterBits(interBoarUser.megaQuery().getFilterBits(connection));
+                this.interactive.setSortVal(interBoarUser.megaQuery().getSortVal(connection));
 
                 interBoarUser.decRefs();
 

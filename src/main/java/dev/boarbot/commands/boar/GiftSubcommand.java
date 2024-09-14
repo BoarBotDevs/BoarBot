@@ -32,7 +32,7 @@ public class GiftSubcommand extends Subcommand {
 
         try (Connection connection = DataUtil.getConnection()) {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-            noGift = boarUser.getPowerupAmount(connection, "gift") == 0;
+            noGift = boarUser.powQuery().getPowerupAmount(connection, "gift") == 0;
             boarUser.decRefs();
         } catch (SQLException exception) {
             log.error("Failed to get user's gift amount", exception);

@@ -5,6 +5,9 @@ import dev.boarbot.bot.BoarBot;
 import dev.boarbot.bot.BotType;
 import lombok.Getter;
 
+import java.io.InputStream;
+import java.net.URL;
+
 /**
  * {@link BoarBotApp BoarBotApp.java}
  *
@@ -43,5 +46,13 @@ public class BoarBotApp {
     public static void reset() {
         BoarBotApp.bot = null;
         BoarBotApp.main();
+    }
+
+    public static URL getResource(String path) {
+        return BoarBotApp.class.getClassLoader().getResource(path);
+    }
+
+    public static InputStream getResourceStream(String path) {
+        return BoarBotApp.class.getClassLoader().getResourceAsStream(path);
     }
 }

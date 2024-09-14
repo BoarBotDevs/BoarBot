@@ -176,7 +176,9 @@ class MegaMenuComponentHandler implements Configured {
 
             case "CLONE_AMOUNT" -> {
                 try (Connection connection = DataUtil.getConnection()) {
-                    this.interactive.setNumClone(this.interactive.getBoarUser().getPowerupAmount(connection, "clone"));
+                    this.interactive.setNumClone(
+                        this.interactive.getBoarUser().powQuery().getPowerupAmount(connection, "clone")
+                    );
 
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                     int input = Math.min(Integer.parseInt(inputStr), this.interactive.getNumClone());
@@ -188,7 +190,7 @@ class MegaMenuComponentHandler implements Configured {
                     int avgClones = RARITIES.get(this.interactive.getCurRarityKey()).getAvgClones();
 
                     if (avgClones != 0) {
-                        boolean hasBoar = this.interactive.getBoarUser().hasBoar(
+                        boolean hasBoar = this.interactive.getBoarUser().boarQuery().hasBoar(
                             this.interactive.getCurBoarEntry().getKey(), connection
                         );
 
@@ -232,7 +234,7 @@ class MegaMenuComponentHandler implements Configured {
                 PowerupItemConfig miracleConfig = POWS.get("miracle");
 
                 try (Connection connection = DataUtil.getConnection()) {
-                    this.interactive.setPowData(this.interactive.getBoarUser().getPowerupsData(connection));
+                    this.interactive.setPowData(this.interactive.getBoarUser().megaQuery().getPowerupsData(connection));
                     int numMiracles = this.interactive.getPowData().powAmts().get("miracle");
 
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
@@ -243,7 +245,7 @@ class MegaMenuComponentHandler implements Configured {
                     }
 
                     if (input > 0) {
-                        long blessings = this.interactive.getBoarUser().getBlessings(connection, input);
+                        long blessings = this.interactive.getBoarUser().baseQuery().getBlessings(connection, input);
                         this.interactive.setNumTryCharm(input);
 
                         this.interactive.setConfirmOpen(true);
@@ -365,9 +367,13 @@ class MegaMenuComponentHandler implements Configured {
                 if (curBoar.getStaticFile() != null) {
                     String filePath = PATHS.getBoars() + curBoar.getFile();
 
-                    this.interactive.setAcknowledgeImageGen(
-                        new OverlayImageGenerator(null, filePath, NUMS.getLargeBoarSize())
-                    );
+                    try {
+                        this.interactive.setAcknowledgeImageGen(
+                            new OverlayImageGenerator(null, filePath, NUMS.getLargeBoarSize())
+                        );
+                    } catch (Exception exception) {
+                        log.error("Invalid animated image path", exception);
+                    }
                 } else {
                     this.interactive.setAcknowledgeImageGen(
                         new OverlayImageGenerator(null, BoarBotApp.getBot().getImageCacheMap().get("large" + curBoarID))

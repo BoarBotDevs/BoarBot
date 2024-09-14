@@ -142,20 +142,20 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         try {
             try (Connection connection = DataUtil.getConnection()) {
                 boolean shouldUpdateData = this.currentImageGen == null ||
-                    this.lastEndTime <= this.boarUser.getLastChanged(connection);
+                    this.lastEndTime <= this.boarUser.baseQuery().getLastChanged(connection);
 
                 if (shouldUpdateData) {
-                    long firstJoinedTimestamp = this.boarUser.getFirstJoinedTimestamp(connection);
+                    long firstJoinedTimestamp = this.boarUser.megaQuery().getFirstJoinedTimestamp(connection);
 
-                    this.firstJoinedDate = this.boarUser.getFirstJoinedTimestamp(connection) > 0
+                    this.firstJoinedDate = this.boarUser.megaQuery().getFirstJoinedTimestamp(connection) > 0
                         ? Instant.ofEpochMilli(firstJoinedTimestamp)
                             .atOffset(ZoneOffset.UTC)
                             .format(TimeUtil.getDateFormatter())
                         : STRS.getUnavailable();
-                    this.favoriteID = this.boarUser.getFavoriteID(connection);
+                    this.favoriteID = this.boarUser.megaQuery().getFavoriteID(connection);
 
                     this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.guildID);
-                    this.badges = this.boarUser.getCurrentBadges(connection);
+                    this.badges = this.boarUser.megaQuery().getCurrentBadges(connection);
                     this.viewsToUpdateData.replaceAll((k, v) -> false);
                 }
             }
@@ -192,11 +192,11 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         try {
             if (this.filterOpen) {
                 try (Connection connection = DataUtil.getConnection()) {
-                    boarUser.setFilterBits(connection, this.filterBits);
+                    boarUser.megaQuery().setFilterBits(connection, this.filterBits);
                 }
             } else if (this.sortOpen) {
                 try (Connection connection = DataUtil.getConnection()) {
-                    boarUser.setSortVal(connection, this.sortVal);
+                    boarUser.megaQuery().setSortVal(connection, this.sortVal);
                 }
             } else if (this.interactType != null) {
                 switch (this.interactType) {
@@ -227,18 +227,18 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         String boarName = BOARS.get(this.curBoarEntry.getKey()).getName();
 
         try (Connection connection = DataUtil.getConnection()) {
-            this.favoriteID = boarUser.getFavoriteID(connection);
+            this.favoriteID = boarUser.megaQuery().getFavoriteID(connection);
 
             if (this.favoriteID == null || !this.favoriteID.equals(this.curBoarEntry.getKey())) {
                 this.acknowledgeImageGen = new OverlayImageGenerator(
                     null, STRS.getCompFavoriteSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
                 );
-                boarUser.setFavoriteID(connection, this.curBoarEntry.getKey());
+                boarUser.megaQuery().setFavoriteID(connection, this.curBoarEntry.getKey());
             } else {
                 this.acknowledgeImageGen = new OverlayImageGenerator(
                     null, STRS.getCompUnfavoriteSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
                 );
-                boarUser.setFavoriteID(connection, null);
+                boarUser.megaQuery().setFavoriteID(connection, null);
             }
         }
     }
@@ -251,12 +251,12 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         List<Integer> editions = new ArrayList<>();
 
         try (Connection connection = DataUtil.getConnection()) {
-            this.numClone = boarUser.getPowerupAmount(connection, "clone");
+            this.numClone = boarUser.powQuery().getPowerupAmount(connection, "clone");
             boolean cloneable = RARITIES.get(this.curRarityKey).getAvgClones() != 0 &&
                 this.numTryClone <= this.numClone;
 
             if (cloneable) {
-                if (boarUser.hasBoar(this.curBoarEntry.getKey(), connection)) {
+                if (boarUser.boarQuery().hasBoar(this.curBoarEntry.getKey(), connection)) {
                     int avgClones = RARITIES.get(this.curRarityKey).getAvgClones();
                     double chance = this.numTryClone == avgClones
                         ? 1
@@ -276,7 +276,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                             null, STRS.getCompCloneFailed().formatted("<>" + this.curRarityKey + "<>" + boarName)
                         );
                     } else {
-                        boarUser.addBoars(
+                        boarUser.boarQuery().addBoars(
                             newBoarIDs,
                             connection,
                             BoarObtainType.CLONE,
@@ -284,7 +284,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                             editions
                         );
 
-                        boarUser.usePowerup(connection, "clone", this.numTryClone);
+                        boarUser.powQuery().usePowerup(connection, "clone", this.numTryClone);
                     }
                 } else {
                     this.acknowledgeImageGen = new OverlayImageGenerator(
@@ -321,18 +321,18 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         List<Integer> editions = new ArrayList<>();
 
         try (Connection connection = DataUtil.getConnection()) {
-            this.numTransmute = boarUser.getPowerupAmount(connection, "transmute");
+            this.numTransmute = boarUser.powQuery().getPowerupAmount(connection, "transmute");
             RarityConfig curRarity = RARITIES.get(this.curRarityKey);
             boolean transmutable = curRarity.getChargesNeeded() != 0 &&
                 curRarity.getChargesNeeded() <= this.numTransmute;
 
             if (transmutable) {
-                if (boarUser.hasBoar(this.curBoarEntry.getKey(), connection)) {
+                if (boarUser.boarQuery().hasBoar(this.curBoarEntry.getKey(), connection)) {
                     String nextRarityID = BoarUtil.getNextRarityKey(this.curRarityKey);
                     newBoarIDs.add(BoarUtil.findValid(nextRarityID, this.isSkyblockGuild));
 
-                    boarUser.removeBoar(this.curBoarEntry.getKey(), connection);
-                    boarUser.addBoars(
+                    boarUser.boarQuery().removeBoar(this.curBoarEntry.getKey(), connection);
+                    boarUser.boarQuery().addBoars(
                         newBoarIDs,
                         connection,
                         BoarObtainType.TRANSMUTE,
@@ -340,7 +340,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                         editions
                     );
 
-                    boarUser.usePowerup(connection, "transmute", this.numTransmute);
+                    boarUser.powQuery().usePowerup(connection, "transmute", this.numTransmute);
                 } else {
                     this.acknowledgeImageGen = new OverlayImageGenerator(
                         null, STRS.getCompNoBoar().formatted("<>" + this.curRarityKey + "<>" + boarName)
@@ -387,10 +387,10 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     private void doCharm(BoarUser boarUser) throws SQLException {
         try (Connection connection = DataUtil.getConnection()) {
-            if (this.numTryCharm <= boarUser.getPowerupAmount(connection, this.powerupUsing)) {
-                boarUser.activateMiracles(connection, this.numTryCharm);
+            if (this.numTryCharm <= boarUser.powQuery().getPowerupAmount(connection, this.powerupUsing)) {
+                boarUser.powQuery().activateMiracles(connection, this.numTryCharm);
 
-                long blessings = this.boarUser.getBlessings(connection);
+                long blessings = this.boarUser.baseQuery().getBlessings(connection);
                 this.acknowledgeImageGen = new OverlayImageGenerator(
                     null,
                     STRS.getPowMiracleSuccess().formatted(
@@ -416,7 +416,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         PowerupItemConfig powConfig = POWS.get(this.powerupUsing);
 
         try (Connection connection = DataUtil.getConnection()) {
-            if (boarUser.getPowerupAmount(connection, this.powerupUsing) > 0) {
+            if (boarUser.powQuery().getPowerupAmount(connection, this.powerupUsing) > 0) {
                 this.acknowledgeImageGen = new OverlayImageGenerator(
                     null, STRS.getPowGiftSuccess().formatted(powConfig.getName())
                 );

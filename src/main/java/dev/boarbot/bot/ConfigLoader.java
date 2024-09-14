@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -108,13 +109,14 @@ class ConfigLoader {
                 }
             }
 
-            File fontFile = new File(config.getPathConfig().getFontAssets() + config.getPathConfig().getMainFont());
+            String fontPath = config.getPathConfig().getFontAssets() + config.getPathConfig().getMainFont();
+            InputStream is = BoarBotApp.getResourceStream(fontPath);
 
             try {
-                BoarBotApp.getBot().setFont(Font.createFont(Font.TRUETYPE_FONT, fontFile));
+                BoarBotApp.getBot().setFont(Font.createFont(Font.TRUETYPE_FONT, is));
             } catch (Exception exception) {
                 log.error(
-                    "There was a problem when creating font from font file %s".formatted(fontFile.getPath()), exception
+                    "There was a problem when creating font from font file %s".formatted(fontPath), exception
                 );
             }
 

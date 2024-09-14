@@ -331,21 +331,22 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         try {
             if (this.outcomeType == null && this.giftWinner != null) {
                 try (Connection connection = DataUtil.getConnection()) {
-                    long userVal = this.giftTimes.get(boarUser.getUser()) - boarUser.getGiftHandicap(connection);
+                    long userVal = this.giftTimes
+                       .get(boarUser.getUser()) - boarUser.giftQuery().getGiftHandicap(connection);
 
                     if (userVal > this.giftWinnerValue) {
                         this.giftWinner = boarUser.getUser();
                         this.giftWinnerValue = userVal;
                     }
 
-                    boarUser.updateGiftHandicap(connection, this.giftTimes.get(boarUser.getUser()));
+                    boarUser.giftQuery().updateGiftHandicap(connection, this.giftTimes.get(boarUser.getUser()));
                 }
             } else if (this.outcomeType == null) {
                 try (Connection connection = DataUtil.getConnection()) {
-                    this.hasGift = boarUser.getPowerupAmount(connection, "gift") > 0;
+                    this.hasGift = boarUser.powQuery().getPowerupAmount(connection, "gift") > 0;
 
                     if (this.hasGift) {
-                        boarUser.usePowerup(connection, "gift", 1);
+                        boarUser.powQuery().usePowerup(connection, "gift", 1);
                     }
                 }
             } else if (this.outcomeType == OutcomeType.SPECIAL || this.outcomeType == OutcomeType.BOAR) {
@@ -364,7 +365,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                         rarityKeys.add(BoarUtil.findRarityKey(boarID));
                     }
 
-                    boarUser.openGift(
+                    boarUser.giftQuery().openGift(
                         connection, this.numBucks, rarityKeys, this.giftWinner.getId().equals(boarUser.getUserID())
                     );
                 }
@@ -379,7 +380,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         List<Integer> editions = new ArrayList<>();
 
         try (Connection connection = DataUtil.getConnection()) {
-            boarUser.addBoars(this.boarIDs, connection, BoarObtainType.GIFT, bucksGotten, editions);
+            boarUser.boarQuery().addBoars(this.boarIDs, connection, BoarObtainType.GIFT, bucksGotten, editions);
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {
@@ -403,7 +404,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
     private void giveBucks(BoarUser boarUser) throws SQLException {
         try (Connection connection = DataUtil.getConnection()) {
-            boarUser.giveBucks(connection, this.numBucks);
+            boarUser.baseQuery().giveBucks(connection, this.numBucks);
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {
@@ -437,7 +438,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
     private void givePowerup(BoarUser boarUser) throws SQLException {
         try (Connection connection = DataUtil.getConnection()) {
-            boarUser.addPowerup(connection, this.subOutcomeType.toString(), this.subOutcomeConfig.getRewardAmt());
+            boarUser.powQuery().addPowerup(connection, this.subOutcomeType.toString(), this.subOutcomeConfig.getRewardAmt());
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {

@@ -1,10 +1,12 @@
 package dev.boarbot.util.graphics;
 
+import dev.boarbot.BoarBotApp;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -61,10 +63,15 @@ public final class GraphicsUtil {
         if (path.startsWith("http")) {
             image = ImageIO.read(new URI(path).toURL());
         } else {
-            image = ImageIO.read(new FileInputStream(path));
+            image = ImageIO.read(BoarBotApp.getResource(path));
         }
 
         return image;
+    }
+
+    public static byte[] getImageBytes(String path) throws URISyntaxException, IOException {
+        InputStream is = BoarBotApp.getResourceStream(path);
+        return is.readAllBytes();
     }
 
     public static void drawCircleImage(

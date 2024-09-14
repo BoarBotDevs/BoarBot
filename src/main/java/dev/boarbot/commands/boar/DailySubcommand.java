@@ -93,9 +93,9 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
-            if (!boarUser.canUseDaily(connection) && !CONFIG.getMainConfig().isUnlimitedBoars()) {
+            if (!boarUser.boarQuery().canUseDaily(connection) && !CONFIG.getMainConfig().isUnlimitedBoars()) {
                 this.canDaily = false;
-                this.notificationsOn = boarUser.getNotificationStatus(connection);
+                this.notificationsOn = boarUser.baseQuery().getNotificationStatus(connection);
                 return;
             }
 
@@ -111,14 +111,14 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
             this.isFirstDaily = boarUser.isFirstDaily();
 
-            long blessings = boarUser.getBlessings(connection);
+            long blessings = boarUser.baseQuery().getBlessings(connection);
             boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
                 connection, Objects.requireNonNull(this.interaction.getGuild()).getId()
             );
             this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
-            boarUser.addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
-            boarUser.useActiveMiracles(this.boarIDs, this.bucksGotten, connection);
+            boarUser.boarQuery().addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
+            boarUser.powQuery().useActiveMiracles(this.boarIDs, this.bucksGotten, connection);
         } catch (SQLException exception) {
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
         }

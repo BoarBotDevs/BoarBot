@@ -1,7 +1,7 @@
 {
   "daily": {
-    "description": "Use /boar daily <>green<>%s<>font<> time",
-    "descriptionAlt": "Use /boar daily <>green<>%s<>font<> times",
+    "description": "Use <>silver<>/boar daily<>green<> %s<>font<> time",
+    "descriptionAlt": "Use <>silver<>/boar daily<>green<> %s<>font<> times",
     "questVals": [
       {
         "requirement": "4",

@@ -4,26 +4,26 @@ from io import BytesIO
 import json
 import sys
 
-path_config = json.loads(sys.argv[1])
-num_config = json.loads(sys.argv[2])
-main_image_path = sys.argv[3]
+num_config = json.loads(sys.argv[1])
+temp_len = json.loads(sys.argv[2])
+main_len = json.loads(sys.argv[3])
 
-temp_bytes = sys.stdin.buffer.read()
+image_bytes = sys.stdin.buffer.read()
 
-image_size = (930, 1080)
+temp_image_bytes = image_bytes[:temp_len]
+main_image_bytes = image_bytes[temp_len:temp_len+main_len]
+
 item_size = tuple(num_config['bigBoarSize'])
 item_pos = (33, 174)
 
-base_image = Image.open(BytesIO(temp_bytes))
-
-main_image = Image.open(main_image_path)
+base_image = Image.open(BytesIO(temp_image_bytes))
+main_image = Image.open(BytesIO(main_image_bytes))
 
 frames = []
 durations = []
 
 for frame in ImageSequence.Iterator(main_image):
-    new_frame = Image.new('RGBA', image_size)
-    new_frame.paste(base_image, (0, 0))
+    new_frame = base_image.copy()
 
     frame = frame.copy().resize(item_size).convert('RGBA')
     new_frame.paste(frame, item_pos)

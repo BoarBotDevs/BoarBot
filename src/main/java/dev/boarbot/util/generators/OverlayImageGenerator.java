@@ -2,6 +2,7 @@ package dev.boarbot.util.generators;
 
 import com.google.gson.Gson;
 import dev.boarbot.util.graphics.Align;
+import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.python.PythonUtil;
 
@@ -9,6 +10,7 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class OverlayImageGenerator extends ImageGenerator {
     private String text;
@@ -16,7 +18,7 @@ public class OverlayImageGenerator extends ImageGenerator {
     private BufferedImage overlayImage;
     private int[] pos;
 
-    private String path;
+    private byte[] animatedImage;
     private int[] size;
 
     private final boolean darken;
@@ -46,21 +48,28 @@ public class OverlayImageGenerator extends ImageGenerator {
         this.darken = darken;
     }
 
-    public OverlayImageGenerator(BufferedImage image, String path, int[] size) {
+    public OverlayImageGenerator(BufferedImage image, String path, int[] size) throws URISyntaxException, IOException {
         this(image, path, size, true);
     }
 
-    public OverlayImageGenerator(BufferedImage image, String path, int[] size, boolean darken) {
+    public OverlayImageGenerator(
+        BufferedImage image, String path, int[] size, boolean darken
+    ) throws URISyntaxException, IOException {
         this(image, path, size, null, darken);
     }
 
-    public OverlayImageGenerator(BufferedImage image, String path, int[] size, int[] pos) {
+    public OverlayImageGenerator(
+        BufferedImage image, String path, int[] size, int[] pos
+    ) throws URISyntaxException, IOException {
         this(image, path, size, pos, true);
     }
 
-    public OverlayImageGenerator(BufferedImage image, String path, int[] size, int[] pos, boolean darken) {
+    public OverlayImageGenerator(
+        BufferedImage image, String path, int[] size, int[] pos, boolean darken
+    ) throws URISyntaxException, IOException {
         this.generatedImage = image;
-        this.path = path;
+        this.animatedImage = GraphicsUtil.getImageBytes(path);
+        this.animated = true;
         this.size = size;
         this.pos = pos;
         this.darken = darken;
@@ -84,8 +93,7 @@ public class OverlayImageGenerator extends ImageGenerator {
 
         if (this.text != null) {
             return drawText(g2d);
-        } else if (this.overlayImage != null || this.path != null) {
-            this.animated = this.path != null;
+        } else if (this.animated) {
             return drawImage(g2d);
         }
 
@@ -141,12 +149,13 @@ public class OverlayImageGenerator extends ImageGenerator {
                 "python",
                 PATHS.getApplyScript(),
                 g.toJson(NUMS),
-                this.path,
                 "[%d, %d]".formatted(pos[0], pos[1]),
-                "[%d, %d]".formatted(this.size[0], this.size[1])
+                "[%d, %d]".formatted(this.size[0], this.size[1]),
+                Integer.toString(this.getBytes().length),
+                Integer.toString(this.animatedImage.length)
             ).start();
 
-            this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.getBytes());
+            this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.getBytes() ,this.animatedImage);
         } else {
             g2d.drawImage(this.overlayImage, pos[0], pos[1], null);
         }

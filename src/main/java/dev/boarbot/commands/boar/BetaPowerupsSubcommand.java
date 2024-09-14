@@ -24,10 +24,10 @@ public class BetaPowerupsSubcommand extends Subcommand {
         try (Connection connection = DataUtil.getConnection()) {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
 
-            boarUser.addPowerup(connection, "miracle", 10);
-            boarUser.addPowerup(connection, "gift", 10);
-            boarUser.addPowerup(connection, "clone", 10);
-            boarUser.addPowerup(connection, "transmute", 10);
+            boarUser.powQuery().addPowerup(connection, "miracle", 10);
+            boarUser.powQuery().addPowerup(connection, "gift", 10);
+            boarUser.powQuery().addPowerup(connection, "clone", 10);
+            boarUser.powQuery().addPowerup(connection, "transmute", 10);
 
             boarUser.decRefs();
         } catch (SQLException exception) {

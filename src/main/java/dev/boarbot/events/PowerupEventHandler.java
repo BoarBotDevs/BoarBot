@@ -145,13 +145,13 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable 
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             if (boarUser.getUserID().equals(this.sortedUsers.getFirst())) {
-                boarUser.addPerfectPowerup(connection);
+                boarUser.eventQuery().addPerfectPowerup(connection);
             }
 
             double placement = this.sortedUsers.size() > 1
                 ? (double) this.sortedUsers.indexOf(boarUser.getUserID()) / (this.sortedUsers.size()-1)
                 : 0;
-            boarUser.addPrompt(connection, this.promptID, placement);
+            boarUser.eventQuery().addPrompt(connection, this.promptID, placement);
         } catch (SQLException exception) {
             log.error("Failed update user after Powerup Event", exception);
         }

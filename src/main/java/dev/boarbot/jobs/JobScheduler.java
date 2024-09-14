@@ -1,8 +1,13 @@
 package dev.boarbot.jobs;
 
+import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.data.QuestDataUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 @Slf4j
 public class JobScheduler {
@@ -16,7 +21,17 @@ public class JobScheduler {
 
             scheduler.scheduleJob(PowerupEventJob.getJob(), PowerupEventJob.getTrigger());
 
+            try (Connection connection = DataUtil.getConnection()) {
+                if (QuestDataUtil.needNewQuests(connection)) {
+                    QuestDataUtil.updateQuests(connection);
+                }
+            }
+
+            scheduler.scheduleJob(QuestResetJob.getJob(), QuestResetJob.getTrigger());
+
             log.info("Jobs successfully scheduled");
+        } catch (SQLException exception) {
+            log.error("Failed to get quest status", exception);
         } catch (Exception exception) {
             log.error("Failed to schedule one or more jobs", exception);
         }

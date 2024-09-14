@@ -142,7 +142,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
 
         if (this.userTimes.containsKey(userID)) {
             try (Connection connection = DataUtil.getConnection()) {
-                boarUser.applyPowEventWin(
+                boarUser.eventQuery().applyPowEventWin(
                     connection, this.powerupID, POWS.get(this.powerupID).getEventAmt(), this.userTimes.get(userID)
                 );
             } catch (SQLException exception) {
@@ -150,7 +150,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             }
         } else if (this.failUsers.containsKey(userID) && this.failUsers.get(userID)) {
             try (Connection connection = DataUtil.getConnection()) {
-                boarUser.applyPowEventFail(connection);
+                boarUser.eventQuery().applyPowEventFail(connection);
             } catch (SQLException exception) {
                 log.error("Failed to give Powerup Event fail", exception);
             }

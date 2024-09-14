@@ -45,7 +45,7 @@ public class StopMessageListener extends ListenerAdapter implements Runnable, Co
             boolean notificationsOn;
 
             try (Connection connection = DataUtil.getConnection()) {
-                notificationsOn = boarUser.getNotificationStatus(connection);
+                notificationsOn = boarUser.baseQuery().getNotificationStatus(connection);
             }
 
             if (!notificationsOn) {
@@ -58,7 +58,7 @@ public class StopMessageListener extends ListenerAdapter implements Runnable, Co
             for (String word : words) {
                 if (word.trim().equalsIgnoreCase("stop")) {
                     try (Connection connection = DataUtil.getConnection()) {
-                        boarUser.setNotifications(connection, null);
+                        boarUser.baseQuery().setNotifications(connection, null);
                         boarUser.decRefs();
 
                         this.event.getMessage().reply(STRS.getNotificationDisabledStr()).queue();
