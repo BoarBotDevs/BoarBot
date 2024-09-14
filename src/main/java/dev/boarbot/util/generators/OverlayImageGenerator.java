@@ -147,7 +147,7 @@ public class OverlayImageGenerator extends ImageGenerator {
 
             Process pythonProcess = new ProcessBuilder(
                 "python",
-                PATHS.getApplyScript(),
+                PythonUtil.getTempPath(PATHS.getApplyScript()),
                 g.toJson(NUMS),
                 "[%d, %d]".formatted(pos[0], pos[1]),
                 "[%d, %d]".formatted(this.size[0], this.size[1]),
@@ -155,7 +155,7 @@ public class OverlayImageGenerator extends ImageGenerator {
                 Integer.toString(this.animatedImage.length)
             ).start();
 
-            this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.getBytes() ,this.animatedImage);
+            this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.getBytes(), this.animatedImage);
         } else {
             g2d.drawImage(this.overlayImage, pos[0], pos[1], null);
         }

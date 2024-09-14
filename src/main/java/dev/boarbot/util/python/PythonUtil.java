@@ -1,15 +1,21 @@
 package dev.boarbot.util.python;
 
+import dev.boarbot.BoarBotApp;
+import dev.boarbot.api.util.Configured;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
-public class PythonUtil {
+public class PythonUtil implements Configured {
+    private final static Map<String, Path> scripts = new HashMap<>();
+
     public static byte[] getResult(Process pythonProcess, byte[]... byteArrays) throws IOException {
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
         BufferedReader stdErr = new BufferedReader(new InputStreamReader(pythonProcess.getErrorStream()));
@@ -41,5 +47,22 @@ public class PythonUtil {
 
             log.error(errMessage);
         }
+    }
+
+    public static String getTempPath(String scriptPath) throws IOException {
+        String scriptName = scriptPath.split("/")[1].split("\\.")[0];
+
+        if (scripts.containsKey(scriptName)) {
+            return scripts.get(scriptName).toString();
+        }
+
+        InputStream is = BoarBotApp.getResourceStream(scriptPath);
+
+        Path tempScript = Files.createTempFile(scriptName, ".py");
+        Files.copy(is, tempScript, StandardCopyOption.REPLACE_EXISTING);
+        tempScript.toFile().deleteOnExit();
+
+        scripts.put(scriptName, tempScript);
+        return tempScript.toString();
     }
 }

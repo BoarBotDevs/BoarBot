@@ -93,7 +93,7 @@ public final class ItemImageGrouper implements Configured {
 
             Process pythonProcess = new ProcessBuilder(
                 "python",
-                PATHS.getGroupScript(),
+                PythonUtil.getTempPath(PATHS.getGroupScript()),
                 Integer.toString(resultByteArray.length),
                 Integer.toString(middleImageBytes.length)
             ).start();

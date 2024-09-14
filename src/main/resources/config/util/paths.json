@@ -36,8 +36,8 @@
   "eventUnderlay": "EventUnderlay.png",
   "powIcon": "PowerupIcon.png",
   "checkMark": "Checkmark.png",
-  "makeImageScript": "python/make_animated_image.py",
-  "overlayScript": "python/user_animated_overlay.py",
-  "groupScript": "python/animated_item_grouper.py",
-  "applyScript": "python/apply_animated.py"
+  "makeImageScript": "scripts/make_animated_image.py",
+  "overlayScript": "scripts/user_animated_overlay.py",
+  "groupScript": "scripts/animated_item_grouper.py",
+  "applyScript": "scripts/apply_animated.py"
 }

@@ -157,7 +157,7 @@ public class ItemImageGenerator extends ImageGenerator {
 
         Process pythonProcess = new ProcessBuilder(
             "python",
-            PATHS.getMakeImageScript(),
+            PythonUtil.getTempPath(PATHS.getMakeImageScript()),
             g.toJson(NUMS),
             Integer.toString(this.generatedImageBytes.length),
             Integer.toString(animatedImage.length)
@@ -181,7 +181,7 @@ public class ItemImageGenerator extends ImageGenerator {
 
         Process pythonProcess = new ProcessBuilder(
             "python",
-            PATHS.getOverlayScript(),
+            PythonUtil.getTempPath(PATHS.getOverlayScript()),
             Integer.toString(this.generatedImageBytes.length),
             Integer.toString(userOverlayBytes.length)
         ).start();
