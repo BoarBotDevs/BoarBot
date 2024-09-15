@@ -1,12 +1,12 @@
 package dev.boarbot.bot;
 
+import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.config.*;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.*;
 import dev.boarbot.modals.ModalHandler;
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -21,9 +21,6 @@ import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 public class BoarBot implements Bot {
-    private final Dotenv env = Dotenv.configure()
-        .filename(".env")
-        .load();
     private JDA jda;
 
     private final BotConfig config = new BotConfig();
@@ -36,19 +33,18 @@ public class BoarBot implements Bot {
     private final ConcurrentMap<String, Interactive> interactives = new ConcurrentHashMap<>();
     private final Map<String, ModalHandler> modalHandlers = new HashMap<>();
 
-    private BotType botType;
-
     @Override
-    public void create(BotType type) {
-        this.botType = type;
-
+    public void create() {
+        log.info("Starting up bot...");
         ConfigLoader.loadConfig();
         DatabaseLoader.loadIntoDatabase("rarities");
         DatabaseLoader.loadIntoDatabase("boars");
         DatabaseLoader.loadIntoDatabase("badges");
+        DatabaseLoader.fixQuests();
         CacheLoader.loadCache();
+        CommandLoader.registerSubcommands();
 
-        this.jda = JDABuilder.createDefault(this.env.get("TOKEN"))
+        this.jda = JDABuilder.createDefault(BoarBotApp.getEnv().get("TOKEN"))
             .addEventListeners(
                 new StopMessageListener(),
                 new CommandListener(),
@@ -58,23 +54,11 @@ public class BoarBot implements Bot {
             )
             .setActivity(Activity.customStatus("/boar help | boarbot.dev"))
             .build();
-
-        CommandLoader.registerSubcommands();
-    }
-
-    @Override
-    public BotType getBotType() {
-        return this.botType;
     }
 
     @Override
     public JDA getJDA() {
         return this.jda;
-    }
-
-    @Override
-    public Dotenv getEnv() {
-        return this.env;
     }
 
     @Override

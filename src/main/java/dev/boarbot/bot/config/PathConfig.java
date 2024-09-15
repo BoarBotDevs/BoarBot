@@ -15,10 +15,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class PathConfig {
-    // Folder storing logs
-
-    private String logsFolder = "";
-
     // Base paths for images/assets
 
     private String boars = "";

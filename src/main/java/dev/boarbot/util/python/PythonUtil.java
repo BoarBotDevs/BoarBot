@@ -1,7 +1,6 @@
 package dev.boarbot.util.python;
 
 import dev.boarbot.BoarBotApp;
-import dev.boarbot.api.util.Configured;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -13,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class PythonUtil implements Configured {
+public class PythonUtil {
     private final static Map<String, Path> scripts = new HashMap<>();
 
     public static byte[] getResult(Process pythonProcess, byte[]... byteArrays) throws IOException {

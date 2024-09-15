@@ -112,7 +112,7 @@ public class QuestUtil implements Configured {
         return "<>powerup<>%,d %s<>font<>".formatted(rewardAmt, powerupStr);
     }
 
-    public static int getRequiredAmt(QuestType quest, int index) {
+    public static int getRequiredAmt(QuestType quest, int index, boolean actualAmt) {
         String requirement = CONFIG.getQuestConfig().get(quest.toString()).getQuestVals()[index/2].getRequirement();
 
         return switch (quest) {
@@ -122,9 +122,9 @@ public class QuestUtil implements Configured {
                  QuestType.CLONE_BOARS,
                  QuestType.SEND_GIFTS,
                  QuestType.OPEN_GIFTS,
-                 QuestType.POW_WIN,
-                 QuestType.POW_FAST -> Integer.parseInt(requirement);
+                 QuestType.POW_WIN -> Integer.parseInt(requirement);
             case QuestType.COLLECT_RARITY, QuestType.CLONE_RARITY -> 1;
+            case QuestType.POW_FAST -> actualAmt ? Integer.parseInt(requirement) : 1;
         };
     }
 }

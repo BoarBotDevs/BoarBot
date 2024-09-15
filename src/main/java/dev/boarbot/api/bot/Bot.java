@@ -1,11 +1,9 @@
 package dev.boarbot.api.bot;
 
-import dev.boarbot.bot.BotType;
 import dev.boarbot.bot.config.BotConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.modals.ModalHandler;
-import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 
 import java.awt.*;
@@ -15,10 +13,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 public interface Bot {
-    void create(BotType type);
-    BotType getBotType();
+    void create();
     JDA getJDA();
-    Dotenv getEnv();
     BotConfig getConfig();
     void setFont(Font font);
     Font getFont();

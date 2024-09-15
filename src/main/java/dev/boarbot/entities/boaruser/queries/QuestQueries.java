@@ -53,8 +53,8 @@ public class QuestQueries implements Configured {
                 continue;
             }
 
-            int requiredAmt = QuestUtil.getRequiredAmt(quest, i);
-            boolean shouldClaim = quest.equals(QuestType.POW_FAST) == (progress < requiredAmt);
+            int requiredAmt = QuestUtil.getRequiredAmt(quest, i, false);
+            boolean shouldClaim = progress >= requiredAmt;
 
             if (shouldClaim) {
                 questIndexes.add(i);
@@ -171,13 +171,15 @@ public class QuestQueries implements Configured {
         String columnNum = numStrs.get(questIndex);
         List<QuestType> quests = QuestDataUtil.getQuests(connection);
         List<Integer> requiredAmts = new ArrayList<>();
+        List<Integer> actualRequiredAmts = new ArrayList<>();
 
         for (QuestType curQuest : quests) {
-            requiredAmts.add(QuestUtil.getRequiredAmt(curQuest, questIndex));
+            requiredAmts.add(QuestUtil.getRequiredAmt(curQuest, questIndex, false));
+            actualRequiredAmts.add(QuestUtil.getRequiredAmt(curQuest, questIndex, true));
         }
 
-        if (quest.equals(QuestType.POW_FAST) && val < requiredAmts.get(questIndex)) {
-            val = 1;
+        if (quest.equals(QuestType.POW_FAST)) {
+            val = val < actualRequiredAmts.get(questIndex) ? 1 : 0;
         }
 
         if (val == 0) {
@@ -210,9 +212,7 @@ public class QuestQueries implements Configured {
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
                     progress = results.getInt("%s_progress".formatted(columnNum));
-                    boolean complete = quest.equals(QuestType.POW_FAST)
-                        ? val < requiredAmts.get(questIndex)
-                        : progress + val >= requiredAmts.get(questIndex);
+                    boolean complete = progress + val >= requiredAmts.get(questIndex);
                     boolean claimed = results.getBoolean("%s_claimed".formatted(columnNum));
                     boolean autoClaim = results.getBoolean("auto_claim");
                     shouldClaim = complete && autoClaim && !claimed;
@@ -224,8 +224,7 @@ public class QuestQueries implements Configured {
                         if (i == questIndex) {
                             shouldClaimBonus = complete;
                         } else {
-                            shouldClaimBonus = quests.get(i)
-                               .equals(QuestType.POW_FAST) == (curProgress < requiredAmts.get(i));
+                            shouldClaimBonus = curProgress >= requiredAmts.get(i);
                         }
                     }
                 }
@@ -243,10 +242,7 @@ public class QuestQueries implements Configured {
         """.formatted(columnNum, columnNum, columnNum);
 
         try (PreparedStatement statement = connection.prepareStatement(update)) {
-            long adjustedVal = quest.equals(QuestType.POW_FAST)
-                ? Math.min(progress, val)
-                : progress + val;
-            statement.setLong(1, adjustedVal);
+            statement.setLong(1, progress + val);
             statement.setBoolean(2, shouldClaim);
             statement.setBoolean(3, shouldClaimBonus);
             statement.setLong(4, shouldClaimBonus
@@ -256,7 +252,6 @@ public class QuestQueries implements Configured {
             statement.setString(5, this.boarUser.getUserID());
             statement.executeUpdate();
         }
-
         List<IndivQuestConfig> questConfigs = new ArrayList<>();
         IndivQuestConfig questConfig = CONFIG.getQuestConfig().get(quest.toString()).getQuestVals()[questIndex/2];
         String rewardType = questConfig.getRewardType();

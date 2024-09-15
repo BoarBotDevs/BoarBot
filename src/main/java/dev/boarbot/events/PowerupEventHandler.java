@@ -1,6 +1,7 @@
 package dev.boarbot.events;
 
 import dev.boarbot.BoarBotApp;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.Synchronizable;
@@ -22,7 +23,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 @Slf4j
-public class PowerupEventHandler extends EventHandler implements Synchronizable {
+public class PowerupEventHandler extends EventHandler implements Synchronizable, Configured {
     @Getter private static final List<Message> curMessages = new ArrayList<>();
     private static final Set<Message> priorMessages = new HashSet<>();
 

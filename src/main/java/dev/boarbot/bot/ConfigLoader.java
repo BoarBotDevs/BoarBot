@@ -16,11 +16,9 @@ import dev.boarbot.bot.config.quests.QuestConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.Scanner;
 
 @Slf4j
 class ConfigLoader {
@@ -28,72 +26,47 @@ class ConfigLoader {
     
     public static void loadConfig() {
         try {
-            log.info("Attempting to load configs from 'src/main/resources/config'");
+            log.debug("Attempting to load config...");
 
-            Gson g = new Gson();
-            String basePath = "src/%s/resources/config/".formatted(
-                BoarBotApp.getBot().getBotType() == BotType.TEST ? "test" : "main"
-            );
+            String basePath = "config/";
 
-            File langConfig = new File(basePath + "lang/en_us.json");
-            config.setStringConfig(g.fromJson(getJson(langConfig), StringConfig.class));
+            config.setMainConfig(getFromJson(basePath + "config.json", MainConfig.class));
 
-            File colorConfig = new File(basePath + "util/colors.json");
-            config.setColorConfig(
-                g.fromJson(getJson(colorConfig), new TypeToken<Map<String, String>>(){}.getType())
-            );
+            config.setStringConfig(getFromJson(basePath + "lang/en_us.json", StringConfig.class));
 
-            File constantConfig = new File(basePath + "util/constants.json");
-            config.setNumberConfig(g.fromJson(getJson(constantConfig), NumberConfig.class));
+            config.setColorConfig(getFromJson(
+                basePath + "util/colors.json", new TypeToken<Map<String, String>>(){}.getType()
+            ));
+            config.setNumberConfig(getFromJson(basePath + "util/constants.json", NumberConfig.class));
+            config.setPathConfig(getFromJson(basePath + "util/paths.json", PathConfig.class));
 
-            File pathConfig = new File(basePath + "util/paths.json");
-            config.setPathConfig(g.fromJson(getJson(pathConfig), PathConfig.class));
+            config.setCommandConfig(getFromJson(
+                basePath + "discord/commands.json", new TypeToken<Map<String, CommandConfig>>(){}.getType()
+            ));
+            config.setComponentConfig(getFromJson(basePath + "discord/components.json", ComponentConfig.class));
+            config.setModalConfig(getFromJson(
+                basePath + "discord/modals.json", new TypeToken<Map<String, ModalConfig>>(){}.getType()
+            ));
 
-            File mainConfig = new File(basePath + "config.json");
-            config.setMainConfig(g.fromJson(getJson(mainConfig), MainConfig.class));
+            config.setPromptConfig(getFromJson(
+                basePath + "game/pow_prompts.json", new TypeToken<Map<String, PromptConfig>>(){}.getType()
+            ));
+            config.setQuestConfig(getFromJson(
+                basePath + "game/quests.json", new TypeToken<Map<String, QuestConfig>>(){}.getType()
+            ));
+            config.setRarityConfigs(getFromJson(
+                basePath + "game/rarities.json", new TypeToken<Map<String, RarityConfig>>(){}.getType()
+            ));
 
-            File commandConfig = new File(basePath + "discord/commands.json");
-            config.setCommandConfig(
-                g.fromJson(getJson(commandConfig), new TypeToken<Map<String, CommandConfig>>(){}.getType())
-            );
-
-            File componentConfig = new File(basePath + "discord/components.json");
-            config.setComponentConfig(g.fromJson(getJson(componentConfig), ComponentConfig.class));
-
-            File modalConfig = new File(basePath + "discord/modals.json");
-            config.setModalConfig(
-                g.fromJson(getJson(modalConfig), new TypeToken<Map<String, ModalConfig>>(){}.getType())
-            );
-
-            File promptConfig = new File(basePath + "game/pow_prompts.json");
-            config.setPromptConfig(
-                g.fromJson(getJson(promptConfig), new TypeToken<Map<String, PromptConfig>>(){}.getType())
-            );
-
-            File questConfig = new File(basePath + "game/quests.json");
-            config.setQuestConfig(
-                g.fromJson(getJson(questConfig), new TypeToken<Map<String, QuestConfig>>(){}.getType())
-            );
-
-            File rarityConfigs = new File(basePath + "game/rarities.json");
-            config.setRarityConfigs(
-                g.fromJson(getJson(rarityConfigs), new TypeToken<Map<String, RarityConfig>>(){}.getType())
-            );
-
-            File badgeConfig = new File(basePath + "items/badges.json");
-            config.getItemConfig().setBadges(
-                g.fromJson(getJson(badgeConfig), new TypeToken<Map<String, BadgeItemConfig>>(){}.getType())
-            );
-
-            File boarConfig = new File(basePath + "items/boars.json");
-            config.getItemConfig().setBoars(
-                g.fromJson(getJson(boarConfig), new TypeToken<Map<String, BoarItemConfig>>(){}.getType())
-            );
-
-            File powerupConfig = new File(basePath + "items/powerups.json");
-            config.getItemConfig().setPowerups(
-                g.fromJson(getJson(powerupConfig), new TypeToken<Map<String, PowerupItemConfig>>(){}.getType())
-            );
+            config.getItemConfig().setBadges(getFromJson(
+                basePath + "items/badges.json", new TypeToken<Map<String, BadgeItemConfig>>(){}.getType()
+            ));
+            config.getItemConfig().setBoars(getFromJson(
+                basePath + "items/boars.json", new TypeToken<Map<String, BoarItemConfig>>(){}.getType()
+            ));
+            config.getItemConfig().setPowerups(getFromJson(
+                basePath + "items/powerups.json", new TypeToken<Map<String, PowerupItemConfig>>(){}.getType()
+            ));
 
             for (BoarItemConfig boar : config.getItemConfig().getBoars().values()) {
                 setNames(boar);
@@ -110,21 +83,19 @@ class ConfigLoader {
             }
 
             String fontPath = config.getPathConfig().getFontAssets() + config.getPathConfig().getMainFont();
-            InputStream is = BoarBotApp.getResourceStream(fontPath);
 
             try {
+                InputStream is = BoarBotApp.getResourceStream(fontPath);
                 BoarBotApp.getBot().setFont(Font.createFont(Font.TRUETYPE_FONT, is));
             } catch (Exception exception) {
-                log.error(
-                    "There was a problem when creating font from font file %s".formatted(fontPath), exception
-                );
+                log.error("There was a problem when creating font from font file", exception);
             }
 
             fixStrings();
 
-            log.info("Successfully loaded config");
-        } catch (FileNotFoundException exception) {
-            log.error("Unable to find one or more config files in 'src/main/resources/config'", exception);
+            log.debug("Successfully loaded config");
+        } catch (IOException exception) {
+            log.error("Unable to find one or more config files", exception);
             System.exit(-1);
         }
     }
@@ -214,14 +185,25 @@ class ConfigLoader {
         );
     }
 
-    private static String getJson(File file) throws FileNotFoundException {
-        Scanner reader = new Scanner(file);
-        StringBuilder jsonStr = new StringBuilder();
+    private static <T> T getFromJson(String path, Class<T> clazz) throws IOException {
+        try (InputStream stream = BoarBotApp.getResourceStream(path)) {
+            if (stream == null) {
+                throw new IllegalArgumentException("Resource not found " + path);
+            }
 
-        while (reader.hasNextLine()) {
-            jsonStr.append(reader.nextLine());
+            InputStreamReader streamReader = new InputStreamReader(stream);
+            return new Gson().fromJson(streamReader, clazz);
         }
+    }
 
-        return jsonStr.toString();
+    private static <T> T getFromJson(String path, Type type) throws IOException {
+        try (InputStream stream = BoarBotApp.getResourceStream(path)) {
+            if (stream == null) {
+                throw new IllegalArgumentException("Resource not found " + path);
+            }
+
+            InputStreamReader streamReader = new InputStreamReader(stream);
+            return new Gson().fromJson(streamReader, type);
+        }
     }
 }

@@ -239,22 +239,22 @@
     "descriptionAlt": "Get <>green<><%sms<>font<> in a Powerup Event",
     "questVals": [
       {
-        "requirement": "6000",
+        "requirement": "8000",
         "rewardType": "bucks",
         "rewardAmt": 5
       },
       {
-        "requirement": "4500",
+        "requirement": "6000",
         "rewardType": "bucks",
         "rewardAmt": 10
       },
       {
-        "requirement": "3000",
+        "requirement": "4000",
         "rewardType": "bucks",
         "rewardAmt": 25
       },
       {
-        "requirement": "1500",
+        "requirement": "2000",
         "rewardType": "transmute",
         "rewardAmt": 1
       }

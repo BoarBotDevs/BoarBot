@@ -184,10 +184,10 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     }
 
     private String getQuestValue(QuestType quest, int progress, int index) {
-        int requirementAmt = QuestUtil.getRequiredAmt(quest, index);
+        int requirementAmt = QuestUtil.getRequiredAmt(quest, index, false);
         String questValue = "<>%s<>%d/%d";
 
-        boolean requirementMet = quest.equals(QuestType.POW_FAST) == (progress < requirementAmt);
+        boolean requirementMet = progress >= requirementAmt;
         String colorKey = requirementMet ? "green" : "silver";
 
         if (!requirementMet) {

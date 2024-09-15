@@ -37,10 +37,12 @@ class CommandLoader implements Configured {
             globalCommands.add(SlashCommandData.fromData(DataObject.fromJson(command.toString())));
         }
 
-        Guild devGuild = BoarBotApp.getBot().getJDA().getGuildById(BoarBotApp.getBot().getEnv().get("GUILD_ID"));
+        Guild devGuild = BoarBotApp.getBot().getJDA().getGuildById(CONFIG.getMainConfig().getDevGuild());
 
         if (devGuild != null) {
             devGuild.updateCommands().addCommands(guildCommands).complete();
+        } else {
+            log.warn("Unable to find development guild. Could not deploy developer commands!");
         }
 
         BoarBotApp.getBot().getJDA().updateCommands().addCommands(globalCommands).complete();

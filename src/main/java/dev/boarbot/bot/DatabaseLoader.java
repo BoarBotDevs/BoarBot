@@ -6,6 +6,7 @@ import dev.boarbot.bot.config.items.BadgeItemConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.data.QuestDataUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -16,6 +17,8 @@ import java.sql.SQLException;
 class DatabaseLoader implements Configured {
     public static void loadIntoDatabase(String databaseType) {
         try (Connection connection = DataUtil.getConnection()) {
+            log.debug("Loading %s into the database...".formatted(databaseType));
+
             if (databaseType.equals("rarities")) {
                 String resetQuery = """
                     DELETE FROM rarities_info
@@ -43,8 +46,21 @@ class DatabaseLoader implements Configured {
                     statement.executeUpdate();
                 }
             }
+
+            log.debug("Loaded %s into the database".formatted(databaseType));
         } catch (SQLException exception) {
             log.error("Something went wrong when loading config data into database.", exception);
+            System.exit(-1);
+        }
+    }
+
+    public static void fixQuests() {
+        try (Connection connection = DataUtil.getConnection()) {
+            if (QuestDataUtil.needNewQuests(connection)) {
+                QuestDataUtil.updateQuests(connection);
+            }
+        } catch (SQLException exception) {
+            log.error("Something went wrong when fixing quests", exception);
             System.exit(-1);
         }
     }

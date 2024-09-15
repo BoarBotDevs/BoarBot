@@ -14,6 +14,11 @@ public class MainConfig {
     private String[] devs = {};
 
     /**
+     * The guild ID the bot uses to deploy dev commands
+     */
+    private String devGuild = "";
+
+    /**
      * The text channel ID the bot sends certain logs to
      */
     private String logChannel = "";
@@ -24,14 +29,9 @@ public class MainConfig {
     private String reportsChannel = "";
 
     /**
-     * The text channel ID the bot sends update messages to
+     * The text channel ID the bot attempts to ping for notifications (LEGACY SUPPORT)
      */
-    private String updatesChannel = "";
-
-    /**
-     * The text channel ID the bot defaults to for notifications
-     */
-    private String defaultChannel = "";
+    private String pingChannel = "";
 
     /**
      * The text channel ID the channel to send spook messages to

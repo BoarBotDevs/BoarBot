@@ -215,8 +215,8 @@ class MegaMenuComponentsGetter implements Configured {
                 continue;
             }
 
-            int requiredAmt = QuestUtil.getRequiredAmt(quest, i);
-            boolean enableClaim = quest.equals(QuestType.POW_FAST) == (progress < requiredAmt);
+            int requiredAmt = QuestUtil.getRequiredAmt(quest, i, false);
+            boolean enableClaim = progress >= requiredAmt;
 
             if (enableClaim) {
                 claimBtn = claimBtn.withDisabled(false);

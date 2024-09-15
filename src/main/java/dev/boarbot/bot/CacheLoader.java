@@ -27,14 +27,14 @@ class CacheLoader implements Configured {
     }
 
     private static void loadBoars() {
-        log.info("Attempting to load boar images into cache");
+        log.debug("Attempting to load boar images into cache...");
 
         for (String boarID : BOARS.keySet()) {
             try {
                 BoarItemConfig boarInfo = BOARS.get(boarID);
 
                 if (boarInfo.getFile().isEmpty()) {
-                    throw new IllegalArgumentException("Failed to find file.");
+                    throw new IllegalArgumentException("Failed to find file");
                 }
 
                 String filePath = boarInfo.getStaticFile() != null
@@ -42,7 +42,7 @@ class CacheLoader implements Configured {
                     : PATHS.getBoars() + boarInfo.getFile();
 
                 if (filePath.endsWith(".gif")) {
-                    throw new IllegalArgumentException("Animated file is missing a static version.");
+                    throw new IllegalArgumentException("Animated file is missing a static version");
                 }
 
                 BufferedImage largeBoarImage = new BufferedImage(
@@ -82,13 +82,13 @@ class CacheLoader implements Configured {
             }
         }
 
-        log.info("Successfully loaded all boar images into cache");
+        log.debug("Successfully loaded all boar images into cache");
     }
 
     private static void loadBorders() {
         String rarityBorderPath = PATHS.getMegaMenuAssets() + PATHS.getRarityBorder();
 
-        log.info("Attempting to load rarity borders into cache");
+        log.debug("Attempting to load rarity borders into cache...");
 
         for (String rarityID : RARITIES.keySet()) {
             String color = COLORS.get(rarityID);
@@ -121,6 +121,6 @@ class CacheLoader implements Configured {
             }
         }
 
-        log.info("Successfully loaded all rarity borders into cache");
+        log.debug("Successfully loaded all rarity borders into cache");
     }
 }

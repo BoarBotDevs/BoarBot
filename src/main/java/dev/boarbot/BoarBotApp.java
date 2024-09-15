@@ -2,7 +2,7 @@ package dev.boarbot;
 
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.BoarBot;
-import dev.boarbot.bot.BotType;
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.Getter;
 
 import java.io.InputStream;
@@ -17,6 +17,9 @@ import java.net.URL;
  */
 public class BoarBotApp {
     @Getter private static Bot bot;
+    private static final Dotenv env = Dotenv.configure()
+        .filename(".env")
+        .load();
 
     public static void main(String... args) {
         if (args.length != 0 && args[0].equals("deploy-prod")) {
@@ -25,18 +28,7 @@ public class BoarBotApp {
         }
 
         BoarBotApp.bot = new BoarBot();
-
-        BotType botType = BotType.DEV;
-
-        if (System.getProperty("environment") != null) {
-            botType = switch(System.getProperty("environment").toLowerCase().charAt(0)) {
-                case 'p' -> BotType.PROD;
-                case 't' -> BotType.TEST;
-                default -> BotType.DEV;
-            };
-        }
-
-        BoarBotApp.bot.create(botType);
+        BoarBotApp.bot.create();
 
         if (args.length != 0 && args[0].equals("deploy-commands")) {
             BoarBotApp.bot.deployCommands();
@@ -46,6 +38,10 @@ public class BoarBotApp {
     public static void reset() {
         BoarBotApp.bot = null;
         BoarBotApp.main();
+    }
+
+    public static Dotenv getEnv() {
+        return BoarBotApp.env;
     }
 
     public static URL getResource(String path) {

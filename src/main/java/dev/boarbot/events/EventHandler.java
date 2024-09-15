@@ -1,6 +1,5 @@
 package dev.boarbot.events;
 
-import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
@@ -15,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-public abstract class EventHandler implements Configured {
+public abstract class EventHandler {
     protected Set<String> failedGuilds = new HashSet<>();
 
     protected ImageGenerator imageGenerator;
