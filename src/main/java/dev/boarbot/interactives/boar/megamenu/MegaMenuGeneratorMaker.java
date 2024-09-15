@@ -210,7 +210,7 @@ class MegaMenuGeneratorMaker implements Configured {
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
                 this.interactive.setQuestData(this.interactive.getBoarUser().megaQuery().getQuestsData(connection));
-                this.interactive.setQuestIDs(QuestDataUtil.getQuests(connection));
+                this.interactive.setQuests(QuestDataUtil.getQuests(connection));
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
@@ -227,7 +227,7 @@ class MegaMenuGeneratorMaker implements Configured {
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
             this.interactive.getQuestData(),
-            this.interactive.getQuestIDs()
+            this.interactive.getQuests()
         );
     }
 

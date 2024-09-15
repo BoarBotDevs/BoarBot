@@ -1,5 +1,6 @@
 package dev.boarbot.entities.boaruser.queries;
 
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.util.boar.BoarUtil;
 
@@ -9,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public class PowerupQueries {
+public class PowerupQueries implements Configured {
     private final BoarUser boarUser;
 
     public PowerupQueries(BoarUser boarUser) {
@@ -17,20 +18,25 @@ public class PowerupQueries {
     }
 
     public void addPowerup(Connection connection, String powerupID, int amount) throws SQLException {
+        this.addPowerup(connection, powerupID, amount, false);
+    }
+
+    public void addPowerup(Connection connection, String powerupID, int amount, boolean force) throws SQLException {
         this.boarUser.baseQuery().addUser(connection);
         this.boarUser.forceSynchronized();
         this.insertPowerupIfNotExist(connection, powerupID);
 
         String updateQuery = """
             UPDATE collected_powerups
-            SET amount = amount + ?
+            SET amount = LEAST(amount + ?, ?)
             WHERE user_id = ? AND powerup_id = ?;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
             statement.setInt(1, amount);
-            statement.setString(2, this.boarUser.getUserID());
-            statement.setString(3, powerupID);
+            statement.setLong(2, powerupID.equals("transmute") && !force ? NUMS.getMaxTransmute() : Integer.MAX_VALUE);
+            statement.setString(3, this.boarUser.getUserID());
+            statement.setString(4, powerupID);
             statement.execute();
         }
     }

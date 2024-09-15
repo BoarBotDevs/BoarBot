@@ -378,10 +378,13 @@ public class ItemImageGenerator extends ImageGenerator {
         List<String> boarIDs, List<Integer> bucksGotten, User user, String title, User giftingUser
     ) {
         List<ItemImageGenerator> itemGens = new ArrayList<>();
+        String baseTitle = title;
 
         for (int i=0; i<boarIDs.size(); i++) {
             if (boarIDs.get(i).equals(CONFIG.getMainConfig().getFirstBoarID())) {
                 title = STRS.getFirstTitle();
+            } else {
+                title = baseTitle;
             }
 
             ItemImageGenerator boarItemGen = new ItemImageGenerator(

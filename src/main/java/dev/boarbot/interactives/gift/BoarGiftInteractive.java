@@ -11,8 +11,11 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.UserInteractive;
+import dev.boarbot.util.quests.QuestInfo;
+import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
@@ -66,6 +69,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
     private List<String> boarIDs = new ArrayList<>();
     private int numBucks = 0;
+
+    private final List<QuestInfo> senderQuestInfos = new ArrayList<>();
+    private final List<QuestInfo> openerQuestInfos = new ArrayList<>();
 
     private final Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getGift();
 
@@ -331,8 +337,8 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         try {
             if (this.outcomeType == null && this.giftWinner != null) {
                 try (Connection connection = DataUtil.getConnection()) {
-                    long userVal = this.giftTimes
-                       .get(boarUser.getUser()) - boarUser.giftQuery().getGiftHandicap(connection);
+                    long userVal = this.giftTimes.get(boarUser.getUser()) -
+                       boarUser.giftQuery().getGiftHandicap(connection);
 
                     if (userVal > this.giftWinnerValue) {
                         this.giftWinner = boarUser.getUser();
@@ -347,6 +353,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
                     if (this.hasGift) {
                         boarUser.powQuery().usePowerup(connection, "gift", 1);
+                        this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
+                            QuestType.SEND_GIFTS, 1, connection
+                        ));
                     }
                 }
             } else if (this.outcomeType == OutcomeType.SPECIAL || this.outcomeType == OutcomeType.BOAR) {
@@ -368,6 +377,17 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     boarUser.giftQuery().openGift(
                         connection, this.numBucks, rarityKeys, this.giftWinner.getId().equals(boarUser.getUserID())
                     );
+
+                    if (this.giftWinner.getId().equals(boarUser.getUserID())) {
+                        this.openerQuestInfos.add(boarUser.questQuery().addProgress(
+                            QuestType.OPEN_GIFTS, 1, connection
+                        ));
+                        QuestUtil.sendQuestClaimMessage(
+                            this.giftInteractions.get(this.giftWinner).getHook(), this.openerQuestInfos
+                        );
+                    } else {
+                        QuestUtil.sendQuestClaimMessage(this.hook, this.senderQuestInfos);
+                    }
                 }
             }
         } catch (SQLException exception) {
@@ -381,6 +401,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.boarQuery().addBoars(this.boarIDs, connection, BoarObtainType.GIFT, bucksGotten, editions);
+            this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
+                QuestType.COLLECT_RARITY, this.boarIDs, connection
+            ));
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {
@@ -405,6 +428,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     private void giveBucks(BoarUser boarUser) throws SQLException {
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.baseQuery().giveBucks(connection, this.numBucks);
+            this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
+                QuestType.COLLECT_BUCKS, this.boarIDs, connection
+            ));
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {
@@ -521,5 +547,13 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         return rows.toArray(new ActionRow[0]);
+    }
+
+    private List<QuestInfo> getQuestInfos(BoarUser boarUser) {
+        if (this.giftWinner != null && this.giftWinner.equals(boarUser.getUser())) {
+            return this.openerQuestInfos;
+        }
+
+        return this.senderQuestInfos;
     }
 }

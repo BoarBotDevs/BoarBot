@@ -7,6 +7,8 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.events.PowerupEventHandler;
 import dev.boarbot.events.PromptType;
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.util.quests.QuestUtil;
+import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
@@ -19,6 +21,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -39,6 +42,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
     private final String powerupID;
     private final Map<String, Long> userTimes;
     private final Map<String, Boolean> failUsers;
+    private final Map<String, InteractionHook> userHooks = new HashMap<>();
     private long sentTimestamp;
 
     @Setter private FileUpload eventImage;
@@ -73,6 +77,8 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
         String userID = compEvent.getUser().getId();
         EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getPowEventAttempted(), COLORS.get("error"));
 
+        this.userHooks.put(userID, compEvent.getHook());
+
         try {
             boolean hasAttempted = this.userTimes.containsKey(userID) ||
                 this.failUsers.containsKey(userID) && this.failUsers.get(userID);
@@ -98,7 +104,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 String powStr = eventAmt == 1
                     ? POWS.get(this.powerupID).getName()
                     : POWS.get(this.powerupID).getPluralName();
-                embedGen.setStr(STRS.getPowEventSuccess().formatted(eventAmt, powStr, this.userTimes.get(userID)))
+                embedGen.setStr(STRS.getPowEventSuccess().formatted(this.userTimes.get(userID), eventAmt, powStr))
                     .setColor(COLORS.get("font"));
 
                 compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
@@ -144,6 +150,11 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.eventQuery().applyPowEventWin(
                     connection, this.powerupID, POWS.get(this.powerupID).getEventAmt(), this.userTimes.get(userID)
+                );
+                QuestUtil.sendQuestClaimMessage(
+                    this.userHooks.get(boarUser.getUserID()),
+                    boarUser.questQuery().addProgress(QuestType.POW_WIN, 1, connection),
+                    boarUser.questQuery().addProgress(QuestType.POW_FAST, this.userTimes.get(userID), connection)
                 );
             } catch (SQLException exception) {
                 log.error("Failed to give Powerup Event win", exception);

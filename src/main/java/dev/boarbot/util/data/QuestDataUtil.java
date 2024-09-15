@@ -1,6 +1,7 @@
 package dev.boarbot.util.data;
 
 import dev.boarbot.api.util.Configured;
+import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.sql.*;
@@ -8,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QuestDataUtil implements Configured {
-    public static List<String> getQuests(Connection connection) throws SQLException {
-        List<String> quests = new ArrayList<>();
+    public static List<QuestType> getQuests(Connection connection) throws SQLException {
+        List<QuestType> quests = new ArrayList<>();
         Timestamp curQuestTimestamp = new Timestamp(TimeUtil.getLastQuestResetMilli());
 
         String questQuery = """
@@ -31,13 +32,13 @@ public class QuestDataUtil implements Configured {
 
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
-                    quests.add(results.getString("quest_one_id"));
-                    quests.add(results.getString("quest_two_id"));
-                    quests.add(results.getString("quest_three_id"));
-                    quests.add(results.getString("quest_four_id"));
-                    quests.add(results.getString("quest_five_id"));
-                    quests.add(results.getString("quest_six_id"));
-                    quests.add(results.getString("quest_seven_id"));
+                    quests.add(QuestType.fromString(results.getString("quest_one_id")));
+                    quests.add(QuestType.fromString(results.getString("quest_two_id")));
+                    quests.add(QuestType.fromString(results.getString("quest_three_id")));
+                    quests.add(QuestType.fromString(results.getString("quest_four_id")));
+                    quests.add(QuestType.fromString(results.getString("quest_five_id")));
+                    quests.add(QuestType.fromString(results.getString("quest_six_id")));
+                    quests.add(QuestType.fromString(results.getString("quest_seven_id")));
                 }
             }
         }
@@ -60,7 +61,7 @@ public class QuestDataUtil implements Configured {
             newQuests.add(quests.remove(randQuest));
         }
 
-        String questQuery = """
+        String query = """
             INSERT INTO quests (
                 quest_start_timestamp,
                 quest_one_id,
@@ -74,29 +75,7 @@ public class QuestDataUtil implements Configured {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         """;
 
-        String userQuery = """
-            UPDATE user_quests
-            SET
-                one_progress = 0,
-                one_claimed = false,
-                two_progress = 0,
-                two_claimed = false,
-                three_progress = 0,
-                three_claimed = false,
-                four_progress = 0,
-                four_claimed = false,
-                five_progress = 0,
-                five_claimed = false,
-                six_progress = 0,
-                six_claimed = false,
-                seven_progress = 0,
-                seven_claimed = false
-        """;
-
-        try (
-            PreparedStatement statement1 = connection.prepareStatement(questQuery);
-            PreparedStatement statement2 = connection.prepareStatement(userQuery)
-        ) {
+        try (PreparedStatement statement1 = connection.prepareStatement(query)) {
             statement1.setTimestamp(1, new Timestamp(TimeUtil.getQuestResetMilli()));
             statement1.setString(2, newQuests.getFirst());
             statement1.setString(3, newQuests.get(1));
@@ -106,8 +85,6 @@ public class QuestDataUtil implements Configured {
             statement1.setString(7, newQuests.get(5));
             statement1.setString(8, newQuests.get(6));
             statement1.execute();
-
-            statement2.executeUpdate();
         }
     }
 
@@ -130,5 +107,16 @@ public class QuestDataUtil implements Configured {
         }
 
         return questTimestamp == null || questTimestamp.getTime() < TimeUtil.getLastQuestResetMilli();
+    }
+
+    public static int getQuestIndex(QuestType quest, Connection connection) throws SQLException {
+        List<QuestType> quests = getQuests(connection);
+        for (int i=0; i<quests.size(); i++) {
+            if (quests.get(i).equals(quest)) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

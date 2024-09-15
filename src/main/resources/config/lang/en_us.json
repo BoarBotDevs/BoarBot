@@ -140,7 +140,7 @@
   "powEventPromptLabel": "Prompt",
   "powEventNobody": "Nobody participated in this event! :(",
   "powEventAttempted": "You've already attempted this Powerup Event!",
-  "powEventSuccess": "<>green<>Correct!<>font<> You've received <>powerup<>%d %s<>font<> from the <>powerup<>Powerup Event<>font<>! Your time: <>silver<>%,dms",
+  "powEventSuccess": "<>green<>Correct!<>font<> This <>powerup<>Powerup Event<>font<> took you <>silver<>%,dms<>font<> to guess correctly! You received <>powerup<>%d %s<>font<> as a reward!",
   "powEventIncorrect": "<>error<>Incorrect!<>font<> You have one more chance to perform the task.",
   "powEventFail": "<>error<>You failed!<>font<> Better luck next time!",
   "notificationSuccess": "You've successfully enabled notifications! You'll be notified when /%s %s is available again. \n\nTo disable notifications, simply message me STOP at any time.",

@@ -1,7 +1,6 @@
-from PIL import Image, ImageSequence, ImageFont, ImageDraw, ImageChops
+from PIL import Image, ImageSequence
 import base64
 from io import BytesIO
-import requests
 import json
 import sys
 

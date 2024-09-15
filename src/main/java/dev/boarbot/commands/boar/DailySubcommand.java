@@ -8,8 +8,11 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
+import dev.boarbot.util.quests.QuestInfo;
+import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
@@ -34,6 +37,8 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     private boolean notificationsOn = false;
     private boolean isFirstDaily = false;
     private boolean hasDonePowerup = false;
+
+    private final List<QuestInfo> questInfos = new ArrayList<>();
 
     public DailySubcommand(SlashCommandInteractionEvent event) {
         super(event);
@@ -117,8 +122,18 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             );
             this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
-            boarUser.boarQuery().addBoars(this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions);
+            boarUser.boarQuery().addBoars(
+                this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions
+            );
             boarUser.powQuery().useActiveMiracles(this.boarIDs, this.bucksGotten, connection);
+
+            this.questInfos.add(boarUser.questQuery().addProgress(QuestType.DAILY, 1, connection));
+            this.questInfos.add(boarUser.questQuery().addProgress(
+                QuestType.COLLECT_RARITY, this.boarIDs, connection
+            ));
+            this.questInfos.add(boarUser.questQuery().addProgress(
+                QuestType.COLLECT_BUCKS, this.bucksGotten.stream().reduce(0, Integer::sum), connection
+            ));
         } catch (SQLException exception) {
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
         }
@@ -139,6 +154,8 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 log.error("Failed to generate first daily reward image.", exception);
             }
         }
+
+        QuestUtil.sendQuestClaimMessage(this.interaction.getHook(), this.questInfos);
     }
 
     private void sendPowResponse() {

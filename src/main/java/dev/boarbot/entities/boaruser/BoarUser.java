@@ -23,6 +23,7 @@ public class BoarUser {
     private final GiftQueries giftQuery;
     private final MegaMenuQueries megaQuery;
     private final PowerupQueries powQuery;
+    private final QuestQueries questQuery;
 
     @Getter boolean isSynchronized = false;
     private int numRefs = 0;
@@ -40,6 +41,7 @@ public class BoarUser {
         this.giftQuery = new GiftQueries(this);
         this.megaQuery = new MegaMenuQueries(this);
         this.powQuery = new PowerupQueries(this);
+        this.questQuery = new QuestQueries(this);
         this.incRefs();
     }
 
@@ -72,6 +74,10 @@ public class BoarUser {
 
     public PowerupQueries powQuery() {
         return this.powQuery;
+    }
+
+    public QuestQueries questQuery() {
+        return this.questQuery;
     }
 
     public synchronized void passSynchronizedAction(Synchronizable callingObject) {

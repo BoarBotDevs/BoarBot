@@ -5,10 +5,12 @@ import dev.boarbot.bot.config.quests.QuestConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.entities.boaruser.data.QuestData;
+import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
@@ -36,7 +38,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     private static final int RIGHT_Y_SPACING = 198;
 
     private final QuestData questData;
-    private final List<String> questIDs;
+    private final List<QuestType> quests;
 
     private boolean allQuestsDone = true;
 
@@ -46,11 +48,11 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
         List<BadgeData> badges,
         String firstJoinedDate,
         QuestData questData,
-        List<String> questIDs
+        List<QuestType> quests
     ) {
         super(page, boarUser, badges, firstJoinedDate);
         this.questData = questData;
-        this.questIDs = questIDs;
+        this.quests = quests;
     }
 
     @Override
@@ -66,7 +68,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
             g2d, "", ORIGIN, Align.LEFT, COLORS.get("font"), NUMS.getFontMedium(), QUEST_WIDTH
         );
 
-        for (int i=0; i<this.questIDs.size(); i++) {
+        for (int i=0; i<this.quests.size(); i++) {
             this.drawQuest(g2d, i);
         }
 
@@ -119,7 +121,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     }
 
     private void drawQuestStr(int index) {
-        String questStr = this.getQuestStr(this.questIDs.get(index), index);
+        String questStr = this.getQuestStr(this.quests.get(index), index);
 
         this.textDrawer.setText(questStr);
         this.textDrawer.setFontSize(NUMS.getFontSmallMedium());
@@ -130,12 +132,12 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
         this.textDrawer.drawText();
     }
 
-    private String getQuestStr(String questID, int index) {
-        QuestConfig questConfig = CONFIG.getQuestConfig().get(questID);
+    private String getQuestStr(QuestType quest, int index) {
+        QuestConfig questConfig = CONFIG.getQuestConfig().get(quest.toString());
         String requirement = questConfig.getQuestVals()[index/2].getRequirement();
 
-        return switch (questID) {
-            case "daily", "cloneBoars", "powWin" -> {
+        return switch (quest) {
+            case QuestType.DAILY, QuestType.CLONE_BOARS, QuestType.POW_WIN -> {
                 boolean isMultiple = Integer.parseInt(requirement) > 1;
 
                 yield isMultiple
@@ -143,7 +145,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
                     : questConfig.getDescription().formatted(requirement);
             }
 
-            case "collectRarity", "cloneRarity" -> {
+            case QuestType.COLLECT_RARITY, QuestType.CLONE_RARITY -> {
                 char firstChar = requirement.charAt(0);
                 boolean isVowel = firstChar == 'a' || firstChar == 'e' || firstChar == 'i' || firstChar == 'o' ||
                     firstChar == 'u';
@@ -154,9 +156,10 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
                     : questConfig.getDescription().formatted(requirement, rarityName);
             }
 
-            case "spendBucks", "collectBucks", "powFast" -> questConfig.getDescription().formatted(requirement);
+            case QuestType.SPEND_BUCKS, QuestType.COLLECT_BUCKS, QuestType.POW_FAST ->
+                questConfig.getDescription().formatted(requirement);
 
-            case "sendGifts", "openGifts" -> {
+            case QuestType.SEND_GIFTS, QuestType.OPEN_GIFTS -> {
                 boolean isMultiple = Integer.parseInt(requirement) > 1;
                 String giftStr = isMultiple
                     ? POWS.get("gift").getPluralName()
@@ -164,14 +167,12 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
 
                 yield questConfig.getDescription().formatted(requirement, giftStr);
             }
-
-            default -> STRS.getUnavailable();
         };
     }
 
     private void drawQuestValue(int index) {
         String questValue = this.getQuestValue(
-            this.questIDs.get(index), this.questData.questProgress().get(index), index
+            this.quests.get(index), this.questData.questProgress().get(index), index
         );
 
         this.textDrawer.setText(questValue);
@@ -182,36 +183,18 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
         this.textDrawer.drawText();
     }
 
-    private String getQuestValue(String questID, int progress, int index) {
-        QuestConfig questConfig = CONFIG.getQuestConfig().get(questID);
-        String requirement = questConfig.getQuestVals()[index/2].getRequirement();
+    private String getQuestValue(QuestType quest, int progress, int index) {
+        int requirementAmt = QuestUtil.getRequiredAmt(quest, index);
         String questValue = "<>%s<>%d/%d";
 
-        return switch (questID) {
-            case "daily", "spendBucks", "collectBucks", "cloneBoars", "sendGifts", "openGifts", "powWin" -> {
-                int requirementAmt = Integer.parseInt(requirement);
-                boolean requirementMet = progress >= requirementAmt;
-                String colorKey = requirementMet ? "green" : "silver";
+        boolean requirementMet = quest.equals(QuestType.POW_FAST) == (progress < requirementAmt);
+        String colorKey = requirementMet ? "green" : "silver";
 
-                if (!requirementMet) {
-                    this.allQuestsDone = false;
-                }
+        if (!requirementMet) {
+            this.allQuestsDone = false;
+        }
 
-                yield questValue.formatted(colorKey, progress, requirementAmt);
-            }
-
-            case "collectRarity", "cloneRarity", "powFast" -> {
-                boolean requirementMet = progress >= 1;
-                String colorKey = requirementMet ? "green" : "silver";
-
-                if (!requirementMet) {
-                    this.allQuestsDone = false;
-                }
-
-                yield questValue.formatted(colorKey, progress, 1);
-            }
-            default -> questValue.formatted("silver", 0, 0);
-        };
+        return questValue.formatted(colorKey, progress, requirementAmt);
     }
 
     private void drawReward(Graphics2D g2d, int index) throws IOException, URISyntaxException {
@@ -221,7 +204,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
             return;
         }
 
-        IndivQuestConfig indivQuestConfig = CONFIG.getQuestConfig().get(this.questIDs.get(index))
+        IndivQuestConfig indivQuestConfig = CONFIG.getQuestConfig().get(this.quests.get(index).toString())
             .getQuestVals()[index/2];
         String rewardType = indivQuestConfig.getRewardType();
         int rewardAmt = indivQuestConfig.getRewardAmt();

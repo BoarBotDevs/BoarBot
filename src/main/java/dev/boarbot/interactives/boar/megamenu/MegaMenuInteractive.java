@@ -10,8 +10,10 @@ import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.interactives.gift.BoarGiftInteractive;
+import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
@@ -97,7 +99,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter @Setter private int numTryCharm;
 
     @Getter @Setter private QuestData questData;
-    @Getter @Setter private List<String> questIDs;
+    @Getter @Setter private List<QuestType> quests;
 
     public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) throws SQLException {
         super(event.getInteraction());
@@ -285,6 +287,13 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                         );
 
                         boarUser.powQuery().usePowerup(connection, "clone", this.numTryClone);
+
+                        QuestUtil.sendQuestClaimMessage(
+                            this.compEvent.getHook(),
+                            boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection),
+                            boarUser.questQuery().addProgress(QuestType.CLONE_BOARS, newBoarIDs.size(), connection),
+                            boarUser.questQuery().addProgress(QuestType.CLONE_RARITY, newBoarIDs, connection)
+                        );
                     }
                 } else {
                     this.acknowledgeImageGen = new OverlayImageGenerator(
@@ -341,6 +350,11 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                     );
 
                     boarUser.powQuery().usePowerup(connection, "transmute", this.numTransmute);
+
+                    QuestUtil.sendQuestClaimMessage(
+                        this.compEvent.getHook(),
+                        boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection)
+                    );
                 } else {
                     this.acknowledgeImageGen = new OverlayImageGenerator(
                         null, STRS.getCompNoBoar().formatted("<>" + this.curRarityKey + "<>" + boarName)
