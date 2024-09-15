@@ -51,7 +51,7 @@ Gives a player their boar for the day. Some boars are rarer than others!
 </div>
 
 ### /boar collection
-Shows players their entire collection of boars, powerups, and badges. Also shows neat statistics!
+Shows players an entire collection of boars, powerups, and badges. Also shows neat statistics!
 
 <div align="center">
     <img src="https://github.com/WeslayCodes/BoarBot/assets/60010287/b05b8ff0-fea2-44f0-a5b7-f06d1a414bf6" alt="A user's main collection page showing the most recent 16 boars and other stats" width="600">
