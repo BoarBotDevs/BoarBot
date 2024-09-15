@@ -33,6 +33,7 @@ src/main/resources/config/config.json
 src/main/resources/config/game/rarities.json
 src/main/resources/config/items/boars.json
 src/main/resources/config/items/badges.json
+src/main/resources/logback.xml
 /target
 /logs
 /dataSources
