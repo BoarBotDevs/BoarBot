@@ -365,9 +365,20 @@
         }
       ]
     },
-    "claimBtn": {
-      "custom_id": "CLAIM",
-      "label": "Claim Quest Rewards",
+    "questClaimBtn": {
+      "custom_id": "QUEST_CLAIM",
+      "label": "Claim Rewards",
+      "style": 3,
+      "disabled": true
+    },
+    "questBonusBtn": {
+      "custom_id": "QUEST_BONUS",
+      "label": "Claim Bonus",
+      "style": 3
+    },
+    "questAutoBtn": {
+      "custom_id": "QUEST_AUTO",
+      "label": "Auto Claim: %s",
       "style": 3
     }
   },

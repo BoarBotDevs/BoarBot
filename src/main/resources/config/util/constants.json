@@ -50,5 +50,5 @@
   "fastCols": 3,
   "openDelay": 120000,
   "notificationButtonDelay": 15000,
-  "questFullAmt": 3
+  "questBonusAmt": 3
 }

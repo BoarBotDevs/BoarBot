@@ -157,6 +157,11 @@ public class StringConfig {
     private String questNoBonusLabel = "";
     private String questUnclaimedBonusLabel = "";
     private String questClaimedBonusLabel = "";
+    private String questClaimed = "";
+    private String questMultiClaimed = "";
+    private String questBonusClaimed = "";
+    private String questNoClaim = "";
+    private String questNoBonus = "";
     private String badgeBlocked = "";
     private String badgeObtainedLabel = "";
 

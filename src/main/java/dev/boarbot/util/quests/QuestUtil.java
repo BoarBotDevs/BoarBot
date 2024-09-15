@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 public class QuestUtil implements Configured {
     public static void sendQuestClaimMessage(InteractionHook hook, QuestInfo... questInfos) {
-        List<QuestInfo> questConfigList = Arrays.stream(questInfos).toList();
+        List<QuestInfo> questConfigList = Arrays.asList(questInfos);
         sendQuestClaimMessage(hook, questConfigList);
     }
 
@@ -37,7 +37,11 @@ public class QuestUtil implements Configured {
         }
     }
 
-    private static String getQuestClaimMessage(List<QuestInfo> questInfos) {
+    public static String getQuestClaimMessage(QuestInfo... questInfos) {
+        return getQuestClaimMessage(Arrays.asList(questInfos));
+    }
+
+    public static String getQuestClaimMessage(List<QuestInfo> questInfos) {
         List<IndivQuestConfig> validQuests = new ArrayList<>();
         boolean claimedBonus = false;
 
@@ -52,7 +56,6 @@ public class QuestUtil implements Configured {
                     validQuests.add(quest);
                 }
             }
-
         }
 
         if (validQuests.isEmpty()) {
@@ -60,11 +63,16 @@ public class QuestUtil implements Configured {
         }
 
         String claimString = validQuests.size() == 1
-            ? "You received %s for completing a quest!"
-            : "You received %s for completing multiple quests!";
+            ? STRS.getQuestClaimed()
+            : STRS.getQuestMultiClaimed();
 
         if (claimedBonus) {
-            claimString += " Here's <>powerup<>3 Transmutation Charges<>font<> for perfecting this week!";
+            claimString += " " + STRS.getQuestBonusClaimed().formatted(
+                NUMS.getQuestBonusAmt(),
+                NUMS.getQuestBonusAmt() == 1
+                    ? POWS.get("transmute").getName()
+                    : POWS.get("transmute").getPluralName()
+            );
         }
 
         StringBuilder claimAmts = new StringBuilder();

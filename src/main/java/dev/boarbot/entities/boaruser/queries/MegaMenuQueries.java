@@ -478,7 +478,8 @@ public class MegaMenuQueries {
                 seven_claimed,
                 num_completed,
                 num_full_completed,
-                full_claimed
+                full_claimed,
+                auto_claim
             FROM user_quests
             WHERE user_id = ?;
         """;
@@ -508,11 +509,12 @@ public class MegaMenuQueries {
                     questClaims.add(results.getBoolean("seven_claimed"));
 
                     questData = new QuestData(
-                            questProgress,
-                            questClaims,
-                            results.getInt("num_completed"),
-                            results.getInt("num_full_completed"),
-                            results.getBoolean("full_claimed")
+                        questProgress,
+                        questClaims,
+                        results.getInt("num_completed"),
+                        results.getInt("num_full_completed"),
+                        results.getBoolean("full_claimed"),
+                        results.getBoolean("auto_claim")
                     );
                 }
             }

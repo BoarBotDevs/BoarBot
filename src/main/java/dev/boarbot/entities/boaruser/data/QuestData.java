@@ -8,9 +8,10 @@ public record QuestData(
     List<Boolean> questClaims,
     int questsCompleted,
     int perfectWeeks,
-    boolean fullClaimed
+    boolean fullClaimed,
+    boolean autoClaim
 ) {
     public QuestData() {
-        this(new ArrayList<>(), new ArrayList<>(), 0, 0, false);
+        this(new ArrayList<>(), new ArrayList<>(), 0, 0, false, true);
     }
 }

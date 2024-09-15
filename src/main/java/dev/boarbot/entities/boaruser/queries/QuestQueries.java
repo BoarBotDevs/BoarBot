@@ -3,6 +3,7 @@ package dev.boarbot.entities.boaruser.queries;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.quests.IndivQuestConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.data.QuestData;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.QuestDataUtil;
@@ -36,6 +37,101 @@ public class QuestQueries implements Configured {
 
     public QuestQueries(BoarUser boarUser) {
         this.boarUser = boarUser;
+    }
+
+    public QuestInfo claimQuests(QuestData questData, Connection connection) throws SQLException {
+        List<QuestType> quests = QuestDataUtil.getQuests(connection);
+        List<Integer> questIndexes = new ArrayList<>();
+        List<IndivQuestConfig> claimQuests = new ArrayList<>();
+
+        for (int i=0; i<quests.size(); i++) {
+            QuestType quest = quests.get(i);
+            int progress = questData.questProgress().get(i);
+            boolean claimed = questData.questClaims().get(i);
+
+            if (claimed) {
+                continue;
+            }
+
+            int requiredAmt = QuestUtil.getRequiredAmt(quest, i);
+            boolean shouldClaim = quest.equals(QuestType.POW_FAST) == (progress < requiredAmt);
+
+            if (shouldClaim) {
+                questIndexes.add(i);
+                claimQuests.add(CONFIG.getQuestConfig().get(quest.toString()).getQuestVals()[i/2]);
+            }
+        }
+
+        if (claimQuests.isEmpty()) {
+            return null;
+        }
+
+        String updateQuery = """
+            UPDATE user_quests
+            SET
+                one_claimed = one_claimed + ?,
+                two_claimed = two_claimed + ?,
+                three_claimed = three_claimed + ?,
+                four_claimed = four_claimed + ?,
+                five_claimed = five_claimed + ?,
+                six_claimed = six_claimed + ?,
+                seven_claimed = seven_claimed + ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            for (int i=0; i<quests.size(); i++) {
+                if (questIndexes.contains(i)) {
+                    statement.setInt(i+1, 1);
+                    continue;
+                }
+
+                statement.setInt(i+1, 0);
+            }
+
+            statement.setString(8, this.boarUser.getUserID());
+            statement.executeUpdate();
+        }
+
+        for (IndivQuestConfig claimQuest : claimQuests) {
+            this.giveReward(claimQuest, connection);
+        }
+
+        return new QuestInfo(claimQuests, false);
+    }
+
+    public boolean claimBonus(QuestData questData, Connection connection) throws SQLException {
+        if (questData.fullClaimed()) {
+            return false;
+        }
+
+        String updateQuery = """
+            UPDATE user_quests
+            SET full_claimed = full_claimed + 1
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setString(1, this.boarUser.getUserID());
+            statement.executeUpdate();
+        }
+
+        this.giveBonus(connection);
+
+        return true;
+    }
+
+    public void toggleAutoClaim(Connection connection) throws SQLException {
+        String updateQuery = """
+            UPDATE user_quests
+            SET auto_claim = !auto_claim
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setString(1, this.boarUser.getUserID());
+            statement.executeUpdate();
+        }
     }
 
     public QuestInfo addProgress(
@@ -175,24 +271,32 @@ public class QuestQueries implements Configured {
             }
         }
 
+        if (shouldClaimBonus) {
+            this.giveBonus(connection);
+        }
+
         if (shouldClaim) {
             questConfigs.add(questConfig);
-            this.giveReward(questConfig, true, connection);
+            this.giveReward(questConfig, connection);
             return new QuestInfo(questConfigs, shouldClaimBonus);
         }
 
         return null;
     }
 
-    private void giveReward(IndivQuestConfig questConfig, boolean force, Connection connection) throws SQLException {
+    private void giveReward(IndivQuestConfig questConfig, Connection connection) throws SQLException {
         String rewardType = questConfig.getRewardType();
         int rewardAmt = questConfig.getRewardAmt();
 
         if (rewardType.equals("bucks")) {
             this.boarUser.baseQuery().giveBucks(connection, rewardAmt);
         } else {
-            this.boarUser.powQuery().addPowerup(connection, rewardType, rewardAmt, force);
+            this.boarUser.powQuery().addPowerup(connection, rewardType, rewardAmt, true);
         }
+    }
+
+    private void giveBonus(Connection connection) throws SQLException {
+        this.boarUser.powQuery().addPowerup(connection, "transmute", NUMS.getQuestBonusAmt(), true);
     }
 
     private String getRequiredRarity(QuestType quest, int index) {

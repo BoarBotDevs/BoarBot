@@ -70,5 +70,5 @@ public class NumberConfig {
 
     // Quest values
 
-    private int questFullAmt = 0;
+    private int questBonusAmt = 0;
 }

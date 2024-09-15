@@ -464,7 +464,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
     private void givePowerup(BoarUser boarUser) throws SQLException {
         try (Connection connection = DataUtil.getConnection()) {
-            boarUser.powQuery().addPowerup(connection, this.subOutcomeType.toString(), this.subOutcomeConfig.getRewardAmt());
+            boarUser.powQuery().addPowerup(
+                connection, this.subOutcomeType.toString(), this.subOutcomeConfig.getRewardAmt(), true
+            );
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {

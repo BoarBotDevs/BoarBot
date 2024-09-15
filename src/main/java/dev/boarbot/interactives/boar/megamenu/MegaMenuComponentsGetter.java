@@ -5,7 +5,10 @@ import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.components.SelectOptionConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
+import dev.boarbot.entities.boaruser.data.QuestData;
 import dev.boarbot.util.interactive.InteractiveUtil;
+import dev.boarbot.util.quests.QuestType;
+import dev.boarbot.util.quests.QuestUtil;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -187,7 +190,57 @@ class MegaMenuComponentsGetter implements Configured {
     }
 
     private ActionRow[] getQuestsComponents() {
-        return this.getNav();
+        ActionRow[] nav = this.getNav();
+
+        List<ItemComponent> allBtnsRow = InteractiveUtil.makeComponents(
+            this.interactive.getInteractionID(),
+            this.COMPONENTS.get("questClaimBtn"),
+            this.COMPONENTS.get("questBonusBtn"),
+            this.COMPONENTS.get("questAutoBtn")
+        );
+
+        Button claimBtn = ((Button) allBtnsRow.getFirst());
+        Button bonusBtn = ((Button) allBtnsRow.get(1));
+        Button autoBtn = ((Button) allBtnsRow.get(2));
+
+        QuestData questData = this.interactive.getQuestData();
+        boolean claimBonus = !questData.fullClaimed();
+
+        for (int i=0; i<questData.questProgress().size(); i++) {
+            QuestType quest = this.interactive.getQuests().get(i);
+            int progress = questData.questProgress().get(i);
+            boolean claimed = questData.questClaims().get(i);
+
+            if (claimed) {
+                continue;
+            }
+
+            int requiredAmt = QuestUtil.getRequiredAmt(quest, i);
+            boolean enableClaim = quest.equals(QuestType.POW_FAST) == (progress < requiredAmt);
+
+            if (enableClaim) {
+                claimBtn = claimBtn.withDisabled(false);
+                claimBonus = false;
+                break;
+            }
+        }
+
+        autoBtn = autoBtn.withLabel(autoBtn.getLabel().formatted(questData.autoClaim() ? "ON" : "OFF"));
+        if (!questData.autoClaim()) {
+            autoBtn = autoBtn.withStyle(ButtonStyle.DANGER);
+        }
+
+        List<ItemComponent> mainRow = new ArrayList<>();
+
+        if (claimBonus) {
+            mainRow.add(bonusBtn);
+        } else {
+            mainRow.add(claimBtn);
+        }
+
+        mainRow.add(autoBtn);
+
+        return new ActionRow[] {nav[0], nav[1], ActionRow.of(mainRow)};
     }
 
     private List<ItemComponent> getFilterRow() {

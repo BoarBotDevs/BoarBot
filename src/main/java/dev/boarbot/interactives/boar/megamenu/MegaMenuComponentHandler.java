@@ -149,6 +149,21 @@ class MegaMenuComponentHandler implements Configured {
                 }
 
                 case "POW_SELECT" -> doPowerup();
+
+                case "QUEST_CLAIM" -> {
+                    this.interactive.setQuestAction(QuestAction.CLAIM);
+                    this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+                }
+
+                case "QUEST_BONUS" -> {
+                    this.interactive.setQuestAction(QuestAction.CLAIM_BONUS);
+                    this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+                }
+
+                case "QUEST_AUTO" -> {
+                    this.interactive.setQuestAction(QuestAction.AUTO_CLAIM);
+                    this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+                }
             }
         }
     }

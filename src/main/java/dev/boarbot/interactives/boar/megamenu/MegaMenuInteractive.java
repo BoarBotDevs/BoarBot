@@ -10,6 +10,7 @@ import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.interactives.gift.BoarGiftInteractive;
+import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
@@ -100,6 +101,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     @Getter @Setter private QuestData questData;
     @Getter @Setter private List<QuestType> quests;
+    @Getter @Setter private QuestAction questAction;
 
     public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) throws SQLException {
         super(event.getInteraction());
@@ -219,6 +221,18 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                 this.acknowledgeOpen = true;
                 this.powerupUsing = null;
                 this.confirmOpen = false;
+            } else if (this.questAction != null) {
+                try (Connection connection = DataUtil.getConnection()) {
+                    switch (this.questAction) {
+                        case CLAIM -> this.doQuestClaim(boarUser, connection);
+                        case CLAIM_BONUS -> this.doQuestBonus(boarUser, connection);
+                        case AUTO_CLAIM -> this.toggleQuestAuto(boarUser, connection);
+                    }
+                } catch (SQLException exception) {
+                    log.error("Failed to update quest data", exception);
+                }
+
+                this.questAction = null;
             }
         } catch (SQLException exception) {
             log.error("Failed to get user data", exception);
@@ -428,25 +442,69 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     private void doGift(BoarUser boarUser) throws SQLException {
         PowerupItemConfig powConfig = POWS.get(this.powerupUsing);
+        int giftAmt;
 
         try (Connection connection = DataUtil.getConnection()) {
-            if (boarUser.powQuery().getPowerupAmount(connection, this.powerupUsing) > 0) {
+            giftAmt = boarUser.powQuery().getPowerupAmount(connection, this.powerupUsing);
+
+            if (giftAmt > 0) {
                 this.acknowledgeImageGen = new OverlayImageGenerator(
                     null, STRS.getPowGiftSuccess().formatted(powConfig.getName())
                 );
+            } else {
+                this.acknowledgeImageGen = new OverlayImageGenerator(
+                    null, STRS.getNoPow().formatted(powConfig.getPluralName())
+                );
+            }
+        }
 
+        if (giftAmt > 0) {
+            CompletableFuture.runAsync(() -> {
                 Interactive giftInteractive = InteractiveFactory.constructInteractive(
                     this.compEvent, true, BoarGiftInteractive.class
                 );
                 giftInteractive.execute(null);
-
-                return;
-            }
-
-            this.acknowledgeImageGen = new OverlayImageGenerator(
-                null, STRS.getNoPow().formatted(powConfig.getPluralName())
-            );
+            });
         }
+    }
+
+    private void doQuestClaim(BoarUser boarUser, Connection connection) throws SQLException {
+        this.questData = boarUser.megaQuery().getQuestsData(connection);
+        QuestInfo questInfo = boarUser.questQuery().claimQuests(this.questData, connection);
+        String questClaimStr = QuestUtil.getQuestClaimMessage(questInfo);
+
+        this.acknowledgeOpen = true;
+
+        if (questInfo != null) {
+            this.acknowledgeImageGen = new OverlayImageGenerator(null, questClaimStr);
+        } else {
+            this.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getQuestNoClaim());
+        }
+    }
+
+    private void doQuestBonus(BoarUser boarUser, Connection connection) throws SQLException {
+        this.questData = boarUser.megaQuery().getQuestsData(connection);
+        boolean claimedBonus = boarUser.questQuery().claimBonus(this.questData, connection);
+
+        this.acknowledgeOpen = true;
+
+        if (claimedBonus) {
+            this.acknowledgeImageGen = new OverlayImageGenerator(
+                null,
+                STRS.getQuestBonusClaimed().formatted(
+                    NUMS.getQuestBonusAmt(),
+                    NUMS.getQuestBonusAmt() == 1
+                        ? POWS.get("transmute").getName()
+                        : POWS.get("transmute").getPluralName()
+                )
+            );
+        } else {
+            this.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getQuestNoBonus());
+        }
+    }
+
+    private void toggleQuestAuto(BoarUser boarUser, Connection connection) throws SQLException {
+        boarUser.questQuery().toggleAutoClaim(connection);
     }
 
     private void sendResponse() {
