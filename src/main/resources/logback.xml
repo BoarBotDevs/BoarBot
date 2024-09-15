@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- Main log file path -->
+        <file>logs/latest.log</file>
+
+        <!-- Time-based rolling policy -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Log file pattern, with compression -->
+            <fileNamePattern>logs/%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <!-- Keep logs for 30 days -->
+            <maxHistory>60</maxHistory>
+            <!-- Clean up old logs when the application starts -->
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+
+        <!-- Log message format -->
+        <encoder>
+            <pattern>[%level] [%d{dd/MM/yyyy HH:mm:ss}] [%logger{36}] [%thread] %n> %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%level] [%d{dd/MM/yyyy HH:mm:ss}] [%logger{36}] [%thread] %n> %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <logger name="org.quartz" level="WARN" />
+    <logger name="com.zaxxer" level="WARN" />
+    <logger name="net.dv8tion" level="WARN" />
+    <logger name="org.mariadb.jdbc" level="WARN" />
+</configuration>
