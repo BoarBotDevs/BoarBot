@@ -451,13 +451,9 @@ class MegaMenuComponentHandler implements Configured {
 
         this.interactive.setFilterBits(filterBits);
 
-        try {
-            BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
-            interBoarUser.passSynchronizedAction(this.interactive);
-            interBoarUser.decRefs();
-        } catch (SQLException exception) {
-            log.error("Failed to get boar user.", exception);
-        }
+        BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
+        interBoarUser.passSynchronizedAction(this.interactive);
+        interBoarUser.decRefs();
     }
 
     private void setSortVal() {
@@ -467,13 +463,9 @@ class MegaMenuComponentHandler implements Configured {
             Integer.parseInt(((StringSelectInteractionEvent) this.compEvent).getValues().getFirst())
         ]);
 
-        try {
-            BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
-            interBoarUser.passSynchronizedAction(this.interactive);
-            interBoarUser.decRefs();
-        } catch (SQLException exception) {
-            log.error("Failed to get boar user.", exception);
-        }
+        BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
+        interBoarUser.passSynchronizedAction(this.interactive);
+        interBoarUser.decRefs();
     }
 
     private void confirmClone(int input) {

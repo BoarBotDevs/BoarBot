@@ -2,6 +2,7 @@ package dev.boarbot.entities.boaruser.queries;
 
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.sql.*;
@@ -45,10 +46,6 @@ public class BaseQueries implements Configured {
         }
     }
 
-    public void updateUser(Connection connection) throws SQLException {
-        this.updateUser(connection, false);
-    }
-
     public void updateUser(Connection connection, boolean syncBypass) throws SQLException {
         if (!syncBypass) {
             this.boarUser.forceSynchronized();
@@ -63,31 +60,33 @@ public class BaseQueries implements Configured {
         long lastDailyLong = 0;
         long lastStreakLong = 0;
         long firstJoinedLong = 0;
-        int boarStreak = 0;
+        int boarStreak;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, this.boarUser.getUserID());
 
             try (ResultSet results = statement.executeQuery()) {
-                if (results.next()) {
-                    Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
-                    Timestamp lastStreakFixTimestamp = results.getTimestamp("last_streak_fix");
-                    Timestamp firstJoinedTimestamp = results.getTimestamp("first_joined_timestamp");
-
-                    if (lastDailyTimestamp != null) {
-                        lastDailyLong = lastDailyTimestamp.getTime();
-                    }
-
-                    if (lastStreakFixTimestamp != null) {
-                        lastStreakLong = lastStreakFixTimestamp.getTime();
-                    }
-
-                    if (firstJoinedTimestamp != null) {
-                        firstJoinedLong = firstJoinedTimestamp.getTime();
-                    }
-
-                    boarStreak = results.getInt("boar_streak");
+                if (!results.next()) {
+                    return;
                 }
+
+                Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
+                Timestamp lastStreakFixTimestamp = results.getTimestamp("last_streak_fix");
+                Timestamp firstJoinedTimestamp = results.getTimestamp("first_joined_timestamp");
+
+                if (lastDailyTimestamp != null) {
+                    lastDailyLong = lastDailyTimestamp.getTime();
+                }
+
+                if (lastStreakFixTimestamp != null) {
+                    lastStreakLong = lastStreakFixTimestamp.getTime();
+                }
+
+                if (firstJoinedTimestamp != null) {
+                    firstJoinedLong = firstJoinedTimestamp.getTime();
+                }
+
+                boarStreak = results.getInt("boar_streak");
             }
         }
 
@@ -104,20 +103,22 @@ public class BaseQueries implements Configured {
             curDailiesMissed++;
         }
 
-        if (curDailiesMissed > 0) {
-            query = """
-                UPDATE users
-                SET boar_streak = ?, num_dailies_missed = num_dailies_missed + ?, last_streak_fix = ?
-                WHERE user_id = ?
-            """;
+        if (curDailiesMissed == 0) {
+            return;
+        }
 
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setInt(1, newBoarStreak);
-                statement.setInt(2, curDailiesMissed);
-                statement.setTimestamp(3, new Timestamp(TimeUtil.getLastDailyResetMilli()-1));
-                statement.setString(4, this.boarUser.getUserID());
-                statement.executeUpdate();
-            }
+        String updateQuery = """
+            UPDATE users
+            SET boar_streak = ?, num_dailies_missed = num_dailies_missed + ?, last_streak_fix = ?
+            WHERE user_id = ?
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setInt(1, newBoarStreak);
+            statement.setInt(2, curDailiesMissed);
+            statement.setTimestamp(3, new Timestamp(TimeUtil.getLastDailyResetMilli()-1));
+            statement.setString(4, this.boarUser.getUserID());
+            statement.executeUpdate();
         }
     }
 
@@ -161,7 +162,6 @@ public class BaseQueries implements Configured {
 
     public void setNotifications(Connection connection, String channelID) throws SQLException {
         this.addUser(connection);
-        this.boarUser.forceSynchronized();
 
         String query = """
             UPDATE users
@@ -235,6 +235,7 @@ public class BaseQueries implements Configured {
             }
         }
 
+        Log.debug(this.boarUser.getUser(), this.getClass(), "Blessings: %,d".formatted(blessings));
         return blessings;
     }
 }

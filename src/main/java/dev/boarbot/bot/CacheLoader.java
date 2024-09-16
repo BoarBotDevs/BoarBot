@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 @Slf4j
@@ -76,10 +78,10 @@ class CacheLoader implements Configured {
 
                 GraphicsUtil.drawImage(mediumBoarGraphics, filePath, ORIGIN, MEDIUM_SIZE);
                 imageCacheMap.put("medium" + boarID, mediumBoarImage);
-            } catch (Exception exception) {
-                log.error("Failed to generate cache image for %s".formatted(boarID), exception);
+            } catch (IOException exception) {
+                log.error("Failed to read image file for %s".formatted(boarID), exception);
                 System.exit(-1);
-            }
+            } catch (URISyntaxException ignored) {}
         }
 
         log.debug("Successfully loaded all boar images into cache");
@@ -115,10 +117,10 @@ class CacheLoader implements Configured {
                 GraphicsUtil.drawImage(rarityMediumBigBorderG2D, rarityBorderPath, ORIGIN, MEDIUM_BIG_SIZE);
                 rarityMediumBigBorderG2D.setComposite(AlphaComposite.SrcIn);
                 imageCacheMap.put("borderMediumBig" + rarityID, rarityMediumBigBorderImage);
-            } catch (Exception exception) {
-                log.error("Failed to generate cache image for %s border".formatted(rarityID), exception);
+            } catch (IOException exception) {
+                log.error("Failed to read image file for %s border".formatted(rarityID), exception);
                 System.exit(-1);
-            }
+            } catch (URISyntaxException ignored) {}
         }
 
         log.debug("Successfully loaded all rarity borders into cache");

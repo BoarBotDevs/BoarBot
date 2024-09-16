@@ -3,6 +3,7 @@ package dev.boarbot.entities.boaruser.queries;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.logging.Log;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,6 +40,8 @@ public class PowerupQueries implements Configured {
             statement.setString(4, powerupID);
             statement.execute();
         }
+
+        Log.debug(this.boarUser.getUser(), this.getClass(), "Obtained +%,d %s".formatted(amount, powerupID));
     }
 
     private void insertPowerupIfNotExist(Connection connection, String powerupID) throws SQLException {
@@ -174,5 +177,7 @@ public class PowerupQueries implements Configured {
             statement.setString(3, this.boarUser.getUserID());
             statement.executeUpdate();
         }
+
+        Log.debug(this.boarUser.getUser(), this.getClass(), "Used activate miracles (if user had any active)");
     }
 }

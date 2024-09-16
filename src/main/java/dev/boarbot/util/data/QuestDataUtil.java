@@ -1,6 +1,7 @@
 package dev.boarbot.util.data;
 
 import dev.boarbot.api.util.Configured;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.time.TimeUtil;
 
@@ -47,6 +48,8 @@ public class QuestDataUtil implements Configured {
     }
 
     public static void updateQuests(Connection connection) throws SQLException {
+        Log.debug(QuestDataUtil.class, "Updating quests...");
+
         List<String> quests = new ArrayList<>(CONFIG.getQuestConfig().keySet());
         List<String> newQuests = new ArrayList<>();
 
@@ -86,6 +89,8 @@ public class QuestDataUtil implements Configured {
             statement1.setString(8, newQuests.get(6));
             statement1.execute();
         }
+
+        Log.debug(QuestDataUtil.class, "New quests added");
     }
 
     public static boolean needNewQuests(Connection connection) throws SQLException {

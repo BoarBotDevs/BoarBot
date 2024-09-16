@@ -8,6 +8,7 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.boar.BoarObtainType;
@@ -17,8 +18,8 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.time.TimeUtil;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.io.IOException;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Slf4j
 public class DailySubcommand extends Subcommand implements Synchronizable {
     private List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucksGotten = new ArrayList<>();
@@ -45,49 +45,38 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     }
 
     @Override
-    public void execute() throws InterruptedException {
+    public void execute() {
         if (!this.canInteract()) {
             return;
         }
 
-        try {
-            BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-            boarUser.passSynchronizedAction(this);
-            boarUser.decRefs();
-        } catch (SQLException exception) {
-            log.error("Failed to get boar user", exception);
-            return;
-        }
+        BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
+        boarUser.passSynchronizedAction(this);
+        boarUser.decRefs();
 
         if (!this.canDaily) {
             this.interaction.deferReply().setEphemeral(true).queue();
 
-            String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), false);
-            dailyResetDistance = dailyResetDistance.substring(dailyResetDistance.indexOf(' ')+1);
-
-            String replyStr = STRS.getDailyUsed().formatted(dailyResetDistance);
-
-            MessageEditBuilder editedMsg = new MessageEditBuilder();
-
             if (!this.notificationsOn) {
+                Log.debug(this.user, this.getClass(), "Sending DailyNotifyInteractive");
                 Interactive interactive = InteractiveFactory.constructInteractive(
                     this.event, DailyNotifyInteractive.class
                 );
-                editedMsg.setComponents(interactive.getCurComponents());
-
-                replyStr += " " + STRS.getDailyUsedNotify();
+                interactive.execute(null);
+                return;
             }
+
+            String dailyResetDistance = TimeUtil.getTimeDistance(TimeUtil.getNextDailyResetMilli(), false);
+            dailyResetDistance = dailyResetDistance.substring(dailyResetDistance.indexOf(' ')+1);
+            String replyStr = STRS.getDailyUsed().formatted(dailyResetDistance);
 
             try {
-                EmbedImageGenerator embedGen = new EmbedImageGenerator(replyStr);
-                editedMsg.setFiles(embedGen.generate().getFileUpload());
-
+                FileUpload fileUpload = new EmbedImageGenerator(replyStr).generate().getFileUpload();
+                MessageEditBuilder editedMsg = new MessageEditBuilder().setFiles(fileUpload).setComponents();
                 this.interaction.getHook().editOriginal(editedMsg.build()).queue();
             } catch (IOException exception) {
-                log.error("Failed to generate next daily reset image.", exception);
+                Log.error(this.user, this.getClass(), "Failed to generate daily used message", exception);
             }
-
-            return;
         }
 
         if (!this.boarIDs.isEmpty()) {
@@ -99,20 +88,25 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             if (!boarUser.boarQuery().canUseDaily(connection) && !CONFIG.getMainConfig().isUnlimitedBoars()) {
+                Log.debug(this.user, this.getClass(), "Daily not available");
                 this.canDaily = false;
                 this.notificationsOn = boarUser.baseQuery().getNotificationStatus(connection);
                 return;
             }
 
             if (!this.hasDonePowerup && this.event.getOption("powerup") != null) {
+                Log.debug(this.user, this.getClass(), "Attempting to use powerup");
                 this.hasDonePowerup = true;
                 this.sendPowResponse();
                 return;
             }
 
             if (!this.hasDonePowerup) {
+                Log.debug(this.user, this.getClass(), "Doing daily without powerup");
                 this.interaction.deferReply().complete();
             }
+
+            Log.debug(this.user, this.getClass(), "Doing daily");
 
             this.isFirstDaily = boarUser.isFirstDaily();
 
@@ -127,6 +121,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             );
             boarUser.powQuery().useActiveMiracles(this.boarIDs, this.bucksGotten, connection);
 
+            Log.debug(this.user, this.getClass(), "Adding quest progress");
             this.questInfos.add(boarUser.questQuery().addProgress(QuestType.DAILY, 1, connection));
             this.questInfos.add(boarUser.questQuery().addProgress(
                 QuestType.COLLECT_RARITY, this.boarIDs, connection
@@ -135,13 +130,14 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 QuestType.COLLECT_BUCKS, this.bucksGotten.stream().reduce(0, Integer::sum), connection
             ));
         } catch (SQLException exception) {
-            log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
+            Log.error(this.user, this.getClass(), "One or more queries failed", exception);
         }
     }
 
     private void sendResponse() {
         String title = STRS.getDailyTitle();
 
+        Log.debug(this.user, this.getClass(), "Sending ItemInteractive");
         ItemInteractive.sendInteractive(
             this.boarIDs, this.bucksGotten, this.boarEditions, null, this.user, title, this.interaction.getHook(), false
         );
@@ -151,7 +147,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getDailyFirstTime());
                 this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
             } catch (IOException exception) {
-                log.error("Failed to generate first daily reward image.", exception);
+                Log.error(this.user, this.getClass(), "Failed to generate first daily reward message", exception);
             }
         }
 
@@ -161,6 +157,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     private void sendPowResponse() {
         this.interaction.deferReply().complete();
 
+        Log.debug(this.user, this.getClass(), "Sending DailyPowerupInteractive");
         Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
         interactive.execute(null);
     }

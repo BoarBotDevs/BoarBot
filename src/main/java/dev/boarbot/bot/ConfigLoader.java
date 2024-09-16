@@ -13,20 +13,19 @@ import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.bot.config.quests.QuestConfig;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-@Slf4j
 class ConfigLoader {
     private static final BotConfig config = BoarBotApp.getBot().getConfig();
     
     public static void loadConfig() {
         try {
-            log.debug("Attempting to load config...");
+            Log.debug(ConfigLoader.class, "Attempting to load config...");
 
             String basePath = "config/";
 
@@ -87,15 +86,17 @@ class ConfigLoader {
             try {
                 InputStream is = BoarBotApp.getResourceStream(fontPath);
                 BoarBotApp.getBot().setFont(Font.createFont(Font.TRUETYPE_FONT, is));
-            } catch (Exception exception) {
-                log.error("There was a problem when creating font from font file", exception);
+            } catch (FontFormatException exception) {
+                Log.error(ConfigLoader.class, "The font file is not a TTF file", exception);
+            } catch (IOException exception) {
+                Log.error(ConfigLoader.class, "The font file could not be read", exception);
             }
 
             fixStrings();
 
-            log.debug("Successfully loaded config");
+            Log.debug(ConfigLoader.class, "Successfully loaded config");
         } catch (IOException exception) {
-            log.error("Unable to find one or more config files", exception);
+            Log.error(ConfigLoader.class, "Unable to read one or more config files", exception);
             System.exit(-1);
         }
     }

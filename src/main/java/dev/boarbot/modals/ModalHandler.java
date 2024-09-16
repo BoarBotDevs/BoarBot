@@ -11,8 +11,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class ModalHandler implements Configured {
@@ -39,10 +38,7 @@ public class ModalHandler implements Configured {
         }
 
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> this.delayStop(NUMS.getInteractiveIdle()));
-        executor.shutdown();
+        CompletableFuture.runAsync(() -> this.delayStop(NUMS.getInteractiveIdle()));
     }
 
     public void execute(ModalInteractionEvent modalEvent) {

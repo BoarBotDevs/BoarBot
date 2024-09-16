@@ -2,15 +2,16 @@ package dev.boarbot.listeners;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.commands.Subcommand;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-@Slf4j
 public class CommandListener extends ListenerAdapter implements Runnable {
     private final Map<String, Constructor<? extends Subcommand>> subcommands = BoarBotApp.getBot().getSubcommands();
     private SlashCommandInteractionEvent event = null;
@@ -30,29 +31,50 @@ public class CommandListener extends ListenerAdapter implements Runnable {
 
     @Override
     public void run() {
-        log.info(
-            "[%s] (%s) ran '/%s %s'".formatted(
-                this.event.getUser().getName(),
-                this.event.getUser().getId(),
-                this.event.getName(),
-                this.event.getSubcommandName()
-            )
-        );
+        String commandStr = "/%s %s".formatted(this.event.getName(), this.event.getSubcommandName());
+        Log.debug(this.event.getUser(), this.getClass(), "Running %s".formatted(commandStr));
 
         if (!this.event.isFromGuild()) {
             return;
         }
 
         try {
-            Subcommand subcommand = subcommands.get(
-                this.event.getName() + this.event.getSubcommandName()
-            ).newInstance(this.event);
+            Subcommand subcommand = subcommands.get(this.event.getName() + this.event.getSubcommandName())
+                .newInstance(this.event);
             subcommand.execute();
-        } catch (Exception exception) {
-            log.error(
-                "Something went wrong when running '/%s %s'.".formatted(
-                    this.event.getName(), this.event.getSubcommandName()
-                ),
+        } catch (InstantiationException exception) {
+            Log.error(
+                this.event.getUser(),
+                this.getClass(),
+                "%s's class is an abstract class".formatted(commandStr),
+                exception
+            );
+        } catch (IllegalAccessException exception) {
+            Log.error(
+                this.event.getUser(),
+                this.getClass(),
+                "%s's constructor is not public".formatted(commandStr),
+                exception
+            );
+        } catch (InvocationTargetException exception) {
+            Log.error(
+                this.event.getUser(),
+                this.getClass(),
+                "%s's constructor threw exception".formatted(commandStr),
+                exception
+            );
+        } catch (ErrorResponseException exception) {
+            Log.warn(
+                this.event.getUser(),
+                this.getClass(),
+                "%s's execute method threw a Discord exception".formatted(commandStr),
+                exception
+            );
+        } catch (RuntimeException exception) {
+            Log.error(
+                this.event.getUser(),
+                this.getClass(),
+                "%s's execute method threw a runtime exception".formatted(commandStr),
                 exception
             );
         }

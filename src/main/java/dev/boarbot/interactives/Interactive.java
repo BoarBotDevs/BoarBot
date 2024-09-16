@@ -12,9 +12,8 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 public abstract class Interactive implements Configured {
@@ -52,10 +51,7 @@ public abstract class Interactive implements Configured {
         }
 
         interactives.put(interactiveID, this);
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> this.tryStop(waitTime));
-        executor.shutdown();
+        CompletableFuture.runAsync(() -> this.tryStop(waitTime));
     }
 
     protected String findDuplicateKey() {

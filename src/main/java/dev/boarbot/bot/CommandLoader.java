@@ -5,7 +5,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.commands.CommandConfig;
 import dev.boarbot.bot.config.commands.SubcommandConfig;
 import dev.boarbot.commands.Subcommand;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -16,10 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 class CommandLoader implements Configured {
     public static void deployCommands() {
-        log.info("Deploying commands...");
+        Log.info(CommandLoader.class, "Deploying commands...");
 
         Map<String, CommandConfig> commandData = CONFIG.getCommandConfig();
 
@@ -42,11 +41,11 @@ class CommandLoader implements Configured {
         if (devGuild != null) {
             devGuild.updateCommands().addCommands(guildCommands).complete();
         } else {
-            log.warn("Unable to find development guild. Could not deploy developer commands!");
+            Log.warn(CommandLoader.class, "Unable to find development guild. Could not deploy developer commands!");
         }
 
         BoarBotApp.getBot().getJDA().updateCommands().addCommands(globalCommands).complete();
-        log.info("Commands successfully deployed");
+        Log.info(CommandLoader.class, "Commands successfully deployed");
     }
 
     public static void registerSubcommands() {
@@ -56,6 +55,9 @@ class CommandLoader implements Configured {
             Map<String, SubcommandConfig> subcommandData = commandVal.getSubcommands();
 
             for (SubcommandConfig subcommandVal : subcommandData.values()) {
+                String subcommandName = "/%s %s".formatted(commandVal.getName(), subcommandVal.getName());
+                Log.debug(CommandLoader.class, "Registering subcommand %s...".formatted(subcommandName));
+
                 try {
                     Class<? extends Subcommand> subcommandClass = Class.forName(subcommandVal.getLocation())
                         .asSubclass(Subcommand.class);
@@ -64,14 +66,22 @@ class CommandLoader implements Configured {
 
                     BoarBotApp.getBot().getSubcommands()
                         .put(commandVal.getName() + subcommandVal.getName(), subcommandConstructor);
-                } catch (Exception exception) {
-                    log.error(
-                        "Failed to find constructor for '/%s %s'."
-                            .formatted(commandVal.getName(), subcommandVal.getName()),
-                        exception
+                } catch (ClassNotFoundException exception) {
+                    Log.error(
+                        CommandLoader.class, "Invalid class location for %s".formatted(subcommandName), exception
+                    );
+                    System.exit(-1);
+                } catch (NoSuchMethodException exception) {
+                    Log.error(
+                        CommandLoader.class, "%s does not have a valid constructor".formatted(subcommandName), exception
                     );
                     System.exit(-1);
                 }
+
+                Log.debug(
+                    CommandLoader.class,
+                    "Subcommand /%s %s registered".formatted(commandVal.getName(), subcommandVal.getName())
+                );
             }
         }
     }

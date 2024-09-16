@@ -149,7 +149,7 @@
   "powEventIncorrect": "<>error<>Incorrect!<>font<> You have one more chance to perform the task.",
   "powEventFail": "<>error<>You failed!<>font<> Better luck next time!",
   "notificationSuccess": "You've successfully enabled notifications! You'll be notified when /%s %s is available again. \n\nTo disable notifications, simply message me STOP at any time.",
-  "notificationFailed": "Failed to enable notifications! I'm unable to DM you. To fix this, invite me to a server where you have DMs open (Right click the server > Privacy Settings > Enable Direct Messages).",
+  "notificationFailed": "<>error<>Failed to enable notifications! I'm unable to DM you. To fix this, invite me to a server where you have DMs open (Right click the server > Privacy Settings > Enable Direct Messages).",
   "notificationSuccessReply": "Success! You should've received a DM from me.",
   "notificationDailyReady": "## Your daily %s is ready!",
   "notificationStopStr": "\n||Message me STOP to turn off notifications||",

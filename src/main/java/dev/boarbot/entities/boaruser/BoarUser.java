@@ -3,14 +3,13 @@ package dev.boarbot.entities.boaruser;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.entities.boaruser.queries.*;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.logging.Log;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 
 import java.sql.*;
 
-@Slf4j
 public class BoarUser {
     private User user;
     @Getter private final String userID;
@@ -28,12 +27,12 @@ public class BoarUser {
     @Getter boolean isSynchronized = false;
     private int numRefs = 0;
 
-    public BoarUser(User user) throws SQLException {
+    public BoarUser(User user) {
         this(user.getId());
         this.user = user;
     }
 
-    public BoarUser(String userID) throws SQLException {
+    public BoarUser(String userID) {
         this.userID = userID;
         this.baseQuery = new BaseQueries(this);
         this.boarQuery = new BoarQueries(this);
@@ -92,10 +91,12 @@ public class BoarUser {
         }
     }
 
-    public synchronized void incRefs() throws SQLException {
+    public synchronized void incRefs() {
         this.numRefs++;
         try (Connection connection = DataUtil.getConnection()) {
             this.baseQuery.updateUser(connection, true);
+        } catch (SQLException exception) {
+            Log.error(this.getUser(), this.getClass(), "Failed to update user's data", exception);
         }
     }
 

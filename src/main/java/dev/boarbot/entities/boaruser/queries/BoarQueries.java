@@ -4,6 +4,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.sql.*;
@@ -30,6 +31,7 @@ public class BoarQueries implements Configured {
         List<String> newBoarIDs = new ArrayList<>();
 
         if (this.boarUser.isFirstDaily()) {
+            Log.debug(this.boarUser.getUser(), this.getClass(), "Giving first daily bonus");
             this.boarUser.powQuery().addPowerup(connection, "miracle", 5);
             this.boarUser.powQuery().addPowerup(connection, "gift", 1);
         }
@@ -68,6 +70,16 @@ public class BoarQueries implements Configured {
 
         boarIDs.clear();
         boarIDs.addAll(newBoarIDs);
+
+        for (int i=0; i<boarIDs.size(); i++) {
+            String boarID = boarIDs.get(i);
+            int bucks = bucksGotten.get(i);
+            long edition = boarEditions.get(i);
+
+            Log.info(
+                this.boarUser.getUser(), this.getClass(), "Obtained %s ($%,d, #%,d)".formatted(boarID, bucks, edition)
+            );
+        }
     }
 
     public boolean hasBoar(String boarID, Connection connection) throws SQLException {

@@ -36,6 +36,7 @@ public class BoarBot implements Bot {
     @Override
     public void create() {
         log.info("Starting up bot...");
+
         ConfigLoader.loadConfig();
         DatabaseLoader.loadIntoDatabase("rarities");
         DatabaseLoader.loadIntoDatabase("boars");

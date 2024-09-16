@@ -91,14 +91,9 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             if (compEvent.getComponentId().endsWith("y")) {
                 this.userTimes.put(userID, TimeUtil.getCurMilli() - this.sentTimestamp);
 
-                try {
-                    BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
-                    boarUser.passSynchronizedAction(this);
-                    boarUser.decRefs();
-                } catch (SQLException exception) {
-                    log.error("Failed to get boar user", exception);
-                    return;
-                }
+                BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
+                boarUser.passSynchronizedAction(this);
+                boarUser.decRefs();
 
                 int eventAmt = POWS.get(this.powerupID).getEventAmt();
                 String powStr = eventAmt == 1
@@ -114,14 +109,9 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             if (this.failUsers.containsKey(userID)) {
                 this.failUsers.put(userID, true);
 
-                try {
-                    BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
-                    boarUser.passSynchronizedAction(this);
-                    boarUser.decRefs();
-                } catch (SQLException exception) {
-                    log.error("Failed to get boar user", exception);
-                    return;
-                }
+                BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
+                boarUser.passSynchronizedAction(this);
+                boarUser.decRefs();
 
                 embedGen.setStr(STRS.getPowEventFail()).setColor(COLORS.get("font"));
                 compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();

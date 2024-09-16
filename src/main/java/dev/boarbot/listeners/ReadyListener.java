@@ -2,7 +2,8 @@ package dev.boarbot.listeners;
 
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.jobs.JobScheduler;
-import dev.boarbot.util.logging.DiscordLog;
+import dev.boarbot.util.logging.Log;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -12,8 +13,12 @@ import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class ReadyListener extends ListenerAdapter implements Configured {
+    @Getter private static boolean done = false;
+
     @Override
     public void onReady(@NotNull ReadyEvent event) {
+        ReadyListener.done = true;
+
         TextChannel logChannel = event.getJDA().getTextChannelById(CONFIG.getMainConfig().getLogChannel());
         ForumChannel reportChannel = event.getJDA().getForumChannelById(CONFIG.getMainConfig().getReportsChannel());
         TextChannel pingChannel = event.getJDA().getTextChannelById(CONFIG.getMainConfig().getPingChannel());
@@ -30,7 +35,7 @@ public class ReadyListener extends ListenerAdapter implements Configured {
             log.warn("Invalid ping channel ID. The legacy channel pinging system is disabled!");
         }
 
-        DiscordLog.forceLog(this.getClass(), "Bot is online!");
+        Log.info(this.getClass(), "Bot is online!", true);
 
         JobScheduler.scheduleJobs();
     }

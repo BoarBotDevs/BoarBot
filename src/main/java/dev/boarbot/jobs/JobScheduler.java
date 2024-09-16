@@ -1,14 +1,13 @@
 package dev.boarbot.jobs;
 
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-@Slf4j
 public class JobScheduler {
     public static void scheduleJobs() {
         try {
-            log.debug("Scheduling jobs...");
+            Log.debug(JobScheduler.class, "Scheduling jobs...");
 
             SchedulerFactory schedulerFactory = new StdSchedulerFactory();
             Scheduler scheduler = schedulerFactory.getScheduler();
@@ -17,9 +16,9 @@ public class JobScheduler {
             scheduler.scheduleJob(PowerupEventJob.getJob(), PowerupEventJob.getTrigger());
             scheduler.scheduleJob(QuestResetJob.getJob(), QuestResetJob.getTrigger());
 
-            log.debug("Jobs successfully scheduled");
+            Log.debug(JobScheduler.class, "Jobs successfully scheduled");
         } catch (SchedulerException exception) {
-            log.error("Failed to schedule one or more jobs", exception);
+            Log.error(JobScheduler.class, "Failed to schedule one or more jobs", exception);
         }
 
         // TODO

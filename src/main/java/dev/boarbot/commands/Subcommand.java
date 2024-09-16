@@ -4,7 +4,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
-@Slf4j
 public abstract class Subcommand implements Configured {
     protected final SlashCommandInteractionEvent event;
     protected final SlashCommandInteraction interaction;
@@ -27,7 +26,7 @@ public abstract class Subcommand implements Configured {
         this.user = event.getUser();
     }
 
-    public abstract void execute() throws InterruptedException;
+    public abstract void execute();
 
     protected boolean canInteract() {
         try (Connection connection = DataUtil.getConnection()) {
@@ -41,20 +40,22 @@ public abstract class Subcommand implements Configured {
             EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getNoSetup(), COLORS.get("error"));
 
             if (!isSetup) {
+                Log.debug(this.user, this.getClass(), "Guild not setup, not proceeding");
                 this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
                 return false;
             }
 
             if (!isValidChannel) {
+                Log.debug(this.user, this.getClass(), "Invalid channel, not proceeding");
                 embedGen.setStr(STRS.getWrongChannel());
                 this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
                 return false;
             }
         } catch (SQLException exception) {
-            log.error("Failed to find guild information.", exception);
+            Log.error(this.user, this.getClass(), "Failed to get valid channel IDs", exception);
             return false;
         } catch (IOException exception) {
-            log.error("Failed to create invalid response image.", exception);
+            Log.error(this.user, this.getClass(), "Failed to generate response image", exception);
             return false;
         }
 

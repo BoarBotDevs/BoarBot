@@ -42,8 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 public class BoarGiftInteractive extends UserInteractive implements Synchronizable {
@@ -106,9 +104,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
             this.enabled = true;
 
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> this.enableGift(randWaitTime));
-            executor.shutdown();
+            CompletableFuture.runAsync(() -> this.enableGift(randWaitTime));
 
             return;
         }
@@ -168,21 +164,22 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         this.giftEnabledTimestamp = TimeUtil.getCurMilli();
         this.sendResponse();
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            try {
-                Thread.sleep(NUMS.getGiftMaxHandicap());
-            } catch (InterruptedException exception) {
-                if (!this.isStopped) {
-                    this.stop(StopType.EXPIRED);
-                }
-            }
+        CompletableFuture.runAsync(this::tryClaimAtMaxHandicap);
 
-            if (!this.giftTimes.isEmpty()) {
-                this.giveGift();
+    }
+
+    private void tryClaimAtMaxHandicap() {
+        try {
+            Thread.sleep(NUMS.getGiftMaxHandicap());
+        } catch (InterruptedException exception) {
+            if (!this.isStopped) {
+                this.stop(StopType.EXPIRED);
             }
-        });
-        executor.shutdown();
+        }
+
+        if (!this.giftTimes.isEmpty()) {
+            this.giveGift();
+        }
     }
 
     private synchronized void giveGift() {
@@ -192,13 +189,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         this.givenGift = true;
 
-        try {
-            BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-            boarUser.passSynchronizedAction(this);
-            boarUser.decRefs();
-        } catch (SQLException exception) {
-            log.error("Failed to get sender powerups");
-        }
+        BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
+        boarUser.passSynchronizedAction(this);
+        boarUser.decRefs();
 
         if (!this.hasGift) {
             this.stop(StopType.EXPIRED);
@@ -208,13 +201,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         this.giftWinner = this.giftTimes.keySet().toArray(new User[0])[0];
 
         for (User user : this.giftTimes.keySet()) {
-            try {
-                BoarUser openUser = BoarUserFactory.getBoarUser(user);
-                openUser.passSynchronizedAction(this);
-                openUser.decRefs();
-            } catch (SQLException exception) {
-                log.error("Failed to get user data", exception);
-            }
+            BoarUser openUser = BoarUserFactory.getBoarUser(user);
+            openUser.passSynchronizedAction(this);
+            openUser.decRefs();
         }
 
         try {
@@ -259,21 +248,13 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             );
         }
 
-        try {
-            BoarUser openUser = BoarUserFactory.getBoarUser(this.giftWinner);
-            openUser.passSynchronizedAction(this);
-            openUser.decRefs();
-        } catch (SQLException exception) {
-            log.error("Failed to get user data", exception);
-        }
+        BoarUser openUser = BoarUserFactory.getBoarUser(this.giftWinner);
+        openUser.passSynchronizedAction(this);
+        openUser.decRefs();
 
-        try {
-            BoarUser sendUser = BoarUserFactory.getBoarUser(this.user);
-            sendUser.passSynchronizedAction(this);
-            sendUser.decRefs();
-        } catch (SQLException exception) {
-            log.error("Failed to get user data", exception);
-        }
+        BoarUser sendUser = BoarUserFactory.getBoarUser(this.user);
+        sendUser.passSynchronizedAction(this);
+        sendUser.decRefs();
     }
 
     private void setOutcome() {

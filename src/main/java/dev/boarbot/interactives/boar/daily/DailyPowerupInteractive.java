@@ -89,13 +89,9 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 case "SUBMIT_POW" -> {
                     compEvent.deferEdit().queue();
 
-                    try {
-                        BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-                        boarUser.passSynchronizedAction(this);
-                        boarUser.decRefs();
-                    } catch (SQLException exception) {
-                        log.error("Failed to get boar user.", exception);
-                    }
+                    BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
+                    boarUser.passSynchronizedAction(this);
+                    boarUser.decRefs();
                 }
 
                 case "CANCEL_POW" -> this.stop(StopType.EXPIRED);
@@ -145,7 +141,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             log.error("Failed to add boar to database for user (%s)!".formatted(this.user.getName()), exception);
         } catch (IOException e) {
             log.error("Failed to create embed image");
-        } catch (InterruptedException ignored) {}
+        }
 
         this.sendResponse();
     }

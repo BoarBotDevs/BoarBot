@@ -5,6 +5,7 @@ import dev.boarbot.bot.config.quests.IndivQuestConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.data.QuestData;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.QuestDataUtil;
 import dev.boarbot.util.quests.QuestInfo;
@@ -257,6 +258,12 @@ public class QuestQueries implements Configured {
         String rewardType = questConfig.getRewardType();
         int rewardAmt = questConfig.getRewardAmt();
 
+        Log.debug(
+            this.boarUser.getUser(),
+            this.getClass(),
+            "Added %,d progress for %s quest".formatted(val, quest)
+        );
+
         if (rewardType.equals("bucks")) {
             QuestInfo bucksQuest = this.addProgress(QuestType.COLLECT_BUCKS, rewardAmt, connection);
 
@@ -268,11 +275,13 @@ public class QuestQueries implements Configured {
 
         if (shouldClaimBonus) {
             this.giveBonus(connection);
+            Log.debug(this.boarUser.getUser(), this.getClass(), "Auto-claimed quest bonus");
         }
 
         if (shouldClaim) {
             questConfigs.add(questConfig);
             this.giveReward(questConfig, connection);
+            Log.debug(this.boarUser.getUser(), this.getClass(), "Auto-claimed quest %s".formatted(quest));
             return new QuestInfo(questConfigs, shouldClaimBonus);
         }
 

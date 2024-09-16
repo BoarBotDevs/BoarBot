@@ -7,18 +7,17 @@ import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.QuestDataUtil;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-@Slf4j
 class DatabaseLoader implements Configured {
     public static void loadIntoDatabase(String databaseType) {
-        try (Connection connection = DataUtil.getConnection()) {
-            log.debug("Loading %s into the database...".formatted(databaseType));
+        Log.debug(DatabaseLoader.class, "Loading %s into the database...".formatted(databaseType));
 
+        try (Connection connection = DataUtil.getConnection()) {
             if (databaseType.equals("rarities")) {
                 String resetQuery = """
                     DELETE FROM rarities_info
@@ -46,12 +45,16 @@ class DatabaseLoader implements Configured {
                     statement.executeUpdate();
                 }
             }
-
-            log.debug("Loaded %s into the database".formatted(databaseType));
         } catch (SQLException exception) {
-            log.error("Something went wrong when loading config data into database.", exception);
+            Log.error(
+                DatabaseLoader.class,
+                "Something went wrong when loading %s into database.".formatted(databaseType),
+                exception
+            );
             System.exit(-1);
         }
+
+        Log.debug(DatabaseLoader.class, "Loaded %s into the database".formatted(databaseType));
     }
 
     public static void fixQuests() {
@@ -60,7 +63,7 @@ class DatabaseLoader implements Configured {
                 QuestDataUtil.updateQuests(connection);
             }
         } catch (SQLException exception) {
-            log.error("Something went wrong when fixing quests", exception);
+            Log.error(DatabaseLoader.class, "Something went wrong when fixing quests", exception);
             System.exit(-1);
         }
     }

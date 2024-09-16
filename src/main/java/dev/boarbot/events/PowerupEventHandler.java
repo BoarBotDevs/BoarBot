@@ -131,13 +131,9 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
 
         if (!this.userTimes.isEmpty()) {
             for (String userID : this.userTimes.keySet()) {
-                try {
-                    BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
-                    boarUser.passSynchronizedAction(this);
-                    boarUser.decRefs();
-                } catch (SQLException exception) {
-                    log.error("Failed get user after Powerup Event", exception);
-                }
+                BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
+                boarUser.passSynchronizedAction(this);
+                boarUser.decRefs();
             }
         }
     }

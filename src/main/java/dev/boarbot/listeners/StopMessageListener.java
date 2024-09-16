@@ -4,7 +4,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.util.data.DataUtil;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Slf4j
 public class StopMessageListener extends ListenerAdapter implements Runnable, Configured {
     private MessageReceivedEvent event = null;
 
@@ -40,35 +39,39 @@ public class StopMessageListener extends ListenerAdapter implements Runnable, Co
             return;
         }
 
-        try {
-            BoarUser boarUser = BoarUserFactory.getBoarUser(this.event.getAuthor());
-            boolean notificationsOn;
+        BoarUser boarUser = BoarUserFactory.getBoarUser(this.event.getAuthor());
+        boolean notificationsOn = false;
+
+        try (Connection connection = DataUtil.getConnection()) {
+            notificationsOn = boarUser.baseQuery().getNotificationStatus(connection);
+        } catch (SQLException exception) {
+            Log.error(this.event.getAuthor(), this.getClass(), "Failed to get notification status", exception);
+        }
+
+        if (!notificationsOn) {
+            boarUser.decRefs();
+            return;
+        }
+
+        String[] words = this.event.getMessage().getContentDisplay().split(" ");
+
+        for (String word : words) {
+            if (!word.trim().equalsIgnoreCase("stop")) {
+                continue;
+            }
 
             try (Connection connection = DataUtil.getConnection()) {
-                notificationsOn = boarUser.baseQuery().getNotificationStatus(connection);
-            }
-
-            if (!notificationsOn) {
+                boarUser.baseQuery().setNotifications(connection, null);
                 boarUser.decRefs();
-                return;
+                Log.debug(this.event.getAuthor(), this.getClass(), "Disabled notifications");
+            } catch (SQLException exception) {
+                Log.error(
+                    this.event.getAuthor(), this.getClass(), "Failed to turn off notifications", exception
+                );
             }
 
-            String[] words = this.event.getMessage().getContentDisplay().split(" ");
-
-            for (String word : words) {
-                if (word.trim().equalsIgnoreCase("stop")) {
-                    try (Connection connection = DataUtil.getConnection()) {
-                        boarUser.baseQuery().setNotifications(connection, null);
-                        boarUser.decRefs();
-
-                        this.event.getMessage().reply(STRS.getNotificationDisabledStr()).queue();
-                    }
-
-                    break;
-                }
-            }
-        } catch (SQLException exception) {
-            log.error("An error occurred while trying to disable notifications.", exception);
+            this.event.getMessage().reply(STRS.getNotificationDisabledStr()).queue();
+            break;
         }
     }
 }
