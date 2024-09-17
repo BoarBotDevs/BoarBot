@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- Main log file path -->
         <file>logs/latest.log</file>
@@ -21,12 +23,13 @@
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
         <encoder>
-            <pattern>[%level] [%d{dd/MM/yyyy HH:mm:ss}] [%logger{36}] [%thread] %n> %msg%n</pattern>
+            <pattern>[%highlight(%level)] [%d{dd/MM/yyyy HH:mm:ss}] [%logger{36}] [%thread] %n> %cyan(%msg%n)</pattern>
         </encoder>
     </appender>
 
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
     </root>

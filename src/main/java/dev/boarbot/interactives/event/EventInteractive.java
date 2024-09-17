@@ -67,6 +67,11 @@ public abstract class EventInteractive extends Interactive {
             return;
         }
 
+        if (type.equals(StopType.EXCEPTION)) {
+            this.msg.editMessageComponents().complete();
+            return;
+        }
+
         this.msg.editMessageComponents().complete();
         Log.debug(this.getClass(), "Interactive expired");
     }

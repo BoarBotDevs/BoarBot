@@ -3,6 +3,8 @@ package dev.boarbot.util.generators;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.logging.Log;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -39,7 +41,7 @@ public class EmbedImageGenerator extends ImageGenerator {
     }
 
     @Override
-    public EmbedImageGenerator generate() throws IOException {
+    public EmbedImageGenerator generate() {
         this.generatedImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = this.generatedImage.createGraphics();
 
@@ -79,5 +81,14 @@ public class EmbedImageGenerator extends ImageGenerator {
         textDrawer.drawText();
 
         return this;
+    }
+
+    public static FileUpload getErrorEmbed() {
+        try {
+            return new EmbedImageGenerator(STRS.getError()).generate().getFileUpload();
+        } catch (IOException exception) {
+            Log.error(EmbedImageGenerator.class, "Failed to generate error embed", exception);
+            return FileUpload.fromData(new byte[0], "error.png");
+        }
     }
 }

@@ -91,7 +91,7 @@ public class BoarUser {
         }
     }
 
-    synchronized void updateLastRef() {
+    void updateLastRef() {
         this.lastRef = TimeUtil.getCurMilli();
         Log.debug(this.getClass(), "[U]%s".formatted(Log.getUserSuffix(this.user, this.userID)));
 

@@ -26,8 +26,6 @@ public abstract class EventHandler {
     private int numActive = 0;
 
     public void sendEvent() {
-        Log.debug(this.getClass(), "Sending event to all channels");
-
         try {
             this.currentImage = this.imageGenerator.generate().getFileUpload();
         } catch (IOException | URISyntaxException exception) {
@@ -36,15 +34,13 @@ public abstract class EventHandler {
 
         Map<String, List<TextChannel>> channels = new HashMap<>();
 
-        Log.debug(this.getClass(), "Gathering all guild channels");
-
         try (Connection connection = DataUtil.getConnection()) {
             channels = GuildDataUtil.getAllChannels(connection);
         } catch (SQLException exception) {
             Log.error(this.getClass(), "Failed to get channels for event", exception);
         }
 
-        Log.debug(this.getClass(), "Gathering all guild channels");
+        Log.debug(this.getClass(), "Gathered all guild channels");
 
         for (String guildID : channels.keySet()) {
             for (TextChannel channel : channels.get(guildID)) {
@@ -68,6 +64,8 @@ public abstract class EventHandler {
                 });
             }
         }
+
+        Log.debug(this.getClass(), "Sent to all channels");
     }
 
     protected abstract void sendInteractive(TextChannel channel) throws InsufficientPermissionException;

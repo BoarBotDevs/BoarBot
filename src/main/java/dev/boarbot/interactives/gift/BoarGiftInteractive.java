@@ -163,7 +163,6 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         this.sendResponse();
 
         CompletableFuture.runAsync(this::tryClaimAtMaxHandicap);
-
     }
 
     private void tryClaimAtMaxHandicap() {

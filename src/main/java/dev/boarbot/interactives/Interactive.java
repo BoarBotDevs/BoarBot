@@ -11,11 +11,15 @@ import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteract
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public abstract class Interactive implements Configured {
     protected static final ConcurrentMap<String, Interactive> interactives = BoarBotApp.getBot().getInteractives();
+
+    private final Future<?> future;
 
     @Getter protected final String interactiveID;
     @Getter protected final String guildID;
@@ -44,7 +48,10 @@ public abstract class Interactive implements Configured {
         }
 
         interactives.put(interactiveID, this);
-        CompletableFuture.runAsync(() -> this.tryStop(waitTime));
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        this.future = executor.submit(() -> this.tryStop(waitTime));
+        executor.shutdown();
     }
 
     protected String findDuplicateKey() {
@@ -82,11 +89,8 @@ public abstract class Interactive implements Configured {
         try {
             Thread.sleep(waitTime);
         } catch (InterruptedException exception) {
-            try {
-                if (!this.isStopped) {
-                    this.stop(StopType.EXPIRED);
-                }
-            } catch (Exception ignored) {}
+            Thread.currentThread().interrupt();
+            return;
         }
 
         long curTime = TimeUtil.getCurMilli();
@@ -108,6 +112,7 @@ public abstract class Interactive implements Configured {
     }
 
     public Interactive removeInteractive() {
+        this.future.cancel(true);
         return interactives.remove(this.interactiveID);
     }
 }

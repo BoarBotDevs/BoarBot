@@ -17,6 +17,10 @@ public class BoarUserFactory implements Configured {
     // An extra minute gives time for final queries to go through
     private final static int ALIVE_MILLIS = NUMS.getInteractiveHardStop() + 1000 * 60;
 
+    public static int getNumBoarUsers() {
+        return boarUsers.size();
+    }
+
     public static BoarUser getBoarUser(User user) {
         return BoarUserFactory.getBoarUser(user, user.getId());
     }

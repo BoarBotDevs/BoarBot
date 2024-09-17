@@ -3,7 +3,7 @@
   "noSetup": "To use this command, an admin must first do /%s %s!",
   "wrongChannel": "Cannot use that command here!",
   "onCooldown": "You're using this command too fast! Please wait 5 seconds!",
-  "error": "Something went wrong! Please try again in a few minutes. If the issue persists, use /%s %s!",
+  "error": "An error occurred! Please report it using /%s %s if the issue persists!",
   "maintenance": "Maintenance mode is currently active!",
   "bannedString": "You're banned from doing this! You'll be unbanned %s!",
   "permBannedString": "You're permanently banned from doing this!",

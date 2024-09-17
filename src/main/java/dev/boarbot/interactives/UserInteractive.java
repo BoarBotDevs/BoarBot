@@ -68,7 +68,8 @@ public abstract class UserInteractive extends Interactive {
             return this.msg.editMessage(editedMsg).complete();
         }
 
-        return this.hook.editOriginal(editedMsg).complete();
+        this.hook.editOriginal(editedMsg).complete();
+        return null;
     }
 
     @Override
@@ -103,6 +104,16 @@ public abstract class UserInteractive extends Interactive {
         this.isStopped = true;
 
         if (interactive == null) {
+            return;
+        }
+
+        if (type.equals(StopType.EXCEPTION)) {
+            if (this.hook != null) {
+                this.hook.editOriginalComponents().complete();
+            } else {
+                this.msg.editMessageComponents().complete();
+            }
+
             return;
         }
 

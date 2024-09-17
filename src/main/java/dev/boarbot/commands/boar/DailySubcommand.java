@@ -96,17 +96,17 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             Log.error(this.user, this.getClass(), "Failed to get daily or notification status", exception);
         }
 
+        if (!this.hasDonePowerup && this.event.getOption("powerup") == null) {
+            Log.debug(this.user, this.getClass(), "Doing daily without powerup");
+            this.interaction.deferReply().complete();
+        }
+
         try (Connection connection = DataUtil.getConnection()) {
             if (!this.hasDonePowerup && this.event.getOption("powerup") != null) {
                 Log.debug(this.user, this.getClass(), "Attempting to use powerup");
                 this.hasDonePowerup = true;
                 this.sendPowResponse();
                 return;
-            }
-
-            if (!this.hasDonePowerup) {
-                Log.debug(this.user, this.getClass(), "Doing daily without powerup");
-                this.interaction.deferReply().complete();
             }
 
             this.isFirstDaily = boarUser.isFirstDaily();
@@ -117,7 +117,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
                 connection, Objects.requireNonNull(this.interaction.getGuild()).getId()
             );
-            this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
+            this.boarIDs = BoarUtil.getRandBoarIDs(0, isSkyblockGuild);
 
             boarUser.boarQuery().addBoars(
                 this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions

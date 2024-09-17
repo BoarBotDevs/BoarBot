@@ -15,6 +15,7 @@ public class JobScheduler {
 
             scheduler.scheduleJob(PowerupEventJob.getJob(), PowerupEventJob.getTrigger());
             scheduler.scheduleJob(QuestResetJob.getJob(), QuestResetJob.getTrigger());
+            scheduler.scheduleJob(LogJob.getJob(), LogJob.getTrigger());
 
             Log.debug(JobScheduler.class, "Jobs successfully scheduled");
         } catch (SchedulerException exception) {
@@ -24,8 +25,6 @@ public class JobScheduler {
         // TODO
         // This will schedule the following:
         // Notifications
-        // Logs
         // Removing wiped users
-        // Sending updates to update channel
     }
 }
