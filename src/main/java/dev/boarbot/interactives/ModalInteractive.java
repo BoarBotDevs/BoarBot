@@ -1,6 +1,7 @@
 package dev.boarbot.interactives;
 
 import dev.boarbot.modals.ModalHandler;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,7 @@ public abstract class ModalInteractive extends UserInteractive {
         GenericComponentInteractionCreateEvent compEvent, ModalInteractionEvent modalEvent, long startTime
     ) {
         if (startTime < this.lastEndTime) {
+            Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
             return;
         }
 

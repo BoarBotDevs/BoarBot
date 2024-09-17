@@ -20,8 +20,8 @@ public class PowerupsSubcommand extends Subcommand {
 
         this.interaction.deferReply().complete();
 
-        Log.debug(this.user, this.getClass(), "Sending MegaMenuInteractive (Powerups)");
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.POWERUPS);
         interactive.execute(null);
+        Log.debug(this.user, this.getClass(), "Sent MegaMenuInteractive (Powerups)");
     }
 }

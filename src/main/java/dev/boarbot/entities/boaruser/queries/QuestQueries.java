@@ -136,6 +136,8 @@ public class QuestQueries implements Configured {
             statement.setString(1, this.boarUser.getUserID());
             statement.executeUpdate();
         }
+
+        Log.debug(this.boarUser.getUser(), this.getClass(), "Toggled auto claim");
     }
 
     public QuestInfo addProgress(

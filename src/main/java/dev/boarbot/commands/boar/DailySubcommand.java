@@ -57,11 +57,11 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             this.interaction.deferReply().setEphemeral(true).queue();
 
             if (!this.notificationsOn) {
-                Log.debug(this.user, this.getClass(), "Sending DailyNotifyInteractive");
                 Interactive interactive = InteractiveFactory.constructInteractive(
                     this.event, DailyNotifyInteractive.class
                 );
                 interactive.execute(null);
+                Log.debug(this.user, this.getClass(), "Sent DailyNotifyInteractive");
                 return;
             }
 
@@ -92,7 +92,11 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 this.notificationsOn = boarUser.baseQuery().getNotificationStatus(connection);
                 return;
             }
+        } catch (SQLException exception) {
+            Log.error(this.user, this.getClass(), "Failed to get daily or notification status", exception);
+        }
 
+        try (Connection connection = DataUtil.getConnection()) {
             if (!this.hasDonePowerup && this.event.getOption("powerup") != null) {
                 Log.debug(this.user, this.getClass(), "Attempting to use powerup");
                 this.hasDonePowerup = true;
@@ -104,8 +108,6 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 Log.debug(this.user, this.getClass(), "Doing daily without powerup");
                 this.interaction.deferReply().complete();
             }
-
-            Log.debug(this.user, this.getClass(), "Doing daily");
 
             this.isFirstDaily = boarUser.isFirstDaily();
 
@@ -122,7 +124,6 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             );
             boarUser.powQuery().useActiveMiracles(this.boarIDs, this.bucksGotten, connection);
 
-            Log.debug(this.user, this.getClass(), "Adding quest progress");
             this.questInfos.add(boarUser.questQuery().addProgress(QuestType.DAILY, 1, connection));
             this.questInfos.add(boarUser.questQuery().addProgress(
                 QuestType.COLLECT_RARITY, this.boarIDs, connection
@@ -131,17 +132,17 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 QuestType.COLLECT_BUCKS, this.bucksGotten.stream().reduce(0, Integer::sum), connection
             ));
         } catch (SQLException exception) {
-            Log.error(this.user, this.getClass(), "One or more queries failed", exception);
+            Log.error(this.user, this.getClass(), "Failed to fully complete daily update logic", exception);
         }
     }
 
     private void sendResponse() {
         String title = STRS.getDailyTitle();
 
-        Log.debug(this.user, this.getClass(), "Sending ItemInteractive");
         ItemInteractive.sendInteractive(
             this.boarIDs, this.bucksGotten, this.boarEditions, null, this.user, title, this.interaction.getHook(), false
         );
+        Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
 
         if (this.isFirstDaily) {
             try {
@@ -158,8 +159,8 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     private void sendPowResponse() {
         this.interaction.deferReply().complete();
 
-        Log.debug(this.user, this.getClass(), "Sending DailyPowerupInteractive");
         Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
         interactive.execute(null);
+        Log.debug(this.user, this.getClass(), "Sent DailyPowerupInteractive");
     }
 }

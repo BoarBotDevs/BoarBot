@@ -7,7 +7,7 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 public class SetupInteractive extends UserInteractive {
     private int page = 0;
     private FileUpload currentImageUpload;
@@ -46,26 +45,26 @@ public class SetupInteractive extends UserInteractive {
 
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
-        if (compEvent != null) {
-            compEvent.deferEdit().queue();
+        if (compEvent == null) {
+            this.sendResponse();
+            return;
+        }
 
-            if (!this.user.getId().equals(compEvent.getUser().getId())) {
-                return;
+        compEvent.deferEdit().queue();
+        String compID = compEvent.getComponentId().split(",")[1];
+
+        Log.debug(this.user, this.getClass(), "Page: " + this.page);
+
+        try {
+            switch (compID) {
+                case "CHANNEL_SELECT" -> this.doChannels(compEvent);
+                case "SB_YES", "SB_NO" -> this.doSb(compID);
+                case "NEXT" -> this.doNext();
+                case "INFO" -> this.doInfo(compEvent);
+                case "CANCEL" -> this.stop(StopType.CANCELLED);
             }
-
-            String compID = compEvent.getComponentId().split(",")[1];
-
-            try {
-                switch (compID) {
-                    case "CHANNEL_SELECT" -> this.doChannels(compEvent);
-                    case "SB_YES", "SB_NO" -> this.doSb(compID);
-                    case "NEXT" -> this.doNext();
-                    case "INFO" -> this.doInfo(compEvent);
-                    case "CANCEL" -> this.stop(StopType.CANCELLED);
-                }
-            } catch (Exception exception){
-                log.error("Failed to create file from image data!", exception);
-            }
+        } catch (IOException exception){
+            Log.error(this.user, this.getClass(), "Failed to generate current message", exception);
         }
 
         this.sendResponse();
@@ -88,7 +87,7 @@ public class SetupInteractive extends UserInteractive {
 
             this.updateInteractive(editedMsg.build());
         } catch (IOException exception) {
-            log.error("Failed to generate powerup use image.", exception);
+            Log.error(this.user, this.getClass(), "Failed to generate initial message", exception);
         }
     }
 
@@ -133,7 +132,7 @@ public class SetupInteractive extends UserInteractive {
     }
 
     @Override
-    public void stop(StopType type) throws IOException {
+    public void stop(StopType type) {
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 
@@ -141,48 +140,70 @@ public class SetupInteractive extends UserInteractive {
             return;
         }
 
-        switch (type) {
-            case StopType.CANCELLED -> this.currentImageUpload = new EmbedImageGenerator(
-                STRS.getSetupCancelled(), COLORS.get("error")
-            ).generate().getFileUpload();
+        try {
+            switch (type) {
+                case StopType.CANCELLED -> {
+                    this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupCancelled(), COLORS.get("error"))
+                        .generate().getFileUpload();
+                    Log.debug(this.user, this.getClass(), "Cancelled interactive");
+                }
 
-            case StopType.EXPIRED -> this.currentImageUpload = new EmbedImageGenerator(
-                STRS.getSetupExpired(), COLORS.get("error")
-            ).generate().getFileUpload();
+                case StopType.EXPIRED -> {
+                    this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupExpired(), COLORS.get("error"))
+                        .generate().getFileUpload();
+                    Log.debug(this.user, this.getClass(), "Interactive expired");
+                }
 
-            case StopType.FINISHED -> {
-                String query = """
+                case StopType.FINISHED -> {
+                    String query = """
                     REPLACE INTO guilds (guild_id, is_skyblock_community, channel_one, channel_two, channel_three)
                     VALUES (?, ?, ?, ?, ?);
                 """;
 
-                try (
-                    Connection connection = DataUtil.getConnection();
-                    PreparedStatement statement = connection.prepareStatement(query)
-                ) {
-                    statement.setString(1, this.guildID);
-                    statement.setBoolean(2, this.isSb);
-                    statement.setString(3, this.chosenChannels.get(0).getId());
-                    statement.setString(
-                        4, this.chosenChannels.size() < 2 ? null : this.chosenChannels.get(1).getId()
-                    );
-                    statement.setString(
-                        5, this.chosenChannels.size() < 3 ? null : this.chosenChannels.get(2).getId()
-                    );
+                    try (
+                        Connection connection = DataUtil.getConnection();
+                        PreparedStatement statement = connection.prepareStatement(query)
+                    ) {
+                        statement.setString(1, this.guildID);
+                        statement.setBoolean(2, this.isSb);
+                        statement.setString(3, this.chosenChannels.get(0).getId());
+                        statement.setString(
+                            4, this.chosenChannels.size() < 2 ? null : this.chosenChannels.get(1).getId()
+                        );
+                        statement.setString(
+                            5, this.chosenChannels.size() < 3 ? null : this.chosenChannels.get(2).getId()
+                        );
 
-                    statement.executeUpdate();
-                } catch (SQLException exception) {
-                    log.error("Failed to add guild to database!", exception);
+                        statement.executeUpdate();
+                    } catch (SQLException exception) {
+                        Log.error(this.user, this.getClass(), "Failed to add guild to database", exception);
+                        return;
+                    }
+
+                    this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupFinishedAll(), COLORS.get("green"))
+                        .generate().getFileUpload();
+
+                    Log.info(
+                        this.user,
+                        this.getClass(),
+                        "Guild successfully setup! Channels: %s, %s, %s | SB: %b".formatted(
+                            this.chosenChannels.getFirst().getId(),
+                            this.chosenChannels.size() > 1
+                                ? this.chosenChannels.get(1).getId()
+                                : STRS.getUnavailable(),
+                            this.chosenChannels.size() > 2
+                                ? this.chosenChannels.get(2).getId()
+                                : STRS.getUnavailable(),
+                            this.isSb
+                        )
+                    );
                 }
-
-                this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupFinishedAll(), COLORS.get("green"))
-                    .generate().getFileUpload();
             }
+        } catch (IOException exception) {
+            Log.error(this.user, this.getClass(), "Failed to generate stop message", exception);
         }
 
-        MessageEditBuilder editedMsg = new MessageEditBuilder()
-            .setFiles(this.currentImageUpload)
-            .setComponents();
+        MessageEditBuilder editedMsg = new MessageEditBuilder().setFiles(this.currentImageUpload).setComponents();
         this.updateInteractive(editedMsg.build());
     }
 

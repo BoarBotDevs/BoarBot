@@ -20,8 +20,8 @@ public class QuestsSubcommand extends Subcommand {
 
         this.interaction.deferReply().complete();
 
-        Log.debug(this.user, this.getClass(), "Sending MegaMenuInteractive (Quests)");
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.QUESTS);
         interactive.execute(null);
+        Log.debug(this.user, this.getClass(), "Sent MegaMenuInteractive (Quests)");
     }
 }

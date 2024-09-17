@@ -6,17 +6,14 @@ import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
 
-@Slf4j
 public abstract class Interactive implements Configured {
     protected static final ConcurrentMap<String, Interactive> interactives = BoarBotApp.getBot().getInteractives();
 
@@ -43,12 +40,7 @@ public abstract class Interactive implements Configured {
         String duplicateInteractiveKey = this.findDuplicateKey();
 
         if (duplicateInteractiveKey != null) {
-            try {
-                interactives.get(duplicateInteractiveKey).stop(StopType.EXPIRED);
-            } catch (Exception exception) {
-                log.error("Something went wrong when terminating interactive!", exception);
-                return;
-            }
+            interactives.get(duplicateInteractiveKey).stop(StopType.EXPIRED);
         }
 
         interactives.put(interactiveID, this);
@@ -100,18 +92,16 @@ public abstract class Interactive implements Configured {
         long curTime = TimeUtil.getCurMilli();
 
         if (this.curStopTime <= curTime || hardStopTime <= curTime) {
-            try {
-                if (!this.isStopped) {
-                    this.stop(StopType.EXPIRED);
-                }
-            } catch (Exception ignored) {}
+            if (!this.isStopped) {
+                this.stop(StopType.EXPIRED);
+            }
         } else {
             long newWaitTime = Math.min(this.curStopTime - curTime, hardStopTime - curTime);
             this.tryStop(newWaitTime);
         }
     }
 
-    public abstract void stop(StopType type) throws IOException, InterruptedException;
+    public abstract void stop(StopType type);
 
     public boolean isStopped() {
         return this.isStopped;

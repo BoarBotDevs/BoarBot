@@ -3,7 +3,8 @@ package dev.boarbot.util.quests;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.quests.IndivQuestConfig;
 import dev.boarbot.util.generators.EmbedImageGenerator;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
+
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Slf4j
 public class QuestUtil implements Configured {
     public static void sendQuestClaimMessage(InteractionHook hook, QuestInfo... questInfos) {
         List<QuestInfo> questConfigList = Arrays.asList(questInfos);
@@ -33,7 +33,9 @@ public class QuestUtil implements Configured {
                 .setFiles(embedImageGenerator.generate().getFileUpload());
             hook.sendMessage(msg.build()).setEphemeral(true).queue();
         } catch (IOException exception) {
-            log.error("Failed to send quest claim message", exception);
+            Log.error(
+                hook.getInteraction().getUser(), QuestUtil.class, "Failed to send quest claim message", exception
+            );
         }
     }
 

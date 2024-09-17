@@ -68,10 +68,6 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
         String compID = compEvent.getComponentId().split(",")[1];
 
-        if (!compID.equals("POW_SELECT")) {
-            compEvent.deferEdit().queue();
-        }
-
         switch(compID) {
             case "POW_SELECT" -> {
                 ModalConfig modalConfig = CONFIG.getModalConfig().get("miracleAmount");
@@ -194,9 +190,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
         PowerupItemConfig miracleConfig = POWS.get("miracle");
 
-        Log.debug(
-            this.user, this.getClass(), "Miracle input: %s".formatted(modalEvent.getValues().getFirst().getAsString())
-        );
+        Log.debug(this.user, this.getClass(), "Miracle input: " + modalEvent.getValues().getFirst().getAsString());
 
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);

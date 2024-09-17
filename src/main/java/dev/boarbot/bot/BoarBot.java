@@ -7,7 +7,7 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.*;
 import dev.boarbot.modals.ModalHandler;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -19,7 +19,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-@Slf4j
 public class BoarBot implements Bot {
     private JDA jda;
 
@@ -35,7 +34,7 @@ public class BoarBot implements Bot {
 
     @Override
     public void create() {
-        log.info("Starting up bot...");
+        Log.info(this.getClass(), "Starting up bot...");
 
         ConfigLoader.loadConfig();
         DatabaseLoader.loadIntoDatabase("rarities");

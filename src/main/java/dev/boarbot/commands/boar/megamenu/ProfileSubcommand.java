@@ -20,8 +20,8 @@ public class ProfileSubcommand extends Subcommand {
 
         this.interaction.deferReply().complete();
 
-        Log.debug(this.user, this.getClass(), "Sending MegaMenuInteractive (Profile)");
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.PROFILE);
         interactive.execute(null);
+        Log.debug(this.user, this.getClass(), "Sent MegaMenuInteractive (Profile)");
     }
 }

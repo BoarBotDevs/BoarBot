@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-import java.io.IOException;
 import java.util.Objects;
 
 public abstract class UserInteractive extends Interactive {
@@ -99,7 +98,7 @@ public abstract class UserInteractive extends Interactive {
     }
 
     @Override
-    public void stop(StopType type) throws IOException, InterruptedException {
+    public void stop(StopType type) {
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 

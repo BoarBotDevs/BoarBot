@@ -8,7 +8,6 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
-import dev.boarbot.interactives.gift.BoarGiftInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
@@ -21,6 +20,8 @@ import dev.boarbot.util.quests.QuestUtil;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -46,12 +47,14 @@ class MegaMenuActionHandler implements Configured {
         if (this.interactive.filterOpen) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.megaQuery().setFilterBits(connection, this.interactive.filterBits);
+                Log.debug(boarUser.getUser(), this.getClass(), "Set filter bits to " + this.interactive.filterBits);
             } catch (SQLException exception) {
                 Log.error(this.user, this.getClass(), "Failed to update filter bits", exception);
             }
         } else if (this.interactive.sortOpen) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.megaQuery().setSortVal(connection, this.interactive.sortVal);
+                Log.debug(boarUser.getUser(), this.getClass(), "Set sort value to " + this.interactive.sortVal);
             } catch (SQLException exception) {
                 Log.error(this.user, this.getClass(), "Failed to update sort value", exception);
             }
@@ -69,7 +72,7 @@ class MegaMenuActionHandler implements Configured {
                 Log.error(
                     this.user,
                     this.getClass(),
-                    "Failed to perform %s".formatted(this.interactive.interactType),
+                    "Failed to perform %s due to database issue".formatted(this.interactive.interactType),
                     exception
                 );
             }
@@ -87,7 +90,7 @@ class MegaMenuActionHandler implements Configured {
                 Log.error(
                     this.user,
                     this.getClass(),
-                    "Failed to use %s powerup".formatted(this.interactive.powerupUsing),
+                    "Failed to use %s powerup due to database issue".formatted(this.interactive.powerupUsing),
                     exception
                 );
             }
@@ -122,11 +125,13 @@ class MegaMenuActionHandler implements Configured {
                 null, STRS.getCompFavoriteSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
             );
             boarUser.megaQuery().setFavoriteID(connection, this.curBoarEntry.getKey());
+            Log.debug(boarUser.getUser(), this.getClass(), "Favorited " + this.curBoarEntry.getKey());
         } else {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                 null, STRS.getCompUnfavoriteSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
             );
             boarUser.megaQuery().setFavoriteID(connection, null);
+            Log.debug(boarUser.getUser(), this.getClass(), "Unfavorited " + this.curBoarEntry.getKey());
         }
     }
 
@@ -184,11 +189,13 @@ class MegaMenuActionHandler implements Configured {
                 this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                     null, STRS.getCompNoBoar().formatted("<>" + this.curRarityKey + "<>" + boarName)
                 );
+                Log.debug(this.user, this.getClass(), "Failed to clone: Lack of boar");
             }
         } else {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                 null, STRS.getNoPow().formatted(POWS.get("transmute").getPluralName())
             );
+            Log.debug(this.user, this.getClass(), "Failed to clone: Not enough");
         }
 
         if (!newBoarIDs.isEmpty()) {
@@ -200,8 +207,9 @@ class MegaMenuActionHandler implements Configured {
                 String title = STRS.getCompCloneTitle();
 
                 ItemInteractive.sendInteractive(
-                        newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
+                    newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
                 );
+                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
             });
         }
     }
@@ -225,11 +233,11 @@ class MegaMenuActionHandler implements Configured {
 
                 boarUser.boarQuery().removeBoar(this.curBoarEntry.getKey(), connection);
                 boarUser.boarQuery().addBoars(
-                        newBoarIDs,
-                        connection,
-                        BoarObtainType.TRANSMUTE,
-                        bucksGotten,
-                        editions
+                    newBoarIDs,
+                    connection,
+                    BoarObtainType.TRANSMUTE,
+                    bucksGotten,
+                    editions
                 );
 
                 boarUser.powQuery().usePowerup(connection, "transmute", this.interactive.numTransmute);
@@ -242,11 +250,13 @@ class MegaMenuActionHandler implements Configured {
                 this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                     null, STRS.getCompNoBoar().formatted("<>" + this.curRarityKey + "<>" + boarName)
                 );
+                Log.debug(this.user, this.getClass(), "Failed to transmute: Lack of boar");
             }
         } else {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                 null, STRS.getNoPow().formatted(POWS.get("transmute").getPluralName())
             );
+            Log.debug(this.user, this.getClass(), "Failed to transmute: Not enough");
         }
 
         if (!newBoarIDs.isEmpty()) {
@@ -275,34 +285,35 @@ class MegaMenuActionHandler implements Configured {
                 String title = STRS.getCompTransmuteTitle();
 
                 ItemInteractive.sendInteractive(
-                        newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
+                    newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
                 );
+                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
             });
         }
     }
 
     public void doCharm(BoarUser boarUser, Connection connection) throws SQLException {
-        if (this.interactive.numTryCharm <= boarUser.powQuery().getPowerupAmount(connection, "miracle")) {
-            boarUser.powQuery().activateMiracles(connection, this.interactive.numTryCharm);
-
-            long blessings = boarUser.baseQuery().getBlessings(connection);
+        if (this.interactive.numTryCharm > boarUser.powQuery().getPowerupAmount(connection, "miracle")) {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                null,
-                STRS.getPowMiracleSuccess().formatted(
-                    STRS.getBlessingsPluralName(),
-                    TextUtil.getBlessHex(blessings),
-                    blessings > 1000
-                        ? STRS.getBlessingsSymbol() + " "
-                        : "",
-                    blessings
-                )
+                null, STRS.getNoPow().formatted(POWS.get(this.interactive.powerupUsing).getPluralName())
             );
-
+            Log.debug(this.user, this.getClass(), "Failed to miracle: Not enough");
             return;
         }
 
+        boarUser.powQuery().activateMiracles(connection, this.interactive.numTryCharm);
+
+        long blessings = boarUser.baseQuery().getBlessings(connection);
         this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-            null, STRS.getNoPow().formatted(POWS.get(this.interactive.powerupUsing).getPluralName())
+            null,
+            STRS.getPowMiracleSuccess().formatted(
+                STRS.getBlessingsPluralName(),
+                TextUtil.getBlessHex(blessings),
+                blessings > 1000
+                    ? STRS.getBlessingsSymbol() + " "
+                    : "",
+                blessings
+            )
         );
     }
 
@@ -310,24 +321,27 @@ class MegaMenuActionHandler implements Configured {
         PowerupItemConfig powConfig = POWS.get("gift");
         int giftAmt = boarUser.powQuery().getPowerupAmount(connection, "gift");
 
-        if (giftAmt > 0) {
-            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                null, STRS.getPowGiftSuccess().formatted(powConfig.getName())
-            );
-        } else {
+        if (giftAmt == 0) {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                 null, STRS.getNoPow().formatted(powConfig.getPluralName())
             );
+            Log.debug(this.user, this.getClass(), "Failed to gift: Not enough");
+            return;
         }
 
-        if (giftAmt > 0) {
-            CompletableFuture.runAsync(() -> {
-                Interactive giftInteractive = InteractiveFactory.constructInteractive(
-                    this.compEvent, true, BoarGiftInteractive.class
-                );
+        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+            null, STRS.getPowGiftSuccess().formatted(powConfig.getName())
+        );
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                Interactive giftInteractive = InteractiveFactory.constructGiftInteractive(this.compEvent, true);
                 giftInteractive.execute(null);
-            });
-        }
+                Log.debug(this.user, this.getClass(), "Sent BoarGiftInteractive");
+            } catch (IOException | URISyntaxException exception) {
+                Log.error(this.user, this.getClass(), "Failed to generate gift message", exception);
+            }
+        });
     }
 
     public void doQuestClaim(BoarUser boarUser, Connection connection) throws SQLException {
@@ -341,6 +355,7 @@ class MegaMenuActionHandler implements Configured {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, questClaimStr);
         } else {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getQuestNoClaim());
+            Log.debug(this.user, this.getClass(), "No quests to claim");
         }
     }
 
@@ -362,6 +377,7 @@ class MegaMenuActionHandler implements Configured {
             );
         } else {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getQuestNoBonus());
+            Log.debug(this.user, this.getClass(), "No quest bonus to claim");
         }
     }
 

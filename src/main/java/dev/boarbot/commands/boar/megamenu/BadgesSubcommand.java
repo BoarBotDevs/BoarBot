@@ -20,8 +20,8 @@ public class BadgesSubcommand extends Subcommand {
 
         this.interaction.deferReply().complete();
 
-        Log.debug(this.user, this.getClass(), "Sending MegaMenuInteractive (Badges)");
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.BADGES);
         interactive.execute(null);
+        Log.debug(this.user, this.getClass(), "Sent MegaMenuInteractive (Badges)");
     }
 }

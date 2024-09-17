@@ -69,7 +69,7 @@ public final class GraphicsUtil {
         return image;
     }
 
-    public static byte[] getImageBytes(String path) throws URISyntaxException, IOException {
+    public static byte[] getImageBytes(String path) throws IOException {
         InputStream is = BoarBotApp.getResourceStream(path);
         return is.readAllBytes();
     }

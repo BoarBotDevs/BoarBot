@@ -8,10 +8,11 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.python.PythonUtil;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+
 import net.dv8tion.jda.api.entities.User;
 
 import javax.imageio.ImageIO;
@@ -23,7 +24,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 public class ItemImageGenerator extends ImageGenerator {
     public static final int[] IMAGE_SIZE = {930, 1080};
 
@@ -151,8 +151,8 @@ public class ItemImageGenerator extends ImageGenerator {
 
         try {
             animatedImage = GraphicsUtil.getImageBytes(this.filePath);
-        } catch (Exception exception) {
-            log.error("Failed to get animated item image", exception);
+        } catch (IOException exception) {
+            Log.error(this.user, this.getClass(), "Failed to get animated item image", exception);
         }
 
         Process pythonProcess = new ProcessBuilder(
@@ -175,8 +175,8 @@ public class ItemImageGenerator extends ImageGenerator {
             ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             ImageIO.write(userOverlay, "png", byteArrayOS);
             userOverlayBytes = byteArrayOS.toByteArray();
-        } catch (Exception exception) {
-            log.error("Failed to get animated user image", exception);
+        } catch (IOException | URISyntaxException exception) {
+            Log.error(this.user, this.getClass(), "Failed to get animated user image overlay", exception);
         }
 
         Process pythonProcess = new ProcessBuilder(

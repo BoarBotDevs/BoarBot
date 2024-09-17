@@ -11,6 +11,7 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.QuestDataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.generators.megamenu.*;
+import dev.boarbot.util.logging.Log;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -96,6 +97,7 @@ class MegaMenuGeneratorMaker implements Configured {
 
             this.interactive.acknowledgeOpen = true;
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getCompBlocked());
+            Log.debug(this.interactive.getUser(), this.getClass(), "Filter results in empty compendium");
 
             return this.makeCollectionGen();
         }
@@ -120,6 +122,9 @@ class MegaMenuGeneratorMaker implements Configured {
 
         this.interactive.curBoarEntry = iterator.next();
         this.interactive.curRarityKey = BoarUtil.findRarityKey(this.interactive.curBoarEntry.getKey());
+        Log.debug(
+            this.interactive.getUser(), this.getClass(), "Current boar: " + this.interactive.curBoarEntry.getKey()
+        );
 
         return new CompendiumImageGenerator(
             this.interactive.page,
@@ -239,6 +244,7 @@ class MegaMenuGeneratorMaker implements Configured {
 
             this.interactive.acknowledgeOpen = true;
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getBadgeBlocked());
+            Log.debug(this.interactive.getUser(), this.getClass(), "No badges");
 
             return this.make();
         }

@@ -13,32 +13,36 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
-import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 
-@Slf4j
 class MegaMenuComponentHandler implements Configured {
     protected static final Map<String, ModalConfig> MODALS = CONFIG.getModalConfig();
 
     private final MegaMenuInteractive interactive;
     private GenericComponentInteractionCreateEvent compEvent;
     private ModalInteractionEvent modalEvent;
+    private User user;
 
     public MegaMenuComponentHandler(GenericComponentInteractionCreateEvent compEvent, MegaMenuInteractive interactive) {
         this.interactive = interactive;
         this.compEvent = compEvent;
         this.interactive.compEvent = compEvent;
+        this.user = compEvent.getUser();
     }
 
     public MegaMenuComponentHandler(ModalInteractionEvent modalEvent, MegaMenuInteractive interactive) {
@@ -48,122 +52,136 @@ class MegaMenuComponentHandler implements Configured {
     }
 
     public void handleCompEvent() {
-        if (this.compEvent != null) {
-            if (!this.interactive.getUser().getId().equals(compEvent.getUser().getId())) {
-                this.compEvent.deferEdit().queue();
-                return;
+        if (this.compEvent == null) {
+            return;
+        }
+
+        if (this.interactive.getModalHandler() != null) {
+            this.interactive.getModalHandler().stop();
+        }
+
+        String compID = this.compEvent.getComponentId().split(",")[1];
+
+        Set<String> modalPossibleIDs = new HashSet<>(
+            Arrays.asList("PAGE", "BOAR_FIND", "INTERACT_SELECT", "POW_SELECT")
+        );
+
+        if (!modalPossibleIDs.contains(compID)) {
+            this.compEvent.deferEdit().queue();
+        }
+
+        Log.debug(
+            this.user,
+            this.getClass(),
+            "Page: %d | View: %s | Filtering: %b | Sorting: %b | Interacting: %b | Component: %s".formatted(
+                this.interactive.page,
+                this.interactive.curView,
+                this.interactive.filterOpen,
+                this.interactive.sortOpen,
+                this.interactive.interactOpen,
+                compID
+            )
+        );
+
+        switch (compID) {
+            case "VIEW_SELECT" -> {
+                this.setPageZero();
+
+                this.interactive.prevView = this.interactive.curView;
+                this.interactive.curView = MegaMenuView.fromString(
+                    ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
+                );
+
+                Log.debug(this.user, this.getClass(), "Selected view: " + this.interactive.curView);
+
+                this.interactive.filterOpen = false;
+                this.interactive.sortOpen = false;
+                this.interactive.interactOpen = false;
             }
 
-            if (this.interactive.getModalHandler() != null) {
-                this.interactive.getModalHandler().stop();
+            case "LEFT" -> {
+                this.interactive.prevPage = this.interactive.page;
+                this.interactive.page = this.interactive.page - 1;
             }
 
-            String compID = this.compEvent.getComponentId().split(",")[1];
+            case "PAGE" -> {
+                Modal modal = this.makeModal(MODALS.get("pageInput"));
 
-            Set<String> modalPossibleIDs = new HashSet<>(
-                Arrays.asList("PAGE", "BOAR_FIND", "INTERACT_SELECT", "POW_SELECT")
-            );
-
-            if (!modalPossibleIDs.contains(compID)) {
-                this.compEvent.deferEdit().queue();
+                this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
+                this.compEvent.replyModal(modal).complete();
+                Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
 
-            switch (compID) {
-                case "VIEW_SELECT" -> {
-                    this.setPageZero();
+            case "RIGHT" -> {
+                this.interactive.prevPage = this.interactive.page;
+                this.interactive.page = this.interactive.page + 1;
+            }
 
+            case "BOAR_FIND" -> {
+                Modal modal = this.makeModal(MODALS.get("findBoar"));
+
+                this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
+                this.compEvent.replyModal(modal).complete();
+                Log.debug(this.user, this.getClass(), "Sent boar find input modal");
+            }
+
+            case "BOAR_INTERACT" -> {
+                this.interactive.interactOpen = !this.interactive.interactOpen;
+                this.interactive.filterOpen = false;
+                this.interactive.sortOpen = false;
+            }
+
+            case "INTERACT_SELECT" -> this.doInteract();
+
+            case "BOAR_FILTER" -> {
+                this.interactive.filterOpen = !this.interactive.filterOpen;
+                this.interactive.interactOpen = false;
+                this.interactive.sortOpen = false;
+            }
+
+            case "FILTER_SELECT" -> this.setFilterBits();
+
+            case "BOAR_SORT" -> {
+                this.interactive.sortOpen = !this.interactive.sortOpen;
+                this.interactive.interactOpen = false;
+                this.interactive.filterOpen = false;
+            }
+
+            case "SORT_SELECT" -> this.setSortVal();
+
+            case "CONFIRM" -> this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+
+            case "CANCEL" -> {
+                this.interactive.confirmOpen = false;
+                this.interactive.interactType = null;
+            }
+
+            case "BACK" -> {
+                this.interactive.acknowledgeOpen = false;
+                this.interactive.acknowledgeImageGen = null;
+
+                if (this.interactive.curView == MegaMenuView.EDITIONS) {
                     this.interactive.prevView = this.interactive.curView;
-                    this.interactive.curView = MegaMenuView.fromString(
-                        ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
-                    );
-
-                    this.interactive.filterOpen = false;
-                    this.interactive.sortOpen = false;
-                    this.interactive.interactOpen = false;
+                    this.interactive.curView = MegaMenuView.COMPENDIUM;
+                    this.interactive.boarPage = this.interactive.curBoarEntry.getKey();
                 }
+            }
 
-                case "LEFT" -> {
-                    this.interactive.prevPage = this.interactive.page;
-                    this.interactive.page = this.interactive.page - 1;
-                }
+            case "POW_SELECT" -> doPowerup();
 
-                case "PAGE" -> {
-                    Modal modal = this.makeModal(MODALS.get("pageInput"));
+            case "QUEST_CLAIM" -> {
+                this.interactive.questAction = QuestAction.CLAIM;
+                this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+            }
 
-                    this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                    this.compEvent.replyModal(modal).complete();
-                }
+            case "QUEST_BONUS" -> {
+                this.interactive.questAction = QuestAction.CLAIM_BONUS;
+                this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+            }
 
-                case "RIGHT" -> {
-                    this.interactive.prevPage = this.interactive.page;
-                    this.interactive.page = this.interactive.page + 1;
-                }
-
-                case "BOAR_FIND" -> {
-                    Modal modal = this.makeModal(MODALS.get("findBoar"));
-
-                    this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                    this.compEvent.replyModal(modal).complete();
-                }
-
-                case "BOAR_INTERACT" -> {
-                    this.interactive.interactOpen = !this.interactive.interactOpen;
-                    this.interactive.filterOpen = false;
-                    this.interactive.sortOpen = false;
-                }
-
-                case "INTERACT_SELECT" -> this.doInteract();
-
-                case "BOAR_FILTER" -> {
-                    this.interactive.filterOpen = !this.interactive.filterOpen;
-                    this.interactive.interactOpen = false;
-                    this.interactive.sortOpen = false;
-                }
-
-                case "FILTER_SELECT" -> this.setFilterBits();
-
-                case "BOAR_SORT" -> {
-                    this.interactive.sortOpen = !this.interactive.sortOpen;
-                    this.interactive.interactOpen = false;
-                    this.interactive.filterOpen = false;
-                }
-
-                case "SORT_SELECT" -> this.setSortVal();
-
-                case "CONFIRM" -> this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
-
-                case "CANCEL" -> {
-                    this.interactive.confirmOpen = false;
-                    this.interactive.interactType = null;
-                }
-
-                case "BACK" -> {
-                    this.interactive.acknowledgeOpen = false;
-                    this.interactive.acknowledgeImageGen = null;
-
-                    if (this.interactive.curView == MegaMenuView.EDITIONS) {
-                        this.interactive.prevView = this.interactive.curView;
-                        this.interactive.curView = MegaMenuView.COMPENDIUM;
-                        this.interactive.boarPage = this.interactive.curBoarEntry.getKey();
-                    }
-                }
-
-                case "POW_SELECT" -> doPowerup();
-
-                case "QUEST_CLAIM" -> {
-                    this.interactive.questAction = QuestAction.CLAIM;
-                    this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
-                }
-
-                case "QUEST_BONUS" -> {
-                    this.interactive.questAction = QuestAction.CLAIM_BONUS;
-                    this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
-                }
-
-                case "QUEST_AUTO" -> {
-                    this.interactive.questAction = QuestAction.AUTO_CLAIM;
-                    this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
-                }
+            case "QUEST_AUTO" -> {
+                this.interactive.questAction = QuestAction.AUTO_CLAIM;
+                this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
             }
         }
     }
@@ -173,15 +191,26 @@ class MegaMenuComponentHandler implements Configured {
 
         switch (this.modalEvent.getModalId().split(",")[2]) {
             case "PAGE_INPUT" -> {
+                Log.debug(
+                    this.user, this.getClass(), "Page input: " + this.modalEvent.getValues().getFirst().getAsString()
+                );
+
                 try {
                     String pageInput = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                     this.interactive.prevPage = this.interactive.page;
                     this.interactive.page = Math.max(Integer.parseInt(pageInput)-1, 0);
+                } catch (NumberFormatException exception) {
+                    Log.debug(this.user, this.getClass(), "Invalid modal input");
+                } finally {
                     this.interactive.execute(null);
-                } catch (NumberFormatException ignore) {}
+                }
             }
 
             case "FIND_BOAR" -> {
+                Log.debug(
+                    this.user, this.getClass(), "Find input: " + this.modalEvent.getValues().getFirst().getAsString()
+                );
+
                 this.interactive.prevPage = this.interactive.page;
                 this.interactive.page = this.interactive
                     .getFindBoarPage(this.modalEvent.getValues().getFirst().getAsString());
@@ -189,6 +218,10 @@ class MegaMenuComponentHandler implements Configured {
             }
 
             case "CLONE_AMOUNT" -> {
+                Log.debug(
+                    this.user, this.getClass(), "Clone input: " + this.modalEvent.getValues().getFirst().getAsString()
+                );
+
                 try (Connection connection = DataUtil.getConnection()) {
                     this.interactive.numClone = this.interactive.getBoarUser().powQuery()
                         .getPowerupAmount(connection, "clone");
@@ -200,38 +233,40 @@ class MegaMenuComponentHandler implements Configured {
                         throw new NumberFormatException();
                     }
 
-                    int avgClones = RARITIES.get(this.interactive.curRarityKey).getAvgClones();
-
-                    if (avgClones != 0) {
-                        boolean hasBoar = this.interactive.getBoarUser().boarQuery().hasBoar(
-                            this.interactive.curBoarEntry.getKey(), connection
-                        );
-
-                        if (hasBoar) {
-                            this.confirmClone(input);
-                        } else {
-                            String boarName = BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
-
-                            this.interactive.acknowledgeOpen = true;
-                            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                                null,
-                                STRS.getCompNoBoar().formatted(
-                                    "<>" + this.interactive.curRarityKey + "<>" + boarName
-                                )
-                            );
-                        }
-                    } else {
+                    if (RARITIES.get(this.interactive.curRarityKey).getAvgClones() > this.interactive.numClone) {
                         this.interactive.acknowledgeOpen = true;
                         this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                            null,
-                            STRS.getNoPow().formatted(POWS.get("clone").getPluralName())
+                            null, STRS.getNoPow().formatted(POWS.get("clone").getPluralName())
                         );
+
+                        Log.debug(this.user, this.getClass(), "Failed to clone: Not enough");
+                        return;
                     }
-                } catch (NumberFormatException exception1) {
+
+                    boolean hasBoar = this.interactive.getBoarUser().boarQuery().hasBoar(
+                        this.interactive.curBoarEntry.getKey(), connection
+                    );
+
+                    if (hasBoar) {
+                        this.confirmClone(input);
+                        return;
+                    }
+
+                    String boarName = BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
+
+                    this.interactive.acknowledgeOpen = true;
+                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                        null, STRS.getCompNoBoar().formatted("<>" + this.interactive.curRarityKey + "<>" + boarName)
+                    );
+
+                    Log.debug(this.user, this.getClass(), "Failed to clone: Lack of boar");
+                } catch (NumberFormatException exception) {
                     this.interactive.acknowledgeOpen = true;
                     this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getInvalidInput());
-                } catch (SQLException exception2) {
-                    log.error("Failed to get user data", exception2);
+
+                    Log.debug(this.user, this.getClass(), "Invalid modal input");
+                } catch (SQLException exception) {
+                    Log.error(this.user, this.getClass(), "Failed to get clone data", exception);
                 } finally {
                     this.interactive.execute(null);
                 }
@@ -247,38 +282,42 @@ class MegaMenuComponentHandler implements Configured {
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                     int input = Math.min(Integer.parseInt(inputStr), numMiracles);
 
-                    if (input == 0) {
+                    if (input <= 0) {
                         throw new NumberFormatException();
                     }
 
-                    if (input > 0) {
-                        long blessings = this.interactive.getBoarUser().baseQuery().getBlessings(connection, input);
-                        this.interactive.numTryCharm = input;
-
-                        this.interactive.confirmOpen = true;
-                        this.interactive.confirmString = STRS.getMiracleAttempt().formatted(
-                            this.interactive.numTryCharm,
-                            this.interactive.numTryCharm == 1
-                                ? miracleConfig.getName()
-                                : miracleConfig.getPluralName(),
-                            STRS.getBlessingsPluralName(),
-                            TextUtil.getBlessHex(blessings),
-                            blessings > 1000
-                                ? STRS.getBlessingsSymbol() + " "
-                                : "",
-                            blessings
-                        );
-                    } else {
+                    if (numMiracles == 0) {
                         this.interactive.acknowledgeOpen = true;
                         this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                             null, STRS.getNoPow().formatted(POWS.get("miracle").getPluralName())
                         );
+
+                        Log.debug(this.user, this.getClass(), "Failed to miracle: Not enough");
+                        return;
                     }
-                } catch (NumberFormatException exception1) {
+
+                    long blessings = this.interactive.getBoarUser().baseQuery().getBlessings(connection, input);
+                    this.interactive.numTryCharm = input;
+
+                    this.interactive.confirmOpen = true;
+                    this.interactive.confirmString = STRS.getMiracleAttempt().formatted(
+                        this.interactive.numTryCharm,
+                        this.interactive.numTryCharm == 1
+                            ? miracleConfig.getName()
+                            : miracleConfig.getPluralName(),
+                        STRS.getBlessingsPluralName(),
+                        TextUtil.getBlessHex(blessings),
+                        blessings > 1000
+                            ? STRS.getBlessingsSymbol() + " "
+                            : "",
+                        blessings
+                    );
+                } catch (NumberFormatException exception) {
                     this.interactive.acknowledgeOpen = true;
                     this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getInvalidInput());
-                } catch (SQLException exception2) {
-                    log.error("Failed to get user data", exception2);
+                    Log.debug(this.user, this.getClass(), "Invalid modal input");
+                } catch (SQLException exception) {
+                    Log.error(this.user, this.getClass(), "Failed to get miracle data", exception);
                 } finally {
                     this.interactive.execute(null);
                 }
@@ -304,6 +343,8 @@ class MegaMenuComponentHandler implements Configured {
             ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
         );
 
+        Log.debug(this.user, this.getClass(), "Interact type: " + this.interactive.interactType);
+
         switch (this.interactive.interactType) {
             case FAVORITE -> {
                 this.compEvent.deferEdit().queue();
@@ -326,6 +367,7 @@ class MegaMenuComponentHandler implements Configured {
                 }
 
                 this.compEvent.replyModal(modal).complete();
+                Log.debug(this.user, this.getClass(), "Sent clone input modal");
             }
 
             case TRANSMUTE -> {
@@ -333,10 +375,7 @@ class MegaMenuComponentHandler implements Configured {
                 this.interactive.confirmOpen = true;
 
                 String nextRarityKey = BoarUtil.getNextRarityKey(this.interactive.curRarityKey);
-
-                String boarPluralName = BOARS.get(
-                    this.interactive.curBoarEntry.getKey()
-                ).getPluralName();
+                String boarPluralName = BOARS.get(this.interactive.curBoarEntry.getKey()).getPluralName();
 
                 this.interactive.confirmString = STRS.getCompTransmuteConfirm().formatted(
                     "<>" + this.interactive.curRarityKey + "<>" + boarPluralName,
@@ -364,20 +403,21 @@ class MegaMenuComponentHandler implements Configured {
                 String curBoarID = this.interactive.curBoarEntry.getKey();
                 BoarItemConfig curBoar = BOARS.get(curBoarID);
 
-                if (curBoar.getStaticFile() != null) {
-                    String filePath = PATHS.getBoars() + curBoar.getFile();
-
-                    try {
-                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                            null, filePath, NUMS.getLargeBoarSize()
-                        );
-                    } catch (Exception exception) {
-                        log.error("Invalid animated image path", exception);
-                    }
-                } else {
+                if (curBoar.getStaticFile() == null) {
                     this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                         null, BoarBotApp.getBot().getImageCacheMap().get("large" + curBoarID)
                     );
+                    return;
+                }
+
+                String filePath = PATHS.getBoars() + curBoar.getFile();
+
+                try {
+                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                        null, filePath, NUMS.getLargeBoarSize()
+                    );
+                } catch (IOException | URISyntaxException exception) {
+                    Log.error(this.user, this.getClass(), "Failed to get animated overlay", exception);
                 }
             }
 
@@ -387,7 +427,6 @@ class MegaMenuComponentHandler implements Configured {
 
     private void doPowerup() {
         this.interactive.powerupUsing = ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst();
-
         PowerupItemConfig powConfig = POWS.get(this.interactive.powerupUsing);
 
         switch (this.interactive.powerupUsing) {
@@ -402,6 +441,7 @@ class MegaMenuComponentHandler implements Configured {
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
                 this.compEvent.replyModal(modal).complete();
+                Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
 
             case "gift" -> {
@@ -466,9 +506,7 @@ class MegaMenuComponentHandler implements Configured {
         NumberFormat percentFormat = new DecimalFormat("#.##");
 
         if (input / avgClones <= 1) {
-            String boarName = BOARS.get(
-                this.interactive.curBoarEntry.getKey()
-            ).getName();
+            String boarName = BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
             String cloneName = input == 1
                 ? POWS.get("clone").getName()
                 : POWS.get("clone").getPluralName();
@@ -483,12 +521,8 @@ class MegaMenuComponentHandler implements Configured {
             );
         } else {
             String boarName = input / avgClones > 1
-                ? BOARS.get(
-                    this.interactive.curBoarEntry.getKey()
-                ).getPluralName()
-                : BOARS.get(
-                    this.interactive.curBoarEntry.getKey()
-                ).getName();
+                ? BOARS.get(this.interactive.curBoarEntry.getKey()).getPluralName()
+                : BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
 
             this.interactive.confirmString = STRS.getCompCloneConfirmMultiple().formatted(
                 "%,d".formatted(input) + " " + POWS.get("clone").getPluralName(),

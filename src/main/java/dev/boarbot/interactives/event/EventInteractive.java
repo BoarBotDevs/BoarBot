@@ -11,8 +11,6 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-import java.io.IOException;
-
 public abstract class EventInteractive extends Interactive {
     private final TextChannel channel;
     private Message msg;
@@ -61,7 +59,7 @@ public abstract class EventInteractive extends Interactive {
     }
 
     @Override
-    public void stop(StopType type) throws IOException, InterruptedException {
+    public void stop(StopType type) {
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 

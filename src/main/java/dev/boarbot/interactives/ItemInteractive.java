@@ -6,7 +6,7 @@ import dev.boarbot.util.generators.ItemImageGenerator;
 import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -21,11 +21,12 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 public class ItemInteractive extends UserInteractive {
     private int page = 0;
     private final List<ItemImageGenerator> itemGens;
@@ -122,8 +123,8 @@ public class ItemInteractive extends UserInteractive {
             }
 
             this.updateInteractive(editedMsg.build());
-        } catch (Exception exception) {
-            log.error("Failed to change daily boar page!", exception);
+        } catch (IOException | URISyntaxException exception) {
+            Log.error(this.user, this.getClass(), "Failed to generate grouped items", exception);
         }
     }
 
@@ -149,7 +150,7 @@ public class ItemInteractive extends UserInteractive {
 
             this.updateInteractive(editedMsg.build());
         } catch (Exception exception) {
-            log.error("Failed to change daily boar page!", exception);
+            Log.error(this.user, this.getClass(), "Failed to generate grouped items", exception);
         }
     }
 

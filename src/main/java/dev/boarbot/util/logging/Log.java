@@ -10,10 +10,6 @@ public final class Log {
         return LoggerFactory.getLogger(clazz);
     }
 
-    public static void debug(String message) {
-        debug(null, Log.class, message);
-    }
-
     public static void debug(Class<?> clazz, String message) {
         debug(null, clazz, message);
     }

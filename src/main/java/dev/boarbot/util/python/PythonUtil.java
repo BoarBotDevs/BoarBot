@@ -1,7 +1,7 @@
 package dev.boarbot.util.python;
 
 import dev.boarbot.BoarBotApp;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -11,7 +11,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-@Slf4j
 public class PythonUtil {
     private final static Map<String, Path> scripts = new HashMap<>();
 
@@ -44,7 +43,7 @@ public class PythonUtil {
                 errMessage = errMessage.concat(tempErrMessage + "\n");
             }
 
-            log.error(errMessage);
+            Log.error(PythonUtil.class, "Python script threw an exception", new RuntimeException(errMessage));
         }
     }
 

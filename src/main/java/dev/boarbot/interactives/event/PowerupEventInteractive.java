@@ -7,6 +7,7 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.events.PowerupEventHandler;
 import dev.boarbot.events.PromptType;
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
@@ -15,7 +16,6 @@ import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -30,11 +30,11 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-@Slf4j
 public class PowerupEventInteractive extends EventInteractive implements Synchronizable {
     private final IndivPromptConfig promptConfig;
 
@@ -102,6 +102,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     .setColor(COLORS.get("font"));
 
                 compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
+                Log.debug(compEvent.getUser(), this.getClass(), "Gave powerup win rewards");
                 return;
             }
 
@@ -113,14 +114,16 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
 
                 embedGen.setStr(STRS.getPowEventFail()).setColor(COLORS.get("font"));
                 compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
+                Log.debug(compEvent.getUser(), this.getClass(), "Updated powerup fail status");
                 return;
             }
 
             this.failUsers.put(userID, false);
             embedGen.setStr(STRS.getPowEventIncorrect()).setColor(COLORS.get("font"));
             compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
-        } catch (Exception exception) {
-            log.error("Failed to send embed image.", exception);
+            Log.debug(compEvent.getUser(), this.getClass(), "Guessed incorrectly");
+        } catch (IOException exception) {
+            Log.error(compEvent.getUser(), this.getClass(), "Failed to generate response", exception);
         }
     }
 
@@ -145,13 +148,13 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     boarUser.questQuery().addProgress(QuestType.POW_FAST, this.userTimes.get(userID), connection)
                 );
             } catch (SQLException exception) {
-                log.error("Failed to give Powerup Event win", exception);
+                Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event win", exception);
             }
         } else if (this.failUsers.containsKey(userID) && this.failUsers.get(userID)) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.eventQuery().applyPowEventFail(connection);
             } catch (SQLException exception) {
-                log.error("Failed to give Powerup Event fail", exception);
+                Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);
             }
         }
     }

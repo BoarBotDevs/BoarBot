@@ -5,7 +5,8 @@ import dev.boarbot.api.util.Configured;
 
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.util.graphics.GraphicsUtil;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
+
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -13,7 +14,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-@Slf4j
 class CacheLoader implements Configured {
     private final static Map<String, BufferedImage> imageCacheMap = BoarBotApp.getBot().getImageCacheMap();
 
@@ -29,7 +29,7 @@ class CacheLoader implements Configured {
     }
 
     private static void loadBoars() {
-        log.debug("Attempting to load boar images into cache...");
+        Log.debug(CacheLoader.class, "Attempting to load boar images into cache...");
 
         for (String boarID : BOARS.keySet()) {
             try {
@@ -79,18 +79,18 @@ class CacheLoader implements Configured {
                 GraphicsUtil.drawImage(mediumBoarGraphics, filePath, ORIGIN, MEDIUM_SIZE);
                 imageCacheMap.put("medium" + boarID, mediumBoarImage);
             } catch (IOException exception) {
-                log.error("Failed to read image file for %s".formatted(boarID), exception);
+                Log.error(CacheLoader.class, "Failed to read image file for %s".formatted(boarID), exception);
                 System.exit(-1);
             } catch (URISyntaxException ignored) {}
         }
 
-        log.debug("Successfully loaded all boar images into cache");
+        Log.debug(CacheLoader.class, "Successfully loaded all boar images into cache");
     }
 
     private static void loadBorders() {
         String rarityBorderPath = PATHS.getMegaMenuAssets() + PATHS.getRarityBorder();
 
-        log.debug("Attempting to load rarity borders into cache...");
+        Log.debug(CacheLoader.class, "Attempting to load rarity borders into cache...");
 
         for (String rarityID : RARITIES.keySet()) {
             String color = COLORS.get(rarityID);
@@ -118,11 +118,11 @@ class CacheLoader implements Configured {
                 rarityMediumBigBorderG2D.setComposite(AlphaComposite.SrcIn);
                 imageCacheMap.put("borderMediumBig" + rarityID, rarityMediumBigBorderImage);
             } catch (IOException exception) {
-                log.error("Failed to read image file for %s border".formatted(rarityID), exception);
+                Log.error(CacheLoader.class, "Failed to read image file for %s border".formatted(rarityID), exception);
                 System.exit(-1);
             } catch (URISyntaxException ignored) {}
         }
 
-        log.debug("Successfully loaded all rarity borders into cache");
+        Log.debug(CacheLoader.class, "Successfully loaded all rarity borders into cache");
     }
 }

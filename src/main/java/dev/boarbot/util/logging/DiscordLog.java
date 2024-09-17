@@ -2,7 +2,7 @@ package dev.boarbot.util.logging;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
-import lombok.extern.slf4j.Slf4j;
+
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Slf4j
 final class DiscordLog implements Configured {
     private static final TextChannel logChannel = BoarBotApp.getBot().getJDA()
         .getTextChannelById(CONFIG.getMainConfig().getLogChannel());

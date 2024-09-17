@@ -5,7 +5,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.util.modal.ModalUtil;
 import dev.boarbot.util.time.TimeUtil;
-import lombok.extern.slf4j.Slf4j;
+
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 
 import java.util.concurrent.CompletableFuture;
 
-@Slf4j
 public class ModalHandler implements Configured {
     private final ModalInteractive receiver;
 
@@ -29,12 +28,7 @@ public class ModalHandler implements Configured {
         String duplicateModalKey = ModalUtil.findDuplicateModalHandler(this.user.getId());
 
         if (duplicateModalKey != null) {
-            try {
-                BoarBotApp.getBot().getModalHandlers().get(duplicateModalKey).stop();
-            } catch (Exception exception) {
-                log.error("Something went wrong when terminating modal handler!", exception);
-                return;
-            }
+            BoarBotApp.getBot().getModalHandlers().get(duplicateModalKey).stop();
         }
 
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);

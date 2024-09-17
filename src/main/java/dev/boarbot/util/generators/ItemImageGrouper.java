@@ -3,7 +3,7 @@ package dev.boarbot.util.generators;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.python.PythonUtil;
-import lombok.extern.slf4j.Slf4j;
+
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
@@ -13,7 +13,6 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.List;
 
-@Slf4j
 public final class ItemImageGrouper implements Configured {
     private static final int[] IMAGE_SIZE = ItemImageGenerator.IMAGE_SIZE;
     private static final int HORIZ_PADDING = 135;

@@ -11,6 +11,7 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.UserInteractive;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.boar.BoarObtainType;
@@ -23,7 +24,6 @@ import dev.boarbot.util.generators.GiftImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
@@ -43,11 +43,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-@Slf4j
 public class BoarGiftInteractive extends UserInteractive implements Synchronizable {
     private final PowerupItemConfig giftConfig = POWS.get("gift");
 
-    private FileUpload giftImage;
+    private final FileUpload giftImage;
 
     private boolean isSkyblockGuild = false;
 
@@ -73,19 +72,17 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
     private final Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getGift();
 
-    public BoarGiftInteractive(Interaction interaction, boolean isMsg) {
+    public BoarGiftInteractive(
+        Interaction interaction, boolean isMsg
+    ) throws IOException, URISyntaxException {
         super(interaction, isMsg, NUMS.getGiftIdle(), NUMS.getGiftIdle());
 
-        try {
-            this.giftImage = new GiftImageGenerator(this.user.getName()).generate().getFileUpload();
-        } catch (IOException | URISyntaxException exception) {
-            log.error("Failed to generate gift image", exception);
-        }
+        this.giftImage = new GiftImageGenerator(this.user.getName()).generate().getFileUpload();
 
         try (Connection connection = DataUtil.getConnection()) {
             this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.guildID);
         } catch (SQLException exception) {
-            log.error("Failed to get guild data", exception);
+            Log.error(this.user, this.getClass(), "Failed to get skyblock status", exception);
         }
     }
 
@@ -117,7 +114,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     .setFiles(new EmbedImageGenerator(STRS.getGiftSelfOpen()).generate().getFileUpload());
                 compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
             } catch (IOException exception) {
-                log.error("An error occurred while sending self gift open message.", exception);
+                Log.error(this.user, this.getClass(), "Failed to generate self open response", exception);
             }
 
             return;
@@ -132,6 +129,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         long userTime = TimeUtil.getCurMilli() - this.giftEnabledTimestamp;
         this.giftTimes.put(compEvent.getUser(), userTime);
         this.giftInteractions.put(compEvent.getUser(), compEvent);
+        Log.debug(this.user, this.getClass(), "Time: %,dms".formatted(userTime));
 
         if (userTime > NUMS.getGiftMaxHandicap()) {
             this.giveGift();
@@ -193,6 +191,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         boarUser.passSynchronizedAction(this);
 
         if (!this.hasGift) {
+            Log.debug(this.user, this.getClass(), "No gifts");
             this.stop(StopType.EXPIRED);
             return;
         }
@@ -213,7 +212,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
             this.giftInteractions.get(this.giftWinner).getHook().sendMessage(msg.build()).setEphemeral(true).complete();
         } catch (IOException exception) {
-            log.error("Failed to send gift time message", exception);
+            Log.error(this.user, this.getClass(), "Failed to generate gift time message", exception);
         }
 
         this.stop(StopType.FINISHED);
@@ -230,6 +229,10 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         if (this.subOutcomeType == SubOutcomeType.SPECIAL_SANTA && TimeUtil.isChristmas()) {
             this.setSubOutcome();
         }
+
+        Log.debug(
+            this.user, this.getClass(), "Outcome: %s | Suboutcome: %s".formatted(this.outcomeType, this.subOutcomeType)
+        );
 
         switch (this.outcomeType) {
             case SPECIAL -> this.boarIDs.add(this.subOutcomeType.toString());
@@ -317,6 +320,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     long userVal = this.giftTimes.get(boarUser.getUser()) -
                        boarUser.giftQuery().getGiftHandicap(connection);
 
+                    Log.debug(this.user, this.getClass(), "Handicapped Value: %,d".formatted(userVal));
                     if (userVal > this.giftWinnerValue) {
                         this.giftWinner = boarUser.getUser();
                         this.giftWinnerValue = userVal;
@@ -368,7 +372,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 }
             }
         } catch (SQLException exception) {
-            log.error("Failed to get user data", exception);
+            Log.error(this.user, this.getClass(), "Failed to fully perform gift open", exception);
         }
     }
 
@@ -399,6 +403,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 this.giftInteractions.get(this.giftWinner).getHook(),
                 false
             );
+            Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
         });
     }
 
@@ -436,6 +441,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 this.giftInteractions.get(this.giftWinner).getHook(),
                 false
             );
+            Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
         });
     }
 
@@ -473,6 +479,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 this.giftInteractions.get(this.giftWinner).getHook(),
                 false
             );
+            Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
         });
     }
 
@@ -486,8 +493,15 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         switch (stopType) {
-            case EXPIRED -> this.deleteInteractive();
-            case FINISHED -> this.updateComponents();
+            case EXPIRED -> {
+                this.deleteInteractive();
+                Log.debug(this.user, this.getClass(), "Interactive expired");
+            }
+
+            case FINISHED -> {
+                this.updateComponents();
+                Log.debug(this.user, this.getClass(), "Finished Interactive");
+            }
         }
     }
 

@@ -54,8 +54,8 @@ public class GiftSubcommand extends Subcommand {
 
         this.interaction.deferReply().complete();
 
-        Log.debug(this.user, this.getClass(), "Sending BoarGiftInteractive");
         Interactive interactive = InteractiveFactory.constructInteractive(this.event, BoarGiftInteractive.class);
         interactive.execute(null);
+        Log.debug(this.user, this.getClass(), "Sent BoarGiftInteractive");
     }
 }

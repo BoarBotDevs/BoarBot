@@ -105,19 +105,16 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
-        if (compEvent != null) {
-            if (!this.user.getId().equals(compEvent.getUser().getId())) {
-                compEvent.deferEdit().queue();
-                return;
-            }
-
-            if (this.modalHandler != null) {
-                this.modalHandler.stop();
-            }
-
-            new MegaMenuComponentHandler(compEvent, this).handleCompEvent();
+        if (compEvent == null) {
+            this.trySendResponse();
+            return;
         }
 
+        if (this.modalHandler != null) {
+            this.modalHandler.stop();
+        }
+
+        new MegaMenuComponentHandler(compEvent, this).handleCompEvent();
         this.trySendResponse();
     }
 
@@ -144,22 +141,25 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             }
 
             this.currentImageGen = this.generatorMaker.make().generate();
+            Log.debug(this.user, this.getClass(), "Successfully generated image for " + this.curView);
 
             if (this.confirmOpen) {
                 this.currentImageUpload = new OverlayImageGenerator(
                     this.currentImageGen.getImage(), this.confirmString
                 ).generate().getFileUpload();
+                Log.debug(this.user, this.getClass(), "Confirmation screen active");
             } else if (this.acknowledgeOpen) {
                 this.currentImageUpload = this.acknowledgeImageGen.setBaseImage(
                     this.currentImageGen.getImage()
                 ).generate().getFileUpload();
+                Log.debug(this.user, this.getClass(), "Acknowledge screen active");
             } else {
                 this.currentImageUpload = this.currentImageGen.getFileUpload();
             }
 
             this.sendResponse();
         } catch (SQLException exception) {
-            Log.error(this.user, this.getClass(), "Failed to get general data", exception);
+            Log.error(this.user, this.getClass(), "Failed to get update data for " + this.curView, exception);
         } catch (IOException | URISyntaxException exception) {
             Log.error(this.user, this.getClass(), "Failed to generate %s image".formatted(this.curView), exception);
         }
@@ -177,8 +177,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     private void sendResponse() {
         MessageEditBuilder editedMsg = new MessageEditBuilder()
-            .setFiles(this.currentImageUpload)
-            .setComponents(this.getCurComponents());
+            .setFiles(this.currentImageUpload).setComponents(this.getCurComponents());
 
         if (this.isStopped) {
             return;
@@ -189,7 +188,6 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     public int getFindBoarPage(String input) {
         int newPage = 0;
-        boolean found = false;
 
         String cleanInput = input.replaceAll(" ", "").toLowerCase();
         Map<String, BoarInfo> filteredBoars = this.filteredBoars;
@@ -200,45 +198,34 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
             for (String searchTerm : boar.getSearchTerms()) {
                 if (cleanInput.equals(searchTerm)) {
-                    found = true;
-                    break;
+                    Log.debug(this.user, this.getClass(), "Found boar: " + boarID);
+                    return newPage;
                 }
-            }
-
-            if (found) {
-                break;
             }
 
             newPage++;
         }
 
         // Find by boar name (startsWith) second
-        if (!found) {
-            newPage = this.matchFront(cleanInput, filteredBoars);
-            found = newPage <= this.maxPage;
+        newPage = this.matchFront(cleanInput, filteredBoars);
+        if (newPage <= this.maxPage) {
+            return newPage;
         }
 
         // Find by shrinking boar name (startsWith) third
-        if (!found) {
-            cleanInput = cleanInput.substring(0, cleanInput.length()-1);
+        cleanInput = cleanInput.substring(0, cleanInput.length()-1);
+        while (!cleanInput.isEmpty()) {
+            newPage = this.matchFront(cleanInput, filteredBoars);
 
-            while (!cleanInput.isEmpty()) {
-                newPage = this.matchFront(cleanInput, filteredBoars);
-                found = newPage <= this.maxPage;
-
-                if (found) {
-                    break;
-                }
-
-                cleanInput = cleanInput.substring(0, cleanInput.length()-1);
+            if (newPage <= this.maxPage) {
+                return newPage;
             }
+
+            cleanInput = cleanInput.substring(0, cleanInput.length()-1);
         }
 
-        if (!found) {
-            newPage = this.page;
-        }
-
-        return newPage;
+        Log.debug(this.user, this.getClass(), "Failed to find boar");
+        return this.page;
     }
 
     private int matchFront(String cleanInput, Map<String, BoarInfo> filteredBoars) {
@@ -248,7 +235,8 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             BoarItemConfig boar = BOARS.get(boarID);
 
             if (boar.getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput)) {
-                break;
+                Log.debug(this.user, this.getClass(), "Found boar: " + boarID);
+                return newPage;
             }
 
             newPage++;

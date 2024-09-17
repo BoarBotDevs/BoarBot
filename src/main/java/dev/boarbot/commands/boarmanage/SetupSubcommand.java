@@ -16,8 +16,8 @@ public class SetupSubcommand extends Subcommand {
     public void execute() {
         this.interaction.deferReply().setEphemeral(true).queue();
 
-        Log.debug(this.user, this.getClass(), "Sending SetupInteractive");
         Interactive interactive = InteractiveFactory.constructInteractive(this.event, SetupInteractive.class);
         interactive.execute(null);
+        Log.debug(this.user, this.getClass(), "Sent SetupInteractive");
     }
 }

@@ -11,24 +11,18 @@ import dev.boarbot.util.generators.ItemImageGenerator;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class InteractiveFactory {
     public static synchronized Interactive constructInteractive(
         Interaction initEvent, Class<? extends Interactive> interactiveClass
     ) {
-        return InteractiveFactory.constructInteractive(initEvent, false, interactiveClass);
-    }
-
-    public static synchronized Interactive constructInteractive(
-        Interaction initEvent, boolean isMsg, Class<? extends Interactive> interactiveClass
-    ) {
         if (interactiveClass == SetupInteractive.class) {
             return new SetupInteractive(initEvent);
         } else if (interactiveClass == DailyNotifyInteractive.class) {
             return new DailyNotifyInteractive(initEvent);
-        } else if (interactiveClass == BoarGiftInteractive.class) {
-            return new BoarGiftInteractive(initEvent, isMsg);
         }
 
         throw new IllegalArgumentException("Not a valid interactive class: " + interactiveClass);
@@ -54,5 +48,11 @@ public class InteractiveFactory {
         SlashCommandInteractionEvent initEvent, MegaMenuView curView
     ) {
         return new MegaMenuInteractive(initEvent, curView);
+    }
+
+    public static synchronized Interactive constructGiftInteractive(
+        Interaction initEvent, boolean isMsg
+    ) throws IOException, URISyntaxException {
+        return new BoarGiftInteractive(initEvent, isMsg);
     }
 }
