@@ -55,6 +55,11 @@ public class ComponentListener extends ListenerAdapter implements Runnable {
 
         try {
             interactive.attemptExecute(this.event, startTime);
+            Log.debug(
+                this.event.getUser(),
+                this.getClass(),
+                "Finished processing %s in %s".formatted(componentID[1], interactive.getClass().getSimpleName())
+            );
         } catch (ErrorResponseException exception) {
             Log.warn(
                 this.event.getUser(),

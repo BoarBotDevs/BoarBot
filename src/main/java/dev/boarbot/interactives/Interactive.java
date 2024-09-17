@@ -3,6 +3,7 @@ package dev.boarbot.interactives;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +70,7 @@ public abstract class Interactive implements Configured {
 
     public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
         if (startTime < this.lastEndTime) {
+            Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
             return;
         }
 

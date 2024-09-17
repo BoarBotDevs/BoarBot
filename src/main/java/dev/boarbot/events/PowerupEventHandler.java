@@ -9,8 +9,8 @@ import dev.boarbot.interactives.event.PowerupEventInteractive;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.PowerupEventImageGenerator;
+import dev.boarbot.util.logging.Log;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -18,11 +18,12 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-@Slf4j
 public class PowerupEventHandler extends EventHandler implements Synchronizable, Configured {
     @Getter private static final List<Message> curMessages = new ArrayList<>();
     private static final Set<Message> priorMessages = new HashSet<>();
@@ -57,6 +58,8 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
 
     @Override
     public void sendEvent() {
+        Log.debug(this.getClass(), "Preparing Powerup Event");
+
         this.setPriorMessages();
         super.sendEvent();
         this.removePriorEvent();
@@ -73,8 +76,10 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
         try (Connection connection = DataUtil.getConnection()) {
             GuildDataUtil.updatePowerupMessages(connection, curMessages);
         } catch (SQLException exception) {
-            log.error("Failed to update Powerup Event messages in database.", exception);
+            Log.error(this.getClass(), "Failed to update Powerup Event messages in database", exception);
         }
+
+        Log.debug(this.getClass(), "Updated prior Powerup Event messages in database");
     }
 
     private void setPriorMessages() {
@@ -83,14 +88,17 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
         if (!curMessages.isEmpty()) {
             priorMessages.addAll(curMessages);
             curMessages.clear();
+            Log.debug(this.getClass(), "Retrieved prior Powerup Event messages from memory");
             return;
         }
 
         try (Connection connection = DataUtil.getConnection()) {
             priorMessages.addAll(GuildDataUtil.getPowerupMessages(connection));
         } catch (SQLException exception) {
-            log.error("Failed to get prior Powerup Event messages to remove.", exception);
+            Log.error(this.getClass(), "Failed to get prior Powerup Event messages", exception);
         }
+
+        Log.debug(this.getClass(), "Retrieved prior Powerup Event messages from database");
     }
 
     private void removePriorEvent() {
@@ -99,10 +107,14 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
                 msg.delete().queue();
             } catch (ErrorResponseException ignored) {}
         }
+
+        Log.debug(this.getClass(), "Removed prior Powerup Event messages");
     }
 
     @Override
     protected void handleResults() {
+        Log.debug(this.getClass(), "All Powerup Events ended, handling results");
+
         String fastestStr = null;
         String avgStr = null;
 
@@ -112,6 +124,8 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
         for (Map.Entry<String, Long> entry : userEntries) {
             this.sortedUsers.add(entry.getKey());
         }
+
+        Log.debug(this.getClass(), "Sorted users based on time");
 
         if (!this.userTimes.isEmpty()) {
             User user = BoarBotApp.getBot().getJDA().getUserById(this.sortedUsers.getFirst());
@@ -133,8 +147,8 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
             for (String userID : this.userTimes.keySet()) {
                 BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
                 boarUser.passSynchronizedAction(this);
-                boarUser.decRefs();
             }
+            Log.debug(this.getClass(), "Updated participant stats");
         }
     }
 
@@ -150,7 +164,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
                 : 0;
             boarUser.eventQuery().addPrompt(connection, this.promptID, placement);
         } catch (SQLException exception) {
-            log.error("Failed update user after Powerup Event", exception);
+            Log.error(boarUser.getUser(), this.getClass(), "Failed to update powerup stats", exception);
         }
     }
 
@@ -159,14 +173,17 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
             this.currentImage = ((PowerupEventImageGenerator) this.imageGenerator).setEndStrings(fastestStr, avgStr)
                 .generate().getFileUpload();
 
-            MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setComponents().setFiles(this.currentImage);
+            MessageEditBuilder editedMsg = new MessageEditBuilder().setComponents().setFiles(this.currentImage);
 
             for (Message msg : curMessages) {
-                msg.editMessage(editedMsg.build()).queue();
+                try {
+                    msg.editMessage(editedMsg.build()).queue();
+                } catch (ErrorResponseException ignored) {}
             }
-        } catch (Exception exception) {
-            log.error("Failed to get end image Powerup Event.", exception);
+
+            Log.debug(this.getClass(), "Edited all Powerup Event messages");
+        } catch (IOException | URISyntaxException exception) {
+            Log.error(this.getClass(), "Failed to generate Powerup Event end message", exception);
         }
     }
 }

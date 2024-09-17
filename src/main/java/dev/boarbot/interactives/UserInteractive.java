@@ -1,6 +1,7 @@
 package dev.boarbot.interactives;
 
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.Log;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -111,5 +112,7 @@ public abstract class UserInteractive extends Interactive {
         } else {
             this.msg.editMessageComponents().complete();
         }
+
+        Log.debug(this.user, this.getClass(), "Interactive expired");
     }
 }

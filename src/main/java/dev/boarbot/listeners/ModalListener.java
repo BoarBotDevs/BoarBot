@@ -36,10 +36,15 @@ public class ModalListener extends ListenerAdapter implements Runnable {
             return;
         }
 
-        Log.debug(this.event.getUser(), this.getClass(), "Submitted modal %s".formatted(modalID[1]));
+        Log.debug(this.event.getUser(), this.getClass(), "Submitted modal %s".formatted(modalID[2]));
 
         try {
             modalHandler.execute(this.event);
+            Log.debug(
+                this.event.getUser(),
+                this.getClass(),
+                "Finished processing %s".formatted(modalID[2])
+            );
         } catch (ErrorResponseException exception) {
             Log.warn(
                 this.event.getUser(),

@@ -2,6 +2,7 @@ package dev.boarbot.interactives.event;
 
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -69,5 +70,6 @@ public abstract class EventInteractive extends Interactive {
         }
 
         this.msg.editMessageComponents().complete();
+        Log.debug(this.getClass(), "Interactive expired");
     }
 }

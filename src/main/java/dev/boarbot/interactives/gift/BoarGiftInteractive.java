@@ -191,7 +191,6 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
         boarUser.passSynchronizedAction(this);
-        boarUser.decRefs();
 
         if (!this.hasGift) {
             this.stop(StopType.EXPIRED);
@@ -203,7 +202,6 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         for (User user : this.giftTimes.keySet()) {
             BoarUser openUser = BoarUserFactory.getBoarUser(user);
             openUser.passSynchronizedAction(this);
-            openUser.decRefs();
         }
 
         try {
@@ -250,11 +248,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         BoarUser openUser = BoarUserFactory.getBoarUser(this.giftWinner);
         openUser.passSynchronizedAction(this);
-        openUser.decRefs();
 
         BoarUser sendUser = BoarUserFactory.getBoarUser(this.user);
         sendUser.passSynchronizedAction(this);
-        sendUser.decRefs();
     }
 
     private void setOutcome() {

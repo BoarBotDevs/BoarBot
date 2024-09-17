@@ -36,7 +36,7 @@ class MegaMenuComponentsGetter implements Configured {
     }
 
     public ActionRow[] getComponents() {
-        if (this.interactive.isAcknowledgeOpen()) {
+        if (this.interactive.acknowledgeOpen) {
             List<ItemComponent> backRow = InteractiveUtil.makeComponents(
                 this.interactive.getInteractionID(),
                 this.COMPONENTS.get("backBtn")
@@ -45,7 +45,7 @@ class MegaMenuComponentsGetter implements Configured {
             return new ActionRow[] {ActionRow.of(backRow)};
         }
 
-        if (this.interactive.isConfirmOpen()) {
+        if (this.interactive.confirmOpen) {
             List<ItemComponent> confirmRow = InteractiveUtil.makeComponents(
                 this.interactive.getInteractionID(),
                 this.COMPONENTS.get("cancelBtn"),
@@ -55,7 +55,7 @@ class MegaMenuComponentsGetter implements Configured {
             return new ActionRow[] {ActionRow.of(confirmRow)};
         }
 
-        return switch (this.interactive.getCurView()) {
+        return switch (this.interactive.curView) {
             case MegaMenuView.PROFILE, MegaMenuView.STATS, MegaMenuView.BADGES -> this.getNav();
             case MegaMenuView.COLLECTION -> this.getCompendiumCollectionComponents();
             case MegaMenuView.COMPENDIUM -> this.getCompendiumCollectionComponents(true);
@@ -91,11 +91,11 @@ class MegaMenuComponentsGetter implements Configured {
 
         List<ItemComponent> selectRow = null;
 
-        if (this.interactive.isFilterOpen()) {
+        if (this.interactive.filterOpen) {
             selectRow = this.getFilterRow();
-        } else if (this.interactive.isSortOpen()) {
+        } else if (this.interactive.sortOpen) {
             selectRow = this.getSortRow();
-        } else if (this.interactive.isInteractOpen()) {
+        } else if (this.interactive.interactOpen) {
             selectRow = this.getInteractRow();
         }
 
@@ -109,7 +109,7 @@ class MegaMenuComponentsGetter implements Configured {
 
         boolean userSelf = this.interactive.getUser().getId().equals(this.interactive.getBoarUser().getUserID());
 
-        if (interactBtn != null && this.interactive.getCurBoarEntry().getValue().getAmount() > 0 && userSelf) {
+        if (interactBtn != null && this.interactive.curBoarEntry.getValue().getAmount() > 0 && userSelf) {
             interactBtn = interactBtn.withDisabled(false);
         }
 
@@ -121,11 +121,11 @@ class MegaMenuComponentsGetter implements Configured {
             actionRows.add(ActionRow.of(interactRow));
         }
 
-        if (this.interactive.getFilterBits() != 1) {
+        if (this.interactive.filterBits != 1) {
             filterBtn = filterBtn.withStyle(ButtonStyle.SUCCESS);
         }
 
-        if (this.interactive.getSortVal() != SortType.RARITY_D) {
+        if (this.interactive.sortVal != SortType.RARITY_D) {
             sortBtn = sortBtn.withStyle(ButtonStyle.SUCCESS);
         }
 
@@ -148,8 +148,8 @@ class MegaMenuComponentsGetter implements Configured {
             this.COMPONENTS.get("backBtn")
         );
 
-        String rarityEmoji = RARITIES.get(this.interactive.getCurRarityKey()).getEmoji();
-        String boarName = BOARS.get(this.interactive.getCurBoarEntry().getKey()).getName();
+        String rarityEmoji = RARITIES.get(this.interactive.curRarityKey).getEmoji();
+        String boarName = BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
 
         List<SelectOption> selectOptions = new ArrayList<>(this.navOptions);
         selectOptions.add(
@@ -203,11 +203,11 @@ class MegaMenuComponentsGetter implements Configured {
         Button bonusBtn = ((Button) allBtnsRow.get(1));
         Button autoBtn = ((Button) allBtnsRow.get(2));
 
-        QuestData questData = this.interactive.getQuestData();
+        QuestData questData = this.interactive.questData;
         boolean claimBonus = !questData.fullClaimed();
 
         for (int i=0; i<questData.questProgress().size(); i++) {
-            QuestType quest = this.interactive.getQuests().get(i);
+            QuestType quest = this.interactive.quests.get(i);
             int progress = questData.questProgress().get(i);
             boolean claimed = questData.questClaims().get(i);
 
@@ -256,7 +256,7 @@ class MegaMenuComponentsGetter implements Configured {
         for (int i=0; i<this.filterOptions.size(); i++) {
             SelectOption filterOption = this.filterOptions.get(i);
 
-            if ((this.interactive.getFilterBits() >> i) % 2 == 1) {
+            if ((this.interactive.filterBits >> i) % 2 == 1) {
                 this.filterOptions.set(i, filterOption.withDefault(true));
                 continue;
             }
@@ -290,7 +290,7 @@ class MegaMenuComponentsGetter implements Configured {
         for (int i=0; i<this.sortOptions.size(); i++) {
             SelectOption sortOption = this.sortOptions.get(i);
 
-            if (this.interactive.getSortVal() == SortType.values()[i]) {
+            if (this.interactive.sortVal == SortType.values()[i]) {
                 this.sortOptions.set(i, sortOption.withDefault(true));
                 continue;
             }
@@ -321,8 +321,8 @@ class MegaMenuComponentsGetter implements Configured {
             this.COMPONENTS.get("interactSelect")
         );
 
-        boolean canFavorite = this.interactive.getFavoriteID() == null ||
-            !this.interactive.getFavoriteID().equals(this.interactive.getCurBoarEntry().getKey());
+        boolean canFavorite = this.interactive.favoriteID == null ||
+            !this.interactive.favoriteID.equals(this.interactive.curBoarEntry.getKey());
 
         List<SelectOption> selectOptions = new ArrayList<>(this.interactOptions);
 
@@ -331,11 +331,11 @@ class MegaMenuComponentsGetter implements Configured {
             selectOptions.set(0, selectOptions.getFirst().withDescription("Unfavorite this boar"));
         }
 
-        RarityConfig curRarity = RARITIES.get(this.interactive.getCurRarityKey());
+        RarityConfig curRarity = RARITIES.get(this.interactive.curRarityKey);
 
-        boolean cloneable = curRarity.getAvgClones() != 0 && this.interactive.getNumClone() > 0;
+        boolean cloneable = curRarity.getAvgClones() != 0 && this.interactive.numClone > 0;
         boolean transmutable = curRarity.getChargesNeeded() != 0 &&
-            curRarity.getChargesNeeded() <= this.interactive.getNumTransmute();
+            curRarity.getChargesNeeded() <= this.interactive.numTransmute;
 
         if (!cloneable) {
             selectOptions.remove(1);
@@ -377,7 +377,7 @@ class MegaMenuComponentsGetter implements Configured {
         for (int i=0; i<this.navOptions.size(); i++) {
             SelectOption navOption = this.navOptions.get(i);
 
-            if (navOption.getValue().equals(this.interactive.getCurView().toString())) {
+            if (navOption.getValue().equals(this.interactive.curView.toString())) {
                 this.navOptions.set(i, navOption.withDefault(true));
                 continue;
             }
@@ -389,15 +389,15 @@ class MegaMenuComponentsGetter implements Configured {
         Button pageBtn = ((Button) navBtns.get(1)).asDisabled();
         Button rightBtn = ((Button) navBtns.get(2)).asDisabled();
 
-        if (this.interactive.getPage() > 0) {
+        if (this.interactive.page > 0) {
             leftBtn = leftBtn.withDisabled(false);
         }
 
-        if (this.interactive.getMaxPage() > 0) {
+        if (this.interactive.maxPage > 0) {
             pageBtn = pageBtn.withDisabled(false);
         }
 
-        if (this.interactive.getPage() < this.interactive.getMaxPage()) {
+        if (this.interactive.page < this.interactive.maxPage) {
             rightBtn = rightBtn.withDisabled(false);
         }
 
@@ -435,7 +435,7 @@ class MegaMenuComponentsGetter implements Configured {
             case "FILTER_SELECT" ->  {
                 Set<String> ownedRarities = new HashSet<>();
 
-                for (BoarInfo boarInfo : this.interactive.getOwnedBoars().values()) {
+                for (BoarInfo boarInfo : this.interactive.ownedBoars.values()) {
                     ownedRarities.add(boarInfo.getRarityID());
                 }
 

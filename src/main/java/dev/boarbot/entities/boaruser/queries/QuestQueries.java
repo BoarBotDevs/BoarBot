@@ -94,8 +94,10 @@ public class QuestQueries implements Configured {
             statement.executeUpdate();
         }
 
-        for (IndivQuestConfig claimQuest : claimQuests) {
+        for (int i=0; i<claimQuests.size(); i++) {
+            IndivQuestConfig claimQuest = claimQuests.get(i);
             this.giveReward(claimQuest, connection);
+            Log.debug(this.boarUser.getUser(), this.getClass(), "Claimed quest %s".formatted(quests.get(i)));
         }
 
         return new QuestInfo(claimQuests, false);
@@ -118,6 +120,7 @@ public class QuestQueries implements Configured {
         }
 
         this.giveBonus(connection);
+        Log.debug(this.boarUser.getUser(), this.getClass(), "Claimed quest bonus");
 
         return true;
     }

@@ -28,6 +28,8 @@ public class BaseQueries implements Configured {
             statement.setString(2, this.boarUser.getUser().getName());
             statement.execute();
         }
+
+        Log.info(this.boarUser.getUser(), this.getClass(), "New user!");
     }
 
     public boolean userExists(Connection connection) throws SQLException {
@@ -120,6 +122,10 @@ public class BaseQueries implements Configured {
             statement.setString(4, this.boarUser.getUserID());
             statement.executeUpdate();
         }
+
+        Log.debug(
+            this.boarUser.getUser(), this.getClass(), "Decreased streak %,d -> %,d".formatted(boarStreak, newBoarStreak)
+        );
     }
 
     public long getLastChanged(Connection connection) throws SQLException {
@@ -158,6 +164,12 @@ public class BaseQueries implements Configured {
             statement.setString(2, this.boarUser.getUserID());
             statement.executeUpdate();
         }
+
+        if (amount > 100) {
+            Log.info(this.boarUser.getUser(), this.getClass(), "Obtained +$%,d".formatted(amount));
+        } else {
+            Log.debug(this.boarUser.getUser(), this.getClass(), "Obtained +$%,d".formatted(amount));
+        }
     }
 
     public void setNotifications(Connection connection, String channelID) throws SQLException {
@@ -175,6 +187,8 @@ public class BaseQueries implements Configured {
             statement.setString(3, this.boarUser.getUserID());
             statement.executeUpdate();
         }
+
+        Log.debug(this.boarUser.getUser(), this.getClass(), "Notifications enabled in channel " + channelID);
     }
 
     public boolean getNotificationStatus(Connection connection) throws SQLException {
@@ -235,7 +249,6 @@ public class BaseQueries implements Configured {
             }
         }
 
-        Log.debug(this.boarUser.getUser(), this.getClass(), "Blessings: %,d".formatted(blessings));
         return blessings;
     }
 }

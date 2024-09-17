@@ -24,7 +24,6 @@ public class BetaPowerupsSubcommand extends Subcommand implements Synchronizable
 
         BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
         boarUser.passSynchronizedAction(this);
-        boarUser.decRefs();
 
         Log.debug(this.user, this.getClass(), "Given powerups");
         this.interaction.reply("+10 of each powerup").setEphemeral(true).complete();

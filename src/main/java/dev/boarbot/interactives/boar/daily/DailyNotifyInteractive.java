@@ -45,8 +45,6 @@ public class DailyNotifyInteractive extends UserInteractive {
         Log.debug(this.user, this.getClass(), "Attempting to enable notifications");
         compEvent.deferEdit().queue();
 
-        this.hasButton = true;
-
         try {
             compEvent.getUser().openPrivateChannel().complete().sendMessage(STRS.getNotificationSuccess()).complete();
         } catch (ErrorResponseException exception) {
@@ -65,12 +63,12 @@ public class DailyNotifyInteractive extends UserInteractive {
         try (Connection connection = DataUtil.getConnection()) {
             BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
             boarUser.baseQuery().setNotifications(connection, compEvent.getChannelId());
-            boarUser.decRefs();
         } catch (SQLException exception) {
             Log.error(this.user, this.getClass(), "Failed to enable notifications", exception);
             return;
         }
 
+        this.hasButton = false;
         this.sendResponse();
     }
 
@@ -111,6 +109,7 @@ public class DailyNotifyInteractive extends UserInteractive {
         }
 
         this.deleteInteractive();
+        Log.debug(this.user, this.getClass(), "Interactive expired");
     }
 
     @Override

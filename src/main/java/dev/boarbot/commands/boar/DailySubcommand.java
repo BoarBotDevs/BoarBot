@@ -52,7 +52,6 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
         BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
         boarUser.passSynchronizedAction(this);
-        boarUser.decRefs();
 
         if (!this.canDaily) {
             this.interaction.deferReply().setEphemeral(true).queue();
@@ -111,6 +110,8 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             this.isFirstDaily = boarUser.isFirstDaily();
 
             long blessings = boarUser.baseQuery().getBlessings(connection);
+            Log.debug(this.user, this.getClass(), "Blessings: %,d".formatted(blessings));
+
             boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
                 connection, Objects.requireNonNull(this.interaction.getGuild()).getId()
             );

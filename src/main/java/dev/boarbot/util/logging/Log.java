@@ -10,13 +10,17 @@ public final class Log {
         return LoggerFactory.getLogger(clazz);
     }
 
+    public static void debug(String message) {
+        debug(null, Log.class, message);
+    }
+
     public static void debug(Class<?> clazz, String message) {
         debug(null, clazz, message);
     }
 
     public static void debug(User user, Class<?> clazz, String message) {
-        message = getUserMsg(user, message);
-        log(clazz).debug(message);
+        String msg = getUserMsg(user, message);
+        log(clazz).debug(msg);
     }
 
     public static void info(Class<?> clazz, String message) {
@@ -32,19 +36,19 @@ public final class Log {
     }
 
     public static void info(User user, Class<?> clazz, String message, boolean force) {
-        message = getUserMsg(user, message);
-        log(clazz).info(message);
+        String msg = getUserMsg(user, message);
+        log(clazz).info(msg);
 
         if (!ReadyListener.isDone()) {
             return;
         }
 
         if (force) {
-            DiscordLog.forceLog(clazz, message);
+            DiscordLog.forceLog(clazz, msg);
             return;
         }
 
-        DiscordLog.addLog(clazz, message);
+        DiscordLog.addLog(clazz, msg);
     }
 
     public static void warn(Class<?> clazz, String message) {
@@ -60,20 +64,19 @@ public final class Log {
     }
 
     public static void warn(User user, Class<?> clazz, String message, Exception exception) {
-        message = getUserMsg(user, message);
+        String msg = getUserMsg(user, message);
 
         if (exception != null) {
-            log(clazz).warn(message, exception);
+            log(clazz).warn(msg, exception);
         } else {
-            log(clazz).warn(message);
+            log(clazz).warn(msg);
         }
-
 
         if (!ReadyListener.isDone()) {
             return;
         }
 
-        DiscordLog.sendWarn(clazz, message);
+        DiscordLog.sendWarn(clazz, msg);
     }
 
     public static void error(Class<?> clazz, String message, Exception exception) {
@@ -81,14 +84,21 @@ public final class Log {
     }
 
     public static void error(User user, Class<?> clazz, String message, Exception exception) {
-        message = getUserMsg(user, message);
-        log(clazz).error(message, exception);
+        String msg = getUserMsg(user, message);
+        log(clazz).error(msg, exception);
 
         if (!ReadyListener.isDone()) {
             return;
         }
 
-        DiscordLog.sendException(clazz, message);
+        DiscordLog.sendException(clazz, msg);
+    }
+
+    public static String getUserSuffix(User user, String userID) {
+        if (user != null) {
+            return " %s (%s)".formatted(user.getName(), userID);
+        }
+        return " (%s)".formatted(userID);
     }
 
     private static String getUserMsg(User user, String message) {

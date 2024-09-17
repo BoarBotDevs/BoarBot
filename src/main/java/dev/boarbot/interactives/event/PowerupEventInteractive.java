@@ -93,7 +93,6 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
 
                 BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
                 boarUser.passSynchronizedAction(this);
-                boarUser.decRefs();
 
                 int eventAmt = POWS.get(this.powerupID).getEventAmt();
                 String powStr = eventAmt == 1
@@ -111,7 +110,6 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
 
                 BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
                 boarUser.passSynchronizedAction(this);
-                boarUser.decRefs();
 
                 embedGen.setStr(STRS.getPowEventFail()).setColor(COLORS.get("font"));
                 compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();

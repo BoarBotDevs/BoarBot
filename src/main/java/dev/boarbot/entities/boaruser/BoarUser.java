@@ -4,6 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.entities.boaruser.queries.*;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.User;
@@ -25,7 +26,7 @@ public class BoarUser {
     private final QuestQueries questQuery;
 
     @Getter boolean isSynchronized = false;
-    private int numRefs = 0;
+    @Getter private long lastRef;
 
     public BoarUser(User user) {
         this(user.getId());
@@ -41,7 +42,6 @@ public class BoarUser {
         this.megaQuery = new MegaMenuQueries(this);
         this.powQuery = new PowerupQueries(this);
         this.questQuery = new QuestQueries(this);
-        this.incRefs();
     }
 
     public User getUser() {
@@ -91,18 +91,14 @@ public class BoarUser {
         }
     }
 
-    public synchronized void incRefs() {
-        this.numRefs++;
+    synchronized void updateLastRef() {
+        this.lastRef = TimeUtil.getCurMilli();
+        Log.debug(this.getClass(), "[U]%s".formatted(Log.getUserSuffix(this.user, this.userID)));
+
         try (Connection connection = DataUtil.getConnection()) {
             this.baseQuery.updateUser(connection, true);
         } catch (SQLException exception) {
             Log.error(this.getUser(), this.getClass(), "Failed to update user's data", exception);
-        }
-    }
-
-    public synchronized void decRefs() {
-        if (--this.numRefs == 0) {
-            BoarUserFactory.removeBoarUser(this.userID);
         }
     }
 }

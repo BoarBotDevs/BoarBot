@@ -1,30 +1,17 @@
 package dev.boarbot.interactives.boar.megamenu;
 
-import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
-import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.entities.boaruser.*;
 import dev.boarbot.entities.boaruser.data.*;
-import dev.boarbot.interactives.Interactive;
-import dev.boarbot.interactives.InteractiveFactory;
-import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.ModalInteractive;
-import dev.boarbot.interactives.gift.BoarGiftInteractive;
-import dev.boarbot.util.quests.QuestInfo;
-import dev.boarbot.util.quests.QuestUtil;
-import dev.boarbot.util.boar.BoarObtainType;
-import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.generators.OverlayImageGenerator;
-import dev.boarbot.util.graphics.TextUtil;
-import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -32,78 +19,70 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
-import java.io.*;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
-@Slf4j
 public class MegaMenuInteractive extends ModalInteractive implements Synchronizable {
-    @Getter @Setter private int prevPage = -1;
-    @Getter @Setter private int page;
-    @Getter @Setter private int maxPage;
-    @Getter @Setter private String boarPage;
-
-    @Getter @Setter private MegaMenuView curView;
-    @Getter @Setter private MegaMenuView prevView;
+    int prevPage = -1;
+    int page;
+    int maxPage;
+    String boarPage;
+    MegaMenuView curView;
+    MegaMenuView prevView;
     @Getter private final Map<MegaMenuView, Boolean> viewsToUpdateData = new HashMap<>();
 
-    @Getter @Setter private GenericComponentInteractionCreateEvent compEvent;
-    @Getter @Setter private ModalInteractionEvent modalEvent;
+    GenericComponentInteractionCreateEvent compEvent;
+    ModalInteractionEvent modalEvent;
 
     private final MegaMenuComponentsGetter componentsGetter = new MegaMenuComponentsGetter(this);
     private final MegaMenuGeneratorMaker generatorMaker = new MegaMenuGeneratorMaker(this);
+    private final MegaMenuActionHandler actionHandler = new MegaMenuActionHandler(this);
     private ImageGenerator currentImageGen;
     private FileUpload currentImageUpload;
 
-    @Getter private boolean isSkyblockGuild;
-
-    @Getter @Setter private boolean confirmOpen = false;
-    @Getter @Setter private String confirmString;
-
-    @Getter @Setter private boolean acknowledgeOpen = false;
-    @Getter @Setter private OverlayImageGenerator acknowledgeImageGen;
-
-    @Getter @Setter private boolean filterOpen = false;
-    @Getter @Setter private int filterBits = 0;
-
-    @Getter @Setter private boolean sortOpen = false;
-    @Getter @Setter private SortType sortVal = SortType.RARITY_D;
-
-    @Getter @Setter private boolean interactOpen = false;
-    @Getter @Setter private InteractType interactType;
-
-    @Getter @Setter private String powerupUsing;
+    boolean confirmOpen = false;
+    String confirmString;
+    boolean acknowledgeOpen = false;
+    OverlayImageGenerator acknowledgeImageGen;
 
     @Getter private final BoarUser boarUser;
-
+    @Getter private boolean isSkyblockGuild;
     @Getter private String firstJoinedDate;
     @Getter private List<BadgeData> badges;
-    @Getter @Setter private String favoriteID;
+    String favoriteID;
 
-    @Getter @Setter private Map<String, BoarInfo> ownedBoars;
-    @Getter @Setter private Map<String, BoarInfo> filteredBoars;
-    @Getter @Setter private Map.Entry<String, BoarInfo> curBoarEntry;
-    @Getter @Setter private String curRarityKey;
-    @Getter @Setter private int numTransmute;
-    @Getter @Setter private int numClone;
-    @Getter @Setter private int numTryClone;
+    ProfileData profileData;
 
-    @Getter @Setter private ProfileData profileData;
+    Map<String, BoarInfo> ownedBoars;
+    Map<String, BoarInfo> filteredBoars;
+    Map.Entry<String, BoarInfo> curBoarEntry;
+    String curRarityKey;
+    boolean filterOpen = false;
+    int filterBits = 0;
+    boolean sortOpen = false;
+    SortType sortVal = SortType.RARITY_D;
+    boolean interactOpen = false;
+    InteractType interactType;
+    int numTransmute;
+    int numClone;
+    int numTryClone;
 
-    @Getter @Setter private StatsData statsData;
+    StatsData statsData;
 
-    @Getter @Setter private PowerupsData powData;
-    @Getter @Setter private int numTryCharm;
+    PowerupsData powData;
+    String powerupUsing;
+    int numTryCharm;
 
-    @Getter @Setter private QuestData questData;
-    @Getter @Setter private List<QuestType> quests;
-    @Getter @Setter private QuestAction questAction;
+    QuestData questData;
+    List<QuestType> quests;
+    QuestAction questAction;
 
-    public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) throws SQLException {
+    public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) {
         super(event.getInteraction());
 
         this.page = event.getOption("page") != null
@@ -180,9 +159,9 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
             this.sendResponse();
         } catch (SQLException exception) {
-            log.error("Failed to get data.", exception);
-        } catch (Exception exception) {
-            log.error("Failed to generate collection image.", exception);
+            Log.error(this.user, this.getClass(), "Failed to get general data", exception);
+        } catch (IOException | URISyntaxException exception) {
+            Log.error(this.user, this.getClass(), "Failed to generate %s image".formatted(this.curView), exception);
         }
     }
 
@@ -193,318 +172,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
-        try {
-            if (this.filterOpen) {
-                try (Connection connection = DataUtil.getConnection()) {
-                    boarUser.megaQuery().setFilterBits(connection, this.filterBits);
-                }
-            } else if (this.sortOpen) {
-                try (Connection connection = DataUtil.getConnection()) {
-                    boarUser.megaQuery().setSortVal(connection, this.sortVal);
-                }
-            } else if (this.interactType != null) {
-                switch (this.interactType) {
-                    case FAVORITE -> this.doFavorite(boarUser);
-                    case CLONE -> this.doClone(boarUser);
-                    case TRANSMUTE -> this.doTransmute(boarUser);
-                }
-
-                this.acknowledgeOpen = true;
-                this.interactType = null;
-                this.confirmOpen = false;
-            } else if (this.powerupUsing != null) {
-                switch (this.powerupUsing) {
-                    case "miracle" -> this.doCharm(boarUser);
-                    case "gift" -> this.doGift(boarUser);
-                }
-
-                this.acknowledgeOpen = true;
-                this.powerupUsing = null;
-                this.confirmOpen = false;
-            } else if (this.questAction != null) {
-                try (Connection connection = DataUtil.getConnection()) {
-                    switch (this.questAction) {
-                        case CLAIM -> this.doQuestClaim(boarUser, connection);
-                        case CLAIM_BONUS -> this.doQuestBonus(boarUser, connection);
-                        case AUTO_CLAIM -> this.toggleQuestAuto(boarUser, connection);
-                    }
-                } catch (SQLException exception) {
-                    log.error("Failed to update quest data", exception);
-                }
-
-                this.questAction = null;
-            }
-        } catch (SQLException exception) {
-            log.error("Failed to get user data", exception);
-        }
-    }
-
-    private void doFavorite(BoarUser boarUser) throws SQLException {
-        String boarName = BOARS.get(this.curBoarEntry.getKey()).getName();
-
-        try (Connection connection = DataUtil.getConnection()) {
-            this.favoriteID = boarUser.megaQuery().getFavoriteID(connection);
-
-            if (this.favoriteID == null || !this.favoriteID.equals(this.curBoarEntry.getKey())) {
-                this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getCompFavoriteSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                );
-                boarUser.megaQuery().setFavoriteID(connection, this.curBoarEntry.getKey());
-            } else {
-                this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getCompUnfavoriteSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                );
-                boarUser.megaQuery().setFavoriteID(connection, null);
-            }
-        }
-    }
-
-    private void doClone(BoarUser boarUser) throws SQLException {
-        String boarName = BOARS.get(this.curBoarEntry.getKey()).getName();
-
-        List<String> newBoarIDs = new ArrayList<>();
-        List<Integer> bucksGotten = new ArrayList<>();
-        List<Integer> editions = new ArrayList<>();
-
-        try (Connection connection = DataUtil.getConnection()) {
-            this.numClone = boarUser.powQuery().getPowerupAmount(connection, "clone");
-            boolean cloneable = RARITIES.get(this.curRarityKey).getAvgClones() != 0 &&
-                this.numTryClone <= this.numClone;
-
-            if (cloneable) {
-                if (boarUser.boarQuery().hasBoar(this.curBoarEntry.getKey(), connection)) {
-                    int avgClones = RARITIES.get(this.curRarityKey).getAvgClones();
-                    double chance = this.numTryClone == avgClones
-                        ? 1
-                        : (double) (this.numTryClone % avgClones) / avgClones;
-                    double randVal = Math.random();
-
-                    for (int i = 0; i < (this.numTryClone / avgClones); i++) {
-                        newBoarIDs.add(this.curBoarEntry.getKey());
-                    }
-
-                    if (chance < 1 && chance > randVal) {
-                        newBoarIDs.add(this.curBoarEntry.getKey());
-                    }
-
-                    if (newBoarIDs.isEmpty()) {
-                        this.acknowledgeImageGen = new OverlayImageGenerator(
-                            null, STRS.getCompCloneFailed().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                        );
-                    } else {
-                        boarUser.boarQuery().addBoars(
-                            newBoarIDs,
-                            connection,
-                            BoarObtainType.CLONE,
-                            bucksGotten,
-                            editions
-                        );
-
-                        boarUser.powQuery().usePowerup(connection, "clone", this.numTryClone);
-
-                        QuestUtil.sendQuestClaimMessage(
-                            this.compEvent.getHook(),
-                            boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection),
-                            boarUser.questQuery().addProgress(QuestType.CLONE_BOARS, newBoarIDs.size(), connection),
-                            boarUser.questQuery().addProgress(QuestType.CLONE_RARITY, newBoarIDs, connection)
-                        );
-                    }
-                } else {
-                    this.acknowledgeImageGen = new OverlayImageGenerator(
-                        null, STRS.getCompNoBoar().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                    );
-                }
-            } else {
-                this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getNoPow().formatted(POWS.get("transmute").getPluralName())
-                );
-            }
-        }
-
-        if (!newBoarIDs.isEmpty()) {
-            CompletableFuture.runAsync(() -> {
-                this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getCompCloneSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                );
-
-                String title = STRS.getCompCloneTitle();
-
-                ItemInteractive.sendInteractive(
-                    newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
-                );
-            });
-        }
-    }
-
-    private void doTransmute(BoarUser boarUser) throws SQLException {
-        String boarName = BOARS.get(this.curBoarEntry.getKey()).getName();
-
-        List<String> newBoarIDs = new ArrayList<>();
-        List<Integer> bucksGotten = new ArrayList<>();
-        List<Integer> editions = new ArrayList<>();
-
-        try (Connection connection = DataUtil.getConnection()) {
-            this.numTransmute = boarUser.powQuery().getPowerupAmount(connection, "transmute");
-            RarityConfig curRarity = RARITIES.get(this.curRarityKey);
-            boolean transmutable = curRarity.getChargesNeeded() != 0 &&
-                curRarity.getChargesNeeded() <= this.numTransmute;
-
-            if (transmutable) {
-                if (boarUser.boarQuery().hasBoar(this.curBoarEntry.getKey(), connection)) {
-                    String nextRarityID = BoarUtil.getNextRarityKey(this.curRarityKey);
-                    newBoarIDs.add(BoarUtil.findValid(nextRarityID, this.isSkyblockGuild));
-
-                    boarUser.boarQuery().removeBoar(this.curBoarEntry.getKey(), connection);
-                    boarUser.boarQuery().addBoars(
-                        newBoarIDs,
-                        connection,
-                        BoarObtainType.TRANSMUTE,
-                        bucksGotten,
-                        editions
-                    );
-
-                    boarUser.powQuery().usePowerup(connection, "transmute", this.numTransmute);
-
-                    QuestUtil.sendQuestClaimMessage(
-                        this.compEvent.getHook(),
-                        boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection)
-                    );
-                } else {
-                    this.acknowledgeImageGen = new OverlayImageGenerator(
-                        null, STRS.getCompNoBoar().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                    );
-                }
-            } else {
-                this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getNoPow().formatted(POWS.get("transmute").getPluralName())
-                );
-            }
-        }
-
-        if (!newBoarIDs.isEmpty()) {
-            CompletableFuture.runAsync(() -> {
-                String newBoarName = BOARS.get(newBoarIDs.getFirst()).getName();
-                String newBoarRarityKey = BoarUtil.findRarityKey(newBoarIDs.getFirst());
-
-                this.boarPage = newBoarName;
-                String overlayStr = STRS.getCompTransmuteSuccess().formatted(
-                    "<>" + this.curRarityKey + "<>" + boarName,
-                    "<>" + newBoarRarityKey + "<>" + newBoarName
-                );
-
-                this.acknowledgeImageGen = new OverlayImageGenerator(null, overlayStr);
-
-                if (newBoarIDs.size() > 1) {
-                    String firstBoarID = CONFIG.getMainConfig().getFirstBoarID();
-                    String firstBoarName = BOARS.get(firstBoarID).getName();
-                    String firstRarityKey = BoarUtil.findRarityKey(firstBoarID);
-
-                    this.acknowledgeImageGen = new OverlayImageGenerator(
-                        null, STRS.getCompTransmuteFirst().formatted("<>" + firstRarityKey + "<>" + firstBoarName)
-                    );
-                }
-
-                String title = STRS.getCompTransmuteTitle();
-
-                ItemInteractive.sendInteractive(
-                    newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
-                );
-            });
-        }
-    }
-
-    private void doCharm(BoarUser boarUser) throws SQLException {
-        try (Connection connection = DataUtil.getConnection()) {
-            if (this.numTryCharm <= boarUser.powQuery().getPowerupAmount(connection, this.powerupUsing)) {
-                boarUser.powQuery().activateMiracles(connection, this.numTryCharm);
-
-                long blessings = this.boarUser.baseQuery().getBlessings(connection);
-                this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null,
-                    STRS.getPowMiracleSuccess().formatted(
-                        STRS.getBlessingsPluralName(),
-                        TextUtil.getBlessHex(blessings),
-                        blessings > 1000
-                            ? STRS.getBlessingsSymbol() + " "
-                            : "",
-                        blessings
-                    )
-                );
-
-                return;
-            }
-
-            this.acknowledgeImageGen = new OverlayImageGenerator(
-                null, STRS.getNoPow().formatted(POWS.get(this.powerupUsing).getPluralName())
-            );
-        }
-    }
-
-    private void doGift(BoarUser boarUser) throws SQLException {
-        PowerupItemConfig powConfig = POWS.get(this.powerupUsing);
-        int giftAmt;
-
-        try (Connection connection = DataUtil.getConnection()) {
-            giftAmt = boarUser.powQuery().getPowerupAmount(connection, this.powerupUsing);
-
-            if (giftAmt > 0) {
-                this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getPowGiftSuccess().formatted(powConfig.getName())
-                );
-            } else {
-                this.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getNoPow().formatted(powConfig.getPluralName())
-                );
-            }
-        }
-
-        if (giftAmt > 0) {
-            CompletableFuture.runAsync(() -> {
-                Interactive giftInteractive = InteractiveFactory.constructInteractive(
-                    this.compEvent, true, BoarGiftInteractive.class
-                );
-                giftInteractive.execute(null);
-            });
-        }
-    }
-
-    private void doQuestClaim(BoarUser boarUser, Connection connection) throws SQLException {
-        this.questData = boarUser.megaQuery().getQuestsData(connection);
-        QuestInfo questInfo = boarUser.questQuery().claimQuests(this.questData, connection);
-        String questClaimStr = QuestUtil.getQuestClaimMessage(questInfo);
-
-        this.acknowledgeOpen = true;
-
-        if (questInfo != null) {
-            this.acknowledgeImageGen = new OverlayImageGenerator(null, questClaimStr);
-        } else {
-            this.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getQuestNoClaim());
-        }
-    }
-
-    private void doQuestBonus(BoarUser boarUser, Connection connection) throws SQLException {
-        this.questData = boarUser.megaQuery().getQuestsData(connection);
-        boolean claimedBonus = boarUser.questQuery().claimBonus(this.questData, connection);
-
-        this.acknowledgeOpen = true;
-
-        if (claimedBonus) {
-            this.acknowledgeImageGen = new OverlayImageGenerator(
-                null,
-                STRS.getQuestBonusClaimed().formatted(
-                    NUMS.getQuestBonusAmt(),
-                    NUMS.getQuestBonusAmt() == 1
-                        ? POWS.get("transmute").getName()
-                        : POWS.get("transmute").getPluralName()
-                )
-            );
-        } else {
-            this.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getQuestNoBonus());
-        }
-    }
-
-    private void toggleQuestAuto(BoarUser boarUser, Connection connection) throws SQLException {
-        boarUser.questQuery().toggleAutoClaim(connection);
+        this.actionHandler.doAction(boarUser);
     }
 
     private void sendResponse() {
@@ -524,7 +192,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         boolean found = false;
 
         String cleanInput = input.replaceAll(" ", "").toLowerCase();
-        Map<String, BoarInfo> filteredBoars = this.getFilteredBoars();
+        Map<String, BoarInfo> filteredBoars = this.filteredBoars;
 
         // Find by search term first
         for (String boarID : filteredBoars.keySet()) {
@@ -556,7 +224,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
             while (!cleanInput.isEmpty()) {
                 newPage = this.matchFront(cleanInput, filteredBoars);
-                found = newPage <= this.getMaxPage();
+                found = newPage <= this.maxPage;
 
                 if (found) {
                     break;
@@ -587,12 +255,6 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         }
 
         return newPage;
-    }
-
-    @Override
-    public void stop(StopType type) throws IOException, InterruptedException {
-        super.stop(type);
-        this.boarUser.decRefs();
     }
 
     @Override

@@ -49,7 +49,6 @@ public class StopMessageListener extends ListenerAdapter implements Runnable, Co
         }
 
         if (!notificationsOn) {
-            boarUser.decRefs();
             return;
         }
 
@@ -62,7 +61,6 @@ public class StopMessageListener extends ListenerAdapter implements Runnable, Co
 
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.baseQuery().setNotifications(connection, null);
-                boarUser.decRefs();
                 Log.debug(this.event.getAuthor(), this.getClass(), "Disabled notifications");
             } catch (SQLException exception) {
                 Log.error(

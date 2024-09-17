@@ -22,11 +22,11 @@ class MegaMenuGeneratorMaker implements Configured {
 
     public MegaMenuGeneratorMaker(MegaMenuInteractive interactive) {
         this.interactive = interactive;
-        this.view = this.interactive.getCurView();
+        this.view = this.interactive.curView;
     }
 
     public MegaMenuGenerator make() throws SQLException {
-        this.view = this.interactive.getCurView();
+        this.view = this.interactive.curView;
 
         return switch (this.view) {
             case MegaMenuView.PROFILE -> this.makeProfileGen();
@@ -46,25 +46,25 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setProfileData(this.interactive.getBoarUser().megaQuery().getProfileData(connection));
+                this.interactive.profileData = this.interactive.getBoarUser().megaQuery().getProfileData(connection);
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
 
-        this.interactive.setMaxPage(0);
-        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getMaxPage());
+        this.interactive.maxPage = 0;
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.maxPage;
         }
 
         return new ProfileImageGenerator(
-            this.interactive.getPage(),
+            this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
-            this.interactive.getFavoriteID(),
+            this.interactive.favoriteID,
             this.interactive.isSkyblockGuild(),
-            this.interactive.getProfileData()
+            this.interactive.profileData
         );
     }
 
@@ -72,18 +72,18 @@ class MegaMenuGeneratorMaker implements Configured {
         this.updateCompendiumCollection();
         this.refreshFilterSort();
 
-        this.interactive.setMaxPage(Math.max((this.interactive.getFilteredBoars().size()-1) / 15, 0));
-        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getMaxPage());
+        this.interactive.maxPage = Math.max((this.interactive.filteredBoars.size()-1) / 15, 0);
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.maxPage;
         }
 
         return new CollectionImageGenerator(
-            this.interactive.getPage(),
+            this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
-            this.interactive.getFilteredBoars()
+            this.interactive.filteredBoars
         );
     }
 
@@ -91,63 +91,61 @@ class MegaMenuGeneratorMaker implements Configured {
         this.updateCompendiumCollection();
         this.refreshFilterSort();
 
-        if (this.interactive.getFilteredBoars().isEmpty()) {
-            this.interactive.setCurView(MegaMenuView.COLLECTION);
+        if (this.interactive.filteredBoars.isEmpty()) {
+            this.interactive.curView = MegaMenuView.COLLECTION;
 
-            this.interactive.setAcknowledgeOpen(true);
-            this.interactive.setAcknowledgeImageGen(new OverlayImageGenerator(null, STRS.getCompBlocked()));
+            this.interactive.acknowledgeOpen = true;
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getCompBlocked());
 
             return this.makeCollectionGen();
         }
 
-        this.interactive.setMaxPage(this.interactive.getFilteredBoars().size()-1);
+        this.interactive.maxPage = this.interactive.filteredBoars.size()-1;
 
-        if (this.interactive.getBoarPage() != null) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getFindBoarPage(this.interactive.getBoarPage()));
-            this.interactive.setBoarPage(null);
+        if (this.interactive.boarPage != null) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.getFindBoarPage(this.interactive.boarPage);
+            this.interactive.boarPage = null;
         }
 
-        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getMaxPage());
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.maxPage;
         }
 
-        Iterator<Map.Entry<String, BoarInfo>> iterator = this.interactive.getFilteredBoars().entrySet().iterator();
-        for (int i=0; i<this.interactive.getPage(); i++) {
+        Iterator<Map.Entry<String, BoarInfo>> iterator = this.interactive.filteredBoars.entrySet().iterator();
+        for (int i=0; i<this.interactive.page; i++) {
             iterator.next();
         }
 
-        this.interactive.setCurBoarEntry(iterator.next());
-        this.interactive.setCurRarityKey(BoarUtil.findRarityKey(this.interactive.getCurBoarEntry().getKey()));
+        this.interactive.curBoarEntry = iterator.next();
+        this.interactive.curRarityKey = BoarUtil.findRarityKey(this.interactive.curBoarEntry.getKey());
 
         return new CompendiumImageGenerator(
-            this.interactive.getPage(),
+            this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
-            this.interactive.getFavoriteID() != null &&
-                this.interactive.getFavoriteID().equals(this.interactive.getCurBoarEntry().getKey()),
-            this.interactive.getCurBoarEntry()
+            this.interactive.favoriteID != null &&
+                this.interactive.favoriteID.equals(this.interactive.curBoarEntry.getKey()),
+            this.interactive.curBoarEntry
         );
     }
 
     private MegaMenuGenerator makeEditionsGen() {
-        this.interactive.setMaxPage(
-            Math.max((this.interactive.getCurBoarEntry().getValue().getEditions().size()-1) / 5, 0)
-        );
+        this.interactive.maxPage = Math.max((this.interactive.curBoarEntry.getValue().getEditions().size()-1) / 5, 0);
 
-        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getMaxPage());
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.maxPage;
         }
 
         return new EditionsImageGenerator(
-            this.interactive.getPage(),
+            this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
-            this.interactive.getCurBoarEntry()
+            this.interactive.curBoarEntry
         );
     }
 
@@ -157,23 +155,23 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setStatsData(this.interactive.getBoarUser().megaQuery().getStatsData(connection));
+                this.interactive.statsData = this.interactive.getBoarUser().megaQuery().getStatsData(connection);
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
 
-        this.interactive.setMaxPage(7);
-        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getMaxPage());
+        this.interactive.maxPage = 7;
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.maxPage;
         }
 
         return new StatsImageGenerator(
-            this.interactive.getPage(),
+            this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
-            this.interactive.getStatsData()
+            this.interactive.statsData
         );
     }
 
@@ -183,23 +181,23 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setPowData(this.interactive.getBoarUser().megaQuery().getPowerupsData(connection));
+                this.interactive.powData = this.interactive.getBoarUser().megaQuery().getPowerupsData(connection);
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
 
-        this.interactive.setMaxPage(0);
-        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getMaxPage());
+        this.interactive.maxPage = 0;
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.maxPage;
         }
 
         return new PowerupsImageGenerator(
-            this.interactive.getPage(),
+            this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
-            this.interactive.getPowData()
+            this.interactive.powData
         );
     }
 
@@ -209,50 +207,50 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setQuestData(this.interactive.getBoarUser().megaQuery().getQuestsData(connection));
-                this.interactive.setQuests(QuestDataUtil.getQuests(connection));
+                this.interactive.questData = this.interactive.getBoarUser().megaQuery().getQuestsData(connection);
+                this.interactive.quests = QuestDataUtil.getQuests(connection);
                 this.interactive.getViewsToUpdateData().put(this.view, true);
             }
         }
 
-        this.interactive.setMaxPage(0);
-        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getMaxPage());
+        this.interactive.maxPage = 0;
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.maxPage;
         }
 
         return new QuestsImageGenerator(
-            this.interactive.getPage(),
+            this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate(),
-            this.interactive.getQuestData(),
-            this.interactive.getQuests()
+            this.interactive.questData,
+            this.interactive.quests
         );
     }
 
     private MegaMenuGenerator makeBadgesGen() throws SQLException {
         if (this.interactive.getBadges().isEmpty()) {
-            if (this.interactive.getPrevView() == null || this.interactive.getPrevView().equals(MegaMenuView.BADGES)) {
-                this.interactive.setCurView(MegaMenuView.PROFILE);
+            if (this.interactive.prevView == null || this.interactive.prevView.equals(MegaMenuView.BADGES)) {
+                this.interactive.curView = MegaMenuView.PROFILE;
             } else {
-                this.interactive.setCurView(this.interactive.getPrevView());
+                this.interactive.curView = this.interactive.prevView;
             }
 
-            this.interactive.setAcknowledgeOpen(true);
-            this.interactive.setAcknowledgeImageGen(new OverlayImageGenerator(null, STRS.getBadgeBlocked()));
+            this.interactive.acknowledgeOpen = true;
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getBadgeBlocked());
 
             return this.make();
         }
 
-        this.interactive.setMaxPage(this.interactive.getBadges().size()-1);
-        if (this.interactive.getPage() > this.interactive.getMaxPage()) {
-            this.interactive.setPrevPage(this.interactive.getPage());
-            this.interactive.setPage(this.interactive.getMaxPage());
+        this.interactive.maxPage = this.interactive.getBadges().size()-1;
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.prevPage = this.interactive.page;
+            this.interactive.page = this.interactive.maxPage;
         }
 
         return new BadgesImageGenerator(
-            this.interactive.getPage(),
+            this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
             this.interactive.getFirstJoinedDate()
@@ -265,26 +263,20 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
-                this.interactive.setOwnedBoars(this.interactive.getBoarUser().megaQuery().getOwnedBoarInfo(connection));
+                this.interactive.ownedBoars = this.interactive.getBoarUser().megaQuery().getOwnedBoarInfo(connection);
 
                 if (this.view == MegaMenuView.COMPENDIUM) {
-                    this.interactive.setFavoriteID(
-                        this.interactive.getBoarUser().megaQuery().getFavoriteID(connection)
-                    );
-                    this.interactive.setNumTransmute(
-                        this.interactive.getBoarUser().powQuery().getPowerupAmount(connection, "transmute")
-                    );
-                    this.interactive.setNumClone(
-                        this.interactive.getBoarUser().powQuery().getPowerupAmount(connection, "clone")
-                    );
+                    this.interactive.favoriteID = this.interactive.getBoarUser().megaQuery().getFavoriteID(connection);
+                    this.interactive.numTransmute = this.interactive.getBoarUser().powQuery()
+                        .getPowerupAmount(connection, "transmute");
+                    this.interactive.numClone = this.interactive.getBoarUser().powQuery()
+                        .getPowerupAmount(connection, "clone");
                 }
 
                 BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
 
-                this.interactive.setFilterBits(interBoarUser.megaQuery().getFilterBits(connection));
-                this.interactive.setSortVal(interBoarUser.megaQuery().getSortVal(connection));
-
-                interBoarUser.decRefs();
+                this.interactive.filterBits = interBoarUser.megaQuery().getFilterBits(connection);
+                this.interactive.sortVal = interBoarUser.megaQuery().getSortVal(connection);
 
                 this.interactive.getViewsToUpdateData().put(MegaMenuView.COMPENDIUM, true);
                 this.interactive.getViewsToUpdateData().put(MegaMenuView.COLLECTION, true);
@@ -293,7 +285,7 @@ class MegaMenuGeneratorMaker implements Configured {
     }
 
     private void refreshFilterSort() {
-        this.interactive.setFilteredBoars(new LinkedHashMap<>());
+        this.interactive.filteredBoars = new LinkedHashMap<>();
         int[] rarityBitShift = new int[] {1 + RARITIES.size()};
 
         List<String> newKeySet = new ArrayList<>(RARITIES.keySet());
@@ -305,66 +297,66 @@ class MegaMenuGeneratorMaker implements Configured {
 
         LinkedHashMap<String, BoarInfo> sortedBoars = new LinkedHashMap<>();
 
-        switch (this.interactive.getSortVal()) {
-            case RARITY_A -> this.interactive.getFilteredBoars().entrySet()
+        switch (this.interactive.sortVal) {
+            case RARITY_A -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case AMOUNT_D -> this.interactive.getFilteredBoars().entrySet()
+            case AMOUNT_D -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(BoarInfo.amountComparator().reversed()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case AMOUNT_A -> this.interactive.getFilteredBoars().entrySet()
+            case AMOUNT_A -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(BoarInfo.amountComparator()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case RECENT_D -> this.interactive.getFilteredBoars().entrySet()
+            case RECENT_D -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(BoarInfo.recentComparator().reversed()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case RECENT_A -> this.interactive.getFilteredBoars().entrySet()
+            case RECENT_A -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(BoarInfo.recentComparator()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case NEWEST_D -> this.interactive.getFilteredBoars().entrySet()
+            case NEWEST_D -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(BoarInfo.newestComparator().reversed()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case NEWEST_A -> this.interactive.getFilteredBoars().entrySet()
+            case NEWEST_A -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(BoarInfo.newestComparator()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case ALPHA_D -> this.interactive.getFilteredBoars().entrySet()
+            case ALPHA_D -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
-            case ALPHA_A -> this.interactive.getFilteredBoars().entrySet()
+            case ALPHA_A -> this.interactive.filteredBoars.entrySet()
                 .stream()
                 .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
         }
 
         if (!sortedBoars.isEmpty()) {
-            this.interactive.setFilteredBoars(sortedBoars);
+            this.interactive.filteredBoars = sortedBoars;
         }
     }
 
     private void applyFilter(RarityConfig rarity, String rarityKey, int[] rarityBitShift) {
         BoarInfo emptyBoarInfo = new BoarInfo(rarityKey);
 
-        boolean ownedFilter = this.interactive.getFilterBits() % 2 == 1;
-        boolean duplicateFilter = (this.interactive.getFilterBits() >> 1) % 2 == 1;
-        boolean raritySelected = this.interactive.getFilterBits() > 3;
+        boolean ownedFilter = this.interactive.filterBits % 2 == 1;
+        boolean duplicateFilter = (this.interactive.filterBits >> 1) % 2 == 1;
+        boolean raritySelected = this.interactive.filterBits > 3;
 
-        boolean notRarityFilter = (this.interactive.getFilterBits() >> rarityBitShift[0]) % 2 == 0;
+        boolean notRarityFilter = (this.interactive.filterBits >> rarityBitShift[0]) % 2 == 0;
         rarityBitShift[0]--;
         if (raritySelected && notRarityFilter) {
             return;
@@ -372,13 +364,13 @@ class MegaMenuGeneratorMaker implements Configured {
 
         for (String boarID : rarity.getBoars()) {
             // Owned filter
-            if (ownedFilter && !this.interactive.getOwnedBoars().containsKey(boarID)) {
+            if (ownedFilter && !this.interactive.ownedBoars.containsKey(boarID)) {
                 continue;
             }
 
             // Duplicate filter
-            boolean hasDuplicate = this.interactive.getOwnedBoars().containsKey(boarID) &&
-                this.interactive.getOwnedBoars().get(boarID).getAmount() > 1;
+            boolean hasDuplicate = this.interactive.ownedBoars.containsKey(boarID) &&
+                this.interactive.ownedBoars.get(boarID).getAmount() > 1;
             if (duplicateFilter && !hasDuplicate) {
                 continue;
             }
@@ -387,12 +379,12 @@ class MegaMenuGeneratorMaker implements Configured {
             boolean boarShouldHide = rarity.isHidden() || boar.isSecret();
 
             // No filter
-            if (boar.isBlacklisted() || boarShouldHide && !this.interactive.getOwnedBoars().containsKey(boarID)) {
+            if (boar.isBlacklisted() || boarShouldHide && !this.interactive.ownedBoars.containsKey(boarID)) {
                 continue;
             }
 
-            this.interactive.getFilteredBoars().put(
-                boarID, this.interactive.getOwnedBoars().getOrDefault(boarID, emptyBoarInfo)
+            this.interactive.filteredBoars.put(
+                boarID, this.interactive.ownedBoars.getOrDefault(boarID, emptyBoarInfo)
             );
         }
     }

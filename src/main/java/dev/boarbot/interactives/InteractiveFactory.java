@@ -11,7 +11,6 @@ import dev.boarbot.util.generators.ItemImageGenerator;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class InteractiveFactory {
@@ -53,7 +52,7 @@ public class InteractiveFactory {
 
     public static synchronized Interactive constructMegaMenuInteractive(
         SlashCommandInteractionEvent initEvent, MegaMenuView curView
-    ) throws SQLException {
+    ) {
         return new MegaMenuInteractive(initEvent, curView);
     }
 }

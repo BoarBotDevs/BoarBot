@@ -117,10 +117,11 @@ public final class BoarUtil implements Configured {
             .stream()
             .sorted(Map.Entry.comparingByValue())
             .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (oldValue, newValue) -> oldValue, LinkedHashMap::new
-            ));
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    (oldValue, newValue) -> oldValue, LinkedHashMap::new
+                )
+            );
 
         String lastWeightKey = sortedWeights.keySet().stream().toList().getLast();
         int numBoars = 1;

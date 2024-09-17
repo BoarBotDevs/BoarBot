@@ -41,7 +41,11 @@ public class PowerupQueries implements Configured {
             statement.execute();
         }
 
-        Log.debug(this.boarUser.getUser(), this.getClass(), "Obtained +%,d %s".formatted(amount, powerupID));
+        if (powerupID.equals("transmute")) {
+            Log.info(this.boarUser.getUser(), this.getClass(), "Obtained +%,d %s".formatted(amount, powerupID));
+        } else {
+            Log.debug(this.boarUser.getUser(), this.getClass(), "Obtained +%,d %s".formatted(amount, powerupID));
+        }
     }
 
     private void insertPowerupIfNotExist(Connection connection, String powerupID) throws SQLException {
@@ -127,6 +131,7 @@ public class PowerupQueries implements Configured {
         }
 
         this.usePowerup(connection, "miracle", amount);
+        Log.debug(this.boarUser.getUser(), this.getClass(), "Activated miracles");
     }
 
     public void useActiveMiracles(

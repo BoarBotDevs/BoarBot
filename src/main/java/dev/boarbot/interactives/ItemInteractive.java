@@ -141,8 +141,7 @@ public class ItemInteractive extends UserInteractive {
         }
 
         try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {
-            MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(imageToSend);
+            MessageEditBuilder editedMsg = new MessageEditBuilder().setFiles(imageToSend);
 
             if (this.boarIDs != null) {
                 editedMsg.setComponents(this.getCurComponents()[0]);

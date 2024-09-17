@@ -1,6 +1,7 @@
 package dev.boarbot.entities.boaruser.queries;
 
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.util.logging.Log;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -65,6 +66,8 @@ public class EventQueries {
             statement.setString(1, this.boarUser.getUserID());
             statement.executeUpdate();
         }
+
+        Log.info(this.boarUser.getUser(), this.getClass(), "Perfect Powerup!");
     }
 
     public void addPrompt(Connection connection, String promptID, double placement) throws SQLException {

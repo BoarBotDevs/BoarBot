@@ -8,15 +8,16 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Slf4j
+
 public class GiftSubcommand extends Subcommand {
     public GiftSubcommand(SlashCommandInteractionEvent event) {
         super(event);
@@ -33,27 +34,27 @@ public class GiftSubcommand extends Subcommand {
         try (Connection connection = DataUtil.getConnection()) {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
             noGift = boarUser.powQuery().getPowerupAmount(connection, "gift") == 0;
-            boarUser.decRefs();
         } catch (SQLException exception) {
-            log.error("Failed to get user's gift amount", exception);
+            Log.error(this.user, this.getClass(), "Failed to get number of gifts", exception);
         }
 
         if (noGift) {
             try {
-                MessageCreateBuilder messageBuilder = new MessageCreateBuilder().setFiles(
-                    new EmbedImageGenerator(STRS.getNoPow().formatted(POWS.get("gift").getPluralName())).generate()
-                        .getFileUpload()
-                );
+                String replyStr = STRS.getNoPow().formatted(POWS.get("gift").getPluralName());
+                FileUpload fileUpload = new EmbedImageGenerator(replyStr).generate().getFileUpload();
+                MessageCreateBuilder messageBuilder = new MessageCreateBuilder().setFiles(fileUpload);
 
                 this.interaction.reply(messageBuilder.build()).setEphemeral(true).complete();
             } catch (IOException exception) {
-                log.error("Failed to generate no gift message", exception);
+                Log.error(this.user, this.getClass(), "Failed to generate no gifts message", exception);
             }
 
             return;
         }
 
         this.interaction.deferReply().complete();
+
+        Log.debug(this.user, this.getClass(), "Sending BoarGiftInteractive");
         Interactive interactive = InteractiveFactory.constructInteractive(this.event, BoarGiftInteractive.class);
         interactive.execute(null);
     }

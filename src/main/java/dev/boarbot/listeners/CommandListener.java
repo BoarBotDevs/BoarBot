@@ -42,6 +42,7 @@ public class CommandListener extends ListenerAdapter implements Runnable {
             Subcommand subcommand = subcommands.get(this.event.getName() + this.event.getSubcommandName())
                 .newInstance(this.event);
             subcommand.execute();
+            Log.debug(this.event.getUser(), this.getClass(), "Finished processing %s".formatted(commandStr));
         } catch (InstantiationException exception) {
             Log.error(
                 this.event.getUser(),

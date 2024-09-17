@@ -113,6 +113,8 @@ public class BoarQueries implements Configured {
             statement.setString(2, this.boarUser.getUserID());
             statement.executeUpdate();
         }
+
+        Log.info(this.boarUser.getUser(), this.getClass(), "Removed %s from collection");
     }
 
     private void addFirstBoar(

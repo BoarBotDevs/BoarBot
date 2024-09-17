@@ -38,13 +38,13 @@ class MegaMenuComponentHandler implements Configured {
     public MegaMenuComponentHandler(GenericComponentInteractionCreateEvent compEvent, MegaMenuInteractive interactive) {
         this.interactive = interactive;
         this.compEvent = compEvent;
-        this.interactive.setCompEvent(compEvent);
+        this.interactive.compEvent = compEvent;
     }
 
     public MegaMenuComponentHandler(ModalInteractionEvent modalEvent, MegaMenuInteractive interactive) {
         this.interactive = interactive;
         this.modalEvent = modalEvent;
-        this.interactive.setModalEvent(modalEvent);
+        this.interactive.modalEvent = modalEvent;
     }
 
     public void handleCompEvent() {
@@ -72,19 +72,19 @@ class MegaMenuComponentHandler implements Configured {
                 case "VIEW_SELECT" -> {
                     this.setPageZero();
 
-                    this.interactive.setPrevView(this.interactive.getCurView());
-                    this.interactive.setCurView(MegaMenuView.fromString(
+                    this.interactive.prevView = this.interactive.curView;
+                    this.interactive.curView = MegaMenuView.fromString(
                         ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
-                    ));
+                    );
 
-                    this.interactive.setFilterOpen(false);
-                    this.interactive.setSortOpen(false);
-                    this.interactive.setInteractOpen(false);
+                    this.interactive.filterOpen = false;
+                    this.interactive.sortOpen = false;
+                    this.interactive.interactOpen = false;
                 }
 
                 case "LEFT" -> {
-                    this.interactive.setPrevPage(this.interactive.getPage());
-                    this.interactive.setPage(this.interactive.getPage() - 1);
+                    this.interactive.prevPage = this.interactive.page;
+                    this.interactive.page = this.interactive.page - 1;
                 }
 
                 case "PAGE" -> {
@@ -95,8 +95,8 @@ class MegaMenuComponentHandler implements Configured {
                 }
 
                 case "RIGHT" -> {
-                    this.interactive.setPrevPage(this.interactive.getPage());
-                    this.interactive.setPage(this.interactive.getPage() + 1);
+                    this.interactive.prevPage = this.interactive.page;
+                    this.interactive.page = this.interactive.page + 1;
                 }
 
                 case "BOAR_FIND" -> {
@@ -107,25 +107,25 @@ class MegaMenuComponentHandler implements Configured {
                 }
 
                 case "BOAR_INTERACT" -> {
-                    this.interactive.setInteractOpen(!this.interactive.isInteractOpen());
-                    this.interactive.setFilterOpen(false);
-                    this.interactive.setSortOpen(false);
+                    this.interactive.interactOpen = !this.interactive.interactOpen;
+                    this.interactive.filterOpen = false;
+                    this.interactive.sortOpen = false;
                 }
 
                 case "INTERACT_SELECT" -> this.doInteract();
 
                 case "BOAR_FILTER" -> {
-                    this.interactive.setFilterOpen(!this.interactive.isFilterOpen());
-                    this.interactive.setInteractOpen(false);
-                    this.interactive.setSortOpen(false);
+                    this.interactive.filterOpen = !this.interactive.filterOpen;
+                    this.interactive.interactOpen = false;
+                    this.interactive.sortOpen = false;
                 }
 
                 case "FILTER_SELECT" -> this.setFilterBits();
 
                 case "BOAR_SORT" -> {
-                    this.interactive.setSortOpen(!this.interactive.isSortOpen());
-                    this.interactive.setInteractOpen(false);
-                    this.interactive.setFilterOpen(false);
+                    this.interactive.sortOpen = !this.interactive.sortOpen;
+                    this.interactive.interactOpen = false;
+                    this.interactive.filterOpen = false;
                 }
 
                 case "SORT_SELECT" -> this.setSortVal();
@@ -133,35 +133,35 @@ class MegaMenuComponentHandler implements Configured {
                 case "CONFIRM" -> this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
 
                 case "CANCEL" -> {
-                    this.interactive.setConfirmOpen(false);
-                    this.interactive.setInteractType(null);
+                    this.interactive.confirmOpen = false;
+                    this.interactive.interactType = null;
                 }
 
                 case "BACK" -> {
-                    this.interactive.setAcknowledgeOpen(false);
-                    this.interactive.setAcknowledgeImageGen(null);
+                    this.interactive.acknowledgeOpen = false;
+                    this.interactive.acknowledgeImageGen = null;
 
-                    if (this.interactive.getCurView() == MegaMenuView.EDITIONS) {
-                        this.interactive.setPrevView(this.interactive.getCurView());
-                        this.interactive.setCurView(MegaMenuView.COMPENDIUM);
-                        this.interactive.setBoarPage(this.interactive.getCurBoarEntry().getKey());
+                    if (this.interactive.curView == MegaMenuView.EDITIONS) {
+                        this.interactive.prevView = this.interactive.curView;
+                        this.interactive.curView = MegaMenuView.COMPENDIUM;
+                        this.interactive.boarPage = this.interactive.curBoarEntry.getKey();
                     }
                 }
 
                 case "POW_SELECT" -> doPowerup();
 
                 case "QUEST_CLAIM" -> {
-                    this.interactive.setQuestAction(QuestAction.CLAIM);
+                    this.interactive.questAction = QuestAction.CLAIM;
                     this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
                 }
 
                 case "QUEST_BONUS" -> {
-                    this.interactive.setQuestAction(QuestAction.CLAIM_BONUS);
+                    this.interactive.questAction = QuestAction.CLAIM_BONUS;
                     this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
                 }
 
                 case "QUEST_AUTO" -> {
-                    this.interactive.setQuestAction(QuestAction.AUTO_CLAIM);
+                    this.interactive.questAction = QuestAction.AUTO_CLAIM;
                     this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
                 }
             }
@@ -175,69 +175,61 @@ class MegaMenuComponentHandler implements Configured {
             case "PAGE_INPUT" -> {
                 try {
                     String pageInput = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-                    this.interactive.setPrevPage(this.interactive.getPage());
-                    this.interactive.setPage(Math.max(Integer.parseInt(pageInput)-1, 0));
+                    this.interactive.prevPage = this.interactive.page;
+                    this.interactive.page = Math.max(Integer.parseInt(pageInput)-1, 0);
                     this.interactive.execute(null);
                 } catch (NumberFormatException ignore) {}
             }
 
             case "FIND_BOAR" -> {
-                this.interactive.setPrevPage(this.interactive.getPage());
-                this.interactive.setPage(
-                    this.interactive.getFindBoarPage(this.modalEvent.getValues().getFirst().getAsString())
-                );
+                this.interactive.prevPage = this.interactive.page;
+                this.interactive.page = this.interactive
+                    .getFindBoarPage(this.modalEvent.getValues().getFirst().getAsString());
                 this.interactive.execute(null);
             }
 
             case "CLONE_AMOUNT" -> {
                 try (Connection connection = DataUtil.getConnection()) {
-                    this.interactive.setNumClone(
-                        this.interactive.getBoarUser().powQuery().getPowerupAmount(connection, "clone")
-                    );
+                    this.interactive.numClone = this.interactive.getBoarUser().powQuery()
+                        .getPowerupAmount(connection, "clone");
 
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-                    int input = Math.min(Integer.parseInt(inputStr), this.interactive.getNumClone());
+                    int input = Math.min(Integer.parseInt(inputStr), this.interactive.numClone);
 
                     if (input == 0) {
                         throw new NumberFormatException();
                     }
 
-                    int avgClones = RARITIES.get(this.interactive.getCurRarityKey()).getAvgClones();
+                    int avgClones = RARITIES.get(this.interactive.curRarityKey).getAvgClones();
 
                     if (avgClones != 0) {
                         boolean hasBoar = this.interactive.getBoarUser().boarQuery().hasBoar(
-                            this.interactive.getCurBoarEntry().getKey(), connection
+                            this.interactive.curBoarEntry.getKey(), connection
                         );
 
                         if (hasBoar) {
                             this.confirmClone(input);
                         } else {
-                            String boarName = BOARS.get(this.interactive.getCurBoarEntry().getKey()).getName();
+                            String boarName = BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
 
-                            this.interactive.setAcknowledgeOpen(true);
-                            this.interactive.setAcknowledgeImageGen(
-                                new OverlayImageGenerator(
-                                    null,
-                                    STRS.getCompNoBoar().formatted(
-                                        "<>" + this.interactive.getCurRarityKey() + "<>" + boarName
-                                    )
+                            this.interactive.acknowledgeOpen = true;
+                            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                                null,
+                                STRS.getCompNoBoar().formatted(
+                                    "<>" + this.interactive.curRarityKey + "<>" + boarName
                                 )
                             );
                         }
                     } else {
-                        this.interactive.setAcknowledgeOpen(true);
-                        this.interactive.setAcknowledgeImageGen(
-                            new OverlayImageGenerator(
-                                null,
-                                STRS.getNoPow().formatted(POWS.get("clone").getPluralName())
-                            )
+                        this.interactive.acknowledgeOpen = true;
+                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                            null,
+                            STRS.getNoPow().formatted(POWS.get("clone").getPluralName())
                         );
                     }
                 } catch (NumberFormatException exception1) {
-                    this.interactive.setAcknowledgeOpen(true);
-                    this.interactive.setAcknowledgeImageGen(
-                        new OverlayImageGenerator(null, STRS.getInvalidInput())
-                    );
+                    this.interactive.acknowledgeOpen = true;
+                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getInvalidInput());
                 } catch (SQLException exception2) {
                     log.error("Failed to get user data", exception2);
                 } finally {
@@ -249,8 +241,8 @@ class MegaMenuComponentHandler implements Configured {
                 PowerupItemConfig miracleConfig = POWS.get("miracle");
 
                 try (Connection connection = DataUtil.getConnection()) {
-                    this.interactive.setPowData(this.interactive.getBoarUser().megaQuery().getPowerupsData(connection));
-                    int numMiracles = this.interactive.getPowData().powAmts().get("miracle");
+                    this.interactive.powData = this.interactive.getBoarUser().megaQuery().getPowerupsData(connection);
+                    int numMiracles = this.interactive.powData.powAmts().get("miracle");
 
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                     int input = Math.min(Integer.parseInt(inputStr), numMiracles);
@@ -261,37 +253,30 @@ class MegaMenuComponentHandler implements Configured {
 
                     if (input > 0) {
                         long blessings = this.interactive.getBoarUser().baseQuery().getBlessings(connection, input);
-                        this.interactive.setNumTryCharm(input);
+                        this.interactive.numTryCharm = input;
 
-                        this.interactive.setConfirmOpen(true);
-                        this.interactive.setConfirmString(
-                            STRS.getMiracleAttempt().formatted(
-                                this.interactive.getNumTryCharm(),
-                                this.interactive.getNumTryCharm() == 1
-                                    ? miracleConfig.getName()
-                                    : miracleConfig.getPluralName(),
-                                STRS.getBlessingsPluralName(),
-                                TextUtil.getBlessHex(blessings),
-                                blessings > 1000
-                                    ? STRS.getBlessingsSymbol() + " "
-                                    : "",
-                                blessings
-                            )
+                        this.interactive.confirmOpen = true;
+                        this.interactive.confirmString = STRS.getMiracleAttempt().formatted(
+                            this.interactive.numTryCharm,
+                            this.interactive.numTryCharm == 1
+                                ? miracleConfig.getName()
+                                : miracleConfig.getPluralName(),
+                            STRS.getBlessingsPluralName(),
+                            TextUtil.getBlessHex(blessings),
+                            blessings > 1000
+                                ? STRS.getBlessingsSymbol() + " "
+                                : "",
+                            blessings
                         );
                     } else {
-                        this.interactive.setAcknowledgeOpen(true);
-                        this.interactive.setAcknowledgeImageGen(
-                            new OverlayImageGenerator(
-                                null,
-                                STRS.getNoPow().formatted(POWS.get("miracle").getPluralName())
-                            )
+                        this.interactive.acknowledgeOpen = true;
+                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                            null, STRS.getNoPow().formatted(POWS.get("miracle").getPluralName())
                         );
                     }
                 } catch (NumberFormatException exception1) {
-                    this.interactive.setAcknowledgeOpen(true);
-                    this.interactive.setAcknowledgeImageGen(
-                        new OverlayImageGenerator(null, STRS.getInvalidInput())
-                    );
+                    this.interactive.acknowledgeOpen = true;
+                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getInvalidInput());
                 } catch (SQLException exception2) {
                     log.error("Failed to get user data", exception2);
                 } finally {
@@ -302,8 +287,8 @@ class MegaMenuComponentHandler implements Configured {
     }
 
     private void setPageZero() {
-        this.interactive.setPrevPage(this.interactive.getPage());
-        this.interactive.setPage(0);
+        this.interactive.prevPage = this.interactive.page;
+        this.interactive.page = 0;
     }
 
     private Modal makeModal(ModalConfig modalConfig) {
@@ -315,11 +300,11 @@ class MegaMenuComponentHandler implements Configured {
     }
 
     private void doInteract() {
-        this.interactive.setInteractType(InteractType.fromString(
+        this.interactive.interactType = InteractType.fromString(
             ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
-        ));
+        );
 
-        switch (this.interactive.getInteractType()) {
+        switch (this.interactive.interactType) {
             case FAVORITE -> {
                 this.compEvent.deferEdit().queue();
                 this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
@@ -345,18 +330,18 @@ class MegaMenuComponentHandler implements Configured {
 
             case TRANSMUTE -> {
                 this.compEvent.deferEdit().queue();
-                this.interactive.setConfirmOpen(true);
+                this.interactive.confirmOpen = true;
 
-                String nextRarityKey = BoarUtil.getNextRarityKey(this.interactive.getCurRarityKey());
+                String nextRarityKey = BoarUtil.getNextRarityKey(this.interactive.curRarityKey);
 
                 String boarPluralName = BOARS.get(
-                    this.interactive.getCurBoarEntry().getKey()
+                    this.interactive.curBoarEntry.getKey()
                 ).getPluralName();
 
-                this.interactive.setConfirmString(STRS.getCompTransmuteConfirm().formatted(
-                    "<>" + this.interactive.getCurRarityKey() + "<>" + boarPluralName,
+                this.interactive.confirmString = STRS.getCompTransmuteConfirm().formatted(
+                    "<>" + this.interactive.curRarityKey + "<>" + boarPluralName,
                     "<>" + nextRarityKey + "<>" + RARITIES.get(nextRarityKey).getName()
-                ));
+                );
             }
 
             case EDITIONS -> {
@@ -364,48 +349,48 @@ class MegaMenuComponentHandler implements Configured {
 
                 this.setPageZero();
 
-                this.interactive.setPrevView(this.interactive.getCurView());
-                this.interactive.setCurView(MegaMenuView.EDITIONS);
+                this.interactive.prevView = this.interactive.curView;
+                this.interactive.curView = MegaMenuView.EDITIONS;
 
-                this.interactive.setFilterOpen(false);
-                this.interactive.setSortOpen(false);
-                this.interactive.setInteractOpen(false);
+                this.interactive.filterOpen = false;
+                this.interactive.sortOpen = false;
+                this.interactive.interactOpen = false;
             }
 
             case ZOOM -> {
                 this.compEvent.deferEdit().queue();
-                this.interactive.setAcknowledgeOpen(true);
+                this.interactive.acknowledgeOpen = true;
 
-                String curBoarID = this.interactive.getCurBoarEntry().getKey();
+                String curBoarID = this.interactive.curBoarEntry.getKey();
                 BoarItemConfig curBoar = BOARS.get(curBoarID);
 
                 if (curBoar.getStaticFile() != null) {
                     String filePath = PATHS.getBoars() + curBoar.getFile();
 
                     try {
-                        this.interactive.setAcknowledgeImageGen(
-                            new OverlayImageGenerator(null, filePath, NUMS.getLargeBoarSize())
+                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                            null, filePath, NUMS.getLargeBoarSize()
                         );
                     } catch (Exception exception) {
                         log.error("Invalid animated image path", exception);
                     }
                 } else {
-                    this.interactive.setAcknowledgeImageGen(
-                        new OverlayImageGenerator(null, BoarBotApp.getBot().getImageCacheMap().get("large" + curBoarID))
+                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                        null, BoarBotApp.getBot().getImageCacheMap().get("large" + curBoarID)
                     );
                 }
             }
+
+            case null -> {}
         }
     }
 
     private void doPowerup() {
-        this.interactive.setPowerupUsing(
-            ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst()
-        );
+        this.interactive.powerupUsing = ((StringSelectInteractionEvent) this.compEvent).getValues().getFirst();
 
-        PowerupItemConfig powConfig = POWS.get(this.interactive.getPowerupUsing());
+        PowerupItemConfig powConfig = POWS.get(this.interactive.powerupUsing);
 
-        switch (this.interactive.getPowerupUsing()) {
+        switch (this.interactive.powerupUsing) {
             case "miracle" -> {
                 ModalConfig curModalConfig = MODALS.get("miracleAmount");
 
@@ -422,18 +407,16 @@ class MegaMenuComponentHandler implements Configured {
             case "gift" -> {
                 this.compEvent.deferEdit().queue();
 
-                this.interactive.setConfirmOpen(true);
-                this.interactive.setConfirmString(STRS.getPowGiftConfirm().formatted(powConfig.getName()));
+                this.interactive.confirmOpen = true;
+                this.interactive.confirmString = STRS.getPowGiftConfirm().formatted(powConfig.getName());
             }
 
             case "clone", "transmute" -> {
                 this.compEvent.deferEdit().queue();
 
-                this.interactive.setAcknowledgeOpen(true);
-                this.interactive.setAcknowledgeImageGen(
-                    new OverlayImageGenerator(
-                        null, STRS.getPowCannotUse().formatted(powConfig.getPluralName())
-                    )
+                this.interactive.acknowledgeOpen = true;
+                this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                    null, STRS.getPowCannotUse().formatted(powConfig.getPluralName())
                 );
             }
         }
@@ -449,27 +432,25 @@ class MegaMenuComponentHandler implements Configured {
             filterBits += Integer.parseInt(value);
         }
 
-        this.interactive.setFilterBits(filterBits);
+        this.interactive.filterBits = filterBits;
 
         BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
         interBoarUser.passSynchronizedAction(this.interactive);
-        interBoarUser.decRefs();
     }
 
     private void setSortVal() {
         this.setPageZero();
 
-        this.interactive.setSortVal(SortType.values()[
+        this.interactive.sortVal = SortType.values()[
             Integer.parseInt(((StringSelectInteractionEvent) this.compEvent).getValues().getFirst())
-        ]);
+        ];
 
         BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
         interBoarUser.passSynchronizedAction(this.interactive);
-        interBoarUser.decRefs();
     }
 
     private void confirmClone(int input) {
-        RarityConfig rarity = RARITIES.get(this.interactive.getCurRarityKey());
+        RarityConfig rarity = RARITIES.get(this.interactive.curRarityKey);
         int avgClones = rarity.getAvgClones();
 
         boolean tooMany = input / avgClones > 25 || input / avgClones == 25 && input % avgClones > 0;
@@ -478,15 +459,15 @@ class MegaMenuComponentHandler implements Configured {
             input = avgClones * 25;
         }
 
-        this.interactive.setNumTryClone(input);
-        this.interactive.setConfirmOpen(true);
+        this.interactive.numTryClone = input;
+        this.interactive.confirmOpen = true;
 
         double percentVal = ((double) (input % avgClones) / avgClones) * 100;
         NumberFormat percentFormat = new DecimalFormat("#.##");
 
         if (input / avgClones <= 1) {
             String boarName = BOARS.get(
-                this.interactive.getCurBoarEntry().getKey()
+                this.interactive.curBoarEntry.getKey()
             ).getName();
             String cloneName = input == 1
                 ? POWS.get("clone").getName()
@@ -495,26 +476,26 @@ class MegaMenuComponentHandler implements Configured {
                 ? percentFormat.format(percentVal + 100) + "%"
                 : percentFormat.format(percentVal) + "%";
 
-            this.interactive.setConfirmString(STRS.getCompCloneConfirmOne().formatted(
+            this.interactive.confirmString = STRS.getCompCloneConfirmOne().formatted(
                 "%,d".formatted(input) + " " + cloneName,
                 percentStr,
-                "<>" + this.interactive.getCurRarityKey() + "<>" + boarName
-            ));
+                "<>" + this.interactive.curRarityKey + "<>" + boarName
+            );
         } else {
             String boarName = input / avgClones > 1
                 ? BOARS.get(
-                    this.interactive.getCurBoarEntry().getKey()
+                    this.interactive.curBoarEntry.getKey()
                 ).getPluralName()
                 : BOARS.get(
-                    this.interactive.getCurBoarEntry().getKey()
+                    this.interactive.curBoarEntry.getKey()
                 ).getName();
 
-            this.interactive.setConfirmString(STRS.getCompCloneConfirmMultiple().formatted(
+            this.interactive.confirmString = STRS.getCompCloneConfirmMultiple().formatted(
                 "%,d".formatted(input) + " " + POWS.get("clone").getPluralName(),
                 (input / avgClones),
-                "<>" + this.interactive.getCurRarityKey() + "<>" + boarName,
+                "<>" + this.interactive.curRarityKey + "<>" + boarName,
                 percentFormat.format(percentVal) + "%"
-            ));
+            );
         }
     }
 }

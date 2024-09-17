@@ -3,17 +3,19 @@ package dev.boarbot.events;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
-import lombok.extern.slf4j.Slf4j;
+import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.FileUpload;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-@Slf4j
 public abstract class EventHandler {
     protected Set<String> failedGuilds = new HashSet<>();
 
@@ -24,19 +26,25 @@ public abstract class EventHandler {
     private int numActive = 0;
 
     public void sendEvent() {
+        Log.debug(this.getClass(), "Sending event to all channels");
+
         try {
             this.currentImage = this.imageGenerator.generate().getFileUpload();
-        } catch (Exception exception) {
-            log.error("Failed to generate event image.", exception);
+        } catch (IOException | URISyntaxException exception) {
+            Log.error(this.getClass(), "Failed to generate event image", exception);
         }
 
         Map<String, List<TextChannel>> channels = new HashMap<>();
 
+        Log.debug(this.getClass(), "Gathering all guild channels");
+
         try (Connection connection = DataUtil.getConnection()) {
             channels = GuildDataUtil.getAllChannels(connection);
         } catch (SQLException exception) {
-            log.error("Failed to get channels for powerup event.", exception);
+            Log.error(this.getClass(), "Failed to get channels for event", exception);
         }
+
+        Log.debug(this.getClass(), "Gathering all guild channels");
 
         for (String guildID : channels.keySet()) {
             for (TextChannel channel : channels.get(guildID)) {
@@ -48,9 +56,15 @@ public abstract class EventHandler {
                         this.incNumActive();
                     } catch (InsufficientPermissionException exception) {
                         this.failedGuilds.add(guildID);
+                    } catch (ErrorResponseException exception) {
+                        Log.warn(
+                            this.getClass(),
+                            "Failed to send event in channel %s in guild %s".formatted(channel.getId(), guildID),
+                            exception
+                        );
+                    } finally {
+                        this.decNumPotential();
                     }
-
-                    this.decNumPotential();
                 });
             }
         }

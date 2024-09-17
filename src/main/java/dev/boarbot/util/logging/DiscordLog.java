@@ -47,7 +47,7 @@ final class DiscordLog implements Configured {
             return;
         }
 
-        if (!curLogMessage.toString().equals("```ansi```")) {
+        if (!curLogMessage.toString().equals("```ansi```") && !curLogMessage.toString().equals("```")) {
             sendMessage(curLogMessage.toString());
         }
 
