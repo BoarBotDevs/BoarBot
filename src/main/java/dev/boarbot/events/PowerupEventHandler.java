@@ -8,6 +8,7 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.event.PowerupEventInteractive;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.generators.PowerupEventImageGenerator;
 import dev.boarbot.util.logging.Log;
 import lombok.Getter;
@@ -172,7 +173,10 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
         try {
             this.currentImage = ((PowerupEventImageGenerator) this.imageGenerator).setEndStrings(fastestStr, avgStr)
                 .generate().getFileUpload();
-
+        } catch (IOException | URISyntaxException exception) {
+            this.currentImage = EmbedImageGenerator.getErrorEmbed();
+            Log.error(this.getClass(), "Failed to generate Powerup Event end message", exception);
+        } finally {
             MessageEditBuilder editedMsg = new MessageEditBuilder().setComponents().setFiles(this.currentImage);
 
             for (Message msg : curMessages) {
@@ -182,8 +186,6 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
             }
 
             Log.debug(this.getClass(), "Edited all Powerup Event messages");
-        } catch (IOException | URISyntaxException exception) {
-            Log.error(this.getClass(), "Failed to generate Powerup Event end message", exception);
         }
     }
 }

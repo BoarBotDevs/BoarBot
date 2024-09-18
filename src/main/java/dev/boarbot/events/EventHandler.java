@@ -30,14 +30,16 @@ public abstract class EventHandler {
             this.currentImage = this.imageGenerator.generate().getFileUpload();
         } catch (IOException | URISyntaxException exception) {
             Log.error(this.getClass(), "Failed to generate event image", exception);
+            return;
         }
 
-        Map<String, List<TextChannel>> channels = new HashMap<>();
+        Map<String, List<TextChannel>> channels;
 
         try (Connection connection = DataUtil.getConnection()) {
             channels = GuildDataUtil.getAllChannels(connection);
         } catch (SQLException exception) {
             Log.error(this.getClass(), "Failed to get channels for event", exception);
+            return;
         }
 
         Log.debug(this.getClass(), "Gathered all guild channels");

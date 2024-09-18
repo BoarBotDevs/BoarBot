@@ -82,6 +82,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         try (Connection connection = DataUtil.getConnection()) {
             this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.guildID);
         } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to get skyblock status", exception);
         }
     }
@@ -114,6 +115,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     .setFiles(new EmbedImageGenerator(STRS.getGiftSelfOpen()).generate().getFileUpload());
                 compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue();
             } catch (IOException exception) {
+                this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to generate self open response", exception);
             }
 
@@ -211,6 +213,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
             this.giftInteractions.get(this.giftWinner).getHook().sendMessage(msg.build()).setEphemeral(true).queue();
         } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate gift time message", exception);
         }
 
@@ -371,6 +374,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 }
             }
         } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to fully perform gift open", exception);
         }
     }
@@ -483,7 +487,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     }
 
     @Override
-    public void stop(StopType stopType) {
+    public void stop(StopType type) {
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 
@@ -491,7 +495,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             return;
         }
 
-        switch (stopType) {
+        switch (type) {
+            case EXCEPTION -> super.stop(type);
+
             case EXPIRED -> {
                 this.deleteInteractive();
                 Log.debug(this.user, this.getClass(), "Interactive expired");

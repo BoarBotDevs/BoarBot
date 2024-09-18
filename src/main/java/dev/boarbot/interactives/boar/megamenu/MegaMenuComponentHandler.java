@@ -13,6 +13,7 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
 import net.dv8tion.jda.api.entities.User;
@@ -229,7 +230,7 @@ class MegaMenuComponentHandler implements Configured {
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                     int input = Math.min(Integer.parseInt(inputStr), this.interactive.numClone);
 
-                    if (input == 0) {
+                    if (input == 0 && this.interactive.numClone > 0) {
                         throw new NumberFormatException();
                     }
 
@@ -266,6 +267,7 @@ class MegaMenuComponentHandler implements Configured {
 
                     Log.debug(this.user, this.getClass(), "Invalid modal input");
                 } catch (SQLException exception) {
+                    this.interactive.stop(StopType.EXCEPTION);
                     Log.error(this.user, this.getClass(), "Failed to get clone data", exception);
                 } finally {
                     this.interactive.execute(null);
@@ -273,6 +275,10 @@ class MegaMenuComponentHandler implements Configured {
             }
 
             case "MIRACLE_AMOUNT" -> {
+                Log.debug(
+                    this.user, this.getClass(), "Miracle input: " + this.modalEvent.getValues().getFirst().getAsString()
+                );
+
                 PowerupItemConfig miracleConfig = POWS.get("miracle");
 
                 try (Connection connection = DataUtil.getConnection()) {
@@ -282,7 +288,7 @@ class MegaMenuComponentHandler implements Configured {
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                     int input = Math.min(Integer.parseInt(inputStr), numMiracles);
 
-                    if (input <= 0) {
+                    if (input <= 0 && numMiracles > 0) {
                         throw new NumberFormatException();
                     }
 
@@ -317,6 +323,7 @@ class MegaMenuComponentHandler implements Configured {
                     this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getInvalidInput());
                     Log.debug(this.user, this.getClass(), "Invalid modal input");
                 } catch (SQLException exception) {
+                    this.interactive.stop(StopType.EXCEPTION);
                     Log.error(this.user, this.getClass(), "Failed to get miracle data", exception);
                 } finally {
                     this.interactive.execute(null);
@@ -417,6 +424,7 @@ class MegaMenuComponentHandler implements Configured {
                         null, filePath, NUMS.getLargeBoarSize()
                     );
                 } catch (IOException | URISyntaxException exception) {
+                    this.interactive.stop(StopType.EXCEPTION);
                     Log.error(this.user, this.getClass(), "Failed to get animated overlay", exception);
                 }
             }

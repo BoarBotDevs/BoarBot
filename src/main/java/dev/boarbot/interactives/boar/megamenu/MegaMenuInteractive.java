@@ -4,6 +4,7 @@ import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.*;
 import dev.boarbot.entities.boaruser.data.*;
 import dev.boarbot.interactives.ModalInteractive;
+import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
@@ -159,8 +160,10 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
             this.sendResponse();
         } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to get update data for " + this.curView, exception);
         } catch (IOException | URISyntaxException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate %s image".formatted(this.curView), exception);
         }
     }

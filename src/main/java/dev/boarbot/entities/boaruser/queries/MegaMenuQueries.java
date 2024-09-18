@@ -1,5 +1,6 @@
 package dev.boarbot.entities.boaruser.queries;
 
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.data.*;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MegaMenuQueries {
+public class MegaMenuQueries implements Configured {
     private final BoarUser boarUser;
 
     public MegaMenuQueries(BoarUser boarUser) {
@@ -447,6 +448,10 @@ public class MegaMenuQueries {
 
             try (ResultSet results = statement.executeQuery()) {
                 Map<String, Integer> powAmts = new HashMap<>();
+
+                for (String powerupID : POWS.keySet()) {
+                    powAmts.put(powerupID, 0);
+                }
 
                 while (results.next()) {
                     powAmts.put(results.getString("powerup_id"), results.getInt("amount"));

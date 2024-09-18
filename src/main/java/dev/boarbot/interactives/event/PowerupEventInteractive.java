@@ -123,6 +123,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
             Log.debug(compEvent.getUser(), this.getClass(), "Guessed incorrectly");
         } catch (IOException exception) {
+            EmbedImageGenerator.sendErrorEmbed(compEvent.getHook());
             Log.error(compEvent.getUser(), this.getClass(), "Failed to generate response", exception);
         }
     }
@@ -148,23 +149,30 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     boarUser.questQuery().addProgress(QuestType.POW_FAST, this.userTimes.get(userID), connection)
                 );
             } catch (SQLException exception) {
+                EmbedImageGenerator.sendErrorEmbed(this.userHooks.get(boarUser.getUserID()));
                 Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event win", exception);
             }
         } else if (this.failUsers.containsKey(userID) && this.failUsers.get(userID)) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.eventQuery().applyPowEventFail(connection);
             } catch (SQLException exception) {
+                EmbedImageGenerator.sendErrorEmbed(this.userHooks.get(boarUser.getUserID()));
                 Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);
             }
         }
     }
 
     @Override
-    public void stop(StopType stopType) {
+    public void stop(StopType type) {
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 
         if (interactive == null) {
+            return;
+        }
+
+        if (type.equals(StopType.EXCEPTION)) {
+            super.stop(type);
             return;
         }
 

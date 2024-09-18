@@ -177,6 +177,12 @@ class MegaMenuComponentsGetter implements Configured {
     private ActionRow[] getPowerupsComponents() {
         ActionRow[] nav = this.getNav();
 
+        boolean userSelf = this.interactive.getUser().getId().equals(this.interactive.getBoarUser().getUserID());
+
+        if (!userSelf) {
+            return nav;
+        }
+
         if (this.powOptions.isEmpty()) {
             this.makeSelectOptions(this.COMPONENTS.get("powSelect"));
         }
@@ -191,6 +197,12 @@ class MegaMenuComponentsGetter implements Configured {
 
     private ActionRow[] getQuestsComponents() {
         ActionRow[] nav = this.getNav();
+
+        boolean userSelf = this.interactive.getUser().getId().equals(this.interactive.getBoarUser().getUserID());
+
+        if (!userSelf) {
+            return nav;
+        }
 
         List<ItemComponent> allBtnsRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),

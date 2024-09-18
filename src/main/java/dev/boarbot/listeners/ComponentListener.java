@@ -3,6 +3,7 @@ package dev.boarbot.listeners;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.interactive.InteractiveUtil;
+import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -61,6 +62,7 @@ public class ComponentListener extends ListenerAdapter implements Runnable {
                 "Finished processing %s in %s".formatted(componentID[1], interactive.getClass().getSimpleName())
             );
         } catch (ErrorResponseException exception) {
+            interactive.stop(StopType.EXCEPTION);
             Log.warn(
                 this.event.getUser(),
                 this.getClass(),
@@ -68,6 +70,7 @@ public class ComponentListener extends ListenerAdapter implements Runnable {
                 exception
             );
         } catch (RuntimeException exception) {
+            interactive.stop(StopType.EXCEPTION);
             Log.error(
                 this.event.getUser(),
                 this.getClass(),

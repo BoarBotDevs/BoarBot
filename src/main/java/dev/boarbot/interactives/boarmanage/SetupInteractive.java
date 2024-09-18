@@ -64,6 +64,7 @@ public class SetupInteractive extends UserInteractive {
                 case "CANCEL" -> this.stop(StopType.CANCELLED);
             }
         } catch (IOException exception){
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate current message", exception);
         }
 
@@ -87,6 +88,7 @@ public class SetupInteractive extends UserInteractive {
 
             this.updateInteractive(editedMsg.build());
         } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate initial message", exception);
         }
     }
@@ -142,6 +144,8 @@ public class SetupInteractive extends UserInteractive {
 
         try {
             switch (type) {
+                case StopType.EXCEPTION -> this.currentImageUpload = EmbedImageGenerator.getErrorEmbed();
+
                 case StopType.CANCELLED -> {
                     this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupCancelled(), COLORS.get("error"))
                         .generate().getFileUpload();
@@ -176,6 +180,7 @@ public class SetupInteractive extends UserInteractive {
 
                         statement.executeUpdate();
                     } catch (SQLException exception) {
+                        this.stop(StopType.EXCEPTION);
                         Log.error(this.user, this.getClass(), "Failed to add guild to database", exception);
                         return;
                     }
@@ -200,6 +205,7 @@ public class SetupInteractive extends UserInteractive {
                 }
             }
         } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate stop message", exception);
         }
 

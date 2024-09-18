@@ -1,6 +1,7 @@
 package dev.boarbot.interactives.event;
 
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
@@ -9,6 +10,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 public abstract class EventInteractive extends Interactive {
@@ -68,7 +70,11 @@ public abstract class EventInteractive extends Interactive {
         }
 
         if (type.equals(StopType.EXCEPTION)) {
-            this.msg.editMessageComponents().complete();
+            MessageEditBuilder msg = new MessageEditBuilder()
+                .setFiles(EmbedImageGenerator.getErrorEmbed())
+                .setComponents();
+
+            this.msg.editMessage(msg.build()).queue();
             return;
         }
 

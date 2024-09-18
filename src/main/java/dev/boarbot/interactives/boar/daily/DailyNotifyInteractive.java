@@ -54,6 +54,7 @@ public class DailyNotifyInteractive extends UserInteractive {
                 MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
                 compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue();
             } catch (IOException exception1) {
+                this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to generate notification fail message", exception1);
             }
 
@@ -64,6 +65,7 @@ public class DailyNotifyInteractive extends UserInteractive {
             BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
             boarUser.baseQuery().setNotifications(connection, compEvent.getChannelId());
         } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to enable notifications", exception);
             return;
         }
@@ -95,6 +97,7 @@ public class DailyNotifyInteractive extends UserInteractive {
 
             this.updateInteractive(editedMsg.build());
         } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate daily used message", exception);
         }
     }
@@ -105,6 +108,11 @@ public class DailyNotifyInteractive extends UserInteractive {
         this.isStopped = true;
 
         if (interactive == null) {
+            return;
+        }
+
+        if (type.equals(StopType.EXCEPTION)) {
+            super.stop(type);
             return;
         }
 

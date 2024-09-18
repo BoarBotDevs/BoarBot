@@ -1,5 +1,6 @@
 package dev.boarbot.interactives;
 
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.Objects;
@@ -110,10 +112,14 @@ public abstract class UserInteractive extends Interactive {
         }
 
         if (type.equals(StopType.EXCEPTION)) {
+            MessageEditBuilder msg = new MessageEditBuilder()
+                .setFiles(EmbedImageGenerator.getErrorEmbed())
+                .setComponents();
+
             if (this.hook != null) {
-                this.hook.editOriginalComponents().queue();
+                this.hook.editOriginal(msg.build()).queue();
             } else {
-                this.msg.editMessageComponents().queue();
+                this.msg.editMessage(msg.build()).queue();
             }
 
             return;

@@ -35,6 +35,7 @@ public class GiftSubcommand extends Subcommand {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
             noGift = boarUser.powQuery().getPowerupAmount(connection, "gift") == 0;
         } catch (SQLException exception) {
+            EmbedImageGenerator.sendErrorEmbed(this.interaction);
             Log.error(this.user, this.getClass(), "Failed to get number of gifts", exception);
         }
 
@@ -46,6 +47,7 @@ public class GiftSubcommand extends Subcommand {
 
                 this.interaction.reply(messageBuilder.build()).setEphemeral(true).queue();
             } catch (IOException exception) {
+                EmbedImageGenerator.sendErrorEmbed(this.interaction);
                 Log.error(this.user, this.getClass(), "Failed to generate no gifts message", exception);
             }
 

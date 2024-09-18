@@ -46,6 +46,7 @@ public class ModalListener extends ListenerAdapter implements Runnable {
                 "Finished processing %s".formatted(modalID[2])
             );
         } catch (ErrorResponseException exception) {
+            modalHandler.stop();
             Log.warn(
                 this.event.getUser(),
                 this.getClass(),
@@ -53,6 +54,7 @@ public class ModalListener extends ListenerAdapter implements Runnable {
                 exception
             );
         } catch (RuntimeException exception) {
+            modalHandler.stop();
             Log.error(
                 this.event.getUser(),
                 this.getClass(),

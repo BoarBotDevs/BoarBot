@@ -124,6 +124,7 @@ public class ItemInteractive extends UserInteractive {
 
             this.updateInteractive(editedMsg.build());
         } catch (IOException | URISyntaxException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate grouped items", exception);
         }
     }
@@ -134,6 +135,11 @@ public class ItemInteractive extends UserInteractive {
         this.isStopped = true;
 
         if (interactive == null) {
+            return;
+        }
+
+        if (type.equals(StopType.EXCEPTION)) {
+            super.stop(type);
             return;
         }
 
@@ -149,7 +155,8 @@ public class ItemInteractive extends UserInteractive {
             }
 
             this.updateInteractive(editedMsg.build());
-        } catch (Exception exception) {
+        } catch (IOException | URISyntaxException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate grouped items", exception);
         }
     }

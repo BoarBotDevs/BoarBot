@@ -13,6 +13,7 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestType;
@@ -49,6 +50,7 @@ class MegaMenuActionHandler implements Configured {
                 boarUser.megaQuery().setFilterBits(connection, this.interactive.filterBits);
                 Log.debug(boarUser.getUser(), this.getClass(), "Set filter bits to " + this.interactive.filterBits);
             } catch (SQLException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to update filter bits", exception);
             }
         } else if (this.interactive.sortOpen) {
@@ -56,6 +58,7 @@ class MegaMenuActionHandler implements Configured {
                 boarUser.megaQuery().setSortVal(connection, this.interactive.sortVal);
                 Log.debug(boarUser.getUser(), this.getClass(), "Set sort value to " + this.interactive.sortVal);
             } catch (SQLException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to update sort value", exception);
             }
         } else if (this.interactive.interactType != null) {
@@ -69,6 +72,7 @@ class MegaMenuActionHandler implements Configured {
                     case TRANSMUTE -> this.doTransmute(boarUser, connection);
                 }
             } catch (SQLException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
                 Log.error(
                     this.user,
                     this.getClass(),
@@ -87,6 +91,7 @@ class MegaMenuActionHandler implements Configured {
                     case "gift" -> this.doGift(boarUser, connection);
                 }
             } catch (SQLException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
                 Log.error(
                     this.user,
                     this.getClass(),
@@ -106,6 +111,7 @@ class MegaMenuActionHandler implements Configured {
                     case AUTO_CLAIM -> this.toggleQuestAuto(boarUser, connection);
                 }
             } catch (SQLException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to update quest data", exception);
             }
 
@@ -339,6 +345,7 @@ class MegaMenuActionHandler implements Configured {
                 giftInteractive.execute(null);
                 Log.debug(this.user, this.getClass(), "Sent BoarGiftInteractive");
             } catch (IOException | URISyntaxException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to generate gift message", exception);
             }
         });

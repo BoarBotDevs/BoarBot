@@ -115,6 +115,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             this.updateInteractive(editedMsg.build());
         } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate powerup use message", exception);
         }
     }
@@ -136,8 +137,10 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
             Log.debug(this.user, this.getClass(), "Not enough of this powerup owned");
         } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to query powerups", exception);
         } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate no powerup message", exception);
         }
 
@@ -153,7 +156,12 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             return;
         }
 
-        if (type == StopType.EXPIRED) {
+        if (type.equals(StopType.EXCEPTION)) {
+            super.stop(type);
+            return;
+        }
+
+        if (type.equals(StopType.EXPIRED)) {
             this.deleteInteractive();
             Log.debug(this.user, this.getClass(), "Cancelled interactive");
         }
@@ -200,7 +208,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 String amountInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                 int amount = Math.min(Integer.parseInt(amountInput), numMiraclesHas);
 
-                if (amount == 0) {
+                if (amount == 0 && numMiraclesHas > 0) {
                     throw new NumberFormatException();
                 }
 
@@ -229,6 +237,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                     Log.debug(this.user, this.getClass(), "Modal input greater than owned");
                 }
             } catch (SQLException exception) {
+                this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to get powerup data", exception);
             }
         } catch (NumberFormatException exception) {
@@ -237,9 +246,11 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                     .generate().getFileUpload();
                 Log.debug(this.user, this.getClass(), "Invalid modal input");
             } catch (IOException exception1) {
+                this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to generate invalid input message", exception1);
             }
         } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate response message", exception);
         }
 

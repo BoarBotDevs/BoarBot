@@ -171,9 +171,9 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     }
 
     private void drawQuestValue(int index) {
-        String questValue = this.getQuestValue(
-            this.quests.get(index), this.questData.questProgress().get(index), index
-        );
+        String questValue = this.questData.questProgress().isEmpty()
+            ? this.getQuestValue(this.quests.get(index), 0, index)
+            : this.getQuestValue(this.quests.get(index), this.questData.questProgress().get(index), index);
 
         this.textDrawer.setText(questValue);
         this.textDrawer.setFontSize(NUMS.getFontMedium());
@@ -198,7 +198,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
     }
 
     private void drawReward(Graphics2D g2d, int index) throws IOException, URISyntaxException {
-        if (this.questData.questClaims().get(index)) {
+        if (!this.questData.questClaims().isEmpty() && this.questData.questClaims().get(index)) {
             String checkPath = PATHS.getOtherAssets() + PATHS.getCheckMark();
             GraphicsUtil.drawImage(g2d, checkPath, new int[] {POW_X, POW_START_Y + index * QUEST_Y_SPACING}, POW_SIZE);
             return;
