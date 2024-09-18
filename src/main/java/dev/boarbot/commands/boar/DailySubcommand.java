@@ -8,6 +8,7 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestUtil;
@@ -74,7 +75,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 MessageEditBuilder editedMsg = new MessageEditBuilder().setFiles(fileUpload).setComponents();
                 this.interaction.getHook().editOriginal(editedMsg.build()).queue();
             } catch (IOException exception) {
-                EmbedImageGenerator.sendErrorEmbed(this.interaction);
+                SpecialReply.sendErrorEmbed(this.interaction);
                 Log.error(this.user, this.getClass(), "Failed to generate daily used message", exception);
             }
         }
@@ -94,7 +95,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 return;
             }
         } catch (SQLException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.interaction);
+            SpecialReply.sendErrorEmbed(this.interaction);
             Log.error(this.user, this.getClass(), "Failed to get daily or notification status", exception);
         }
 
@@ -134,7 +135,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 QuestType.COLLECT_BUCKS, this.bucksGotten.stream().reduce(0, Integer::sum), connection
             ));
         } catch (SQLException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.interaction);
+            SpecialReply.sendErrorEmbed(this.interaction);
             Log.error(this.user, this.getClass(), "Failed to fully complete daily update logic", exception);
         }
     }

@@ -27,17 +27,21 @@ public class BoarBotApp {
             return;
         }
 
-        BoarBotApp.bot = new BoarBot();
-        BoarBotApp.bot.create();
+        bot = new BoarBot();
+        bot.create();
 
         if (args.length != 0 && args[0].equals("deploy-commands")) {
-            BoarBotApp.bot.deployCommands();
+            try {
+                bot.getJDA().awaitReady();
+            } catch (InterruptedException ignored) {}
+
+            bot.deployCommands();
         }
     }
 
     public static void reset() {
-        BoarBotApp.bot = null;
-        BoarBotApp.main();
+        bot = null;
+        main();
     }
 
     public static Dotenv getEnv() {

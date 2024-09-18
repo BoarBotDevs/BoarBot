@@ -7,6 +7,7 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.events.PowerupEventHandler;
 import dev.boarbot.events.PromptType;
 import dev.boarbot.interactives.Interactive;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.quests.QuestType;
@@ -123,7 +124,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
             Log.debug(compEvent.getUser(), this.getClass(), "Guessed incorrectly");
         } catch (IOException exception) {
-            EmbedImageGenerator.sendErrorEmbed(compEvent.getHook());
+            SpecialReply.sendErrorEmbed(compEvent.getHook());
             Log.error(compEvent.getUser(), this.getClass(), "Failed to generate response", exception);
         }
     }
@@ -149,14 +150,14 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     boarUser.questQuery().addProgress(QuestType.POW_FAST, this.userTimes.get(userID), connection)
                 );
             } catch (SQLException exception) {
-                EmbedImageGenerator.sendErrorEmbed(this.userHooks.get(boarUser.getUserID()));
+                SpecialReply.sendErrorEmbed(this.userHooks.get(boarUser.getUserID()));
                 Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event win", exception);
             }
         } else if (this.failUsers.containsKey(userID) && this.failUsers.get(userID)) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.eventQuery().applyPowEventFail(connection);
             } catch (SQLException exception) {
-                EmbedImageGenerator.sendErrorEmbed(this.userHooks.get(boarUser.getUserID()));
+                SpecialReply.sendErrorEmbed(this.userHooks.get(boarUser.getUserID()));
                 Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);
             }
         }

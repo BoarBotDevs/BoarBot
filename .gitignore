@@ -28,12 +28,8 @@ src/main/resources/assets/images/items/badges/*
 !src/main/resources/assets/images/items/badges/Athlete3rd.png
 !src/main/resources/assets/images/items/badges/Athlete2nd.png
 !src/main/resources/assets/images/items/badges/Athlete1st.png
-src/main/java/dev/boarbot/util/boar/GuessInterpreter.ts
-src/main/resources/config/config.json
-src/main/resources/config/game/rarities.json
-src/main/resources/config/items/boars.json
-src/main/resources/config/items/badges.json
 /target
 /logs
 /dataSources
 /.ideaDataSources
+/config

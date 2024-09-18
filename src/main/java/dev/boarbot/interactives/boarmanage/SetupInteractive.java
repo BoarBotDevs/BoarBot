@@ -4,6 +4,7 @@ import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.UserInteractive;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
@@ -144,7 +145,7 @@ public class SetupInteractive extends UserInteractive {
 
         try {
             switch (type) {
-                case StopType.EXCEPTION -> this.currentImageUpload = EmbedImageGenerator.getErrorEmbed();
+                case StopType.EXCEPTION -> this.currentImageUpload = SpecialReply.getErrorEmbed();
 
                 case StopType.CANCELLED -> {
                     this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupCancelled(), COLORS.get("error"))

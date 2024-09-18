@@ -5,7 +5,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -38,7 +38,7 @@ public class BetaPowerupsSubcommand extends Subcommand implements Synchronizable
             boarUser.powQuery().addPowerup(connection, "clone", 10);
             boarUser.powQuery().addPowerup(connection, "transmute", 10);
         } catch (SQLException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.interaction);
+            SpecialReply.sendErrorEmbed(this.interaction);
             Log.error(this.user, this.getClass(), "Failed to give powerups to user", exception);
         }
     }

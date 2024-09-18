@@ -8,6 +8,7 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -35,7 +36,7 @@ public class GiftSubcommand extends Subcommand {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
             noGift = boarUser.powQuery().getPowerupAmount(connection, "gift") == 0;
         } catch (SQLException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.interaction);
+            SpecialReply.sendErrorEmbed(this.interaction);
             Log.error(this.user, this.getClass(), "Failed to get number of gifts", exception);
         }
 
@@ -47,7 +48,7 @@ public class GiftSubcommand extends Subcommand {
 
                 this.interaction.reply(messageBuilder.build()).setEphemeral(true).queue();
             } catch (IOException exception) {
-                EmbedImageGenerator.sendErrorEmbed(this.interaction);
+                SpecialReply.sendErrorEmbed(this.interaction);
                 Log.error(this.user, this.getClass(), "Failed to generate no gifts message", exception);
             }
 

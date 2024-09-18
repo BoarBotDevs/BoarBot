@@ -44,11 +44,6 @@ public class MainConfig {
     private boolean unlimitedBoars = false;
 
     /**
-     * Debug messages should be sent to logs
-     */
-    private boolean debugMode = true;
-
-    /**
      * Bot is in maintenance mode
      */
     private boolean maintenanceMode = false;

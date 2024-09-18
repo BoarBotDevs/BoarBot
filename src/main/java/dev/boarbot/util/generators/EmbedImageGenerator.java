@@ -3,14 +3,6 @@ package dev.boarbot.util.generators;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.TextDrawer;
-import dev.boarbot.util.logging.Log;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -87,42 +79,5 @@ public class EmbedImageGenerator extends ImageGenerator {
         textDrawer.drawText();
 
         return this;
-    }
-
-    public static void sendErrorEmbed(SlashCommandInteraction interaction) {
-        MessageEditBuilder editedMsg = new MessageEditBuilder()
-            .setFiles(getErrorEmbed())
-            .setComponents();
-
-        try {
-            if (interaction.isAcknowledged()) {
-                interaction.getHook().editOriginal(editedMsg.build()).queue();
-                return;
-            }
-            interaction.reply(MessageCreateData.fromEditData(editedMsg.build())).queue();
-        } catch (ErrorResponseException exception) {
-            Log.warn(EmbedImageGenerator.class, "Failed to send error embed", exception);
-        }
-    }
-
-    public static void sendErrorEmbed(InteractionHook hook) {
-        MessageCreateBuilder msg = new MessageCreateBuilder()
-            .setFiles(getErrorEmbed())
-            .setComponents();
-
-        try {
-            hook.sendMessage(msg.build()).queue();
-        } catch (ErrorResponseException exception) {
-            Log.warn(EmbedImageGenerator.class, "Failed to send error embed", exception);
-        }
-    }
-
-    public static FileUpload getErrorEmbed() {
-        try {
-            return new EmbedImageGenerator(STRS.getError()).generate().getFileUpload();
-        } catch (IOException exception) {
-            Log.error(EmbedImageGenerator.class, "Failed to generate error embed", exception);
-            return FileUpload.fromData(new byte[0], "error.png");
-        }
     }
 }

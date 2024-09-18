@@ -364,6 +364,11 @@
             "description": "Duration of ban in hours"
           }
         ]
+      },
+      "maintenance": {
+        "name": "maintenance",
+        "description": "Put BoarBot into maintenance mode",
+        "location": "dev.boarbot.commands.boardev.MaintenanceSubcommand"
       }
     }
   }

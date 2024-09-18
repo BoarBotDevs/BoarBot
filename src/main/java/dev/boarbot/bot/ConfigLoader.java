@@ -18,53 +18,69 @@ import dev.boarbot.util.logging.Log;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Scanner;
 
 class ConfigLoader {
     private static final BotConfig config = BoarBotApp.getBot().getConfig();
+
+    public static String basePath = "config/";
+    public static String mainPath = basePath + "config.json";
+
+    public static String langPath = basePath + "lang/";
+    public static String strsPath = langPath + "en_us.json";
+
+    public static String utilPath = basePath + "util/";
+    public static String colorsPath = utilPath + "colors.json";
+    public static String numsPath = utilPath + "constants.json";
+    public static String pathsPath = utilPath + "paths.json";
+
+    public static String discordPath = basePath + "discord/";
+    public static String cmdsPath = discordPath + "commands.json";
+    public static String compsPath = discordPath + "components.json";
+    public static String modalsPath = discordPath + "modals.json";
+
+    public static String gamePath = basePath + "game/";
+    public static String promptsPath = gamePath + "pow_prompts.json";
+    public static String questsPath = gamePath + "quests.json";
+    public static String raritiesPath = gamePath + "rarities.json";
+
+    public static String itemsPath = basePath + "items/";
+    public static String badgesPath = itemsPath + "badges.json";
+    public static String boarsPath = itemsPath + "boars.json";
+    public static String powerupsPath = itemsPath + "powerups.json";
     
     public static void loadConfig() {
         try {
             Log.debug(ConfigLoader.class, "Attempting to load config...");
 
-            String basePath = "config/";
+            config.setMainConfig(getFromJson(mainPath, MainConfig.class));
 
-            config.setMainConfig(getFromJson(basePath + "config.json", MainConfig.class));
+            config.setStringConfig(getFromJson(strsPath, StringConfig.class));
 
-            config.setStringConfig(getFromJson(basePath + "lang/en_us.json", StringConfig.class));
+            config.setColorConfig(getFromJson(colorsPath, new TypeToken<Map<String, String>>(){}.getType()));
+            config.setNumberConfig(getFromJson(numsPath, NumberConfig.class));
+            config.setPathConfig(getFromJson(pathsPath, PathConfig.class));
 
-            config.setColorConfig(getFromJson(
-                basePath + "util/colors.json", new TypeToken<Map<String, String>>(){}.getType()
-            ));
-            config.setNumberConfig(getFromJson(basePath + "util/constants.json", NumberConfig.class));
-            config.setPathConfig(getFromJson(basePath + "util/paths.json", PathConfig.class));
+            config.setCommandConfig(getFromJson(cmdsPath, new TypeToken<Map<String, CommandConfig>>(){}.getType()));
+            config.setComponentConfig(getFromJson(compsPath, ComponentConfig.class));
+            config.setModalConfig(getFromJson(modalsPath, new TypeToken<Map<String, ModalConfig>>(){}.getType()));
 
-            config.setCommandConfig(getFromJson(
-                basePath + "discord/commands.json", new TypeToken<Map<String, CommandConfig>>(){}.getType()
-            ));
-            config.setComponentConfig(getFromJson(basePath + "discord/components.json", ComponentConfig.class));
-            config.setModalConfig(getFromJson(
-                basePath + "discord/modals.json", new TypeToken<Map<String, ModalConfig>>(){}.getType()
-            ));
-
-            config.setPromptConfig(getFromJson(
-                basePath + "game/pow_prompts.json", new TypeToken<Map<String, PromptConfig>>(){}.getType()
-            ));
-            config.setQuestConfig(getFromJson(
-                basePath + "game/quests.json", new TypeToken<Map<String, QuestConfig>>(){}.getType()
-            ));
-            config.setRarityConfigs(getFromJson(
-                basePath + "game/rarities.json", new TypeToken<Map<String, RarityConfig>>(){}.getType()
-            ));
+            config.setPromptConfig(getFromJson(promptsPath, new TypeToken<Map<String, PromptConfig>>(){}.getType()));
+            config.setQuestConfig(getFromJson(questsPath, new TypeToken<Map<String, QuestConfig>>(){}.getType()));
+            config.setRarityConfigs(getFromJson(raritiesPath, new TypeToken<Map<String, RarityConfig>>(){}.getType()));
 
             config.getItemConfig().setBadges(getFromJson(
-                basePath + "items/badges.json", new TypeToken<Map<String, BadgeItemConfig>>(){}.getType()
+                badgesPath, new TypeToken<Map<String, BadgeItemConfig>>(){}.getType()
             ));
             config.getItemConfig().setBoars(getFromJson(
-                basePath + "items/boars.json", new TypeToken<Map<String, BoarItemConfig>>(){}.getType()
+                boarsPath, new TypeToken<Map<String, BoarItemConfig>>(){}.getType()
             ));
             config.getItemConfig().setPowerups(getFromJson(
-                basePath + "items/powerups.json", new TypeToken<Map<String, PowerupItemConfig>>(){}.getType()
+                powerupsPath, new TypeToken<Map<String, PowerupItemConfig>>(){}.getType()
             ));
 
             for (BoarItemConfig boar : config.getItemConfig().getBoars().values()) {
@@ -187,24 +203,46 @@ class ConfigLoader {
     }
 
     private static <T> T getFromJson(String path, Class<T> clazz) throws IOException {
-        try (InputStream stream = BoarBotApp.getResourceStream(path)) {
-            if (stream == null) {
-                throw new IllegalArgumentException("Resource not found " + path);
-            }
-
-            InputStreamReader streamReader = new InputStreamReader(stream);
-            return new Gson().fromJson(streamReader, clazz);
-        }
+        File configFile = createFileIfNotExist(path);
+        return new Gson().fromJson(getJsonStr(configFile), clazz);
     }
 
     private static <T> T getFromJson(String path, Type type) throws IOException {
-        try (InputStream stream = BoarBotApp.getResourceStream(path)) {
-            if (stream == null) {
-                throw new IllegalArgumentException("Resource not found " + path);
-            }
+        File configFile = createFileIfNotExist(path);
+        return new Gson().fromJson(getJsonStr(configFile), type);
+    }
 
-            InputStreamReader streamReader = new InputStreamReader(stream);
-            return new Gson().fromJson(streamReader, type);
+    private static String getJsonStr(File file) throws IOException {
+        Scanner reader = new Scanner(file);
+        StringBuilder jsonStr = new StringBuilder();
+
+        while (reader.hasNextLine()) {
+            jsonStr.append(reader.nextLine());
         }
+
+        return jsonStr.toString();
+    }
+
+    private static void createDirIfNotExist(String dirPathStr) throws IOException {
+        Path dirPath = Paths.get(dirPathStr);
+
+        if (Files.exists(dirPath)) {
+            return;
+        }
+
+        Files.createDirectories(dirPath);
+    }
+
+    private static File createFileIfNotExist(String pathStr) throws IOException {
+        Path path = Paths.get(pathStr);
+
+        if (Files.exists(path)) {
+            return new File(pathStr);
+        }
+
+        createDirIfNotExist(pathStr.substring(0, pathStr.lastIndexOf("/")));
+
+        Files.copy(BoarBotApp.getResourceStream(pathStr), path);
+        return new File(pathStr);
     }
 }

@@ -1,6 +1,6 @@
 package dev.boarbot.interactives;
 
-import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import lombok.Getter;
@@ -113,7 +113,7 @@ public abstract class UserInteractive extends Interactive {
 
         if (type.equals(StopType.EXCEPTION)) {
             MessageEditBuilder msg = new MessageEditBuilder()
-                .setFiles(EmbedImageGenerator.getErrorEmbed())
+                .setFiles(SpecialReply.getErrorEmbed())
                 .setComponents();
 
             if (this.hook != null) {

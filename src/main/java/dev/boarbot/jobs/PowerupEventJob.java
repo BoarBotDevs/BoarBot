@@ -22,6 +22,10 @@ public class PowerupEventJob implements Job, Configured {
             Log.error(this.getClass(), "Powerup event thread was interrupted before it could complete", exception);
         }
 
+        if (CONFIG.getMainConfig().isMaintenanceMode()) {
+            return;
+        }
+
         try {
             PowerupEventHandler eventHandler = new PowerupEventHandler();
             eventHandler.sendEvent();

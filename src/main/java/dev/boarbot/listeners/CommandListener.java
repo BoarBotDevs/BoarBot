@@ -1,8 +1,9 @@
 package dev.boarbot.listeners;
 
 import dev.boarbot.BoarBotApp;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.commands.Subcommand;
-import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
@@ -11,9 +12,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Map;
 
-public class CommandListener extends ListenerAdapter implements Runnable {
+public class CommandListener extends ListenerAdapter implements Runnable, Configured {
     private final Map<String, Constructor<? extends Subcommand>> subcommands = BoarBotApp.getBot().getSubcommands();
     private SlashCommandInteractionEvent event = null;
 
@@ -39,13 +41,21 @@ public class CommandListener extends ListenerAdapter implements Runnable {
             return;
         }
 
+        boolean isMaintenance = CONFIG.getMainConfig().isMaintenanceMode();
+        boolean isDev = Arrays.asList(CONFIG.getMainConfig().getDevs()).contains(this.event.getUser().getId());
+
+        if (isMaintenance && !isDev) {
+            SpecialReply.sendMaintenanceEmbed(this.event.getInteraction());
+            return;
+        }
+
         try {
             Subcommand subcommand = subcommands.get(this.event.getName() + this.event.getSubcommandName())
                 .newInstance(this.event);
             subcommand.execute();
             Log.debug(this.event.getUser(), this.getClass(), "Finished processing %s".formatted(commandStr));
         } catch (InstantiationException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorEmbed(this.event.getInteraction());
             Log.error(
                 this.event.getUser(),
                 this.getClass(),
@@ -53,7 +63,7 @@ public class CommandListener extends ListenerAdapter implements Runnable {
                 exception
             );
         } catch (IllegalAccessException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorEmbed(this.event.getInteraction());
             Log.error(
                 this.event.getUser(),
                 this.getClass(),
@@ -61,7 +71,7 @@ public class CommandListener extends ListenerAdapter implements Runnable {
                 exception
             );
         } catch (InvocationTargetException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorEmbed(this.event.getInteraction());
             Log.error(
                 this.event.getUser(),
                 this.getClass(),
@@ -69,7 +79,7 @@ public class CommandListener extends ListenerAdapter implements Runnable {
                 exception
             );
         } catch (ErrorResponseException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorEmbed(this.event.getInteraction());
             Log.warn(
                 this.event.getUser(),
                 this.getClass(),
@@ -77,7 +87,7 @@ public class CommandListener extends ListenerAdapter implements Runnable {
                 exception
             );
         } catch (RuntimeException exception) {
-            EmbedImageGenerator.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorEmbed(this.event.getInteraction());
             Log.error(
                 this.event.getUser(),
                 this.getClass(),
