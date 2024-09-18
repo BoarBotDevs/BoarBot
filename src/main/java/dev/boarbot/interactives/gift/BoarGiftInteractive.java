@@ -112,7 +112,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder()
                     .setFiles(new EmbedImageGenerator(STRS.getGiftSelfOpen()).generate().getFileUpload());
-                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
+                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue();
             } catch (IOException exception) {
                 Log.error(this.user, this.getClass(), "Failed to generate self open response", exception);
             }
@@ -209,7 +209,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 )).generate().getFileUpload()
             );
 
-            this.giftInteractions.get(this.giftWinner).getHook().sendMessage(msg.build()).setEphemeral(true).complete();
+            this.giftInteractions.get(this.giftWinner).getHook().sendMessage(msg.build()).setEphemeral(true).queue();
         } catch (IOException exception) {
             Log.error(this.user, this.getClass(), "Failed to generate gift time message", exception);
         }

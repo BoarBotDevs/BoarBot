@@ -98,7 +98,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
         if (!this.hasDonePowerup && this.event.getOption("powerup") == null) {
             Log.debug(this.user, this.getClass(), "Doing daily without powerup");
-            this.interaction.deferReply().complete();
+            this.interaction.deferReply().queue();
         }
 
         try (Connection connection = DataUtil.getConnection()) {
@@ -117,7 +117,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
                 connection, Objects.requireNonNull(this.interaction.getGuild()).getId()
             );
-            this.boarIDs = BoarUtil.getRandBoarIDs(0, isSkyblockGuild);
+            this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
             boarUser.boarQuery().addBoars(
                 this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions
@@ -147,7 +147,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         if (this.isFirstDaily) {
             try {
                 EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getDailyFirstTime());
-                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
+                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
             } catch (IOException exception) {
                 Log.error(this.user, this.getClass(), "Failed to generate first daily reward message", exception);
             }
@@ -157,7 +157,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     }
 
     private void sendPowResponse() {
-        this.interaction.deferReply().complete();
+        this.interaction.deferReply().queue();
 
         Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
         interactive.execute(null);

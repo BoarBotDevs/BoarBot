@@ -18,7 +18,7 @@ public class BadgesSubcommand extends Subcommand {
             return;
         }
 
-        this.interaction.deferReply().complete();
+        this.interaction.deferReply().queue();
 
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.BADGES);
         interactive.execute(null);

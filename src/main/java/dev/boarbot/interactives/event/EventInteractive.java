@@ -55,7 +55,7 @@ public abstract class EventInteractive extends Interactive {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }
 
-        this.msg.delete().complete();
+        this.msg.delete().queue();
     }
 
     @Override

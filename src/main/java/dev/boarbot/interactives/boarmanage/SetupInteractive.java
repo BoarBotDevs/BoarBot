@@ -128,7 +128,7 @@ public class SetupInteractive extends UserInteractive {
 
         MessageCreateBuilder infoMsg = new MessageCreateBuilder();
         infoMsg.setFiles(imageUpload);
-        compEvent.getHook().sendMessage(infoMsg.build()).setEphemeral(true).complete();
+        compEvent.getHook().sendMessage(infoMsg.build()).setEphemeral(true).queue();
     }
 
     @Override

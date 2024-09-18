@@ -17,7 +17,7 @@ public class LogJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         Log.debug(
             LogJob.class,
-            "Interactives: %,d | ModalHandlers: %,d  | Images: %,d | Bytearrays: %,d | BoarUsers: %,d | Memory Used: %,dMB | Threads: %,d"
+            "Interactives: %,d | ModalHandlers: %,d | Images: %,d | Bytearrays: %,d | BoarUsers: %,d | Memory Used: %,dMB | Threads: %,d"
                 .formatted(
                     bot.getInteractives().size(),
                     bot.getModalHandlers().size(),

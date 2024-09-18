@@ -108,7 +108,7 @@ class MegaMenuComponentHandler implements Configured {
                 Modal modal = this.makeModal(MODALS.get("pageInput"));
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).complete();
+                this.compEvent.replyModal(modal).queue();
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
 
@@ -121,7 +121,7 @@ class MegaMenuComponentHandler implements Configured {
                 Modal modal = this.makeModal(MODALS.get("findBoar"));
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).complete();
+                this.compEvent.replyModal(modal).queue();
                 Log.debug(this.user, this.getClass(), "Sent boar find input modal");
             }
 
@@ -187,7 +187,7 @@ class MegaMenuComponentHandler implements Configured {
     }
 
     public void handleModalEvent() {
-        this.modalEvent.deferEdit().complete();
+        this.modalEvent.deferEdit().queue();
 
         switch (this.modalEvent.getModalId().split(",")[2]) {
             case "PAGE_INPUT" -> {
@@ -366,7 +366,7 @@ class MegaMenuComponentHandler implements Configured {
                     return;
                 }
 
-                this.compEvent.replyModal(modal).complete();
+                this.compEvent.replyModal(modal).queue();
                 Log.debug(this.user, this.getClass(), "Sent clone input modal");
             }
 
@@ -440,7 +440,7 @@ class MegaMenuComponentHandler implements Configured {
                 );
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).complete();
+                this.compEvent.replyModal(modal).queue();
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
 

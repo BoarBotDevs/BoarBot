@@ -44,7 +44,7 @@ public class GiftSubcommand extends Subcommand {
                 FileUpload fileUpload = new EmbedImageGenerator(replyStr).generate().getFileUpload();
                 MessageCreateBuilder messageBuilder = new MessageCreateBuilder().setFiles(fileUpload);
 
-                this.interaction.reply(messageBuilder.build()).setEphemeral(true).complete();
+                this.interaction.reply(messageBuilder.build()).setEphemeral(true).queue();
             } catch (IOException exception) {
                 Log.error(this.user, this.getClass(), "Failed to generate no gifts message", exception);
             }
@@ -52,7 +52,7 @@ public class GiftSubcommand extends Subcommand {
             return;
         }
 
-        this.interaction.deferReply().complete();
+        this.interaction.deferReply().queue();
 
         Interactive interactive = InteractiveFactory.constructInteractive(this.event, BoarGiftInteractive.class);
         interactive.execute(null);

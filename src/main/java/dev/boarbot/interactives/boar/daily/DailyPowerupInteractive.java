@@ -79,7 +79,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 );
 
                 this.modalHandler = new ModalHandler(compEvent, this);
-                compEvent.replyModal(modal).complete();
+                compEvent.replyModal(modal).queue();
 
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
@@ -186,7 +186,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     @Override
     public void modalExecute(ModalInteractionEvent modalEvent) {
-        modalEvent.deferEdit().complete();
+        modalEvent.deferEdit().queue();
 
         PowerupItemConfig miracleConfig = POWS.get("miracle");
 

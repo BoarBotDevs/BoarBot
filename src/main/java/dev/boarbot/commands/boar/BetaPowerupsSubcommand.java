@@ -26,7 +26,7 @@ public class BetaPowerupsSubcommand extends Subcommand implements Synchronizable
         boarUser.passSynchronizedAction(this);
 
         Log.debug(this.user, this.getClass(), "Given powerups");
-        this.interaction.reply("+10 of each powerup").setEphemeral(true).complete();
+        this.interaction.reply("+10 of each powerup").setEphemeral(true).queue();
     }
 
     @Override

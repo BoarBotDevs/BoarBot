@@ -18,7 +18,7 @@ public class ProfileSubcommand extends Subcommand {
             return;
         }
 
-        this.interaction.deferReply().complete();
+        this.interaction.deferReply().queue();
 
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.PROFILE);
         interactive.execute(null);

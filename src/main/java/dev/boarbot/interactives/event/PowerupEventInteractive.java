@@ -72,7 +72,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             return;
         }
 
-        compEvent.deferEdit().complete();
+        compEvent.deferEdit().queue();
 
         String userID = compEvent.getUser().getId();
         EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getPowEventAttempted(), COLORS.get("error"));

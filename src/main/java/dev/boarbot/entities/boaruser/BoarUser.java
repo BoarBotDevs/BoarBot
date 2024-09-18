@@ -2,14 +2,9 @@ package dev.boarbot.entities.boaruser;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.entities.boaruser.queries.*;
-import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.logging.Log;
-import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.User;
-
-import java.sql.*;
 
 public class BoarUser {
     private User user;
@@ -26,7 +21,6 @@ public class BoarUser {
     private final QuestQueries questQuery;
 
     @Getter boolean isSynchronized = false;
-    @Getter private long lastRef;
 
     public BoarUser(User user) {
         this(user.getId());
@@ -88,17 +82,6 @@ public class BoarUser {
     public void forceSynchronized() {
         if (!this.isSynchronized) {
             throw new IllegalStateException("Boar user must be synchronized to do this!");
-        }
-    }
-
-    void updateLastRef() {
-        this.lastRef = TimeUtil.getCurMilli();
-        Log.debug(this.getClass(), "[U]%s".formatted(Log.getUserSuffix(this.user, this.userID)));
-
-        try (Connection connection = DataUtil.getConnection()) {
-            this.baseQuery.updateUser(connection, true);
-        } catch (SQLException exception) {
-            Log.error(this.getUser(), this.getClass(), "Failed to update user's data", exception);
         }
     }
 }

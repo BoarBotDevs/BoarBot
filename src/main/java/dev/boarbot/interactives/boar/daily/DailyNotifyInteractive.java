@@ -46,13 +46,13 @@ public class DailyNotifyInteractive extends UserInteractive {
         compEvent.deferEdit().queue();
 
         try {
-            compEvent.getUser().openPrivateChannel().complete().sendMessage(STRS.getNotificationSuccess()).complete();
+            compEvent.getUser().openPrivateChannel().queue(ch -> ch.sendMessage(STRS.getNotificationSuccess()).queue());
         } catch (ErrorResponseException exception) {
             EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getNotificationFailed());
 
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
-                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
+                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue();
             } catch (IOException exception1) {
                 Log.error(this.user, this.getClass(), "Failed to generate notification fail message", exception1);
             }

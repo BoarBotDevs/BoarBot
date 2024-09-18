@@ -23,6 +23,7 @@ public abstract class ModalInteractive extends UserInteractive {
     ) {
         if (startTime < this.lastEndTime) {
             Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
+            compEvent.deferEdit().queue();
             return;
         }
 
@@ -34,7 +35,7 @@ public abstract class ModalInteractive extends UserInteractive {
             this.modalExecute(modalEvent);
         }
 
-        this.lastEndTime = TimeUtil.getCurMilli();
+        this.lastEndTime = this.curStopTime;
     }
 
     public abstract void modalExecute(ModalInteractionEvent modalEvent);

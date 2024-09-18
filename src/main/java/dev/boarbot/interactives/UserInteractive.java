@@ -58,17 +58,17 @@ public abstract class UserInteractive extends Interactive {
     @Override
     public Message updateInteractive(MessageEditData editedMsg) {
         if (this.msg == null && this.isMsg) {
-            this.msg = ((ComponentInteraction) this.interaction).getHook().sendMessage(
+            ((ComponentInteraction) this.interaction).getHook().sendMessage(
                 MessageCreateData.fromEditData(editedMsg)
-            ).complete();
-            return this.msg;
+            ).queue(msg -> this.msg = msg);
         }
 
         if (this.msg != null) {
-            return this.msg.editMessage(editedMsg).complete();
+            this.msg.editMessage(editedMsg).queue(msg -> this.updateLastEndTime());
+            return null;
         }
 
-        this.hook.editOriginal(editedMsg).complete();
+        this.hook.editOriginal(editedMsg).queue(msg -> this.updateLastEndTime());
         return null;
     }
 
@@ -79,10 +79,12 @@ public abstract class UserInteractive extends Interactive {
         }
 
         if (this.msg != null) {
-            return this.msg.editMessageComponents(rows).complete();
+            this.msg.editMessageComponents(rows).queue(msg -> this.updateLastEndTime());
+            return null;
         }
 
-        return this.hook.editOriginalComponents(rows).complete();
+        this.hook.editOriginalComponents(rows).queue(msg -> this.updateLastEndTime());
+        return null;
     }
 
     @Override
@@ -92,9 +94,9 @@ public abstract class UserInteractive extends Interactive {
         }
 
         if (this.msg != null) {
-            this.msg.delete().complete();
+            this.msg.delete().queue(msg -> this.updateLastEndTime());
         } else {
-            this.hook.deleteOriginal().complete();
+            this.hook.deleteOriginal().queue(msg -> this.updateLastEndTime());
         }
     }
 
@@ -109,18 +111,18 @@ public abstract class UserInteractive extends Interactive {
 
         if (type.equals(StopType.EXCEPTION)) {
             if (this.hook != null) {
-                this.hook.editOriginalComponents().complete();
+                this.hook.editOriginalComponents().queue();
             } else {
-                this.msg.editMessageComponents().complete();
+                this.msg.editMessageComponents().queue();
             }
 
             return;
         }
 
         if (this.hook != null) {
-            this.hook.editOriginalComponents().complete();
+            this.hook.editOriginalComponents().queue();
         } else {
-            this.msg.editMessageComponents().complete();
+            this.msg.editMessageComponents().queue();
         }
 
         Log.debug(this.user, this.getClass(), "Interactive expired");
