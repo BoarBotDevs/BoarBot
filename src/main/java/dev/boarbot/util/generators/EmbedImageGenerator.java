@@ -6,7 +6,6 @@ import dev.boarbot.util.graphics.TextDrawer;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 public class EmbedImageGenerator extends ImageGenerator {
     private final static int MAX_WIDTH = 1500;
