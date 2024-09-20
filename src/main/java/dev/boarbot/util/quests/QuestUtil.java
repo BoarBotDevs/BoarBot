@@ -31,7 +31,9 @@ public class QuestUtil implements Configured {
         try {
             MessageCreateBuilder msg = new MessageCreateBuilder()
                 .setFiles(embedImageGenerator.generate().getFileUpload());
-            hook.sendMessage(msg.build()).setEphemeral(true).queue();
+            hook.sendMessage(msg.build()).setEphemeral(true).queue(null, e -> Log.warn(
+                hook.getInteraction().getUser(), QuestUtil.class, "Discord exception thrown", e
+            ));
         } catch (IOException exception) {
             Log.error(
                 hook.getInteraction().getUser(), QuestUtil.class, "Failed to send quest claim message", exception

@@ -5,6 +5,7 @@
   "onCooldown": "You're using this command too fast! Please wait 5 seconds!",
   "error": "An error occurred! Please report it using /%s %s if the issue persists!",
   "maintenance": "Maintenance mode is currently active!",
+  "eventDisabled": "<>maintenance<>NOTICE!<>font<> Events cannot be sent in this server. Ensure that the bot has the <>silver<>View Channel<>font<> permission in <>green<>this channel<>font<>.",
   "bannedString": "You're banned from doing this! You'll be unbanned %s!",
   "permBannedString": "You're permanently banned from doing this!",
   "banSuccess": "Successfully banned %s for %d hour(s)!",

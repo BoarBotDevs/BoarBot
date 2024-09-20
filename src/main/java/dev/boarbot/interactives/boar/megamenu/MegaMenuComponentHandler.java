@@ -68,7 +68,9 @@ class MegaMenuComponentHandler implements Configured {
         );
 
         if (!modalPossibleIDs.contains(compID)) {
-            this.compEvent.deferEdit().queue();
+            this.compEvent.deferEdit().queue(null, e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
         }
 
         Log.debug(
@@ -109,7 +111,9 @@ class MegaMenuComponentHandler implements Configured {
                 Modal modal = this.makeModal(MODALS.get("pageInput"));
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).queue();
+                this.compEvent.replyModal(modal).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
 
@@ -122,7 +126,9 @@ class MegaMenuComponentHandler implements Configured {
                 Modal modal = this.makeModal(MODALS.get("findBoar"));
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).queue();
+                this.compEvent.replyModal(modal).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
                 Log.debug(this.user, this.getClass(), "Sent boar find input modal");
             }
 
@@ -188,7 +194,9 @@ class MegaMenuComponentHandler implements Configured {
     }
 
     public void handleModalEvent() {
-        this.modalEvent.deferEdit().queue();
+        this.modalEvent.deferEdit().queue(null, e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
 
         switch (this.modalEvent.getModalId().split(",")[2]) {
             case "PAGE_INPUT" -> {
@@ -354,7 +362,9 @@ class MegaMenuComponentHandler implements Configured {
 
         switch (this.interactive.interactType) {
             case FAVORITE -> {
-                this.compEvent.deferEdit().queue();
+                this.compEvent.deferEdit().queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
                 this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
             }
 
@@ -373,12 +383,16 @@ class MegaMenuComponentHandler implements Configured {
                     return;
                 }
 
-                this.compEvent.replyModal(modal).queue();
+                this.compEvent.replyModal(modal).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
                 Log.debug(this.user, this.getClass(), "Sent clone input modal");
             }
 
             case TRANSMUTE -> {
-                this.compEvent.deferEdit().queue();
+                this.compEvent.deferEdit().queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
                 this.interactive.confirmOpen = true;
 
                 String nextRarityKey = BoarUtil.getNextRarityKey(this.interactive.curRarityKey);
@@ -391,7 +405,9 @@ class MegaMenuComponentHandler implements Configured {
             }
 
             case EDITIONS -> {
-                this.compEvent.deferEdit().queue();
+                this.compEvent.deferEdit().queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
 
                 this.setPageZero();
 
@@ -404,7 +420,9 @@ class MegaMenuComponentHandler implements Configured {
             }
 
             case ZOOM -> {
-                this.compEvent.deferEdit().queue();
+                this.compEvent.deferEdit().queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
                 this.interactive.acknowledgeOpen = true;
 
                 String curBoarID = this.interactive.curBoarEntry.getKey();
@@ -448,19 +466,25 @@ class MegaMenuComponentHandler implements Configured {
                 );
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).queue();
+                this.compEvent.replyModal(modal).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
 
             case "gift" -> {
-                this.compEvent.deferEdit().queue();
+                this.compEvent.deferEdit().queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
 
                 this.interactive.confirmOpen = true;
                 this.interactive.confirmString = STRS.getPowGiftConfirm().formatted(powConfig.getName());
             }
 
             case "clone", "transmute" -> {
-                this.compEvent.deferEdit().queue();
+                this.compEvent.deferEdit().queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
 
                 this.interactive.acknowledgeOpen = true;
                 this.interactive.acknowledgeImageGen = new OverlayImageGenerator(

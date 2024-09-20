@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -199,7 +200,7 @@ public class GuildDataUtil {
             if (message != null) {
                 messages.add(message);
             }
-        } catch (ErrorResponseException ignored) {}
+        } catch (ErrorResponseException | InsufficientPermissionException ignored) {}
     }
 
     public static int getTotalGuilds(Connection connection) throws SQLException {
@@ -219,5 +220,52 @@ public class GuildDataUtil {
         }
 
         return 0;
+    }
+
+    public static boolean getEventNotify(String guildID, Connection connection) throws SQLException {
+        String query = """
+            SELECT event_notify_flag
+            FROM guilds
+            WHERE guild_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, guildID);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return results.getBoolean(1);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static void setEventNotify(Set<String> guildIDs, Connection connection) throws SQLException {
+        String resetQuery = """
+            UPDATE guilds
+            SET event_notify_flag = false;
+        """;
+
+        String updateQuery = """
+            UPDATE guilds
+            SET event_notify_flag = true
+            WHERE guild_id = ?;
+        """;
+
+        try (
+            PreparedStatement statement1 = connection.prepareStatement(resetQuery);
+            PreparedStatement statement2 = connection.prepareStatement(updateQuery)
+        ) {
+            statement1.executeUpdate();
+
+            for (String guildID : guildIDs) {
+                statement2.setString(1, guildID);
+                statement2.addBatch();
+            }
+
+            statement2.executeBatch();
+        }
     }
 }

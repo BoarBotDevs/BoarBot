@@ -62,15 +62,21 @@ public abstract class UserInteractive extends Interactive {
         if (this.msg == null && this.isMsg) {
             ((ComponentInteraction) this.interaction).getHook().sendMessage(
                 MessageCreateData.fromEditData(editedMsg)
-            ).queue(msg -> this.msg = msg);
+            ).queue(msg -> this.msg = msg, e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
         }
 
         if (this.msg != null) {
-            this.msg.editMessage(editedMsg).queue(msg -> this.updateLastEndTime());
+            this.msg.editMessage(editedMsg).queue(msg -> this.updateLastEndTime(), e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
             return null;
         }
 
-        this.hook.editOriginal(editedMsg).queue(msg -> this.updateLastEndTime());
+        this.hook.editOriginal(editedMsg).queue(msg -> this.updateLastEndTime(), e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
         return null;
     }
 
@@ -81,11 +87,15 @@ public abstract class UserInteractive extends Interactive {
         }
 
         if (this.msg != null) {
-            this.msg.editMessageComponents(rows).queue(msg -> this.updateLastEndTime());
+            this.msg.editMessageComponents(rows).queue(msg -> this.updateLastEndTime(), e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
             return null;
         }
 
-        this.hook.editOriginalComponents(rows).queue(msg -> this.updateLastEndTime());
+        this.hook.editOriginalComponents(rows).queue(msg -> this.updateLastEndTime(), e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
         return null;
     }
 
@@ -96,9 +106,13 @@ public abstract class UserInteractive extends Interactive {
         }
 
         if (this.msg != null) {
-            this.msg.delete().queue(msg -> this.updateLastEndTime());
+            this.msg.delete().queue(msg -> this.updateLastEndTime(), e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
         } else {
-            this.hook.deleteOriginal().queue(msg -> this.updateLastEndTime());
+            this.hook.deleteOriginal().queue(msg -> this.updateLastEndTime(), e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
         }
     }
 
@@ -117,18 +131,26 @@ public abstract class UserInteractive extends Interactive {
                 .setComponents();
 
             if (this.hook != null) {
-                this.hook.editOriginal(msg.build()).queue();
+                this.hook.editOriginal(msg.build()).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
             } else {
-                this.msg.editMessage(msg.build()).queue();
+                this.msg.editMessage(msg.build()).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
             }
 
             return;
         }
 
         if (this.hook != null) {
-            this.hook.editOriginalComponents().queue();
+            this.hook.editOriginalComponents().queue(null, e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
         } else {
-            this.msg.editMessageComponents().queue();
+            this.msg.editMessageComponents().queue(null, e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
         }
 
         Log.debug(this.user, this.getClass(), "Interactive expired");

@@ -23,6 +23,7 @@ public class StringConfig {
     private String onCooldown = "";
     private String error = "";
     private String maintenance = "";
+    private String eventDisabled = "";
     private String bannedString = "";
     private String permBannedString = "";
     private String banSuccess = "";

@@ -108,12 +108,16 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         if (this.user.getId().equals(compEvent.getUser().getId())) {
-            compEvent.deferEdit().queue();
+            compEvent.deferEdit().queue(null, e -> Log.warn(
+                this.user, this.getClass(), "Discord exception thrown", e
+            ));
 
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder()
                     .setFiles(new EmbedImageGenerator(STRS.getGiftSelfOpen()).generate().getFileUpload());
-                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue();
+                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
             } catch (IOException exception) {
                 this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to generate self open response", exception);
@@ -122,7 +126,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             return;
         }
 
-        compEvent.deferEdit().queue();
+        compEvent.deferEdit().queue(null, e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
 
         if (this.giftTimes.get(compEvent.getUser()) != null) {
             return;
@@ -211,7 +217,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 )).generate().getFileUpload()
             );
 
-            this.giftInteractions.get(this.giftWinner).getHook().sendMessage(msg.build()).setEphemeral(true).queue();
+            this.giftInteractions.get(this.giftWinner).getHook().sendMessage(msg.build()).setEphemeral(true).queue(
+                null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e)
+            );
         } catch (IOException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate gift time message", exception);

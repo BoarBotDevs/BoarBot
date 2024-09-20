@@ -68,7 +68,9 @@ public class StopMessageListener extends ListenerAdapter implements Runnable, Co
                 );
             }
 
-            this.event.getMessage().reply(STRS.getNotificationDisabledStr()).queue();
+            this.event.getMessage().reply(STRS.getNotificationDisabledStr()).queue(null, e -> Log.warn(
+                this.event.getAuthor(), this.getClass(), "Discord exception thrown", e
+            ));
             break;
         }
     }

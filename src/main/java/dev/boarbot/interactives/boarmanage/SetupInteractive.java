@@ -51,7 +51,7 @@ public class SetupInteractive extends UserInteractive {
             return;
         }
 
-        compEvent.deferEdit().queue();
+        compEvent.deferEdit().queue(null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e));
         String compID = compEvent.getComponentId().split(",")[1];
 
         Log.debug(this.user, this.getClass(), "Page: " + this.page);
@@ -131,7 +131,9 @@ public class SetupInteractive extends UserInteractive {
 
         MessageCreateBuilder infoMsg = new MessageCreateBuilder();
         infoMsg.setFiles(imageUpload);
-        compEvent.getHook().sendMessage(infoMsg.build()).setEphemeral(true).queue();
+        compEvent.getHook().sendMessage(infoMsg.build()).setEphemeral(true).queue(null, e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
     }
 
     @Override

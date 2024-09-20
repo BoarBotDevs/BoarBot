@@ -14,7 +14,9 @@ public class SetupSubcommand extends Subcommand {
 
     @Override
     public void execute() {
-        this.interaction.deferReply().setEphemeral(true).queue();
+        this.interaction.deferReply().setEphemeral(true).queue(null, e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
 
         Interactive interactive = InteractiveFactory.constructInteractive(this.event, SetupInteractive.class);
         interactive.execute(null);

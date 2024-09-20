@@ -27,7 +27,9 @@ public class BetaPowerupsSubcommand extends Subcommand implements Synchronizable
         boarUser.passSynchronizedAction(this);
 
         Log.debug(this.user, this.getClass(), "Given powerups");
-        this.interaction.reply("+10 of each powerup").setEphemeral(true).queue();
+        this.interaction.reply("+10 of each powerup").setEphemeral(true).queue(null, e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
     }
 
     @Override

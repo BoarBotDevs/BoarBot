@@ -79,13 +79,17 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 );
 
                 this.modalHandler = new ModalHandler(compEvent, this);
-                compEvent.replyModal(modal).queue();
+                compEvent.replyModal(modal).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
 
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
 
             case "SUBMIT_POW" -> {
-                compEvent.deferEdit().queue();
+                compEvent.deferEdit().queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
 
                 BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
                 boarUser.passSynchronizedAction(this);
@@ -194,7 +198,9 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     @Override
     public void modalExecute(ModalInteractionEvent modalEvent) {
-        modalEvent.deferEdit().queue();
+        modalEvent.deferEdit().queue(null, e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
 
         PowerupItemConfig miracleConfig = POWS.get("miracle");
 

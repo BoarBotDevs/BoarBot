@@ -54,6 +54,9 @@ public class CommandListener extends ListenerAdapter implements Runnable, Config
                 .newInstance(this.event);
             subcommand.execute();
             Log.debug(this.event.getUser(), this.getClass(), "Finished processing %s".formatted(commandStr));
+
+            Thread.sleep(3000);
+            subcommand.trySendEventDisabled();
         } catch (InstantiationException exception) {
             SpecialReply.sendErrorEmbed(this.event.getInteraction());
             Log.error(
@@ -62,6 +65,7 @@ public class CommandListener extends ListenerAdapter implements Runnable, Config
                 "%s's class is an abstract class".formatted(commandStr),
                 exception
             );
+        } catch (InterruptedException ignored) {
         } catch (IllegalAccessException exception) {
             SpecialReply.sendErrorEmbed(this.event.getInteraction());
             Log.error(

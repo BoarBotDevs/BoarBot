@@ -70,7 +70,9 @@ public abstract class Interactive implements Configured {
     public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
         if (startTime < this.lastEndTime) {
             Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
-            compEvent.deferEdit().queue();
+            compEvent.deferEdit().queue(null, e -> Log.warn(
+                compEvent.getUser(), this.getClass(), "Discord exception thrown", e
+            ));
             return;
         }
 

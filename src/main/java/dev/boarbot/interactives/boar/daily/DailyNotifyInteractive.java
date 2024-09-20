@@ -43,16 +43,23 @@ public class DailyNotifyInteractive extends UserInteractive {
         }
 
         Log.debug(this.user, this.getClass(), "Attempting to enable notifications");
-        compEvent.deferEdit().queue();
+        compEvent.deferEdit().queue(null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e));
 
         try {
-            compEvent.getUser().openPrivateChannel().queue(ch -> ch.sendMessage(STRS.getNotificationSuccess()).queue());
+            compEvent.getUser().openPrivateChannel().queue(
+                ch -> ch.sendMessage(STRS.getNotificationSuccess()).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                )),
+                e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e)
+            );
         } catch (ErrorResponseException exception) {
             EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getNotificationFailed());
 
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
-                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue();
+                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue(null, e -> Log.warn(
+                    this.user, this.getClass(), "Discord exception thrown", e
+                ));
             } catch (IOException exception1) {
                 this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to generate notification fail message", exception1);

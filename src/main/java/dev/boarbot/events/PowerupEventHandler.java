@@ -15,8 +15,6 @@ import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.io.IOException;
@@ -67,7 +65,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
     }
 
     @Override
-    protected void sendInteractive(TextChannel channel) throws InsufficientPermissionException {
+    protected void sendInteractive(TextChannel channel) {
         PowerupEventInteractive interactive = new PowerupEventInteractive(channel, this.currentImage, this);
         interactive.execute(null);
     }
@@ -76,6 +74,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
     protected void handleAfterSend() {
         try (Connection connection = DataUtil.getConnection()) {
             GuildDataUtil.updatePowerupMessages(connection, curMessages);
+            GuildDataUtil.setEventNotify(this.failedGuilds, connection);
         } catch (SQLException exception) {
             Log.error(this.getClass(), "Failed to update Powerup Event messages in database", exception);
         }
@@ -104,9 +103,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
 
     private void removePriorEvent() {
         for (Message msg : priorMessages) {
-            try {
-                msg.delete().queue();
-            } catch (ErrorResponseException ignored) {}
+            msg.delete().queue(null, e -> {});
         }
 
         Log.debug(this.getClass(), "Removed prior Powerup Event messages");
@@ -180,9 +177,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
             MessageEditBuilder editedMsg = new MessageEditBuilder().setComponents().setFiles(this.currentImage);
 
             for (Message msg : curMessages) {
-                try {
-                    msg.editMessage(editedMsg.build()).queue();
-                } catch (ErrorResponseException ignored) {}
+                msg.editMessage(editedMsg.build()).queue(null, e -> {});
             }
 
             Log.debug(this.getClass(), "Edited all Powerup Event messages");

@@ -49,10 +49,15 @@ public class NotificationEventJob implements Job, Configured {
                 );
 
                 if (!userChannels.containsKey(boarUser.getUserID())) {
-                    boarUser.getUser().openPrivateChannel().queue((ch) -> userChannels.put(boarUser.getUserID(), ch));
+                    boarUser.getUser().openPrivateChannel().queue(
+                        ch -> userChannels.put(boarUser.getUserID(), ch),
+                        e -> Log.warn(boarUser.getUser(), this.getClass(), "Discord exception thrown", e)
+                    );
                 }
 
-                userChannels.get(boarUser.getUserID()).sendMessage(notificationStr).setSuppressEmbeds(true).queue();
+                userChannels.get(boarUser.getUserID()).sendMessage(notificationStr).setSuppressEmbeds(true).queue(
+                    null, e -> Log.warn(boarUser.getUser(), this.getClass(), "Discord exception thrown", e)
+                );
             } catch (SQLException exception) {
                 Log.error(
                     boarUser.getUser(), NotificationEventJob.class, "Failed to get notification channel", exception
@@ -108,8 +113,12 @@ public class NotificationEventJob implements Job, Configured {
 
         for (String notifUserID : notifUserIDs) {
             try {
-                jda.retrieveUserById(notifUserID).queue(user ->
-                    user.openPrivateChannel().queue(ch -> userChannels.put(notifUserID, ch))
+                jda.retrieveUserById(notifUserID).queue(
+                    user -> user.openPrivateChannel().queue(
+                        ch -> userChannels.put(notifUserID, ch),
+                        e -> Log.warn(user, NotificationEventJob.class, "Discord exception thrown", e)
+                    ),
+                    e -> Log.warn(NotificationEventJob.class, "Discord exception thrown", e)
                 );
             } catch (ErrorResponseException exception) {
                 exception.getErrorResponse();

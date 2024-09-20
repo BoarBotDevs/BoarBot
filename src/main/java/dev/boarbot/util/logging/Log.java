@@ -55,7 +55,7 @@ public final class Log {
         warn(null, clazz, message, null);
     }
 
-    public static void warn(Class<?> clazz, String message, Exception exception) {
+    public static void warn(Class<?> clazz, String message, Throwable exception) {
         warn(null, clazz, message, exception);
     }
 
@@ -63,7 +63,7 @@ public final class Log {
         warn(user, clazz, message, null);
     }
 
-    public static void warn(User user, Class<?> clazz, String message, Exception exception) {
+    public static void warn(User user, Class<?> clazz, String message, Throwable exception) {
         String msg = getUserMsg(user, message);
 
         if (exception != null) {
@@ -79,11 +79,11 @@ public final class Log {
         DiscordLog.sendWarn(clazz, msg);
     }
 
-    public static void error(Class<?> clazz, String message, Exception exception) {
+    public static void error(Class<?> clazz, String message, Throwable exception) {
         error(null, clazz, message, exception);
     }
 
-    public static void error(User user, Class<?> clazz, String message, Exception exception) {
+    public static void error(User user, Class<?> clazz, String message, Throwable exception) {
         String msg = getUserMsg(user, message);
         log(clazz).error(msg, exception);
 

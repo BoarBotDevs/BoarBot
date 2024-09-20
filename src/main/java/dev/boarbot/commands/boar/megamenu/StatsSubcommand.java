@@ -18,7 +18,9 @@ public class StatsSubcommand extends Subcommand {
             return;
         }
 
-        this.interaction.deferReply().queue();
+        this.interaction.deferReply().queue(null, e -> Log.warn(
+            this.user, this.getClass(), "Discord exception thrown", e
+        ));
 
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.STATS);
         interactive.execute(null);

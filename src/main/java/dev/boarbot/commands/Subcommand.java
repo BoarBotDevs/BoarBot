@@ -4,6 +4,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -41,14 +42,18 @@ public abstract class Subcommand implements Configured {
 
             if (!isSetup) {
                 Log.debug(this.user, this.getClass(), "Guild not setup, not proceeding");
-                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
+                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
+                    null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e)
+                );
                 return false;
             }
 
             if (!isValidChannel) {
                 Log.debug(this.user, this.getClass(), "Invalid channel, not proceeding");
                 embedGen.setStr(STRS.getWrongChannel());
-                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue();
+                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
+                    null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e
+                ));
                 return false;
             }
         } catch (SQLException exception) {
@@ -60,5 +65,24 @@ public abstract class Subcommand implements Configured {
         }
 
         return true;
+    }
+
+    public void trySendEventDisabled() {
+        if (Math.random() > 0.1) {
+            return;
+        }
+
+        try (Connection connection = DataUtil.getConnection()) {
+            String guildID = Objects.requireNonNull(this.interaction.getGuild()).getId();
+            boolean eventsFailing = GuildDataUtil.getEventNotify(guildID, connection);
+
+            if (!eventsFailing) {
+                return;
+            }
+
+            SpecialReply.sendEventDisabled(this.interaction);
+        } catch (SQLException exception) {
+            Log.error(this.user, this.getClass(), "Failed to get event fail flag", exception);
+        }
     }
 }
