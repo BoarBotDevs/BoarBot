@@ -6,6 +6,7 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -48,18 +49,17 @@ public class PowerupEventImageGenerator extends ImageGenerator {
         boolean isEnd = this.generatedImageBytes != null;
         this.generatedImageBytes = null;
 
-        String underlayPath = PATHS.getOtherAssets() + PATHS.getEventUnderlay();
-        String powIconPath = PATHS.getOtherAssets() + PATHS.getPowIcon();
-
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = this.generatedImage.createGraphics();
 
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.eventUnderlayPath, ORIGIN);
 
-        GraphicsUtil.drawImage(g2d, powIconPath, new int[] {NUMS.getBorder() * 2, NUMS.getBorder() * 2}, ICON_SIZE);
+        GraphicsUtil.drawImage(
+            g2d, ResourceUtil.powIconPath, new int[] {NUMS.getBorder() * 2, NUMS.getBorder() * 2}, ICON_SIZE
+        );
         GraphicsUtil.drawImage(
             g2d,
-            powIconPath,
+            ResourceUtil.powIconPath,
             new int[] {this.generatedImage.getWidth() - NUMS.getBorder() * 2, NUMS.getBorder() * 2},
             new int[] {ICON_SIZE[0] * -1, ICON_SIZE[1]}
         );

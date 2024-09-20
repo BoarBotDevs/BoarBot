@@ -10,6 +10,7 @@ import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
@@ -38,12 +39,10 @@ public class StatsImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getMegaMenuBase();
-
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.megaMenuBasePath, ORIGIN, IMAGE_SIZE);
 
         this.textDrawer = new TextDrawer(
             g2d, "", ORIGIN, Align.LEFT, COLORS.get("font"), NUMS.getFontMedium()

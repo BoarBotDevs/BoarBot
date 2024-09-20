@@ -10,6 +10,7 @@ import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.python.PythonUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -64,15 +65,15 @@ public class ItemImageGenerator extends ImageGenerator {
         if (badgeTier >= 0) {
             BadgeItemConfig badgeInfo = BADGES.get(itemID);
             this.itemName = badgeInfo.getNames()[badgeTier];
-            this.filePath = PATHS.getBadges() + badgeInfo.getFiles()[badgeTier];
+            this.filePath = ResourceUtil.badgeAssetsPath + badgeInfo.getFiles()[badgeTier];
             this.staticFilePath = null;
             this.colorKey = "badge";
         } else {
             BoarItemConfig boarInfo = BOARS.get(itemID);
             this.itemName = boarInfo.getName();
-            this.filePath = PATHS.getBoars() + boarInfo.getFile();
+            this.filePath = ResourceUtil.boarAssetsPath + boarInfo.getFile();
             this.staticFilePath = boarInfo.getStaticFile() != null
-                ? PATHS.getBoars() + boarInfo.getStaticFile()
+                ? ResourceUtil.boarAssetsPath + boarInfo.getStaticFile()
                 : null;
             this.colorKey = BoarUtil.findRarityKey(itemID);
         }
@@ -157,7 +158,7 @@ public class ItemImageGenerator extends ImageGenerator {
 
         Process pythonProcess = new ProcessBuilder(
             "python",
-            PythonUtil.getTempPath(PATHS.getMakeImageScript()),
+            PythonUtil.getTempPath(ResourceUtil.animItemScript),
             g.toJson(NUMS),
             Integer.toString(this.generatedImageBytes.length),
             Integer.toString(animatedImage.length)
@@ -181,7 +182,7 @@ public class ItemImageGenerator extends ImageGenerator {
 
         Process pythonProcess = new ProcessBuilder(
             "python",
-            PythonUtil.getTempPath(PATHS.getOverlayScript()),
+            PythonUtil.getTempPath(ResourceUtil.userItemScript),
             Integer.toString(this.generatedImageBytes.length),
             Integer.toString(userOverlayBytes.length)
         ).start();
@@ -190,10 +191,6 @@ public class ItemImageGenerator extends ImageGenerator {
     }
 
     private void generateStatic(boolean makeWithItem) throws IOException, URISyntaxException {
-        String itemAssetsFolder = PATHS.getItemAssets();
-        String underlayPath = itemAssetsFolder + PATHS.getItemUnderlay();
-        String backplatePath = itemAssetsFolder + PATHS.getItemBackplate();
-
         int[] itemSize = NUMS.getBigBoarSize();
 
         BufferedImage generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
@@ -201,10 +198,10 @@ public class ItemImageGenerator extends ImageGenerator {
 
         GraphicsUtil.drawRect(g2d, ORIGIN, IMAGE_SIZE, COLORS.get(colorKey));
         g2d.setComposite(AlphaComposite.DstIn);
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.itemUnderlayPath, ORIGIN, IMAGE_SIZE);
         g2d.setComposite(AlphaComposite.SrcOver);
 
-        GraphicsUtil.drawImage(g2d, backplatePath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.itemBackplatePath, ORIGIN, IMAGE_SIZE);
         if (makeWithItem && this.itemID != null) {
             BufferedImage itemImage = BoarBotApp.getBot().getImageCacheMap().get("big" + this.itemID);
             g2d.drawImage(itemImage, ITEM_POS[0], ITEM_POS[1], null);

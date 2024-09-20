@@ -78,9 +78,4 @@ public class BotConfig {
      * Non-intuitive number constants the bot uses
      */
     private NumberConfig numberConfig = new NumberConfig();
-
-    /**
-     * The {@link PathConfig paths} of all files/folders the bot accesses
-     */
-    private PathConfig pathConfig = new PathConfig();
 }

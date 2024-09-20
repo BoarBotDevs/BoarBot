@@ -4,6 +4,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.python.PythonUtil;
 
+import dev.boarbot.util.resource.ResourceUtil;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
@@ -60,7 +61,7 @@ public final class ItemImageGrouper implements Configured {
             int[] shadowSize = {SHADOW_WIDTH, smallImageSize[1]};
 
             GraphicsUtil.drawImage(
-                g2d, PATHS.getItemAssets() + PATHS.getItemShadowLeft(), shadowPos, shadowSize
+                g2d, ResourceUtil.itemShadowPathL, shadowPos, shadowSize
             );
         }
 
@@ -81,7 +82,7 @@ public final class ItemImageGrouper implements Configured {
             int[] shadowSize = {SHADOW_WIDTH, smallImageSize[1]};
 
             GraphicsUtil.drawImage(
-                g2d, PATHS.getItemAssets() + PATHS.getItemShadowRight(), shadowPos, shadowSize
+                g2d, ResourceUtil.itemShadowPathR, shadowPos, shadowSize
             );
         }
 
@@ -92,7 +93,7 @@ public final class ItemImageGrouper implements Configured {
 
             Process pythonProcess = new ProcessBuilder(
                 "python",
-                PythonUtil.getTempPath(PATHS.getGroupScript()),
+                PythonUtil.getTempPath(ResourceUtil.itemGroupScript),
                 Integer.toString(resultByteArray.length),
                 Integer.toString(middleImageBytes.length)
             ).start();

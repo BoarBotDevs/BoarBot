@@ -11,6 +11,7 @@ import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
@@ -168,9 +169,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
             ? STRS.getProfileFavLabel()
             : "<>%s<>%s".formatted(favoriteRarityKey, STRS.getProfileFavLabel());
 
-        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getProfUnderlay();
-
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.profUnderlayPath, ORIGIN, IMAGE_SIZE);
 
         this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.LEFT, COLORS.get("font"), mediumFont);
 

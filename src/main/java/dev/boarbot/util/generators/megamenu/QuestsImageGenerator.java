@@ -11,6 +11,7 @@ import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.graphics.TextUtil;
 import dev.boarbot.util.quests.QuestUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
@@ -57,12 +58,10 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getQuestUnderlay();
-
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.questUnderlayPath, ORIGIN, IMAGE_SIZE);
 
         this.textDrawer = new TextDrawer(
             g2d, "", ORIGIN, Align.LEFT, COLORS.get("font"), NUMS.getFontMedium(), QUEST_WIDTH
@@ -199,8 +198,9 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
 
     private void drawReward(Graphics2D g2d, int index) throws IOException, URISyntaxException {
         if (!this.questData.questClaims().isEmpty() && this.questData.questClaims().get(index)) {
-            String checkPath = PATHS.getOtherAssets() + PATHS.getCheckMark();
-            GraphicsUtil.drawImage(g2d, checkPath, new int[] {POW_X, POW_START_Y + index * QUEST_Y_SPACING}, POW_SIZE);
+            GraphicsUtil.drawImage(
+                g2d, ResourceUtil.checkmarkPath, new int[] {POW_X, POW_START_Y + index * QUEST_Y_SPACING}, POW_SIZE
+            );
             return;
         }
 
@@ -220,7 +220,7 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
             return;
         }
 
-        String filePath = PATHS.getPowerups() + POWS.get(rewardType).getFile();
+        String filePath = ResourceUtil.powerupAssetsPath + POWS.get(rewardType).getFile();
 
         this.textDrawer.setText("+<>powerup<>%d".formatted(rewardAmt));
         this.textDrawer.setFontSize(NUMS.getFontSmallest());

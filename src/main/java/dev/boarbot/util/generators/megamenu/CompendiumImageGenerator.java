@@ -9,6 +9,7 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.resource.ResourceUtil;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
@@ -53,9 +54,6 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getCompUnderlay();
-        String favoritePath = PATHS.getMegaMenuAssets() + PATHS.getFavorite();
-
         int smallestFont = NUMS.getFontSmallest();
         int mediumFont = NUMS.getFontMedium();
 
@@ -92,10 +90,10 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.compUnderlayPath, ORIGIN, IMAGE_SIZE);
 
         if (this.isFavorite) {
-            GraphicsUtil.drawImage(g2d, favoritePath, FAV_POS);
+            GraphicsUtil.drawImage(g2d, ResourceUtil.favoritePath, FAV_POS);
         }
 
         this.textDrawer = new TextDrawer(

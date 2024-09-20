@@ -12,7 +12,6 @@ public interface Configured {
     BotConfig CONFIG = BoarBotApp.getBot().getConfig();
     NumberConfig NUMS = CONFIG.getNumberConfig();
     StringConfig STRS = CONFIG.getStringConfig();
-    PathConfig PATHS = CONFIG.getPathConfig();
     Map<String, String> COLORS = CONFIG.getColorConfig();
     Map<String, BoarItemConfig> BOARS = CONFIG.getItemConfig().getBoars();
     Map<String, BadgeItemConfig> BADGES = CONFIG.getItemConfig().getBadges();

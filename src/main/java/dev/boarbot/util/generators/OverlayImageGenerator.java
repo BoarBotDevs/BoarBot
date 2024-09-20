@@ -5,6 +5,7 @@ import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.python.PythonUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -54,19 +55,19 @@ public class OverlayImageGenerator extends ImageGenerator {
 
     public OverlayImageGenerator(
         BufferedImage image, String path, int[] size, boolean darken
-    ) throws URISyntaxException, IOException {
+    ) throws IOException {
         this(image, path, size, null, darken);
     }
 
     public OverlayImageGenerator(
         BufferedImage image, String path, int[] size, int[] pos
-    ) throws URISyntaxException, IOException {
+    ) throws IOException {
         this(image, path, size, pos, true);
     }
 
     public OverlayImageGenerator(
         BufferedImage image, String path, int[] size, int[] pos, boolean darken
-    ) throws URISyntaxException, IOException {
+    ) throws IOException {
         this.generatedImage = image;
         this.animatedImage = GraphicsUtil.getImageBytes(path);
         this.animated = true;
@@ -147,7 +148,7 @@ public class OverlayImageGenerator extends ImageGenerator {
 
             Process pythonProcess = new ProcessBuilder(
                 "python",
-                PythonUtil.getTempPath(PATHS.getApplyScript()),
+                PythonUtil.getTempPath(ResourceUtil.animOverlayScript),
                 g.toJson(NUMS),
                 "[%d, %d]".formatted(pos[0], pos[1]),
                 "[%d, %d]".formatted(this.size[0], this.size[1]),

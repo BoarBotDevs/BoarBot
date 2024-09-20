@@ -7,6 +7,7 @@ import dev.boarbot.entities.boaruser.data.BadgeData;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -46,12 +47,10 @@ public class CollectionImageGenerator extends MegaMenuGenerator {
         int border = NUMS.getBorder();
         int[] boarImageSize = NUMS.getMediumBoarSize();
 
-        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getCollUnderlay();
-
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.collUnderlayPath, ORIGIN, IMAGE_SIZE);
 
         String[] boarIDs = this.filteredBoars.keySet().toArray(new String[0]);
         int lastBoarIndex = Math.min((this.page+1)*BOARS_PER_PAGE, boarIDs.length);

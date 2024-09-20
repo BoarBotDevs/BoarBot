@@ -3,6 +3,7 @@ package dev.boarbot.util.generators;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -21,12 +22,10 @@ public class GiftImageGenerator extends ImageGenerator {
 
     @Override
     public ImageGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = PATHS.getOtherAssets() + PATHS.getGiftImage();
-
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = this.generatedImage.createGraphics();
 
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.giftImagePath, ORIGIN);
 
         TextDrawer textDrawer = new TextDrawer(
             g2d,

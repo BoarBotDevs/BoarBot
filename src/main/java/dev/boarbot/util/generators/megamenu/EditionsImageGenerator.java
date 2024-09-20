@@ -7,6 +7,7 @@ import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.resource.ResourceUtil;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
@@ -45,9 +46,7 @@ public class EditionsImageGenerator extends MegaMenuGenerator {
 
         int bigFont = NUMS.getFontBig();
 
-        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getMegaMenuBase();
-
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.megaMenuBasePath, ORIGIN, IMAGE_SIZE);
 
         TextDrawer textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), bigFont);
 

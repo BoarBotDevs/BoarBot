@@ -1,7 +1,7 @@
 package dev.boarbot.util.python;
 
-import dev.boarbot.BoarBotApp;
 import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -54,7 +54,7 @@ public class PythonUtil {
             return scripts.get(scriptName).toString();
         }
 
-        InputStream is = BoarBotApp.getResourceStream(scriptPath);
+        InputStream is = ResourceUtil.getResourceStream(scriptPath);
 
         Path tempScript = Files.createTempFile(scriptName, ".py");
         Files.copy(is, tempScript, StandardCopyOption.REPLACE_EXISTING);

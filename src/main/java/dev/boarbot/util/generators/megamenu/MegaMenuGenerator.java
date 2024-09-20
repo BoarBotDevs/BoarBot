@@ -7,6 +7,7 @@ import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -103,7 +104,7 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
             for (int i=0; i<this.badges.size(); i++) {
                 String badgeID = this.badges.get(i).badgeID();
                 int badgeTier = this.badges.get(i).badgeTier();
-                String badgePath = PATHS.getBadges() + BADGES.get(badgeID).getFiles()[badgeTier];
+                String badgePath = ResourceUtil.badgeAssetsPath + BADGES.get(badgeID).getFiles()[badgeTier];
                 int[] badgePos = {curBadgeStartX + i * BADGE_SPACING, BADGE_Y};
 
                 GraphicsUtil.drawImage(g2d, badgePath, badgePos, BADGE_SIZE);

@@ -227,12 +227,13 @@ class MegaMenuComponentsGetter implements Configured {
                 continue;
             }
 
+            claimBonus = false;
+
             int requiredAmt = QuestUtil.getRequiredAmt(quest, i, false);
             boolean enableClaim = progress >= requiredAmt;
 
             if (enableClaim) {
                 claimBtn = claimBtn.withDisabled(false);
-                claimBonus = false;
                 break;
             }
         }

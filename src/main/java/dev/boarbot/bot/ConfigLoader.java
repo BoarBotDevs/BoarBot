@@ -14,15 +14,12 @@ import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.bot.config.quests.QuestConfig;
 import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Scanner;
 
 class ConfigLoader {
     private static final BotConfig config = BoarBotApp.getBot().getConfig();
@@ -36,7 +33,6 @@ class ConfigLoader {
     public static String utilPath = basePath + "util/";
     public static String colorsPath = utilPath + "colors.json";
     public static String numsPath = utilPath + "constants.json";
-    public static String pathsPath = utilPath + "paths.json";
 
     public static String discordPath = basePath + "discord/";
     public static String cmdsPath = discordPath + "commands.json";
@@ -63,7 +59,6 @@ class ConfigLoader {
 
             config.setColorConfig(getFromJson(colorsPath, new TypeToken<Map<String, String>>(){}.getType()));
             config.setNumberConfig(getFromJson(numsPath, NumberConfig.class));
-            config.setPathConfig(getFromJson(pathsPath, PathConfig.class));
 
             config.setCommandConfig(getFromJson(cmdsPath, new TypeToken<Map<String, CommandConfig>>(){}.getType()));
             config.setComponentConfig(getFromJson(compsPath, ComponentConfig.class));
@@ -97,10 +92,8 @@ class ConfigLoader {
                 }
             }
 
-            String fontPath = config.getPathConfig().getFontAssets() + config.getPathConfig().getMainFont();
-
             try {
-                InputStream is = BoarBotApp.getResourceStream(fontPath);
+                InputStream is = ResourceUtil.getResourceStream(ResourceUtil.fontPath);
                 BoarBotApp.getBot().setFont(Font.createFont(Font.TRUETYPE_FONT, is));
             } catch (FontFormatException exception) {
                 Log.error(ConfigLoader.class, "The font file is not a TTF file", exception);
@@ -203,46 +196,24 @@ class ConfigLoader {
     }
 
     private static <T> T getFromJson(String path, Class<T> clazz) throws IOException {
-        File configFile = createFileIfNotExist(path);
-        return new Gson().fromJson(getJsonStr(configFile), clazz);
+        try (InputStream stream = ResourceUtil.getResourceStream(path)) {
+            if (stream == null) {
+                throw new IOException("Could not find resource " + path);
+            }
+
+            InputStreamReader reader = new InputStreamReader(stream);
+            return new Gson().fromJson(reader, clazz);
+        }
     }
 
     private static <T> T getFromJson(String path, Type type) throws IOException {
-        File configFile = createFileIfNotExist(path);
-        return new Gson().fromJson(getJsonStr(configFile), type);
-    }
+        try (InputStream stream = ResourceUtil.getResourceStream(path)) {
+            if (stream == null) {
+                throw new IOException("Could not find resource " + path);
+            }
 
-    private static String getJsonStr(File file) throws IOException {
-        Scanner reader = new Scanner(file);
-        StringBuilder jsonStr = new StringBuilder();
-
-        while (reader.hasNextLine()) {
-            jsonStr.append(reader.nextLine());
+            InputStreamReader reader = new InputStreamReader(stream);
+            return new Gson().fromJson(reader, type);
         }
-
-        return jsonStr.toString();
-    }
-
-    private static void createDirIfNotExist(String dirPathStr) throws IOException {
-        Path dirPath = Paths.get(dirPathStr);
-
-        if (Files.exists(dirPath)) {
-            return;
-        }
-
-        Files.createDirectories(dirPath);
-    }
-
-    private static File createFileIfNotExist(String pathStr) throws IOException {
-        Path path = Paths.get(pathStr);
-
-        if (Files.exists(path)) {
-            return new File(pathStr);
-        }
-
-        createDirIfNotExist(pathStr.substring(0, pathStr.lastIndexOf("/")));
-
-        Files.copy(BoarBotApp.getResourceStream("default_" + pathStr), path);
-        return new File(pathStr);
     }
 }

@@ -6,6 +6,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.resource.ResourceUtil;
 
 
 import java.awt.*;
@@ -40,8 +41,8 @@ class CacheLoader implements Configured {
                 }
 
                 String filePath = boarInfo.getStaticFile() != null
-                    ? PATHS.getBoars() + boarInfo.getStaticFile()
-                    : PATHS.getBoars() + boarInfo.getFile();
+                    ? ResourceUtil.boarAssetsPath + boarInfo.getStaticFile()
+                    : ResourceUtil.boarAssetsPath + boarInfo.getFile();
 
                 if (filePath.endsWith(".gif")) {
                     throw new IllegalArgumentException("Animated file is missing a static version");
@@ -88,8 +89,6 @@ class CacheLoader implements Configured {
     }
 
     private static void loadBorders() {
-        String rarityBorderPath = PATHS.getMegaMenuAssets() + PATHS.getRarityBorder();
-
         Log.debug(CacheLoader.class, "Attempting to load rarity borders into cache...");
 
         for (String rarityID : RARITIES.keySet()) {
@@ -108,13 +107,15 @@ class CacheLoader implements Configured {
             try {
                 GraphicsUtil.drawRect(rarityMediumBorderG2D, ORIGIN, MEDIUM_SIZE, color);
                 rarityMediumBorderG2D.setComposite(AlphaComposite.DstIn);
-                GraphicsUtil.drawImage(rarityMediumBorderG2D, rarityBorderPath, ORIGIN, MEDIUM_SIZE);
+                GraphicsUtil.drawImage(rarityMediumBorderG2D, ResourceUtil.rarityBorderPath, ORIGIN, MEDIUM_SIZE);
                 rarityMediumBorderG2D.setComposite(AlphaComposite.SrcIn);
                 imageCacheMap.put("border" + rarityID, rarityMediumBorderImage);
 
                 GraphicsUtil.drawRect(rarityMediumBigBorderG2D, ORIGIN, MEDIUM_BIG_SIZE, color);
                 rarityMediumBigBorderG2D.setComposite(AlphaComposite.DstIn);
-                GraphicsUtil.drawImage(rarityMediumBigBorderG2D, rarityBorderPath, ORIGIN, MEDIUM_BIG_SIZE);
+                GraphicsUtil.drawImage(
+                    rarityMediumBigBorderG2D, ResourceUtil.rarityBorderPath, ORIGIN, MEDIUM_BIG_SIZE
+                );
                 rarityMediumBigBorderG2D.setComposite(AlphaComposite.SrcIn);
                 imageCacheMap.put("borderMediumBig" + rarityID, rarityMediumBigBorderImage);
             } catch (IOException exception) {

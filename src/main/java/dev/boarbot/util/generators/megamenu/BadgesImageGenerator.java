@@ -7,6 +7,7 @@ import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.awt.*;
@@ -32,8 +33,6 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getBadgeUnderlay();
-
         int mediumFont = NUMS.getFontMedium();
         int smallestFont = NUMS.getFontSmallest();
 
@@ -41,13 +40,13 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
         int badgeTier = this.badges.get(this.page).badgeTier();
         long badgeObtained = this.badges.get(this.page).obtainedTimestamp();
 
-        String badgeFile = PATHS.getBadges() + badge.getFiles()[badgeTier];
+        String badgeFile = ResourceUtil.badgeAssetsPath + badge.getFiles()[badgeTier];
         String badgeDescription = badge.getDescriptions()[badgeTier];
 
         this.generatedImage = new BufferedImage(IMAGE_SIZE[0], IMAGE_SIZE[1], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+        GraphicsUtil.drawImage(g2d, ResourceUtil.badgeUnderlayPath, ORIGIN, IMAGE_SIZE);
 
         this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), mediumFont);
 

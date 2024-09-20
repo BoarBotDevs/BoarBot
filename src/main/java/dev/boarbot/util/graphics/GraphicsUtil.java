@@ -1,6 +1,6 @@
 package dev.boarbot.util.graphics;
 
-import dev.boarbot.BoarBotApp;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -63,14 +63,14 @@ public final class GraphicsUtil {
         if (path.startsWith("http")) {
             image = ImageIO.read(new URI(path).toURL());
         } else {
-            image = ImageIO.read(BoarBotApp.getResource(path));
+            image = ImageIO.read(ResourceUtil.getResource(path));
         }
 
         return image;
     }
 
     public static byte[] getImageBytes(String path) throws IOException {
-        InputStream is = BoarBotApp.getResourceStream(path);
+        InputStream is = ResourceUtil.getResourceStream(path);
         return is.readAllBytes();
     }
 

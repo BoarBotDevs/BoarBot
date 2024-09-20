@@ -5,9 +5,6 @@ import dev.boarbot.bot.BoarBot;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.Getter;
 
-import java.io.InputStream;
-import java.net.URL;
-
 /**
  * {@link BoarBotApp BoarBotApp.java}
  *
@@ -46,13 +43,5 @@ public class BoarBotApp {
 
     public static Dotenv getEnv() {
         return BoarBotApp.env;
-    }
-
-    public static URL getResource(String path) {
-        return BoarBotApp.class.getClassLoader().getResource(path);
-    }
-
-    public static InputStream getResourceStream(String path) {
-        return BoarBotApp.class.getClassLoader().getResourceAsStream(path);
     }
 }

@@ -16,6 +16,7 @@ import dev.boarbot.util.graphics.TextUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -429,7 +430,7 @@ class MegaMenuComponentHandler implements Configured {
                     return;
                 }
 
-                String filePath = PATHS.getBoars() + curBoar.getFile();
+                String filePath = ResourceUtil.boarAssetsPath + curBoar.getFile();
 
                 try {
                     this.interactive.acknowledgeImageGen = new OverlayImageGenerator(

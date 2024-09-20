@@ -7,6 +7,7 @@ import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
 import dev.boarbot.util.graphics.TextUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -41,9 +42,7 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
 
     @Override
     public MegaMenuGenerator generate() throws IOException, URISyntaxException {
-        String underlayPath = PATHS.getMegaMenuAssets() + PATHS.getMegaMenuBase();
-        String anomalousUnderlayPath = PATHS.getMegaMenuAssets() + PATHS.getPowAnomUnderlay();
-        String cellPath = PATHS.getMegaMenuAssets();
+        String cellPath = ResourceUtil.powCellNonePath;
 
         int numTransmute = this.powData.powAmts().get("transmute") == null
             ? 0
@@ -52,31 +51,29 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
         String transmuteRarityKey = null;
 
         if (numTransmute == RARITIES.get("common").getChargesNeeded()) {
-            cellPath += PATHS.getPowCellCommon();
+            cellPath = ResourceUtil.powCellCommonPath;
             transmuteRarityKey = "common";
         } else if (numTransmute == RARITIES.get("uncommon").getChargesNeeded()) {
-            cellPath += PATHS.getPowCellUncommon();
+            cellPath = ResourceUtil.powCellUncommonPath;
             transmuteRarityKey = "uncommon";
         } else if (numTransmute == RARITIES.get("rare").getChargesNeeded()) {
-            cellPath += PATHS.getPowCellRare();
+            cellPath = ResourceUtil.powCellRarePath;
             transmuteRarityKey = "rare";
         } else if (numTransmute == RARITIES.get("epic").getChargesNeeded()) {
-            cellPath += PATHS.getPowCellEpic();
+            cellPath = ResourceUtil.powCellEpicPath;
             transmuteRarityKey = "epic";
         } else if (numTransmute == RARITIES.get("legendary").getChargesNeeded()) {
-            cellPath += PATHS.getPowCellLegendary();
+            cellPath = ResourceUtil.powCellLegendaryPath;
             transmuteRarityKey = "legendary";
         } else if (numTransmute == RARITIES.get("mythic").getChargesNeeded()) {
-            cellPath += PATHS.getPowCellMythic();
+            cellPath = ResourceUtil.powCellMythicPath;
             transmuteRarityKey = "mythic";
         } else if (numTransmute == RARITIES.get("divine").getChargesNeeded()) {
-            cellPath += PATHS.getPowCellDivine();
+            cellPath = ResourceUtil.powCellDivinePath;
             transmuteRarityKey = "divine";
         } else if (numTransmute > RARITIES.get("divine").getChargesNeeded()) {
-            cellPath += PATHS.getPowCellEntropic();
             cellValueStr = STRS.getPowCellErrorLabel();
         } else {
-            cellPath += PATHS.getPowCellNone();
             cellValueStr = STRS.getPowCellEmptyLabel();
         }
 
@@ -93,9 +90,9 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
         Graphics2D g2d = generatedImage.createGraphics();
 
         if (numTransmute <= RARITIES.get("divine").getChargesNeeded()) {
-            GraphicsUtil.drawImage(g2d, underlayPath, ORIGIN, IMAGE_SIZE);
+            GraphicsUtil.drawImage(g2d, ResourceUtil.megaMenuBasePath, ORIGIN, IMAGE_SIZE);
         } else {
-            GraphicsUtil.drawImage(g2d, anomalousUnderlayPath, ORIGIN, IMAGE_SIZE);
+            GraphicsUtil.drawImage(g2d, ResourceUtil.powAnomUnderlayPath, ORIGIN, IMAGE_SIZE);
         }
 
         if (numTransmute <= RARITIES.get("divine").getChargesNeeded()) {

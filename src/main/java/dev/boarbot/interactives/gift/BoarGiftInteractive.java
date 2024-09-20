@@ -23,6 +23,7 @@ import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.generators.GiftImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.resource.ResourceUtil;
 import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -434,11 +435,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     : STRS.getBucksPluralName()
             );
 
-            String filePath = PATHS.getOtherAssets() + PATHS.getGiftBucks();
-
             ItemInteractive.sendInteractive(
                 rewardStr,
-                filePath,
+                ResourceUtil.bucksGiftPath,
                 "bucks",
                 this.user,
                 this.giftWinner,
@@ -472,7 +471,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     : powConfig.getPluralName()
             );
 
-            String filePath = PATHS.getPowerups() + powConfig.getFile();
+            String filePath = ResourceUtil.powerupAssetsPath + powConfig.getFile();
 
             ItemInteractive.sendInteractive(
                 rewardStr,
