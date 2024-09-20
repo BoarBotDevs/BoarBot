@@ -71,14 +71,14 @@ public abstract class Interactive implements Configured {
         if (startTime < this.lastEndTime) {
             Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
             compEvent.deferEdit().queue(null, e -> Log.warn(
-                compEvent.getUser(), this.getClass(), "Discord exception thrown", e
+                compEvent.getUser(), this.getClass(), "Failed to defer edit", e
             ));
             return;
         }
 
         this.curStopTime = TimeUtil.getCurMilli() + this.waitTime;
         this.execute(compEvent);
-        this.lastEndTime = this.curStopTime;
+        this.lastEndTime = TimeUtil.getCurMilli();
     }
 
     public abstract void execute(GenericComponentInteractionCreateEvent compEvent);
@@ -106,10 +106,6 @@ public abstract class Interactive implements Configured {
             long newWaitTime = Math.min(this.curStopTime - curTime, hardStopTime - curTime);
             this.tryStop(newWaitTime);
         }
-    }
-
-    public void updateLastEndTime() {
-        this.lastEndTime = TimeUtil.getCurMilli();
     }
 
     public abstract void stop(StopType type);

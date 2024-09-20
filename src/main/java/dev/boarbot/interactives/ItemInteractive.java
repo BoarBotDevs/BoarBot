@@ -92,7 +92,7 @@ public class ItemInteractive extends UserInteractive {
 
         if (compEvent != null) {
             compEvent.deferEdit().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Discord exception thrown", e
+                this.user, this.getClass(), "Failed to defer edit", e
             ));
 
             if (!this.user.getId().equals(compEvent.getUser().getId())) {

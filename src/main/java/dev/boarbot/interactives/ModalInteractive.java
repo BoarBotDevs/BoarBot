@@ -24,7 +24,7 @@ public abstract class ModalInteractive extends UserInteractive {
         if (startTime < this.lastEndTime) {
             Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
             compEvent.deferEdit().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Discord exception thrown", e
+                this.user, this.getClass(), "Failed to defer edit", e
             ));
             return;
         }
@@ -37,7 +37,7 @@ public abstract class ModalInteractive extends UserInteractive {
             this.modalExecute(modalEvent);
         }
 
-        this.lastEndTime = this.curStopTime;
+        this.lastEndTime = TimeUtil.getCurMilli();
     }
 
     public abstract void modalExecute(ModalInteractionEvent modalEvent);

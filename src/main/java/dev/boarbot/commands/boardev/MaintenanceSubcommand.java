@@ -17,8 +17,7 @@ public class MaintenanceSubcommand extends Subcommand {
         try {
             ConfigUpdater.toggleMaintenance();
             this.interaction.reply("Maintenance status: `" + CONFIG.getMainConfig().isMaintenanceMode() + "`")
-                .setEphemeral(true)
-                .queue(null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e));
+                .setEphemeral(true).complete();
         } catch (IOException exception) {
             Log.error(this.user, this.getClass(), "Failed to update maintenance status in file", exception);
         }

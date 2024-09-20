@@ -19,9 +19,7 @@ public class SpecialReply implements Configured {
             .setFiles(getMaintenanceEmbed());
 
         try {
-            interaction.reply(msg.build()).queue(null, e -> Log.warn(
-                interaction.getUser(), SpecialReply.class, "Discord exception thrown", e
-            ));
+            interaction.reply(msg.build()).complete();
         } catch (ErrorResponseException exception) {
             Log.warn(EmbedImageGenerator.class, "Failed to send maintenance embed", exception);
         }
@@ -33,9 +31,7 @@ public class SpecialReply implements Configured {
             .setComponents();
 
         try {
-            interaction.getHook().sendMessage(msg.build()).queue(null, e -> Log.warn(
-                interaction.getUser(), SpecialReply.class, "Discord exception thrown", e
-            ));
+            interaction.getHook().sendMessage(msg.build()).complete();
         } catch (ErrorResponseException exception) {
             Log.warn(EmbedImageGenerator.class, "Failed to send error embed", exception);
         }
@@ -57,14 +53,10 @@ public class SpecialReply implements Configured {
 
         try {
             if (interaction.isAcknowledged()) {
-                interaction.getHook().editOriginal(editedMsg.build()).queue(null, e -> Log.warn(
-                    interaction.getUser(), SpecialReply.class, "Discord exception thrown", e
-                ));
+                interaction.getHook().editOriginal(editedMsg.build()).complete();
                 return;
             }
-            interaction.reply(MessageCreateData.fromEditData(editedMsg.build())).queue(null, e -> Log.warn(
-                interaction.getUser(), SpecialReply.class, "Discord exception thrown", e
-            ));
+            interaction.reply(MessageCreateData.fromEditData(editedMsg.build())).complete();
         } catch (ErrorResponseException exception) {
             Log.warn(EmbedImageGenerator.class, "Failed to send error embed", exception);
         }
@@ -75,9 +67,7 @@ public class SpecialReply implements Configured {
             .setFiles(getErrorEmbed());
 
         try {
-            hook.sendMessage(msg.build()).queue(null, e -> Log.warn(
-                hook.getInteraction().getUser(), SpecialReply.class, "Discord exception thrown", e
-            ));
+            hook.sendMessage(msg.build()).complete();
         } catch (ErrorResponseException exception) {
             Log.warn(EmbedImageGenerator.class, "Failed to send error embed", exception);
         }

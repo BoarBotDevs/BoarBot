@@ -69,7 +69,7 @@ class MegaMenuComponentHandler implements Configured {
 
         if (!modalPossibleIDs.contains(compID)) {
             this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Discord exception thrown", e
+                this.user, this.getClass(), "Failed to defer edit", e
             ));
         }
 
@@ -111,9 +111,7 @@ class MegaMenuComponentHandler implements Configured {
                 Modal modal = this.makeModal(MODALS.get("pageInput"));
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
-                ));
+                this.compEvent.replyModal(modal).complete();
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
 
@@ -126,9 +124,7 @@ class MegaMenuComponentHandler implements Configured {
                 Modal modal = this.makeModal(MODALS.get("findBoar"));
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
-                ));
+                this.compEvent.replyModal(modal).complete();
                 Log.debug(this.user, this.getClass(), "Sent boar find input modal");
             }
 
@@ -195,7 +191,7 @@ class MegaMenuComponentHandler implements Configured {
 
     public void handleModalEvent() {
         this.modalEvent.deferEdit().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Discord exception thrown", e
+            this.user, this.getClass(), "Failed to defer edit", e
         ));
 
         switch (this.modalEvent.getModalId().split(",")[2]) {
@@ -363,7 +359,7 @@ class MegaMenuComponentHandler implements Configured {
         switch (this.interactive.interactType) {
             case FAVORITE -> {
                 this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
+                    this.user, this.getClass(), "Failed to defer edit", e
                 ));
                 this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
             }
@@ -383,15 +379,13 @@ class MegaMenuComponentHandler implements Configured {
                     return;
                 }
 
-                this.compEvent.replyModal(modal).queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
-                ));
+                this.compEvent.replyModal(modal).complete();
                 Log.debug(this.user, this.getClass(), "Sent clone input modal");
             }
 
             case TRANSMUTE -> {
                 this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
+                    this.user, this.getClass(), "Failed to defer edit", e
                 ));
                 this.interactive.confirmOpen = true;
 
@@ -406,7 +400,7 @@ class MegaMenuComponentHandler implements Configured {
 
             case EDITIONS -> {
                 this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
+                    this.user, this.getClass(), "Failed to defer edit", e
                 ));
 
                 this.setPageZero();
@@ -421,7 +415,7 @@ class MegaMenuComponentHandler implements Configured {
 
             case ZOOM -> {
                 this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
+                    this.user, this.getClass(), "Failed to defer edit", e
                 ));
                 this.interactive.acknowledgeOpen = true;
 
@@ -466,15 +460,13 @@ class MegaMenuComponentHandler implements Configured {
                 );
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
-                ));
+                this.compEvent.replyModal(modal).complete();
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
 
             case "gift" -> {
                 this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
+                    this.user, this.getClass(), "Failed to defer edit", e
                 ));
 
                 this.interactive.confirmOpen = true;
@@ -483,7 +475,7 @@ class MegaMenuComponentHandler implements Configured {
 
             case "clone", "transmute" -> {
                 this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
+                    this.user, this.getClass(), "Failed to defer edit", e
                 ));
 
                 this.interactive.acknowledgeOpen = true;

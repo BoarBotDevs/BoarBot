@@ -57,7 +57,7 @@ public abstract class EventInteractive extends Interactive {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }
 
-        this.msg.delete().queue(null, e -> Log.warn(this.getClass(), "Discord exception thrown", e));
+        this.msg.delete().complete();
     }
 
     @Override
@@ -74,15 +74,11 @@ public abstract class EventInteractive extends Interactive {
                 .setFiles(SpecialReply.getErrorEmbed())
                 .setComponents();
 
-            this.msg.editMessage(msg.build()).queue(null, e -> Log.warn(
-                this.getClass(), "Discord exception thrown", e
-            ));
+            this.msg.editMessage(msg.build()).complete();
             return;
         }
 
-        this.msg.editMessageComponents().queue(null, e -> Log.warn(
-            this.getClass(), "Discord exception thrown", e
-        ));
+        this.msg.editMessageComponents().complete();
         Log.debug(this.getClass(), "Interactive expired");
     }
 }

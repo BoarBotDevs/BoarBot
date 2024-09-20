@@ -4,6 +4,8 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -99,13 +101,17 @@ final class DiscordLog implements Configured {
             return;
         }
 
-        logChannel.sendMessage(message).queue(null, e -> {
+        try {
+            logChannel.sendMessage(message).complete();
+        } catch (InsufficientPermissionException exception) {
             logsDisabled = true;
             Log.warn(
                 DiscordLog.class,
                 "Bot does not have permission to send messages to log channel. Channel logs are disabled!",
-                e
+                exception
             );
-        });
+        } catch (ErrorResponseException exception) {
+            Log.warn(DiscordLog.class, "Bot was unable to a send message to the log channel", exception);
+        }
     }
 }

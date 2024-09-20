@@ -13,7 +13,6 @@ import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.quartz.*;
 
 import java.sql.Connection;
@@ -50,19 +49,22 @@ public class NotificationEventJob implements Job, Configured {
 
                 if (!userChannels.containsKey(boarUser.getUserID())) {
                     boarUser.getUser().openPrivateChannel().queue(
-                        ch -> userChannels.put(boarUser.getUserID(), ch),
-                        e -> Log.warn(boarUser.getUser(), this.getClass(), "Discord exception thrown", e)
+                        ch -> {
+                            userChannels.put(boarUser.getUserID(), ch);
+                            ch.sendMessage(notificationStr).queue(null, e -> {});
+                        },
+                        e -> {}
                     );
+                    return;
                 }
 
-                userChannels.get(boarUser.getUserID()).sendMessage(notificationStr).setSuppressEmbeds(true).queue(
-                    null, e -> Log.warn(boarUser.getUser(), this.getClass(), "Discord exception thrown", e)
-                );
+                userChannels.get(boarUser.getUserID()).sendMessage(notificationStr).setSuppressEmbeds(true)
+                    .queue(null, e -> {});
             } catch (SQLException exception) {
                 Log.error(
                     boarUser.getUser(), NotificationEventJob.class, "Failed to get notification channel", exception
                 );
-            } catch (ErrorResponseException ignored) {}
+            }
         }
     }
 
@@ -112,17 +114,13 @@ public class NotificationEventJob implements Job, Configured {
         }
 
         for (String notifUserID : notifUserIDs) {
-            try {
-                jda.retrieveUserById(notifUserID).queue(
-                    user -> user.openPrivateChannel().queue(
-                        ch -> userChannels.put(notifUserID, ch),
-                        e -> Log.warn(user, NotificationEventJob.class, "Discord exception thrown", e)
-                    ),
-                    e -> Log.warn(NotificationEventJob.class, "Discord exception thrown", e)
-                );
-            } catch (ErrorResponseException exception) {
-                exception.getErrorResponse();
-            }
+            jda.retrieveUserById(notifUserID).queue(
+                user -> user.openPrivateChannel().queue(
+                    ch -> userChannels.put(notifUserID, ch),
+                    e -> {}
+                ),
+                e -> {}
+            );
         }
 
         Log.debug(NotificationEventJob.class, "%,d user(s) cached for notifications".formatted(notifUserIDs.size()));

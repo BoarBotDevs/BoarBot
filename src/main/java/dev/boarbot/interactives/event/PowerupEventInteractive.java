@@ -74,7 +74,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
         }
 
         compEvent.deferEdit().queue(null, e -> Log.warn(
-            compEvent.getUser(), this.getClass(), "Discord exception thrown", e
+            compEvent.getUser(), this.getClass(), "Failed to defer edit", e
         ));
 
         String userID = compEvent.getUser().getId();
@@ -87,9 +87,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 this.failUsers.containsKey(userID) && this.failUsers.get(userID);
 
             if (hasAttempted) {
-                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
-                    null, e -> Log.warn(compEvent.getUser(), this.getClass(), "Discord exception thrown", e
-                ));
+                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
                 return;
             }
 
@@ -106,9 +104,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 embedGen.setStr(STRS.getPowEventSuccess().formatted(this.userTimes.get(userID), eventAmt, powStr))
                     .setColor(COLORS.get("font"));
 
-                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
-                    null, e -> Log.warn(compEvent.getUser(), this.getClass(), "Discord exception thrown", e
-                ));
+                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
                 Log.debug(compEvent.getUser(), this.getClass(), "Gave powerup win rewards");
                 return;
             }
@@ -120,18 +116,14 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 boarUser.passSynchronizedAction(this);
 
                 embedGen.setStr(STRS.getPowEventFail()).setColor(COLORS.get("font"));
-                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
-                    null, e -> Log.warn(compEvent.getUser(), this.getClass(), "Discord exception thrown", e
-                ));
+                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
                 Log.debug(compEvent.getUser(), this.getClass(), "Updated powerup fail status");
                 return;
             }
 
             this.failUsers.put(userID, false);
             embedGen.setStr(STRS.getPowEventIncorrect()).setColor(COLORS.get("font"));
-            compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
-                null, e -> Log.warn(compEvent.getUser(), this.getClass(), "Discord exception thrown", e)
-            );
+            compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
             Log.debug(compEvent.getUser(), this.getClass(), "Guessed incorrectly");
         } catch (IOException exception) {
             SpecialReply.sendErrorEmbed(compEvent.getHook());

@@ -42,18 +42,14 @@ public abstract class Subcommand implements Configured {
 
             if (!isSetup) {
                 Log.debug(this.user, this.getClass(), "Guild not setup, not proceeding");
-                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
-                    null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e)
-                );
+                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
                 return false;
             }
 
             if (!isValidChannel) {
                 Log.debug(this.user, this.getClass(), "Invalid channel, not proceeding");
                 embedGen.setStr(STRS.getWrongChannel());
-                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
-                    null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e
-                ));
+                this.interaction.replyFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
                 return false;
             }
         } catch (SQLException exception) {

@@ -11,6 +11,7 @@ import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.Interaction;
@@ -43,23 +44,17 @@ public class DailyNotifyInteractive extends UserInteractive {
         }
 
         Log.debug(this.user, this.getClass(), "Attempting to enable notifications");
-        compEvent.deferEdit().queue(null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e));
+        compEvent.deferEdit().queue(null, e -> Log.warn(this.user, this.getClass(), "Failed to defer edit", e));
 
         try {
-            compEvent.getUser().openPrivateChannel().queue(
-                ch -> ch.sendMessage(STRS.getNotificationSuccess()).queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
-                )),
-                e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e)
-            );
+            PrivateChannel channel = compEvent.getUser().openPrivateChannel().complete();
+            channel.sendMessage(STRS.getNotificationSuccess()).complete();
         } catch (ErrorResponseException exception) {
             EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getNotificationFailed());
 
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
-                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
-                ));
+                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
             } catch (IOException exception1) {
                 this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to generate notification fail message", exception1);

@@ -40,14 +40,14 @@ class CommandLoader implements Configured {
 
         if (devGuild != null) {
             devGuild.updateCommands().addCommands(guildCommands).queue(null, e -> Log.warn(
-                CommandLoader.class, "Discord exception thrown", e
+                CommandLoader.class, "Failed to deploy to development guild", e
             ));
         } else {
             Log.warn(CommandLoader.class, "Unable to find development guild. Could not deploy developer commands!");
         }
 
         BoarBotApp.getBot().getJDA().updateCommands().addCommands(globalCommands).queue(null, e -> Log.warn(
-            CommandLoader.class, "Discord exception thrown", e
+            CommandLoader.class, "Failed to deploy globally", e
         ));
         Log.info(CommandLoader.class, "Commands successfully deployed");
     }

@@ -19,7 +19,7 @@ public class CollectionSubcommand extends Subcommand {
         }
 
         this.interaction.deferReply().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Discord exception thrown", e
+            this.user, this.getClass(), "Failed to defer reply", e
         ));
 
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.COLLECTION);

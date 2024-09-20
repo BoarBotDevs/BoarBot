@@ -56,7 +56,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
         if (!this.canDaily) {
             this.interaction.deferReply().setEphemeral(true).queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Discord exception thrown", e
+                this.user, this.getClass(), "Failed to defer reply", e
             ));
 
             if (!this.notificationsOn) {
@@ -75,18 +75,16 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             try {
                 FileUpload fileUpload = new EmbedImageGenerator(replyStr).generate().getFileUpload();
                 MessageEditBuilder editedMsg = new MessageEditBuilder().setFiles(fileUpload).setComponents();
-                this.interaction.getHook().editOriginal(editedMsg.build()).queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Discord exception thrown", e
-                ));
+                this.interaction.getHook().editOriginal(editedMsg.build()).complete();
             } catch (IOException exception) {
                 SpecialReply.sendErrorEmbed(this.interaction);
                 Log.error(this.user, this.getClass(), "Failed to generate daily used message", exception);
             }
+
+            return;
         }
 
-        if (!this.boarIDs.isEmpty()) {
-            this.sendResponse();
-        }
+        this.sendResponse();
     }
 
     @Override
@@ -106,7 +104,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         if (!this.hasDonePowerup && this.event.getOption("powerup") == null) {
             Log.debug(this.user, this.getClass(), "Doing daily without powerup");
             this.interaction.deferReply().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Discord exception thrown", e
+                this.user, this.getClass(), "Failed to defer reply", e
             ));
         }
 
@@ -157,9 +155,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         if (this.isFirstDaily) {
             try {
                 EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getDailyFirstTime());
-                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).queue(
-                    null, e -> Log.warn(this.user, this.getClass(), "Discord exception thrown", e)
-                );
+                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
             } catch (IOException exception) {
                 Log.error(this.user, this.getClass(), "Failed to generate first daily reward message", exception);
             }
@@ -170,7 +166,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
     private void sendPowResponse() {
         this.interaction.deferReply().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Discord exception thrown", e
+            this.user, this.getClass(), "Failed to defer reply", e
         ));
 
         Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
