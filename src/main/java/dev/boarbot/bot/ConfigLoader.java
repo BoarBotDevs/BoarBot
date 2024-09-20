@@ -242,7 +242,7 @@ class ConfigLoader {
 
         createDirIfNotExist(pathStr.substring(0, pathStr.lastIndexOf("/")));
 
-        Files.copy(BoarBotApp.getResourceStream(pathStr), path);
+        Files.copy(BoarBotApp.getResourceStream("default_" + pathStr), path);
         return new File(pathStr);
     }
 }
