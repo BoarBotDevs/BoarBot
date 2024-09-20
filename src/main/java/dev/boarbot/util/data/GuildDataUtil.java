@@ -202,4 +202,22 @@ public class GuildDataUtil {
         } catch (ErrorResponseException ignored) {}
     }
 
+    public static int getTotalGuilds(Connection connection) throws SQLException {
+        String query = """
+            SELECT COUNT(*)
+            FROM guilds;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.executeQuery();
+
+            try (ResultSet results = statement.getResultSet()) {
+                if (results.next()) {
+                    return results.getInt(1);
+                }
+            }
+        }
+
+        return 0;
+    }
 }

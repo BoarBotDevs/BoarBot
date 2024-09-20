@@ -211,6 +211,46 @@ public class BaseQueries implements Configured {
         return false;
     }
 
+    public String getNotificationChannel(Connection connection) throws SQLException {
+        String query = """
+            SELECT notification_channel
+            FROM users
+            WHERE user_id = ? AND notifications_on = true;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return results.getString("notification_channel");
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public int getStreak(Connection connection) throws SQLException {
+        String query = """
+            SELECT boar_streak
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return results.getInt("boar_streak");
+                }
+            }
+        }
+
+        return 0;
+    }
+
     public long getBlessings(Connection connection) throws SQLException {
         return this.getBlessings(connection, 0);
     }

@@ -8,11 +8,14 @@ import org.quartz.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.TimeZone;
+
 public class QuestResetJob implements Job {
     @Getter
     private final static JobDetail job = JobBuilder.newJob(PowerupEventJob.class).build();
     @Getter private final static Trigger trigger = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 59 23 ? * 6")).build();
+        .withSchedule(CronScheduleBuilder.cronSchedule("0 59 23 ? * 6").inTimeZone(TimeZone.getTimeZone("UTC")))
+        .build();
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {

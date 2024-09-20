@@ -11,6 +11,8 @@ import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -53,6 +55,15 @@ public class BoarBot implements Bot {
                 new ReadyListener()
             )
             .setActivity(Activity.customStatus("/boar help | boarbot.dev"))
+            .setEnabledIntents(
+                GatewayIntent.GUILD_MEMBERS,
+                GatewayIntent.GUILD_VOICE_STATES,
+                GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
+                GatewayIntent.SCHEDULED_EVENTS,
+                GatewayIntent.GUILD_MESSAGES,
+                GatewayIntent.DIRECT_MESSAGES
+            )
+            .setMemberCachePolicy(MemberCachePolicy.ALL)
             .build();
     }
 

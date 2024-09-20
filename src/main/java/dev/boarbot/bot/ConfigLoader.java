@@ -197,8 +197,8 @@ class ConfigLoader {
         strs.setNotificationSuccess(strs.getNotificationSuccess().formatted(
             cmds.get("main").getName(), cmds.get("main").getSubcommands().get("daily").getName()
         ));
-        strs.setNotificationDailyReady(
-            strs.getNotificationDailyReady().formatted(strs.getMainItemName().toLowerCase())
+        strs.setNotificationEnding(
+            strs.getNotificationEnding().formatted(strs.getMainItemName().toLowerCase(), "%s")
         );
     }
 

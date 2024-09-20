@@ -187,10 +187,11 @@ public class StringConfig {
     private String notificationSuccess = "";
     private String notificationFailed = "";
     private String notificationSuccessReply = "";
-    private String notificationDailyReady = "";
-    private String notificationStopStr = "";
+    private String notificationEnding = "";
     private String notificationDisabledStr = "";
     private String[] notificationExtras = {};
+    private String notificationHalloween = "";
+    private String notificationChristmas = "";
 
     // Report/Self-wipe strings
 
