@@ -175,55 +175,51 @@
           }
         ]
       },
-      "top": {
-        "name": "top",
+      "leaderboard": {
+        "name": "leaderboard",
         "description": "View leaderboards showcasing a ranking of player stats",
         "location": "dev.boarbot.commands.boar.TopSubcommand",
         "options": [
           {
-            "name": "leaderboard",
+            "name": "board",
             "type": 3,
             "description": "The leaderboard to view",
             "choices": [
               {
                 "name": "Boar Bucks",
-                "value": "bucks"
+                "value": "total_bucks"
               },
               {
                 "name": "Total Boars",
-                "value": "total"
+                "value": "total_boars"
               },
               {
                 "name": "Unique Boars",
-                "value": "uniques"
-              },
-              {
-                "name": "Unique Boars (SkyBlock included)",
-                "value": "uniquesSB"
+                "value": "unique_boars"
               },
               {
                 "name": "Boar Streak",
-                "value": "streak"
-              },
-              {
-                "name": "Lifetime Powerups Collected",
-                "value": "attempts"
+                "value": "boar_streak"
               },
               {
                 "name": "Number of Perfect Powerups",
-                "value": "topAttempts"
+                "value": "powerup_perfects"
               },
               {
                 "name": "Gifts Used",
-                "value": "giftsUsed"
+                "value": "gift"
               },
               {
                 "name": "Boar Blessings",
-                "value": "multiplier"
+                "value": "blessings"
               },
               {
-                "name": "Fastest Times",
-                "value": "fastest"
+                "name": "Peak Boar Blessings",
+                "value": "highest_blessings"
+              },
+              {
+                "name": "Fastest Powerup Event",
+                "value": "powerup_fastest_time"
               }
             ]
           },

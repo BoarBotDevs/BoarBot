@@ -8,12 +8,19 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class ModalUtil {
     public static List<LayoutComponent> makeModalComponents(List<IndivComponentConfig> components) {
         List<ItemComponent> componentsMade = InteractiveUtil.makeComponents("", components);
-        return List.of(ActionRow.of(componentsMade));
+
+        List<LayoutComponent> layoutComponents = new ArrayList<>();
+        for (ItemComponent component : componentsMade) {
+            layoutComponents.add(ActionRow.of(component));
+        }
+
+        return layoutComponents;
     }
 
     public static String findDuplicateModalHandler(String userID) {

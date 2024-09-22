@@ -335,12 +335,12 @@ public class MegaMenuQueries implements Configured {
             statement6.setString(1, this.boarUser.getUserID());
 
             try (
-                    ResultSet results1 = statement1.executeQuery();
-                    ResultSet results2 = statement2.executeQuery();
-                    ResultSet results3 = statement3.executeQuery();
-                    ResultSet results4 = statement4.executeQuery();
-                    ResultSet results5 = statement5.executeQuery();
-                    ResultSet results6 = statement6.executeQuery()
+                ResultSet results1 = statement1.executeQuery();
+                ResultSet results2 = statement2.executeQuery();
+                ResultSet results3 = statement3.executeQuery();
+                ResultSet results4 = statement4.executeQuery();
+                ResultSet results5 = statement5.executeQuery();
+                ResultSet results6 = statement6.executeQuery()
             ) {
                 List<String> topPrompts = new ArrayList<>();
 

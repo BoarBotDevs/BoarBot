@@ -4,6 +4,11 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 
 import dev.boarbot.bot.config.items.BoarItemConfig;
+import dev.boarbot.interactives.boar.TopInteractive;
+import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.data.top.TopData;
+import dev.boarbot.util.data.top.TopDataUtil;
+import dev.boarbot.util.data.top.TopType;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.resource.ResourceUtil;
@@ -13,9 +18,13 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-class CacheLoader implements Configured {
+public class CacheLoader implements Configured {
     private final static Map<String, BufferedImage> imageCacheMap = BoarBotApp.getBot().getImageCacheMap();
 
     private final static int[] ORIGIN = {0, 0};
@@ -24,9 +33,10 @@ class CacheLoader implements Configured {
     private final static int[] MEDIUM_BIG_SIZE = NUMS.getMediumBigBoarSize();
     private final static int[] MEDIUM_SIZE = NUMS.getMediumBoarSize();
 
-    public static void loadCache() {
+    static void loadCache() {
         loadBoars();
         loadBorders();
+        reloadTop();
     }
 
     private static void loadBoars() {
@@ -125,5 +135,19 @@ class CacheLoader implements Configured {
         }
 
         Log.debug(CacheLoader.class, "Successfully loaded all rarity borders into cache");
+    }
+
+    public synchronized static void reloadTop() {
+        try (Connection connection = DataUtil.getConnection()) {
+            for (TopType topType : TopType.values()) {
+                Map<String, TopData> board = TopDataUtil.getBoard(topType, connection);
+                TopInteractive.cachedBoards.put(topType, board);
+
+                List<String> usernameList = new ArrayList<>(board.keySet());
+                TopInteractive.indexedBoards.put(topType, usernameList);
+            }
+        } catch (SQLException exception) {
+            Log.error(CacheLoader.class, "Failed to retrieve leaderboard data", exception);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package dev.boarbot.interactives;
 
 import dev.boarbot.commands.boar.DailySubcommand;
+import dev.boarbot.interactives.boar.TopInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
@@ -17,12 +18,14 @@ import java.util.List;
 
 public class InteractiveFactory {
     public static synchronized Interactive constructInteractive(
-        Interaction initEvent, Class<? extends Interactive> interactiveClass
+        SlashCommandInteractionEvent initEvent, Class<? extends Interactive> interactiveClass
     ) {
         if (interactiveClass == SetupInteractive.class) {
             return new SetupInteractive(initEvent);
         } else if (interactiveClass == DailyNotifyInteractive.class) {
             return new DailyNotifyInteractive(initEvent);
+        } else if (interactiveClass == TopInteractive.class) {
+            return new TopInteractive(initEvent);
         }
 
         throw new IllegalArgumentException("Not a valid interactive class: " + interactiveClass);

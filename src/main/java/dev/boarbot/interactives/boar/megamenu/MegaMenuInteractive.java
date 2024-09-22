@@ -29,7 +29,6 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 public class MegaMenuInteractive extends ModalInteractive implements Synchronizable {
-    int prevPage = -1;
     int page;
     int maxPage;
     String boarPage;

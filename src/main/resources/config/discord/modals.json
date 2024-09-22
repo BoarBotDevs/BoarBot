@@ -54,5 +54,29 @@
         "placeholder": "Ex: 117"
       }
     ]
+  },
+  "pageBoardInput": {
+    "id": "PAGE_BOARD_INPUT",
+    "title": "Enter a page number/username!",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "PAGE",
+        "style": 1,
+        "label": "Page number",
+        "max_length": 9,
+        "required": false,
+        "placeholder": "Ex: 3"
+      },
+      {
+        "type": 4,
+        "custom_id": "USERNAME",
+        "style": 1,
+        "label": "Username",
+        "max_length": 32,
+        "required": false,
+        "placeholder": "Ex: weslay."
+      }
+    ]
   }
 }

@@ -19,8 +19,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-public class NotificationEventJob implements Job, Configured {
-    @Getter private final static JobDetail job = JobBuilder.newJob(NotificationEventJob.class).build();
+public class NotificationJob implements Job, Configured {
+    @Getter private final static JobDetail job = JobBuilder.newJob(NotificationJob.class).build();
     @Getter private final static Trigger trigger = TriggerBuilder.newTrigger()
         .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 ? * *").inTimeZone(TimeZone.getTimeZone("UTC")))
         .build();
@@ -36,7 +36,7 @@ public class NotificationEventJob implements Job, Configured {
             updateDynamicValues(connection);
             notifUserIDs = UserDataUtil.getNotifUserIDs(connection);
         } catch (SQLException exception) {
-            Log.error(NotificationEventJob.class, "Failed to get relevant notification data", exception);
+            Log.error(NotificationJob.class, "Failed to get relevant notification data", exception);
         }
 
         for (String notifUserID : notifUserIDs) {
@@ -62,7 +62,7 @@ public class NotificationEventJob implements Job, Configured {
                     .queue(null, e -> {});
             } catch (SQLException exception) {
                 Log.error(
-                    boarUser.getUser(), NotificationEventJob.class, "Failed to get notification channel", exception
+                    boarUser.getUser(), NotificationJob.class, "Failed to get notification channel", exception
                 );
             }
         }
@@ -123,6 +123,6 @@ public class NotificationEventJob implements Job, Configured {
             );
         }
 
-        Log.debug(NotificationEventJob.class, "%,d user(s) cached for notifications".formatted(notifUserIDs.size()));
+        Log.debug(NotificationJob.class, "%,d user(s) cached for notifications".formatted(notifUserIDs.size()));
     }
 }

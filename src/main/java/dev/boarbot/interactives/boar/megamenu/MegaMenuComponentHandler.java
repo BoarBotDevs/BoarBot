@@ -89,7 +89,7 @@ class MegaMenuComponentHandler implements Configured {
 
         switch (compID) {
             case "VIEW_SELECT" -> {
-                this.setPageZero();
+                this.interactive.page = 0;
 
                 this.interactive.prevView = this.interactive.curView;
                 this.interactive.curView = MegaMenuView.fromString(
@@ -103,10 +103,7 @@ class MegaMenuComponentHandler implements Configured {
                 this.interactive.interactOpen = false;
             }
 
-            case "LEFT" -> {
-                this.interactive.prevPage = this.interactive.page;
-                this.interactive.page = this.interactive.page - 1;
-            }
+            case "LEFT" -> this.interactive.page = this.interactive.page - 1;
 
             case "PAGE" -> {
                 Modal modal = this.makeModal(MODALS.get("pageInput"));
@@ -116,10 +113,7 @@ class MegaMenuComponentHandler implements Configured {
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
 
-            case "RIGHT" -> {
-                this.interactive.prevPage = this.interactive.page;
-                this.interactive.page = this.interactive.page + 1;
-            }
+            case "RIGHT" -> this.interactive.page = this.interactive.page + 1;
 
             case "BOAR_FIND" -> {
                 Modal modal = this.makeModal(MODALS.get("findBoar"));
@@ -203,7 +197,6 @@ class MegaMenuComponentHandler implements Configured {
 
                 try {
                     String pageInput = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-                    this.interactive.prevPage = this.interactive.page;
                     this.interactive.page = Math.max(Integer.parseInt(pageInput)-1, 0);
                 } catch (NumberFormatException exception) {
                     Log.debug(this.user, this.getClass(), "Invalid modal input");
@@ -217,7 +210,6 @@ class MegaMenuComponentHandler implements Configured {
                     this.user, this.getClass(), "Find input: " + this.modalEvent.getValues().getFirst().getAsString()
                 );
 
-                this.interactive.prevPage = this.interactive.page;
                 this.interactive.page = this.interactive
                     .getFindBoarPage(this.modalEvent.getValues().getFirst().getAsString());
                 this.interactive.execute(null);
@@ -337,11 +329,6 @@ class MegaMenuComponentHandler implements Configured {
         }
     }
 
-    private void setPageZero() {
-        this.interactive.prevPage = this.interactive.page;
-        this.interactive.page = 0;
-    }
-
     private Modal makeModal(ModalConfig modalConfig) {
         return new ModalImpl(
             ModalUtil.makeModalID(modalConfig.getId(), this.compEvent),
@@ -404,7 +391,7 @@ class MegaMenuComponentHandler implements Configured {
                     this.user, this.getClass(), "Failed to defer edit", e
                 ));
 
-                this.setPageZero();
+                this.interactive.page = 0;
 
                 this.interactive.prevView = this.interactive.curView;
                 this.interactive.curView = MegaMenuView.EDITIONS;
@@ -488,7 +475,7 @@ class MegaMenuComponentHandler implements Configured {
     }
 
     private void setFilterBits() {
-        this.setPageZero();
+        this.interactive.page = 0;
 
         List<String> values = ((StringSelectInteractionEvent) this.compEvent).getValues();
         int filterBits = 0;
@@ -504,7 +491,7 @@ class MegaMenuComponentHandler implements Configured {
     }
 
     private void setSortVal() {
-        this.setPageZero();
+        this.interactive.page = 0;
 
         this.interactive.sortVal = SortType.values()[
             Integer.parseInt(((StringSelectInteractionEvent) this.compEvent).getValues().getFirst())

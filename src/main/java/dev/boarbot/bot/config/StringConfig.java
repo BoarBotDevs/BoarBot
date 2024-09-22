@@ -183,6 +183,12 @@ public class StringConfig {
     private String powEventIncorrect = "";
     private String powEventFail = "";
 
+    // Leaderboard strings
+
+    private String topEntry = "";
+    private String topPageInfo = "";
+    private String topBoardInfo = "";
+
     // Notification strings
 
     private String notificationSuccess = "";

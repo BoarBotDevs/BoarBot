@@ -20,13 +20,14 @@ public class JobScheduler {
             scheduler.scheduleJob(LogJob.getJob(), LogJob.getTrigger());
 
             try {
-                NotificationEventJob.cacheNotifUsers();
+                NotificationJob.cacheNotifUsers();
             } catch (SQLException exception) {
                 Log.error(JobScheduler.class, "Failed to cache users with notifications on", exception);
                 System.exit(-1);
             }
 
-            scheduler.scheduleJob(NotificationEventJob.getJob(), NotificationEventJob.getTrigger());
+            scheduler.scheduleJob(NotificationJob.getJob(), NotificationJob.getTrigger());
+            scheduler.scheduleJob(TopCacheJob.getJob(), TopCacheJob.getTrigger());
 
             Log.debug(JobScheduler.class, "Jobs successfully scheduled");
         } catch (SchedulerException exception) {

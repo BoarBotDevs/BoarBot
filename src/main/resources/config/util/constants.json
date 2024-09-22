@@ -43,6 +43,7 @@
   "giftLowWait": 3000,
   "giftHighWait": 6000,
   "giftMaxHandicap": 1500,
+  "boardCacheLength": 3600000,
   "emojiRows": 4,
   "emojiCols": 4,
   "triviaRows": 2,

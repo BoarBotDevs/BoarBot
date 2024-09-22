@@ -54,7 +54,6 @@ class MegaMenuGeneratorMaker implements Configured {
 
         this.interactive.maxPage = 0;
         if (this.interactive.page > this.interactive.maxPage) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.maxPage;
         }
 
@@ -75,7 +74,6 @@ class MegaMenuGeneratorMaker implements Configured {
 
         this.interactive.maxPage = Math.max((this.interactive.filteredBoars.size()-1) / 15, 0);
         if (this.interactive.page > this.interactive.maxPage) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.maxPage;
         }
 
@@ -105,13 +103,11 @@ class MegaMenuGeneratorMaker implements Configured {
         this.interactive.maxPage = this.interactive.filteredBoars.size()-1;
 
         if (this.interactive.boarPage != null) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.getFindBoarPage(this.interactive.boarPage);
             this.interactive.boarPage = null;
         }
 
         if (this.interactive.page > this.interactive.maxPage) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.maxPage;
         }
 
@@ -141,7 +137,6 @@ class MegaMenuGeneratorMaker implements Configured {
         this.interactive.maxPage = Math.max((this.interactive.curBoarEntry.getValue().getEditions().size()-1) / 5, 0);
 
         if (this.interactive.page > this.interactive.maxPage) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.maxPage;
         }
 
@@ -167,7 +162,6 @@ class MegaMenuGeneratorMaker implements Configured {
 
         this.interactive.maxPage = 7;
         if (this.interactive.page > this.interactive.maxPage) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.maxPage;
         }
 
@@ -193,7 +187,6 @@ class MegaMenuGeneratorMaker implements Configured {
 
         this.interactive.maxPage = 0;
         if (this.interactive.page > this.interactive.maxPage) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.maxPage;
         }
 
@@ -220,7 +213,6 @@ class MegaMenuGeneratorMaker implements Configured {
 
         this.interactive.maxPage = 0;
         if (this.interactive.page > this.interactive.maxPage) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.maxPage;
         }
 
@@ -251,7 +243,6 @@ class MegaMenuGeneratorMaker implements Configured {
 
         this.interactive.maxPage = this.interactive.getBadges().size()-1;
         if (this.interactive.page > this.interactive.maxPage) {
-            this.interactive.prevPage = this.interactive.page;
             this.interactive.page = this.interactive.maxPage;
         }
 

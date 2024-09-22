@@ -55,6 +55,7 @@ public class ResourceUtil {
     public static final String eventUnderlayPath = otherAssetsPath + "EventUnderlay.png";
     public static final String powIconPath = otherAssetsPath + "PowerupIcon.png";
     public static final String checkmarkPath = otherAssetsPath + "Checkmark.png";
+    public static final String topUnderlayPath = otherAssetsPath + "LeaderboardUnderlay.png";
 
     private static final String scriptsPath = "scripts/";
     public static final String animItemScript = scriptsPath + "make_animated_image.py";

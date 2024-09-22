@@ -210,9 +210,7 @@ public class GuildDataUtil {
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.executeQuery();
-
-            try (ResultSet results = statement.getResultSet()) {
+            try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
                     return results.getInt(1);
                 }

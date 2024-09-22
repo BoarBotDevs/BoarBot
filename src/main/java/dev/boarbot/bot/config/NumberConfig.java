@@ -47,6 +47,7 @@ public class NumberConfig {
     private int giftLowWait = 0;
     private int giftHighWait = 0;
     private int giftMaxHandicap = 0;
+    private int boardCacheLength = 0;
 
     // Boar sizes
 
