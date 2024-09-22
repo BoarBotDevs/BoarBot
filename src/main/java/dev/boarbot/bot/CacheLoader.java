@@ -20,9 +20,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class CacheLoader implements Configured {
     private final static Map<String, BufferedImage> imageCacheMap = BoarBotApp.getBot().getImageCacheMap();
@@ -139,13 +138,35 @@ public class CacheLoader implements Configured {
 
     public synchronized static void reloadTop() {
         try (Connection connection = DataUtil.getConnection()) {
+            Set<String> firstUsernames = new HashSet<>();
+            Set<String> secondUsernames = new HashSet<>();
+            Set<String> thirdUsernames = new HashSet<>();
+
             for (TopType topType : TopType.values()) {
                 Map<String, TopData> board = TopDataUtil.getBoard(topType, connection);
                 TopInteractive.cachedBoards.put(topType, board);
 
                 List<String> usernameList = new ArrayList<>(board.keySet());
                 TopInteractive.indexedBoards.put(topType, usernameList);
+
+                if (!TopInteractive.indexedBoards.get(topType).isEmpty()) {
+                    firstUsernames.add(TopInteractive.indexedBoards.get(topType).getFirst());
+                }
+
+                if (TopInteractive.indexedBoards.get(topType).size() > 1) {
+                    secondUsernames.add(TopInteractive.indexedBoards.get(topType).get(1));
+                }
+
+                if (TopInteractive.indexedBoards.get(topType).size() > 2) {
+                    thirdUsernames.add(TopInteractive.indexedBoards.get(topType).get(2));
+                }
             }
+
+            secondUsernames.removeAll(firstUsernames);
+            thirdUsernames.removeAll(firstUsernames);
+            thirdUsernames.removeAll(secondUsernames);
+
+            TopDataUtil.setAthleteBadges(firstUsernames, secondUsernames, thirdUsernames, connection);
         } catch (SQLException exception) {
             Log.error(CacheLoader.class, "Failed to retrieve leaderboard data", exception);
         }
