@@ -39,9 +39,18 @@ public class BoarUser {
     }
 
     public User getUser() {
-        if (this.user == null) {
+        return this.getUser(false);
+    }
+
+    public User getUser(boolean isChecking) {
+        if (this.user != null) {
+            return user;
+        }
+
+        if (!isChecking) {
             this.user = BoarBotApp.getBot().getJDA().retrieveUserById(this.userID).complete();
         }
+
         return this.user;
     }
 

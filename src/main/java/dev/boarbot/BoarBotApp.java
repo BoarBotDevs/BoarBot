@@ -2,6 +2,7 @@ package dev.boarbot;
 
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.BoarBot;
+import dev.boarbot.migration.MigrationHandler;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.Getter;
 
@@ -26,6 +27,14 @@ public class BoarBotApp {
 
         bot = new BoarBot();
         bot.create();
+
+        if (args.length != 0 && args[0].equals("migrate")) {
+            try {
+                bot.getJDA().awaitReady();
+            } catch (InterruptedException ignored) {}
+
+            MigrationHandler.doMigration();
+        }
 
         if (args.length != 0 && args[0].equals("deploy-commands")) {
             try {

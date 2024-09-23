@@ -118,7 +118,8 @@ public class TopDataUtil {
                 SELECT 1
                 FROM collected_badges
                 WHERE badge_id = 'athlete' AND user_id = users.user_id
-            );
+            )
+            LIMIT 1;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(deleteQuery)) {

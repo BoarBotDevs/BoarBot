@@ -24,6 +24,23 @@ public final class BoarUtil implements Configured {
         throw new IllegalArgumentException("Boar ID input does not exist");
     }
 
+    public static String getPriorRarityKey(String rarityKey) {
+        Iterator<String> iterator = RARITIES.keySet().iterator();
+        String priorRarityKey = null;
+
+        while (iterator.hasNext()) {
+            String curRarityKey = iterator.next();
+
+            if (curRarityKey.equals(rarityKey)) {
+                break;
+            }
+
+            priorRarityKey = curRarityKey;
+        }
+
+        return priorRarityKey;
+    }
+
     public static String getNextRarityKey(String rarityKey) {
         Iterator<String> iterator = RARITIES.keySet().iterator();
 

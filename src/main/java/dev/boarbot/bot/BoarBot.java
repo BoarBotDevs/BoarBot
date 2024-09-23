@@ -39,10 +39,7 @@ public class BoarBot implements Bot {
         Log.info(this.getClass(), "Starting up bot...");
 
         ConfigLoader.loadConfig();
-        DatabaseLoader.loadIntoDatabase("rarities");
-        DatabaseLoader.loadIntoDatabase("boars");
-        DatabaseLoader.loadIntoDatabase("badges");
-        DatabaseLoader.fixQuests();
+        DatabaseLoader.loadIntoDatabase();
         CacheLoader.loadCache();
         CommandLoader.registerSubcommands();
 

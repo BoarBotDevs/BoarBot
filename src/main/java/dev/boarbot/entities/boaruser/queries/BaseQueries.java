@@ -54,11 +54,12 @@ public class BaseQueries implements Configured {
         }
 
         String query = """
-            SELECT last_daily_timestamp, last_streak_fix, first_joined_timestamp, boar_streak
+            SELECT username, last_daily_timestamp, last_streak_fix, first_joined_timestamp, boar_streak
             FROM users
             WHERE user_id = ?;
         """;
 
+        boolean usernameChanged;
         long lastDailyLong = 0;
         long lastStreakLong = 0;
         long firstJoinedLong = 0;
@@ -71,6 +72,9 @@ public class BaseQueries implements Configured {
                 if (!results.next()) {
                     return;
                 }
+
+                usernameChanged = this.boarUser.getUser(true) != null &&
+                    results.getString("username").equals(this.boarUser.getUser().getName());
 
                 Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
                 Timestamp lastStreakFixTimestamp = results.getTimestamp("last_streak_fix");
@@ -89,6 +93,20 @@ public class BaseQueries implements Configured {
                 }
 
                 boarStreak = results.getInt("boar_streak");
+            }
+        }
+
+        if (usernameChanged) {
+            String updateUsernameQuery = """
+                UPDATE users
+                SET username = ?
+                WHERE user_id = ?;
+            """;
+
+            try (PreparedStatement statement = connection.prepareStatement(updateUsernameQuery)) {
+                statement.setString(1, this.boarUser.getUser().getName());
+                statement.setString(2, this.boarUser.getUserID());
+                statement.executeUpdate();
             }
         }
 

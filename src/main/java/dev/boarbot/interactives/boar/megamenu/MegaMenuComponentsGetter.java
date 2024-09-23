@@ -99,17 +99,11 @@ class MegaMenuComponentsGetter implements Configured {
             selectRow = this.getInteractRow();
         }
 
-        Button interactBtn = null;
+        Button interactBtn = interactRow != null ? ((Button) interactRow.get(1)).asDisabled() : null;
         Button filterBtn = ((Button) filterSortRow.getFirst());
         Button sortBtn = ((Button) filterSortRow.get(1));
 
-        if (interactRow != null) {
-            interactBtn = ((Button) interactRow.get(1)).asDisabled();
-        }
-
-        boolean userSelf = this.interactive.getUser().getId().equals(this.interactive.getBoarUser().getUserID());
-
-        if (interactBtn != null && this.interactive.curBoarEntry.getValue().getAmount() > 0 && userSelf) {
+        if (interactBtn != null && this.interactive.curBoarEntry.getValue().getAmount() > 0) {
             interactBtn = interactBtn.withDisabled(false);
         }
 
@@ -358,6 +352,14 @@ class MegaMenuComponentsGetter implements Configured {
             selectOptions.remove(2);
         } else if (!cloneable && !transmutable) {
             selectOptions.remove(1);
+        }
+
+        boolean userSelf = this.interactive.getUser().getId().equals(this.interactive.getBoarUser().getUserID());
+
+        if (!userSelf) {
+            while (selectOptions.size() > 2) {
+                selectOptions.removeFirst();
+            }
         }
 
         StringSelectMenu interactSelectMenu = (StringSelectMenu) selectRow.getFirst();

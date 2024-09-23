@@ -13,6 +13,7 @@ import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.bot.config.prompts.PromptConfig;
 import dev.boarbot.bot.config.quests.QuestConfig;
+import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.resource.ResourceUtil;
 
@@ -78,8 +79,17 @@ class ConfigLoader {
                 powerupsPath, new TypeToken<Map<String, PowerupItemConfig>>(){}.getType()
             ));
 
-            for (BoarItemConfig boar : config.getItemConfig().getBoars().values()) {
-                setNames(boar);
+            for (String boarID : config.getItemConfig().getBoars().keySet()) {
+                setNames(config.getItemConfig().getBoars().get(boarID));
+
+                if (BoarUtil.findRarityKey(boarID) == null) {
+                    Log.error(
+                        ConfigLoader.class,
+                        "%s is not assigned a rarity".formatted(boarID),
+                        new IllegalArgumentException()
+                    );
+                    System.exit(-1);
+                }
             }
 
             for (PowerupItemConfig powerup : config.getItemConfig().getPowerups().values()) {
@@ -89,6 +99,17 @@ class ConfigLoader {
             for (RarityConfig rarityConfig : config.getRarityConfigs().values()) {
                 if (rarityConfig.getPluralName() == null) {
                     rarityConfig.setPluralName(rarityConfig.getName() + "s");
+                }
+
+                for (String boarID : rarityConfig.getBoars()) {
+                    if (!config.getItemConfig().getBoars().containsKey(boarID)) {
+                        Log.error(
+                            ConfigLoader.class,
+                            "%s is assigned a rarity but does not exist".formatted(boarID),
+                            new IllegalArgumentException()
+                        );
+                        System.exit(-1);
+                    }
                 }
             }
 
