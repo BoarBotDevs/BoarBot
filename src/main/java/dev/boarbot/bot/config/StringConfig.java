@@ -200,6 +200,12 @@ public class StringConfig {
     private String notificationHalloween = "";
     private String notificationChristmas = "";
 
+    // Give strings
+
+    private String giveNoID = "";
+    private String giveBadID = "";
+    private String giveTitle = "";
+
     // Report/Self-wipe strings
 
     private String sentReport = "";

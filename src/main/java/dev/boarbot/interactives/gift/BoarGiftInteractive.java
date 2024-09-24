@@ -47,7 +47,7 @@ import java.util.concurrent.CompletableFuture;
 public class BoarGiftInteractive extends UserInteractive implements Synchronizable {
     private final PowerupItemConfig giftConfig = POWS.get("gift");
 
-    private final FileUpload giftImage;
+    private FileUpload giftImage;
 
     private boolean isSkyblockGuild = false;
 
@@ -73,12 +73,16 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
     private final Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getGift();
 
-    public BoarGiftInteractive(
-        Interaction interaction, boolean isMsg
-    ) throws IOException, URISyntaxException {
+    public BoarGiftInteractive(Interaction interaction, boolean isMsg) {
         super(interaction, isMsg, NUMS.getGiftIdle(), NUMS.getGiftIdle());
 
-        this.giftImage = new GiftImageGenerator(this.user.getName()).generate().getFileUpload();
+        try {
+            this.giftImage = new GiftImageGenerator(this.user.getName()).generate().getFileUpload();
+        } catch (IOException | URISyntaxException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.getUser(), this.getClass(), "Failed to send gift message", exception);
+            return;
+        }
 
         try (Connection connection = DataUtil.getConnection()) {
             this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.guildID);
@@ -103,7 +107,14 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
             this.enabled = true;
 
-            CompletableFuture.runAsync(() -> this.enableGift(randWaitTime));
+            CompletableFuture.runAsync(() -> {
+                try {
+                    this.enableGift(randWaitTime);
+                } catch (RuntimeException exception) {
+                    this.stop(StopType.EXCEPTION);
+                    Log.error(this.getUser(), this.getClass(), "A problem occurred when enabling gift", exception);
+                }
+            });
 
             return;
         }
@@ -164,10 +175,17 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             }
         }
 
-        this.giftEnabledTimestamp = TimeUtil.getCurMilli();
         this.sendResponse();
+        this.giftEnabledTimestamp = TimeUtil.getCurMilli();
 
-        CompletableFuture.runAsync(this::tryClaimAtMaxHandicap);
+        CompletableFuture.runAsync(() -> {
+            try {
+                this.tryClaimAtMaxHandicap();
+            } catch (RuntimeException exception) {
+                this.stop(StopType.EXCEPTION);
+                Log.error(this.user, this.getClass(), "A problem occurred while trying to claim gift", exception);
+            }
+        });
     }
 
     private void tryClaimAtMaxHandicap() {
@@ -398,18 +416,23 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         CompletableFuture.runAsync(() -> {
-            String title = STRS.getGiftTitle();
-            ItemInteractive.sendInteractive(
-                this.boarIDs,
-                bucksGotten,
-                editions,
-                this.user,
-                this.giftWinner,
-                title,
-                this.giftInteractions.get(this.giftWinner).getHook(),
-                false
-            );
-            Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+            try {
+                String title = STRS.getGiftTitle();
+                ItemInteractive.sendInteractive(
+                    this.boarIDs,
+                    bucksGotten,
+                    editions,
+                    this.user,
+                    this.giftWinner,
+                    title,
+                    this.giftInteractions.get(this.giftWinner).getHook(),
+                    false
+                );
+                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+            } catch (RuntimeException exception) {
+                this.stop(StopType.EXCEPTION);
+                Log.error(this.user, this.getClass(), "A problem occurred when sending gift interactive", exception);
+            }
         });
     }
 
@@ -417,7 +440,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.baseQuery().giveBucks(connection, this.numBucks);
             this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
-                QuestType.COLLECT_BUCKS, this.boarIDs, connection
+                QuestType.COLLECT_BUCKS, this.numBucks, connection
             ));
         }
 
@@ -426,26 +449,32 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         CompletableFuture.runAsync(() -> {
-            String title = STRS.getGiftTitle();
+            try {
+                String title = STRS.getGiftTitle();
 
-            String rewardStr = this.outcomeConfig.getRewardStr().formatted(
-                this.numBucks,
-                this.numBucks == 1
-                    ? STRS.getBucksName()
-                    : STRS.getBucksPluralName()
-            );
+                String rewardStr = this.outcomeConfig.getRewardStr().formatted(
+                    this.numBucks,
+                    this.numBucks == 1
+                        ? STRS.getBucksName()
+                        : STRS.getBucksPluralName()
+                );
 
-            ItemInteractive.sendInteractive(
-                rewardStr,
-                ResourceUtil.bucksGiftPath,
-                "bucks",
-                this.user,
-                this.giftWinner,
-                title,
-                this.giftInteractions.get(this.giftWinner).getHook(),
-                false
-            );
-            Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+                ItemInteractive.sendInteractive(
+                    rewardStr,
+                    ResourceUtil.bucksGiftPath,
+                    "bucks",
+                    this.user,
+                    this.giftWinner,
+                    title,
+                    this.giftInteractions.get(this.giftWinner).getHook(),
+                    false
+                );
+
+                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+            } catch (RuntimeException exception) {
+                this.stop(StopType.EXCEPTION);
+                Log.error(this.user, this.getClass(), "A problem occurred when sending gift interactive", exception);
+            }
         });
     }
 
@@ -461,29 +490,35 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         CompletableFuture.runAsync(() -> {
-            PowerupItemConfig powConfig = POWS.get(this.subOutcomeType.toString());
-            String title = STRS.getGiftTitle();
+            try {
+                PowerupItemConfig powConfig = POWS.get(this.subOutcomeType.toString());
+                String title = STRS.getGiftTitle();
 
-            String rewardStr = this.outcomeConfig.getRewardStr().formatted(
-                this.subOutcomeConfig.getRewardAmt(),
-                this.subOutcomeConfig.getRewardAmt() == 1
-                    ? powConfig.getName()
-                    : powConfig.getPluralName()
-            );
+                String rewardStr = this.outcomeConfig.getRewardStr().formatted(
+                    this.subOutcomeConfig.getRewardAmt(),
+                    this.subOutcomeConfig.getRewardAmt() == 1
+                        ? powConfig.getName()
+                        : powConfig.getPluralName()
+                );
 
-            String filePath = ResourceUtil.powerupAssetsPath + powConfig.getFile();
+                String filePath = ResourceUtil.powerupAssetsPath + powConfig.getFile();
 
-            ItemInteractive.sendInteractive(
-                rewardStr,
-                filePath,
-                "powerup",
-                this.user,
-                this.giftWinner,
-                title,
-                this.giftInteractions.get(this.giftWinner).getHook(),
-                false
-            );
-            Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+                ItemInteractive.sendInteractive(
+                    rewardStr,
+                    filePath,
+                    "powerup",
+                    this.user,
+                    this.giftWinner,
+                    title,
+                    this.giftInteractions.get(this.giftWinner).getHook(),
+                    false
+                );
+
+                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+            } catch (RuntimeException exception) {
+                this.stop(StopType.EXCEPTION);
+                Log.error(this.user, this.getClass(), "A problem occurred when sending gift interactive", exception);
+            }
         });
     }
 

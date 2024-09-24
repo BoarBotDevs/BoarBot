@@ -68,8 +68,8 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
         if (compEvent == null) {
-            this.sentTimestamp = TimeUtil.getCurMilli();
             this.sendResponse();
+            this.sentTimestamp = TimeUtil.getCurMilli();
             return;
         }
 
@@ -176,14 +176,14 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
 
         if (type.equals(StopType.EXCEPTION)) {
             super.stop(type);
+            this.eventHandler.decNumActive();
             return;
         }
 
         try {
             this.updateComponents(ActionRow.of(tabulatingBtn));
+            this.eventHandler.decNumActive();
         } catch (ErrorResponseException ignored) {}
-
-        this.eventHandler.decNumActive();
     }
 
     @Override

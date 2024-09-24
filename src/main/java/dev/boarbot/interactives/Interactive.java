@@ -70,9 +70,6 @@ public abstract class Interactive implements Configured {
     public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
         if (startTime < this.lastEndTime) {
             Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
-            compEvent.deferEdit().queue(null, e -> Log.warn(
-                compEvent.getUser(), this.getClass(), "Failed to defer edit", e
-            ));
             return;
         }
 
@@ -96,15 +93,17 @@ public abstract class Interactive implements Configured {
             return;
         }
 
-        long curTime = TimeUtil.getCurMilli();
+        try {
+            long curTime = TimeUtil.getCurMilli();
 
-        if (this.curStopTime <= curTime || hardStopTime <= curTime) {
-            if (!this.isStopped) {
+            if ((this.curStopTime <= curTime || hardStopTime <= curTime) && !this.isStopped) {
                 this.stop(StopType.EXPIRED);
+            } else if (!this.isStopped) {
+                long newWaitTime = Math.min(this.curStopTime - curTime, hardStopTime - curTime);
+                this.tryStop(newWaitTime);
             }
-        } else {
-            long newWaitTime = Math.min(this.curStopTime - curTime, hardStopTime - curTime);
-            this.tryStop(newWaitTime);
+        } catch (RuntimeException exception) {
+            Log.error(this.getClass(), "Failed to stop interactive", exception);
         }
     }
 
@@ -115,7 +114,10 @@ public abstract class Interactive implements Configured {
     }
 
     public Interactive removeInteractive() {
-        this.future.cancel(true);
+        if (Thread.currentThread().getState().equals(Thread.State.TIMED_WAITING)) {
+            this.future.cancel(true);
+        }
+
         return interactives.remove(this.interactiveID);
     }
 }

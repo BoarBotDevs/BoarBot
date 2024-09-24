@@ -5,6 +5,7 @@ import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.data.*;
 import dev.boarbot.interactives.boar.megamenu.SortType;
+import dev.boarbot.util.logging.Log;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -256,7 +257,7 @@ public class MegaMenuQueries implements Configured {
                         collected_boars.original_obtain_type = 'TRANSMUTE' AND
                         collected_boars.exists = true AND
                         collected_boars.deleted = false
-                    ORDER BY unique_id DESC LIMIT 1
+                    ORDER BY obtained_timestamp DESC LIMIT 1
                 ) AS last_transmute,
                 (
                     SELECT boar_id
@@ -266,7 +267,7 @@ public class MegaMenuQueries implements Configured {
                         collected_boars.original_obtain_type = 'CLONE' AND
                         collected_boars.exists = true AND
                         collected_boars.deleted = false
-                    ORDER BY unique_id DESC LIMIT 1
+                    ORDER BY obtained_timestamp DESC LIMIT 1
                 ) AS last_clone
             FROM users
             WHERE user_id = ?;
@@ -373,61 +374,61 @@ public class MegaMenuQueries implements Configured {
 
                 if (results1.next() && results2.next()) {
                     statsData = new StatsData(
-                            results1.getLong("total_bucks"),
-                            results1.getLong("highest_bucks"),
-                            results1.getInt("num_dailies"),
-                            results1.getInt("num_dailies_missed"),
-                            results1.getTimestamp("last_daily_timestamp"),
-                            results1.getString("last_boar_id"),
-                            results1.getString("favorite_boar_id"),
-                            results1.getLong("total_boars"),
-                            results1.getLong("highest_boars"),
-                            results1.getInt("unique_boars"),
-                            results1.getInt("highest_unique_boars"),
-                            results1.getInt("boar_streak"),
-                            results1.getInt("highest_streak"),
-                            results1.getBoolean("notifications_on"),
-                            this.boarUser.baseQuery().getBlessings(connection),
-                            results1.getInt("highest_blessings"),
-                            results1.getInt("streak_bless"),
-                            results1.getInt("highest_streak_bless"),
-                            results1.getInt("quest_bless"),
-                            results1.getInt("highest_quest_bless"),
-                            results1.getInt("unique_bless"),
-                            results1.getInt("highest_unique_bless"),
-                            results1.getInt("other_bless"),
-                            results1.getInt("highest_other_bless"),
-                            results1.getInt("powerup_attempts"),
-                            results1.getInt("powerup_wins"),
-                            results1.getInt("powerup_perfects"),
-                            results1.getInt("powerup_fastest_time"),
-                            results1.getDouble("powerup_average_placement"),
-                            topPrompts,
-                            powAmts,
-                            powHighestAmts,
-                            powUsed,
-                            results1.getInt("miracles_active"),
-                            results1.getInt("miracle_rolls"),
-                            results1.getInt("highest_miracles_active"),
-                            results1.getInt("miracle_best_bucks"),
-                            results1.getString("miracle_best_rarity"),
-                            results1.getString("last_transmute"),
-                            transmuteRarities,
-                            results1.getString("last_clone"),
-                            cloneRarities,
-                            results1.getInt("gift_handicap"),
-                            results1.getInt("gifts_opened"),
-                            results1.getInt("gift_fastest"),
-                            results1.getInt("gift_best_bucks"),
-                            results1.getString("gift_best_rarity"),
-                            results2.getInt("num_completed"),
-                            results2.getInt("num_full_completed"),
-                            results2.getLong("fastest_full_millis"),
-                            results2.getBoolean("auto_claim"),
-                            results2.getInt("easy_completed"),
-                            results2.getInt("medium_completed"),
-                            results2.getInt("hard_completed"),
-                            results2.getInt("very_hard_completed")
+                        results1.getLong("total_bucks"),
+                        results1.getLong("highest_bucks"),
+                        results1.getInt("num_dailies"),
+                        results1.getInt("num_dailies_missed"),
+                        results1.getTimestamp("last_daily_timestamp"),
+                        results1.getString("last_boar_id"),
+                        results1.getString("favorite_boar_id"),
+                        results1.getLong("total_boars"),
+                        results1.getLong("highest_boars"),
+                        results1.getInt("unique_boars"),
+                        results1.getInt("highest_unique_boars"),
+                        results1.getInt("boar_streak"),
+                        results1.getInt("highest_streak"),
+                        results1.getBoolean("notifications_on"),
+                        this.boarUser.baseQuery().getBlessings(connection),
+                        results1.getInt("highest_blessings"),
+                        results1.getInt("streak_bless"),
+                        results1.getInt("highest_streak_bless"),
+                        results1.getInt("quest_bless"),
+                        results1.getInt("highest_quest_bless"),
+                        results1.getInt("unique_bless"),
+                        results1.getInt("highest_unique_bless"),
+                        results1.getInt("other_bless"),
+                        results1.getInt("highest_other_bless"),
+                        results1.getInt("powerup_attempts"),
+                        results1.getInt("powerup_wins"),
+                        results1.getInt("powerup_perfects"),
+                        results1.getInt("powerup_fastest_time"),
+                        results1.getDouble("powerup_average_placement"),
+                        topPrompts,
+                        powAmts,
+                        powHighestAmts,
+                        powUsed,
+                        results1.getInt("miracles_active"),
+                        results1.getInt("miracle_rolls"),
+                        results1.getInt("highest_miracles_active"),
+                        results1.getInt("miracle_best_bucks"),
+                        results1.getString("miracle_best_rarity"),
+                        results1.getString("last_transmute"),
+                        transmuteRarities,
+                        results1.getString("last_clone"),
+                        cloneRarities,
+                        results1.getInt("gift_handicap"),
+                        results1.getInt("gifts_opened"),
+                        results1.getInt("gift_fastest"),
+                        results1.getInt("gift_best_bucks"),
+                        results1.getString("gift_best_rarity"),
+                        results2.getInt("num_completed"),
+                        results2.getInt("num_full_completed"),
+                        results2.getLong("fastest_full_millis"),
+                        results2.getBoolean("auto_claim"),
+                        results2.getInt("easy_completed"),
+                        results2.getInt("medium_completed"),
+                        results2.getInt("hard_completed"),
+                        results2.getInt("very_hard_completed")
                     );
                 }
             }
@@ -454,6 +455,7 @@ public class MegaMenuQueries implements Configured {
                 }
 
                 while (results.next()) {
+                    Log.debug(results.getString("powerup_id"));
                     powAmts.put(results.getString("powerup_id"), results.getInt("amount"));
                 }
 

@@ -22,10 +22,12 @@ public abstract class ModalInteractive extends UserInteractive {
         GenericComponentInteractionCreateEvent compEvent, ModalInteractionEvent modalEvent, long startTime
     ) {
         if (startTime < this.lastEndTime) {
-            Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
-            compEvent.deferEdit().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Failed to defer edit", e
-            ));
+            Log.debug(
+                compEvent != null ? compEvent.getUser() : modalEvent.getUser(),
+                this.getClass(),
+                "Interacted too fast!"
+            );
+
             return;
         }
 

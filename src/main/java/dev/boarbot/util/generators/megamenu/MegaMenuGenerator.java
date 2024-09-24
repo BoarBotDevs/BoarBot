@@ -46,7 +46,7 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
     }
 
     protected void drawTopInfo() throws IOException, URISyntaxException {
-        String userAvatar = this.boarUser.getUser().getAvatarUrl();
+        String userAvatar = this.boarUser.getUser().getEffectiveAvatarUrl();
 
         Map<Class<? extends MegaMenuGenerator>, String> classViewMap = new HashMap<>();
         classViewMap.put(ProfileImageGenerator.class, MegaMenuView.PROFILE.toString());

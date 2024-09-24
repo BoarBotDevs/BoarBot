@@ -27,18 +27,48 @@ public class PowerupQueries implements Configured {
         this.boarUser.forceSynchronized();
         this.insertPowerupIfNotExist(connection, powerupID);
 
+        String query = """
+            SELECT amount
+            FROM collected_powerups
+            WHERE user_id = ? AND powerup_id = 'transmute'
+        """;
+
         String updateQuery = """
             UPDATE collected_powerups
             SET amount = LEAST(amount + ?, ?)
             WHERE user_id = ? AND powerup_id = ?;
         """;
 
-        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
-            statement.setInt(1, amount);
-            statement.setLong(2, powerupID.equals("transmute") && !force ? NUMS.getMaxTransmute() : Integer.MAX_VALUE);
-            statement.setString(3, this.boarUser.getUserID());
-            statement.setString(4, powerupID);
-            statement.execute();
+        try (
+            PreparedStatement statement1 = connection.prepareStatement(query);
+            PreparedStatement statement2 = connection.prepareStatement(updateQuery)
+        ) {
+            int curAmount = -1;
+
+            if (powerupID.equals("transmute") && !force) {
+                statement1.setString(1, this.boarUser.getUserID());
+
+                try (ResultSet resultSet = statement1.executeQuery()) {
+                    if (resultSet.next()) {
+                        curAmount = resultSet.getInt(1);
+                    }
+                }
+            }
+
+            statement2.setInt(1, amount);
+
+            int amountMax = powerupID.equals("transmute") && !force
+                ? NUMS.getMaxTransmute()
+                : Integer.MAX_VALUE;
+
+            if (curAmount > amountMax) {
+                amountMax = curAmount;
+            }
+
+            statement2.setLong(2, amountMax);
+            statement2.setString(3, this.boarUser.getUserID());
+            statement2.setString(4, powerupID);
+            statement2.execute();
         }
 
         if (powerupID.equals("transmute")) {
@@ -53,7 +83,7 @@ public class PowerupQueries implements Configured {
             INSERT INTO collected_powerups (user_id, powerup_id)
             SELECT ?, ?
             WHERE NOT EXISTS (
-                SELECT unique_id
+                SELECT 1
                 FROM collected_powerups
                 WHERE user_id = ? AND powerup_id = ?
             );

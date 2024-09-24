@@ -12,8 +12,6 @@ import dev.boarbot.util.generators.ItemImageGenerator;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 
 public class InteractiveFactory {
@@ -53,9 +51,7 @@ public class InteractiveFactory {
         return new MegaMenuInteractive(initEvent, curView);
     }
 
-    public static synchronized Interactive constructGiftInteractive(
-        Interaction initEvent, boolean isMsg
-    ) throws IOException, URISyntaxException {
+    public static synchronized Interactive constructGiftInteractive(Interaction initEvent, boolean isMsg) {
         return new BoarGiftInteractive(initEvent, isMsg);
     }
 }

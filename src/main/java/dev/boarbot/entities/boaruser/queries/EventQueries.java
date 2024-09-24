@@ -96,7 +96,7 @@ public class EventQueries {
             INSERT INTO prompt_stats (user_id, prompt_id)
             SELECT ?, ?
             WHERE NOT EXISTS (
-                SELECT unique_id
+                SELECT 1
                 FROM prompt_stats
                 WHERE user_id = ? AND prompt_id = ?
             );

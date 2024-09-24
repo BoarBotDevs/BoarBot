@@ -36,7 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TopInteractive extends ModalInteractive implements Configured {
     private static final int ENTRIES_PER_PAGE = 44;
 
-    private int page = 0;
+    private int page;
+    private String username;
     private Integer usernameIndex;
     private int maxPage;
     private TopType boardType;
@@ -55,11 +56,14 @@ public class TopInteractive extends ModalInteractive implements Configured {
             ? TopType.fromString(Objects.requireNonNull(event.getOption("board")).getAsString())
             : TopType.TOTAL_BUCKS;
 
+        this.setPage(0);
+
         if (event.getOption("user") != null) {
             String usernameInput = Objects.requireNonNull(event.getOption("user")).getAsUser().getName();
 
             boolean boardHasUser = cachedBoards.get(this.boardType).containsKey(usernameInput);
             if (boardHasUser) {
+                this.username = usernameInput;
                 this.usernameIndex = cachedBoards.get(this.boardType).get(usernameInput).index();
                 this.setPage(this.usernameIndex / ENTRIES_PER_PAGE);
             }
@@ -68,6 +72,7 @@ public class TopInteractive extends ModalInteractive implements Configured {
         }
 
         if (this.usernameIndex == null && cachedBoards.get(this.boardType).containsKey(this.user.getName())) {
+            this.username = this.user.getName();
             this.usernameIndex = cachedBoards.get(this.boardType).get(this.user.getName()).index();
         }
 
@@ -123,6 +128,7 @@ public class TopInteractive extends ModalInteractive implements Configured {
             case "RIGHT" -> this.setPage(this.page + 1);
         }
 
+        this.usernameIndex = cachedBoards.get(this.boardType).get(this.username).index();
         this.sendResponse();
     }
 
@@ -141,7 +147,6 @@ public class TopInteractive extends ModalInteractive implements Configured {
             this.user, this.getClass(), "Failed to defer edit", e
         ));
 
-
         String pageInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
         String usernameInput = modalEvent.getValues().get(1).getAsString();
 
@@ -152,6 +157,7 @@ public class TopInteractive extends ModalInteractive implements Configured {
         try {
             boolean boardHasUser = cachedBoards.get(this.boardType).containsKey(usernameInput);
             if (boardHasUser) {
+                this.username = usernameInput;
                 this.usernameIndex = cachedBoards.get(this.boardType).get(usernameInput).index();
                 this.setPage(this.usernameIndex / ENTRIES_PER_PAGE);
                 return;

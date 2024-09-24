@@ -77,6 +77,8 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
             GuildDataUtil.setEventNotify(this.failedGuilds, connection);
         } catch (SQLException exception) {
             Log.error(this.getClass(), "Failed to update Powerup Event messages in database", exception);
+        } catch (RuntimeException exception) {
+            Log.error(this.getClass(), "Failed to update Powerup Event messages", exception);
         }
 
         Log.debug(this.getClass(), "Updated prior Powerup Event messages in database");
@@ -113,40 +115,44 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
     protected void handleResults() {
         Log.debug(this.getClass(), "All Powerup Events ended, handling results");
 
-        String fastestStr = null;
-        String avgStr = null;
+        try {
+            String fastestStr = null;
+            String avgStr = null;
 
-        List<Map.Entry<String, Long>> userEntries = new ArrayList<>(this.userTimes.entrySet());
-        userEntries.sort(Map.Entry.comparingByValue());
+            List<Map.Entry<String, Long>> userEntries = new ArrayList<>(this.userTimes.entrySet());
+            userEntries.sort(Map.Entry.comparingByValue());
 
-        for (Map.Entry<String, Long> entry : userEntries) {
-            this.sortedUsers.add(entry.getKey());
-        }
-
-        Log.debug(this.getClass(), "Sorted users based on time");
-
-        if (!this.userTimes.isEmpty()) {
-            User user = BoarBotApp.getBot().getJDA().getUserById(this.sortedUsers.getFirst());
-            String fastestUsername = user != null ? user.getName() : STRS.getUnavailable();
-            long fastestTime = this.userTimes.get(this.sortedUsers.getFirst());
-
-            long totalTime = this.userTimes.values().stream().reduce(0L, Long::sum);
-            int numUsers = this.userTimes.size();
-
-            fastestStr = STRS.getPowEventFastVal().formatted(fastestTime, fastestUsername);
-            avgStr = numUsers == 1
-                ? STRS.getPowEventAvgVal().formatted(totalTime / numUsers, numUsers)
-                : STRS.getPowEventAvgPluralVal().formatted(totalTime / numUsers, numUsers);
-        }
-
-        this.updateEventEnd(fastestStr, avgStr);
-
-        if (!this.userTimes.isEmpty()) {
-            for (String userID : this.userTimes.keySet()) {
-                BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
-                boarUser.passSynchronizedAction(this);
+            for (Map.Entry<String, Long> entry : userEntries) {
+                this.sortedUsers.add(entry.getKey());
             }
-            Log.debug(this.getClass(), "Updated participant stats");
+
+            Log.debug(this.getClass(), "Sorted users based on time");
+
+            if (!this.userTimes.isEmpty()) {
+                User user = BoarBotApp.getBot().getJDA().getUserById(this.sortedUsers.getFirst());
+                String fastestUsername = user != null ? user.getName() : STRS.getUnavailable();
+                long fastestTime = this.userTimes.get(this.sortedUsers.getFirst());
+
+                long totalTime = this.userTimes.values().stream().reduce(0L, Long::sum);
+                int numUsers = this.userTimes.size();
+
+                fastestStr = STRS.getPowEventFastVal().formatted(fastestTime, fastestUsername);
+                avgStr = numUsers == 1
+                    ? STRS.getPowEventAvgVal().formatted(totalTime / numUsers, numUsers)
+                    : STRS.getPowEventAvgPluralVal().formatted(totalTime / numUsers, numUsers);
+            }
+
+            this.updateEventEnd(fastestStr, avgStr);
+
+            if (!this.userTimes.isEmpty()) {
+                for (String userID : this.userTimes.keySet()) {
+                    BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
+                    boarUser.passSynchronizedAction(this);
+                }
+                Log.debug(this.getClass(), "Updated participant stats");
+            }
+        } catch (RuntimeException exception) {
+            Log.error(this.getClass(), "Failed to handle Powerup Event results", exception);
         }
     }
 

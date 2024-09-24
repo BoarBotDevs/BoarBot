@@ -50,29 +50,29 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
         String cellValueStr = STRS.getPowCellAmtLabel();
         String transmuteRarityKey = null;
 
-        if (numTransmute == RARITIES.get("common").getChargesNeeded()) {
-            cellPath = ResourceUtil.powCellCommonPath;
-            transmuteRarityKey = "common";
-        } else if (numTransmute == RARITIES.get("uncommon").getChargesNeeded()) {
-            cellPath = ResourceUtil.powCellUncommonPath;
-            transmuteRarityKey = "uncommon";
-        } else if (numTransmute == RARITIES.get("rare").getChargesNeeded()) {
-            cellPath = ResourceUtil.powCellRarePath;
-            transmuteRarityKey = "rare";
-        } else if (numTransmute == RARITIES.get("epic").getChargesNeeded()) {
-            cellPath = ResourceUtil.powCellEpicPath;
-            transmuteRarityKey = "epic";
-        } else if (numTransmute == RARITIES.get("legendary").getChargesNeeded()) {
-            cellPath = ResourceUtil.powCellLegendaryPath;
-            transmuteRarityKey = "legendary";
-        } else if (numTransmute == RARITIES.get("mythic").getChargesNeeded()) {
-            cellPath = ResourceUtil.powCellMythicPath;
-            transmuteRarityKey = "mythic";
-        } else if (numTransmute == RARITIES.get("divine").getChargesNeeded()) {
+        if (numTransmute > RARITIES.get("divine").getChargesNeeded()) {
+            cellValueStr = STRS.getPowCellErrorLabel();
+        } else if (numTransmute >= RARITIES.get("divine").getChargesNeeded()) {
             cellPath = ResourceUtil.powCellDivinePath;
             transmuteRarityKey = "divine";
-        } else if (numTransmute > RARITIES.get("divine").getChargesNeeded()) {
-            cellValueStr = STRS.getPowCellErrorLabel();
+        } else if (numTransmute >= RARITIES.get("mythic").getChargesNeeded()) {
+            cellPath = ResourceUtil.powCellMythicPath;
+            transmuteRarityKey = "mythic";
+        } else if (numTransmute >= RARITIES.get("legendary").getChargesNeeded()) {
+            cellPath = ResourceUtil.powCellLegendaryPath;
+            transmuteRarityKey = "legendary";
+        } else if (numTransmute >= RARITIES.get("epic").getChargesNeeded()) {
+            cellPath = ResourceUtil.powCellEpicPath;
+            transmuteRarityKey = "epic";
+        } else if (numTransmute >= RARITIES.get("rare").getChargesNeeded()) {
+            cellPath = ResourceUtil.powCellRarePath;
+            transmuteRarityKey = "rare";
+        } else if (numTransmute >= RARITIES.get("uncommon").getChargesNeeded()) {
+            cellPath = ResourceUtil.powCellUncommonPath;
+            transmuteRarityKey = "uncommon";
+        } else if (numTransmute >= RARITIES.get("common").getChargesNeeded()) {
+            cellPath = ResourceUtil.powCellCommonPath;
+            transmuteRarityKey = "common";
         } else {
             cellValueStr = STRS.getPowCellEmptyLabel();
         }

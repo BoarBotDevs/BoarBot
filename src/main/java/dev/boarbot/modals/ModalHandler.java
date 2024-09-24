@@ -3,6 +3,7 @@ package dev.boarbot.modals;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.interactives.ModalInteractive;
+import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
 import dev.boarbot.util.time.TimeUtil;
 
@@ -55,11 +56,19 @@ public class ModalHandler implements Configured {
             return;
         }
 
-        this.stop();
+        try {
+            this.stop();
+        } catch (RuntimeException exception) {
+            Log.error(this.getClass(), "Failed to stop modal", exception);
+        }
+
     }
 
     public void stop() {
-        this.future.cancel(true);
+        if (Thread.currentThread().getState().equals(Thread.State.TIMED_WAITING)) {
+            this.future.cancel(true);
+        }
+
         BoarBotApp.getBot().getModalHandlers().remove(this.interaction.getId() + this.user.getId());
     }
 }

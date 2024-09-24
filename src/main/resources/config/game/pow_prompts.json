@@ -3,62 +3,62 @@
     "name": "Emojis",
     "description": "Click the emoji that's different from the others!",
     "prompts": {
-      "frown1": {
+      "frownEmoji": {
         "name": "Frowns",
         "emoji1": "🙁",
         "emoji2": "☹️"
       },
-      "detective1": {
+      "detectiveEmoji": {
         "name": "Detectives",
         "emoji1": "🕵",
         "emoji2": "🕵️‍♀️"
       },
-      "cloud1": {
+      "cloudEmoji": {
         "name": "Clouds",
         "emoji1": "🌨",
         "emoji2": "🌧"
       },
-      "lock1": {
+      "lockEmoji": {
         "name": "Locks",
         "emoji1": "🔓",
         "emoji2": "🔒"
       },
-      "folder1": {
+      "folderEmoji": {
         "name": "Folders",
         "emoji1": "📂",
         "emoji2": "📁"
       },
-      "nest1": {
+      "nestEmoji": {
         "name": "Nests",
         "emoji1": "🪺",
         "emoji2": "🪹"
       },
-      "hourglass1": {
+      "hourglassEmoji": {
         "name": "Hourglasses",
         "emoji1": "⌛",
         "emoji2": "⏳"
       },
-      "bathtub1": {
+      "bathtubEmoji": {
         "name": "Bathtubs",
         "emoji1": "🛀",
         "emoji2": "🛁"
       },
-      "hearts1": {
+      "heartsEmoji": {
         "name": "Hearts",
         "emoji1": "💕",
         "emoji2": "💞"
       },
-      "city1": {
+      "cityEmoji": {
         "name": "Cities",
         "emoji1": "🌆",
         "emoji2": "🌇"
       },
-      "mountain1": {
+      "mountainEmoji": {
         "name": "Mountains",
         "emoji1": "⛰",
         "emoji2": "🏔"
       },
-      "redshape1": {
+      "redshapeEmoji": {
         "name": "Red Shapes",
         "emoji1": "🩸",
         "emoji2": "♦️"
@@ -68,7 +68,7 @@
   "trivia": {
     "name": "Trivia",
     "prompts": {
-      "normal1": {
+      "normalTrivia": {
         "name": "Normal Boar",
         "description": "What is Normal Boar?",
         "choices": [
@@ -78,7 +78,7 @@
           "Ordinary"
         ]
       },
-      "tiny1": {
+      "tinyTrivia": {
         "name": "Tiny Boar",
         "description": "What boar is mentioned in Tiny Boar's description?",
         "choices": [
@@ -88,7 +88,7 @@
           "Matrix Boar"
         ]
       },
-      "bor1": {
+      "borTrivia": {
         "name": "bor",
         "description": "What does bor NOT have?",
         "choices": [
@@ -98,7 +98,7 @@
           "Eyes"
         ]
       },
-      "explosionless1": {
+      "explosionlessTrivia": {
         "name": "Explosionless Boar",
         "description": "What adjective describes Explosionless Boar's potential explosivity?",
         "choices": [
@@ -108,7 +108,7 @@
           "Disastrous"
         ]
       },
-      "lowquality1": {
+      "lowqualityTrivia": {
         "name": "Low Quality Boar",
         "description": "What is Low Quality Boar's internet speed?",
         "choices": [
@@ -118,7 +118,7 @@
           "10 Kb/s"
         ]
       },
-      "chocolate1": {
+      "chocolateTrivia": {
         "name": "Chocolate Boar",
         "description": "What year was <>uncommon<>Chocolate Boar<>font<> pulled off shelves?",
         "choices": [
@@ -128,7 +128,7 @@
           "1989"
         ]
       },
-      "matrix1": {
+      "matrixTrivia": {
         "name": "Matrix Boar",
         "description": "What color pill does <>uncommon<>Matrix Boar<>font<> keep taking?",
         "choices": [
@@ -138,7 +138,7 @@
           "White"
         ]
       },
-      "sketch1": {
+      "sketchTrivia": {
         "name": "Sketch Boar",
         "description": "What should you NOT leave <>uncommon<>Sketch Boar<>font<> by?",
         "choices": [
@@ -148,7 +148,7 @@
           "Pencil"
         ]
       },
-      "buff1": {
+      "buffTrivia": {
         "name": "Buff Boar",
         "description": "What can <>uncommon<>Buff Boar<>font<> crush with its bare hands?",
         "choices": [
@@ -158,7 +158,7 @@
           "Metal Cans"
         ]
       },
-      "keyboard1": {
+      "keyboardTrivia": {
         "name": "KeyBOARd",
         "description": "Where is <>rare<>KeyBOARd<>font<> highly rated?",
         "choices": [
@@ -174,23 +174,23 @@
     "name": "Quick Click",
     "description": "Click the blue button!",
     "prompts": {
-      "one": {
+      "oneBtn": {
         "name": "One",
         "numButtons": 1
       },
-      "two": {
+      "twoBtn": {
         "name": "Two",
         "numButtons": 2
       },
-      "three": {
+      "threeBtn": {
         "name": "Three",
         "numButtons": 3
       },
-      "six": {
+      "sixBtn": {
         "name": "Six",
         "numButtons": 6
       },
-      "nine": {
+      "nineBtn": {
         "name": "Nine",
         "numButtons": 9
       }
@@ -200,69 +200,78 @@
     "name": "Telling Time",
     "description": "Click the clock that's set to <>silver<>%s<>font<>!",
     "prompts": {
-      "one": {
+      "oneClock": {
         "name": "1:00",
         "rightClock": "🕐"
       },
-      "oneThirty": {
+      "oneThirtyClock": {
         "name": "1:30",
         "rightClock": "🕜"
       },
-      "two": {
+      "twoClock": {
         "name": "2:00",
         "rightClock": "🕑"
       },
-      "threeThirty": {
+      "threeThirtyClock": {
         "name": "3:30",
         "rightClock": "🕞"
       },
-      "four": {
+      "fourClock": {
         "name": "4:00",
         "rightClock": "🕓"
       },
-      "fourThirty": {
+      "fourThirtyClock": {
         "name": "4:30",
         "rightClock": "🕟"
       },
-      "five": {
+      "fiveClock": {
         "name": "5:00",
         "rightClock": "🕔"
       },
-      "sixThirty": {
+      "sixThirtyClock": {
         "name": "6:30",
         "rightClock": "🕡"
       },
-      "seven": {
+      "sevenClock": {
         "name": "7:00",
         "rightClock": "🕖"
       },
-      "sevenThirty": {
+      "sevenThirtyClock": {
         "name": "7:30",
         "rightClock": "🕢"
       },
-      "eight": {
+      "eightClock": {
         "name": "8:00",
         "rightClock": "🕗"
       },
-      "nineThirty": {
+      "nineThirtyClock": {
         "name": "9:30",
         "rightClock": "🕤"
       },
-      "ten": {
+      "tenClock": {
         "name": "10:00",
         "rightClock": "🕙"
       },
-      "tenThirty": {
+      "tenThirtyClock": {
         "name": "10:30",
         "rightClock": "🕥"
       },
-      "eleven": {
+      "elevenClock": {
         "name": "11:00",
         "rightClock": "🕚"
       },
-      "twelveThirty": {
+      "twelveThirtyClock": {
         "name": "12:30",
         "rightClock": "🕧"
+      }
+    }
+  },
+  "anniversary": {
+    "name": "Anniversary",
+    "description": "It's BoarBot's",
+    "prompts": {
+      "firstAnn": {
+        "name": "First"
       }
     }
   }

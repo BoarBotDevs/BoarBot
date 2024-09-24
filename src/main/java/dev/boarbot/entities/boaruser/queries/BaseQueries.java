@@ -309,4 +309,49 @@ public class BaseQueries implements Configured {
 
         return blessings;
     }
+
+    public void giveBadge(Connection connection, String badgeID, int tier) throws SQLException {
+        String query = """
+            SELECT 1
+            FROM collected_badges
+            WHERE user_id = ? AND badge_id = ? AND badge_tier = ?;
+        """;
+
+        String removeQuery = """
+            DELETE FROM collected_badges
+            WHERE user_id = ? AND badge_id = ?;
+        """;
+
+        String insertQuery = """
+            INSERT INTO collected_badges (user_id, badge_id, badge_tier)
+            VALUES (?, ?, ?);
+        """;
+
+        try (
+            PreparedStatement statement1 = connection.prepareStatement(query);
+            PreparedStatement statement2 = connection.prepareStatement(removeQuery);
+            PreparedStatement statement3 = connection.prepareStatement(insertQuery)
+        ) {
+            statement1.setString(1, this.boarUser.getUserID());
+            statement1.setString(2, badgeID);
+            statement1.setInt(3, tier);
+
+            boolean hasBadge;
+
+            try (ResultSet results = statement1.executeQuery()) {
+                hasBadge = results.next();
+            }
+
+            if (!hasBadge) {
+                statement2.setString(1, this.boarUser.getUserID());
+                statement2.setString(2, badgeID);
+                statement2.executeUpdate();
+
+                statement3.setString(1, this.boarUser.getUserID());
+                statement3.setString(2, badgeID);
+                statement3.setInt(3, tier);
+                statement3.executeUpdate();
+            }
+        }
+    }
 }

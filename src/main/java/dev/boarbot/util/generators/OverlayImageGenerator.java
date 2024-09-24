@@ -94,11 +94,9 @@ public class OverlayImageGenerator extends ImageGenerator {
 
         if (this.text != null) {
             return drawText(g2d);
-        } else if (this.animated) {
+        } else {
             return drawImage(g2d);
         }
-
-        return this;
     }
 
     public OverlayImageGenerator setBaseImage(BufferedImage baseImage) {

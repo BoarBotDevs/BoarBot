@@ -84,7 +84,9 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             return;
         }
 
-        this.sendResponse();
+        if (!this.boarIDs.isEmpty()) {
+            this.sendResponse();
+        }
     }
 
     @Override

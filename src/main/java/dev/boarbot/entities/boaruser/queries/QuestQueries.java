@@ -179,9 +179,11 @@ public class QuestQueries implements Configured {
         List<Integer> requiredAmts = new ArrayList<>();
         List<Integer> actualRequiredAmts = new ArrayList<>();
 
-        for (QuestType curQuest : quests) {
-            requiredAmts.add(QuestUtil.getRequiredAmt(curQuest, questIndex, false));
-            actualRequiredAmts.add(QuestUtil.getRequiredAmt(curQuest, questIndex, true));
+        for (int i=0; i<quests.size(); i++) {
+            QuestType curQuest = quests.get(i);
+
+            requiredAmts.add(QuestUtil.getRequiredAmt(curQuest, i, false));
+            actualRequiredAmts.add(QuestUtil.getRequiredAmt(curQuest, i, true));
         }
 
         if (quest.equals(QuestType.POW_FAST)) {

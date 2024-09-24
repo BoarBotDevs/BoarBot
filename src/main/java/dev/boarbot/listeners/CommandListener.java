@@ -35,7 +35,6 @@ public class CommandListener extends ListenerAdapter implements Runnable, Config
     @Override
     public void run() {
         String commandStr = "/%s %s".formatted(this.event.getName(), this.event.getSubcommandName());
-        Log.debug(this.event.getUser(), this.getClass(), "Running %s".formatted(commandStr));
 
         if (!this.event.isFromGuild()) {
             return;
@@ -48,6 +47,8 @@ public class CommandListener extends ListenerAdapter implements Runnable, Config
             SpecialReply.sendMaintenanceEmbed(this.event.getInteraction());
             return;
         }
+
+        Log.debug(this.event.getUser(), this.getClass(), "Running %s".formatted(commandStr));
 
         try {
             Subcommand subcommand = subcommands.get(this.event.getName() + this.event.getSubcommandName())

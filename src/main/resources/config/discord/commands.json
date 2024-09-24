@@ -65,11 +65,6 @@
             "name": "user",
             "type": 6,
             "description": "Check another user's profile"
-          },
-          {
-            "name": "page",
-            "type": 4,
-            "description": "Page to start off on"
           }
         ]
       },
@@ -133,11 +128,6 @@
             "name": "user",
             "type": 6,
             "description": "View another user's powerups"
-          },
-          {
-            "name": "page",
-            "type": 4,
-            "description": "Page to start off on"
           }
         ]
       },
@@ -150,11 +140,6 @@
             "name": "user",
             "type": 6,
             "description": "View another user's weekly quests"
-          },
-          {
-            "name": "page",
-            "type": 4,
-            "description": "Page to start off on"
           }
         ]
       },
@@ -335,11 +320,43 @@
             "required": true
           },
           {
+            "name": "type",
+            "type": 4,
+            "description": "Type of item to give",
+            "required": true,
+            "choices": [
+              {
+                "name": "Boar",
+                "value": 0
+              },
+              {
+                "name": "Badge",
+                "value": 1
+              },
+              {
+                "name": "Powerup",
+                "value": 2
+              },
+              {
+                "name": "Bucks",
+                "value": 3
+              }
+            ]
+          },
+          {
             "name": "id",
             "type": 3,
-            "description": "ID of item to give",
-            "required": true,
-            "autocomplete": true
+            "description": "ID of item to give"
+          },
+          {
+            "name": "tier",
+            "type": 4,
+            "description": "Tier of item to give (if it's a badge)"
+          },
+          {
+            "name": "amount",
+            "type": 4,
+            "description": "Amount of item to give"
           }
         ]
       },

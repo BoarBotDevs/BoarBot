@@ -169,7 +169,7 @@ class MigrationWriter implements Configured {
                     PowerupData powerup = powerups.get(powerupID);
 
                     statement1.setString(1, oldUser.getUserID());
-                    statement1.setString(2, powerupID);
+                    statement1.setString(2, powerupID.equals("enhancer") ? "transmute" : powerupID);
                     statement1.setInt(3, powerup.getNumTotal());
                     statement1.setInt(4, powerup.getHighestTotal());
                     statement1.setInt(5, powerup.getNumUsed());
@@ -187,8 +187,17 @@ class MigrationWriter implements Configured {
                     for (String promptID : powerupStats.getPrompts().get(promptTypeID).keySet()) {
                         PromptStatsData promptStats = powerupStats.getPrompts().get(promptTypeID).get(promptID);
 
+                        String fixedPromptID = switch (promptTypeID) {
+                            case "emojiFind" -> promptID.substring(0, promptID.length() - 1) + "Emoji";
+                            case "trivia" -> promptID.substring(0, promptID.length() - 1) + "Trivia";
+                            case "fast" -> promptID + "Btn";
+                            case "time" -> promptID + "Clock";
+                            case "anniversary" -> promptID + "Ann";
+                            default -> promptID;
+                        };
+
                         statement4.setString(1, oldUser.getUserID());
-                        statement4.setString(2, promptID);
+                        statement4.setString(2, fixedPromptID);
                         statement4.setDouble(3, promptStats.getAvg() / 100);
                         statement4.setInt(4, promptStats.getAttempts());
 

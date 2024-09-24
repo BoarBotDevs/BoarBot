@@ -130,44 +130,48 @@ public class GuildDataUtil {
             WHERE guild_id = ?;
         """;
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            try (ResultSet results = statement.executeQuery()) {
+        try (
+            PreparedStatement statement1 = connection.prepareStatement(query);
+            PreparedStatement statement2 = connection.prepareStatement(update)
+        ) {
+            try (ResultSet results = statement1.executeQuery()) {
                 while (results.next()) {
                     String guildID = results.getString("guild_id");
 
-                    guildChannels.putIfAbsent(guildID, new String[3]);
+                    guildChannels.put(guildID, new String[3]);
 
                     guildChannels.get(guildID)[0] = results.getString("channel_one");
                     guildChannels.get(guildID)[1] = results.getString("channel_two");
                     guildChannels.get(guildID)[2] = results.getString("channel_three");
                 }
             }
-        }
 
-        for (Message message : messages) {
-            String guildID = message.getGuildId();
+            for (Message message : messages) {
+                String guildID = message.getGuildId();
+                guildMessages.putIfAbsent(guildID, new String[3]);
 
-            guildMessages.putIfAbsent(guildID, new String[3]);
-
-            if (message.getChannelId().equals(guildChannels.get(guildID)[0])) {
-                guildMessages.get(guildID)[0] = message.getId();
-            } else if (message.getChannelId().equals(guildChannels.get(guildID)[1])) {
-                guildMessages.get(guildID)[1] = message.getId();
-            } else if (message.getChannelId().equals(guildChannels.get(guildID)[2])) {
-                guildMessages.get(guildID)[2] = message.getId();
+                if (message.getChannelId().equals(guildChannels.get(guildID)[0])) {
+                    guildMessages.get(guildID)[0] = message.getId();
+                } else if (message.getChannelId().equals(guildChannels.get(guildID)[1])) {
+                    guildMessages.get(guildID)[1] = message.getId();
+                } else if (message.getChannelId().equals(guildChannels.get(guildID)[2])) {
+                    guildMessages.get(guildID)[2] = message.getId();
+                }
             }
-        }
 
-        try (PreparedStatement statement = connection.prepareStatement(update)) {
             for (String guildID : guildChannels.keySet()) {
-                statement.setString(1, guildMessages.get(guildID)[0]);
-                statement.setString(2, guildMessages.get(guildID)[1]);
-                statement.setString(3, guildMessages.get(guildID)[2]);
-                statement.setString(4, guildID);
-                statement.addBatch();
+                int numMsgs = guildMessages.containsKey(guildID)
+                    ? guildMessages.get(guildID).length
+                    : 0;
+
+                statement2.setString(1, numMsgs > 0 ? guildMessages.get(guildID)[0] : null);
+                statement2.setString(2, numMsgs > 1 ? guildMessages.get(guildID)[1] : null);
+                statement2.setString(3, numMsgs > 2 ? guildMessages.get(guildID)[2] : null);
+                statement2.setString(4, guildID);
+                statement2.addBatch();
             }
 
-            statement.executeBatch();
+            statement2.executeBatch();
         }
     }
 

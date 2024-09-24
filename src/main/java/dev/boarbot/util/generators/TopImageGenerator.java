@@ -20,7 +20,7 @@ public class TopImageGenerator extends ImageGenerator {
     private static final int RIGHT_X = 1443;
     private static final int START_Y = 259;
     private static final int SPACING_Y = 42;
-    private static final int WIDTH = 450;
+    private static final int WIDTH = 900;
     private static final int[] INFO_POS = {960, 1320};
     private static final int INFO_SPACING_Y = 54;
 

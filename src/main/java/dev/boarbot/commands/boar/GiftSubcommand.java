@@ -3,7 +3,6 @@ package dev.boarbot.commands.boar;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.interactives.gift.BoarGiftInteractive;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.util.data.DataUtil;
@@ -59,7 +58,7 @@ public class GiftSubcommand extends Subcommand {
             this.user, this.getClass(), "Failed to defer reply", e
         ));
 
-        Interactive interactive = InteractiveFactory.constructInteractive(this.event, BoarGiftInteractive.class);
+        Interactive interactive = InteractiveFactory.constructGiftInteractive(this.event, false);
         interactive.execute(null);
         Log.debug(this.user, this.getClass(), "Sent BoarGiftInteractive");
     }

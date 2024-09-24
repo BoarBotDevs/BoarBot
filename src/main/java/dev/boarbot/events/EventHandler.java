@@ -46,10 +46,9 @@ public abstract class EventHandler {
 
         for (String guildID : channels.keySet()) {
             for (TextChannel channel : channels.get(guildID)) {
-                this.numPotential++;
-
                 CompletableFuture.runAsync(() -> {
                     try {
+                        incNumPotential();
                         this.sendInteractive(channel);
                         this.incNumActive();
                     } catch (InsufficientPermissionException exception) {
@@ -60,6 +59,8 @@ public abstract class EventHandler {
                             "Failed to send event in channel %s in guild %s".formatted(channel.getId(), guildID),
                             exception
                         );
+                    } catch (RuntimeException exception) {
+                        Log.error(this.getClass(), "A problem occurred when sending event", exception);
                     } finally {
                         this.decNumPotential();
                     }
@@ -74,6 +75,10 @@ public abstract class EventHandler {
 
     protected abstract void handleResults();
     protected void handleAfterSend() {}
+
+    private synchronized void incNumPotential() {
+        this.numPotential++;
+    }
 
     private synchronized void decNumPotential() {
         if (--this.numPotential == 0) {

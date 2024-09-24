@@ -231,7 +231,10 @@ class MegaMenuComponentHandler implements Configured {
                         throw new NumberFormatException();
                     }
 
-                    if (RARITIES.get(this.interactive.curRarityKey).getAvgClones() > this.interactive.numClone) {
+                    boolean notCloneable = RARITIES.get(this.interactive.curRarityKey).getAvgClones() == 0 ||
+                        input > this.interactive.numClone;
+
+                    if (notCloneable) {
                         this.interactive.acknowledgeOpen = true;
                         this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                             null, STRS.getNoPow().formatted(POWS.get("clone").getPluralName())

@@ -19,10 +19,7 @@ import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.quests.QuestUtil;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,7 +30,6 @@ import java.util.concurrent.CompletableFuture;
 class MegaMenuActionHandler implements Configured {
     private final MegaMenuInteractive interactive;
     private final User user;
-    private final GenericComponentInteractionCreateEvent compEvent;
 
     private Map.Entry<String, BoarInfo> curBoarEntry;
     private String curRarityKey;
@@ -41,7 +37,6 @@ class MegaMenuActionHandler implements Configured {
     public MegaMenuActionHandler(MegaMenuInteractive interactive) {
         this.interactive = interactive;
         this.user = interactive.getUser();
-        this.compEvent = this.interactive.compEvent;
     }
 
     public void doAction(BoarUser boarUser) {
@@ -185,7 +180,7 @@ class MegaMenuActionHandler implements Configured {
                     boarUser.powQuery().usePowerup(connection, "clone", numTryClone);
 
                     QuestUtil.sendQuestClaimMessage(
-                        this.compEvent.getHook(),
+                        this.interactive.compEvent.getHook(),
                         boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection),
                         boarUser.questQuery().addProgress(QuestType.CLONE_BOARS, newBoarIDs.size(), connection),
                         boarUser.questQuery().addProgress(QuestType.CLONE_RARITY, newBoarIDs, connection)
@@ -206,16 +201,31 @@ class MegaMenuActionHandler implements Configured {
 
         if (!newBoarIDs.isEmpty()) {
             CompletableFuture.runAsync(() -> {
-                this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getCompCloneSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                );
+                try {
+                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                        null, STRS.getCompCloneSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
+                    );
 
-                String title = STRS.getCompCloneTitle();
+                    String title = STRS.getCompCloneTitle();
 
-                ItemInteractive.sendInteractive(
-                    newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
-                );
-                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+                    ItemInteractive.sendInteractive(
+                        newBoarIDs,
+                        bucksGotten,
+                        editions,
+                        null,
+                        this.user,
+                        title,
+                        this.interactive.compEvent.getHook(),
+                        true
+                    );
+
+                    Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+                } catch (RuntimeException exception) {
+                    this.interactive.stop(StopType.EXCEPTION);
+                    Log.error(
+                        this.user, this.getClass(), "A problem occurred when sending clone item interactive", exception
+                    );
+                }
             });
         }
     }
@@ -249,7 +259,7 @@ class MegaMenuActionHandler implements Configured {
                 boarUser.powQuery().usePowerup(connection, "transmute", this.interactive.numTransmute);
 
                 QuestUtil.sendQuestClaimMessage(
-                    this.compEvent.getHook(),
+                    this.interactive.compEvent.getHook(),
                     boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection)
                 );
             } else {
@@ -267,33 +277,51 @@ class MegaMenuActionHandler implements Configured {
 
         if (!newBoarIDs.isEmpty()) {
             CompletableFuture.runAsync(() -> {
-                String newBoarName = BOARS.get(newBoarIDs.getFirst()).getName();
-                String newBoarRarityKey = BoarUtil.findRarityKey(newBoarIDs.getFirst());
+                try {
+                    String newBoarName = BOARS.get(newBoarIDs.getFirst()).getName();
+                    String newBoarRarityKey = BoarUtil.findRarityKey(newBoarIDs.getFirst());
 
-                this.interactive.boarPage = newBoarName;
-                String overlayStr = STRS.getCompTransmuteSuccess().formatted(
+                    this.interactive.boarPage = newBoarName;
+                    String overlayStr = STRS.getCompTransmuteSuccess().formatted(
                         "<>" + this.curRarityKey + "<>" + boarName,
                         "<>" + newBoarRarityKey + "<>" + newBoarName
-                );
+                    );
 
-                this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, overlayStr);
+                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, overlayStr);
 
-                if (newBoarIDs.size() > 1) {
-                    String firstBoarID = CONFIG.getMainConfig().getFirstBoarID();
-                    String firstBoarName = BOARS.get(firstBoarID).getName();
-                    String firstRarityKey = BoarUtil.findRarityKey(firstBoarID);
+                    if (newBoarIDs.size() > 1) {
+                        String firstBoarID = CONFIG.getMainConfig().getFirstBoarID();
+                        String firstBoarName = BOARS.get(firstBoarID).getName();
+                        String firstRarityKey = BoarUtil.findRarityKey(firstBoarID);
 
-                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                        null, STRS.getCompTransmuteFirst().formatted("<>" + firstRarityKey + "<>" + firstBoarName)
+                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                            null, STRS.getCompTransmuteFirst().formatted("<>" + firstRarityKey + "<>" + firstBoarName)
+                        );
+                    }
+
+                    String title = STRS.getCompTransmuteTitle();
+
+                    ItemInteractive.sendInteractive(
+                        newBoarIDs,
+                        bucksGotten,
+                        editions,
+                        null,
+                        this.user,
+                        title,
+                        this.interactive.compEvent.getHook(),
+                        true
+                    );
+
+                    Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+                } catch (RuntimeException exception) {
+                    this.interactive.stop(StopType.EXCEPTION);
+                    Log.error(
+                        this.user,
+                        this.getClass(),
+                        "A problem occurred when sending transmute item interactive",
+                        exception
                     );
                 }
-
-                String title = STRS.getCompTransmuteTitle();
-
-                ItemInteractive.sendInteractive(
-                    newBoarIDs, bucksGotten, editions, null, this.user, title, this.compEvent.getHook(), true
-                );
-                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
             });
         }
     }
@@ -341,12 +369,12 @@ class MegaMenuActionHandler implements Configured {
 
         CompletableFuture.runAsync(() -> {
             try {
-                Interactive giftInteractive = InteractiveFactory.constructGiftInteractive(this.compEvent, true);
+                Interactive giftInteractive = InteractiveFactory.constructGiftInteractive(this.interactive.compEvent, true);
                 giftInteractive.execute(null);
                 Log.debug(this.user, this.getClass(), "Sent BoarGiftInteractive");
-            } catch (IOException | URISyntaxException exception) {
+            } catch (RuntimeException exception) {
                 this.interactive.stop(StopType.EXCEPTION);
-                Log.error(this.user, this.getClass(), "Failed to generate gift message", exception);
+                Log.error(this.user, this.getClass(), "A problem occurred when sending gift interactive", exception);
             }
         });
     }
