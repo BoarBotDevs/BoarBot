@@ -1,11 +1,14 @@
 package dev.boarbot.util.logging;
 
 import dev.boarbot.listeners.ReadyListener;
+import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class Log {
+    private static long lastWarn = 0;
+
     private static Logger log(Class<?> clazz) {
         return LoggerFactory.getLogger(clazz);
     }
@@ -64,6 +67,10 @@ public final class Log {
     }
 
     public static void warn(User user, Class<?> clazz, String message, Throwable exception) {
+        warn(user, clazz, message, exception, false);
+    }
+
+    public static void warn(User user, Class<?> clazz, String message, Throwable exception, boolean dontSend) {
         String msg = getUserMsg(user, message);
 
         if (exception != null) {
@@ -72,11 +79,12 @@ public final class Log {
             log(clazz).warn(msg);
         }
 
-        if (!ReadyListener.isDone()) {
+        if (!ReadyListener.isDone() || lastWarn > TimeUtil.getCurMilli() - 10000 || dontSend) {
             return;
         }
 
         DiscordLog.sendWarn(clazz, msg);
+        lastWarn = TimeUtil.getCurMilli();
     }
 
     public static void error(Class<?> clazz, String message, Throwable exception) {
@@ -92,13 +100,6 @@ public final class Log {
         }
 
         DiscordLog.sendException(clazz, msg);
-    }
-
-    public static String getUserSuffix(User user, String userID) {
-        if (user != null) {
-            return " %s (%s)".formatted(user.getName(), userID);
-        }
-        return " (%s)".formatted(userID);
     }
 
     private static String getUserMsg(User user, String message) {

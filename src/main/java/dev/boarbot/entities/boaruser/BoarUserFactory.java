@@ -2,7 +2,6 @@ package dev.boarbot.entities.boaruser;
 
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.User;
 
 import java.lang.ref.ReferenceQueue;
@@ -20,15 +19,15 @@ public class BoarUserFactory implements Configured {
         return boarUserPool.size();
     }
 
-    public static BoarUser getBoarUser(User user) {
+    public static BoarUser getBoarUser(User user) throws SQLException {
         return BoarUserFactory.getBoarUser(user, user.getId());
     }
 
-    public static BoarUser getBoarUser(String userID) {
+    public static BoarUser getBoarUser(String userID) throws SQLException {
         return BoarUserFactory.getBoarUser(null, userID);
     }
 
-    private static synchronized BoarUser getBoarUser(User user, String userID) {
+    private static synchronized BoarUser getBoarUser(User user, String userID) throws SQLException {
         cleanUp();
 
         WeakReference<BoarUser> boarUserRef = boarUserPool.get(userID);
@@ -43,12 +42,6 @@ public class BoarUserFactory implements Configured {
 
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.baseQuery().updateUser(connection, true);
-        } catch (SQLException exception) {
-            Log.error(
-                BoarUserFactory.class,
-                "Failed to update user's data%s".formatted(Log.getUserSuffix(user, userID)),
-                exception
-            );
         }
 
         if (isNewBoarUser) {

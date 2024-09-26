@@ -74,7 +74,7 @@ public class BaseQueries implements Configured {
                 }
 
                 usernameChanged = this.boarUser.getUser(true) != null &&
-                    results.getString("username").equals(this.boarUser.getUser().getName());
+                    !results.getString("username").equals(this.boarUser.getUser().getName());
 
                 Timestamp lastDailyTimestamp = results.getTimestamp("last_daily_timestamp");
                 Timestamp lastStreakFixTimestamp = results.getTimestamp("last_streak_fix");
@@ -352,6 +352,18 @@ public class BaseQueries implements Configured {
                 statement3.setInt(3, tier);
                 statement3.executeUpdate();
             }
+        }
+    }
+
+    public void deleteUser(Connection connection) throws SQLException {
+        String deleteQuery = """
+            DELETE FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement1 = connection.prepareStatement(deleteQuery)) {
+            statement1.setString(1, this.boarUser.getUserID());
+            statement1.executeUpdate();
         }
     }
 }

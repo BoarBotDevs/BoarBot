@@ -9,11 +9,10 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
-import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
@@ -44,36 +43,37 @@ public class DailyNotifyInteractive extends UserInteractive {
         }
 
         Log.debug(this.user, this.getClass(), "Attempting to enable notifications");
-        compEvent.deferEdit().queue(null, e -> Log.warn(this.user, this.getClass(), "Failed to defer edit", e));
+        compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
+        compEvent.getUser().openPrivateChannel().queue(
+            ch -> ch.sendMessage(STRS.getNotificationSuccess())
+                .queue(msg -> doAfterDM(compEvent), e -> doExceptionHandle(compEvent)),
+            e -> doExceptionHandle(compEvent)
+        );
+    }
 
-        try {
-            PrivateChannel channel = compEvent.getUser().openPrivateChannel().complete();
-            channel.sendMessage(STRS.getNotificationSuccess()).complete();
-        } catch (ErrorResponseException exception) {
-            EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getNotificationFailed());
-
-            try {
-                MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
-                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
-            } catch (IOException exception1) {
-                this.stop(StopType.EXCEPTION);
-                Log.error(this.user, this.getClass(), "Failed to generate notification fail message", exception1);
-            }
-
-            return;
-        }
-
+    private void doAfterDM(GenericComponentInteractionCreateEvent compEvent) {
         try (Connection connection = DataUtil.getConnection()) {
             BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
             boarUser.baseQuery().setNotifications(connection, compEvent.getChannelId());
+
+            this.hasButton = false;
+            this.sendResponse();
         } catch (SQLException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to enable notifications", exception);
-            return;
         }
+    }
 
-        this.hasButton = false;
-        this.sendResponse();
+    private void doExceptionHandle(GenericComponentInteractionCreateEvent compEvent) {
+        try {
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getNotificationFailed());
+            MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
+            compEvent.getHook().sendMessage(msg.build()).setEphemeral(true)
+                .queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
+        } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to generate notification fail message", exception);
+        }
     }
 
     private void sendResponse() {
@@ -93,11 +93,7 @@ public class DailyNotifyInteractive extends UserInteractive {
                 editedMsg.setComponents(this.getCurComponents());
             }
 
-            if (this.isStopped) {
-                return;
-            }
-
-            this.updateInteractive(editedMsg.build());
+            this.updateInteractive(false, editedMsg.build());
         } catch (IOException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate daily used message", exception);
@@ -118,7 +114,7 @@ public class DailyNotifyInteractive extends UserInteractive {
             return;
         }
 
-        this.deleteInteractive();
+        this.deleteInteractive(true);
         Log.debug(this.user, this.getClass(), "Interactive expired");
     }
 

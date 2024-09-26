@@ -2,6 +2,8 @@ package dev.boarbot.commands.boardev;
 
 import dev.boarbot.bot.ConfigUpdater;
 import dev.boarbot.commands.Subcommand;
+import dev.boarbot.util.interaction.SpecialReply;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -17,8 +19,9 @@ public class MaintenanceSubcommand extends Subcommand {
         try {
             ConfigUpdater.toggleMaintenance();
             this.interaction.reply("Maintenance status: `" + CONFIG.getMainConfig().isMaintenanceMode() + "`")
-                .setEphemeral(true).complete();
+                .setEphemeral(true).queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
         } catch (IOException exception) {
+            SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.user, this.getClass(), "Failed to update maintenance status in file", exception);
         }
     }

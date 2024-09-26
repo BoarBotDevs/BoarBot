@@ -18,6 +18,7 @@ import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.quests.QuestUtil;
+import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.entities.User;
 
 import java.sql.Connection;
@@ -362,6 +363,16 @@ class MegaMenuActionHandler implements Configured {
             Log.debug(this.user, this.getClass(), "Failed to gift: Not enough");
             return;
         }
+
+        long lastGiftSent = boarUser.powQuery().getLastGiftSent(connection);
+
+        if (lastGiftSent > TimeUtil.getCurMilli() - NUMS.getGiftIdle()) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getGiftAlreadySent());
+            Log.debug(this.user, this.getClass(), "Failed to gift: Already sent");
+            return;
+        }
+
+        boarUser.powQuery().setLastGiftSent(connection, TimeUtil.getCurMilli());
 
         this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
             null, STRS.getPowGiftSuccess().formatted(powConfig.getName())

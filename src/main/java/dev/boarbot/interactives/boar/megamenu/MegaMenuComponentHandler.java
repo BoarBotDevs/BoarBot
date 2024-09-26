@@ -14,6 +14,7 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.graphics.TextUtil;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
 import dev.boarbot.util.resource.ResourceUtil;
@@ -69,9 +70,7 @@ class MegaMenuComponentHandler implements Configured {
         );
 
         if (!modalPossibleIDs.contains(compID)) {
-            this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Failed to defer edit", e
-            ));
+            this.compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.compEvent, this, e));
         }
 
         Log.debug(
@@ -109,7 +108,8 @@ class MegaMenuComponentHandler implements Configured {
                 Modal modal = this.makeModal(MODALS.get("pageInput"));
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).complete();
+                this.compEvent.replyModal(modal)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
 
@@ -119,7 +119,8 @@ class MegaMenuComponentHandler implements Configured {
                 Modal modal = this.makeModal(MODALS.get("findBoar"));
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).complete();
+                this.compEvent.replyModal(modal)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent boar find input modal");
             }
 
@@ -185,9 +186,7 @@ class MegaMenuComponentHandler implements Configured {
     }
 
     public void handleModalEvent() {
-        this.modalEvent.deferEdit().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer edit", e
-        ));
+        this.modalEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.modalEvent, this, e));
 
         switch (this.modalEvent.getModalId().split(",")[2]) {
             case "PAGE_INPUT" -> {
@@ -200,9 +199,9 @@ class MegaMenuComponentHandler implements Configured {
                     this.interactive.page = Math.max(Integer.parseInt(pageInput)-1, 0);
                 } catch (NumberFormatException exception) {
                     Log.debug(this.user, this.getClass(), "Invalid modal input");
-                } finally {
-                    this.interactive.execute(null);
                 }
+
+                this.interactive.execute(null);
             }
 
             case "FIND_BOAR" -> {
@@ -264,14 +263,13 @@ class MegaMenuComponentHandler implements Configured {
                 } catch (NumberFormatException exception) {
                     this.interactive.acknowledgeOpen = true;
                     this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getInvalidInput());
-
                     Log.debug(this.user, this.getClass(), "Invalid modal input");
                 } catch (SQLException exception) {
                     this.interactive.stop(StopType.EXCEPTION);
                     Log.error(this.user, this.getClass(), "Failed to get clone data", exception);
-                } finally {
-                    this.interactive.execute(null);
                 }
+
+                this.interactive.execute(null);
             }
 
             case "MIRACLE_AMOUNT" -> {
@@ -325,9 +323,9 @@ class MegaMenuComponentHandler implements Configured {
                 } catch (SQLException exception) {
                     this.interactive.stop(StopType.EXCEPTION);
                     Log.error(this.user, this.getClass(), "Failed to get miracle data", exception);
-                } finally {
-                    this.interactive.execute(null);
                 }
+
+                this.interactive.execute(null);
             }
         }
     }
@@ -349,9 +347,7 @@ class MegaMenuComponentHandler implements Configured {
 
         switch (this.interactive.interactType) {
             case FAVORITE -> {
-                this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Failed to defer edit", e
-                ));
+                this.compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.compEvent, this, e));
                 this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
             }
 
@@ -370,14 +366,13 @@ class MegaMenuComponentHandler implements Configured {
                     return;
                 }
 
-                this.compEvent.replyModal(modal).complete();
+                this.compEvent.replyModal(modal)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent clone input modal");
             }
 
             case TRANSMUTE -> {
-                this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Failed to defer edit", e
-                ));
+                this.compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.compEvent, this, e));
                 this.interactive.confirmOpen = true;
 
                 String nextRarityKey = BoarUtil.getNextRarityKey(this.interactive.curRarityKey);
@@ -390,9 +385,7 @@ class MegaMenuComponentHandler implements Configured {
             }
 
             case EDITIONS -> {
-                this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Failed to defer edit", e
-                ));
+                this.compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.compEvent, this, e));
 
                 this.interactive.page = 0;
 
@@ -405,9 +398,7 @@ class MegaMenuComponentHandler implements Configured {
             }
 
             case ZOOM -> {
-                this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Failed to defer edit", e
-                ));
+                this.compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.compEvent, this, e));
                 this.interactive.acknowledgeOpen = true;
 
                 String curBoarID = this.interactive.curBoarEntry.getKey();
@@ -451,23 +442,20 @@ class MegaMenuComponentHandler implements Configured {
                 );
 
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-                this.compEvent.replyModal(modal).complete();
+                this.compEvent.replyModal(modal)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
 
             case "gift" -> {
-                this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Failed to defer edit", e
-                ));
+                this.compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.compEvent, this, e));
 
                 this.interactive.confirmOpen = true;
                 this.interactive.confirmString = STRS.getPowGiftConfirm().formatted(powConfig.getName());
             }
 
             case "clone", "transmute" -> {
-                this.compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Failed to defer edit", e
-                ));
+                this.compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.compEvent, this, e));
 
                 this.interactive.acknowledgeOpen = true;
                 this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
@@ -489,8 +477,13 @@ class MegaMenuComponentHandler implements Configured {
 
         this.interactive.filterBits = filterBits;
 
-        BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
-        interBoarUser.passSynchronizedAction(this.interactive);
+        try {
+            BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
+            interBoarUser.passSynchronizedAction(this.interactive);
+        } catch (SQLException exception) {
+            this.interactive.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to update data", exception);
+        }
     }
 
     private void setSortVal() {
@@ -500,8 +493,13 @@ class MegaMenuComponentHandler implements Configured {
             Integer.parseInt(((StringSelectInteractionEvent) this.compEvent).getValues().getFirst())
         ];
 
-        BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
-        interBoarUser.passSynchronizedAction(this.interactive);
+        try {
+            BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
+            interBoarUser.passSynchronizedAction(this.interactive);
+        } catch (SQLException exception) {
+            this.interactive.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to update data", exception);
+        }
     }
 
     private void confirmClone(int input) {

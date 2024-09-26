@@ -1,6 +1,7 @@
 package dev.boarbot.interactives;
 
 import dev.boarbot.modals.ModalHandler;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
@@ -18,14 +19,20 @@ public abstract class ModalInteractive extends UserInteractive {
         super(interaction);
     }
 
+    protected ModalInteractive(Interaction interaction, boolean isMsg, long waitTime, long hardTime) {
+        super(interaction, isMsg, waitTime, hardTime);
+    }
+
     public synchronized void attemptExecute(
         GenericComponentInteractionCreateEvent compEvent, ModalInteractionEvent modalEvent, long startTime
     ) {
         if (startTime < this.lastEndTime) {
+            if (compEvent != null) {
+                compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
+            }
+
             Log.debug(
-                compEvent != null ? compEvent.getUser() : modalEvent.getUser(),
-                this.getClass(),
-                "Interacted too fast!"
+                compEvent != null ? compEvent.getUser() : modalEvent.getUser(), this.getClass(), "Interacted too fast!"
             );
 
             return;
@@ -35,11 +42,11 @@ public abstract class ModalInteractive extends UserInteractive {
 
         if (compEvent != null) {
             this.execute(compEvent);
-        } else {
+        } else if (modalEvent != null) {
             this.modalExecute(modalEvent);
         }
 
-        this.lastEndTime = TimeUtil.getCurMilli();
+        this.lastEndTime = TimeUtil.getCurMilli() + NUMS.getInteractiveIdle();
     }
 
     public abstract void modalExecute(ModalInteractionEvent modalEvent);

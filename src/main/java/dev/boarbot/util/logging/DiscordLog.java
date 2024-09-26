@@ -100,17 +100,18 @@ final class DiscordLog implements Configured {
             return;
         }
 
-        logChannel.sendMessage(message).queue(null, e -> {
-            if (e instanceof InsufficientPermissionException) {
+        try {
+            logChannel.sendMessage(message).queue(null, e ->
+                Log.warn(null, DiscordLog.class, "Bot failed to send message to log channel.", e, true)
+            );
+        } catch (Exception exception) {
+            if (exception instanceof InsufficientPermissionException) {
                 logsDisabled = true;
-                Log.warn(
-                    DiscordLog.class,
-                    "Bot does not have permission to send messages to log channel. Channel logs are disabled!",
-                    e
-                );
-            } else {
-                Log.warn(DiscordLog.class, "Bot was unable to a send message to the log channel", e);
+                Log.warn(null, DiscordLog.class, "Bot cannot see log channel. Logs disabled.", exception, true);
+                return;
             }
-        });
+
+            Log.warn(null, DiscordLog.class, "Bot failed to send message to log channel.", exception, true);
+        }
     }
 }

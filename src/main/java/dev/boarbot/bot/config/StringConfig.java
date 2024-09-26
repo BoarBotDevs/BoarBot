@@ -221,11 +221,16 @@ public class StringConfig {
     private String giftSelfOpen = "";
     private String giftTitle = "";
     private String giftOpened = "";
+    private String giftAlreadySent = "";
+    private String reportSuccess = "";
+    private String wipeCheckOneStr = "";
+    private String wipeCheckOneFail = "";
+    private String wipeCheckTwoFail = "";
+    private String wipeSuccess = "";
     private String unavailable = "";
     private String empty = "";
     private String pullLink = "";
     private String githubImg = "";
-    private String supportLink = "";
     private String supportStr = "";
     private String[] spookMessages = {};
 }

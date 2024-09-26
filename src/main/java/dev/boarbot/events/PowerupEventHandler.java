@@ -10,12 +10,15 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.PowerupEventImageGenerator;
 import dev.boarbot.util.interaction.SpecialReply;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -24,7 +27,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class PowerupEventHandler extends EventHandler implements Synchronizable, Configured {
-    @Getter private static final List<Message> curMessages = new ArrayList<>();
+    @Getter protected static final List<Message> curMessages = new ArrayList<>();
     private static final Set<Message> priorMessages = new HashSet<>();
 
     @Getter private final Map<String, Long> userTimes = new HashMap<>();
@@ -78,7 +81,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
         } catch (SQLException exception) {
             Log.error(this.getClass(), "Failed to update Powerup Event messages in database", exception);
         } catch (RuntimeException exception) {
-            Log.error(this.getClass(), "Failed to update Powerup Event messages", exception);
+            Log.error(this.getClass(), "Something went wrong when updating Powerup Event messages", exception);
         }
 
         Log.debug(this.getClass(), "Updated prior Powerup Event messages in database");
@@ -105,7 +108,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
 
     private void removePriorEvent() {
         for (Message msg : priorMessages) {
-            msg.delete().queue(null, e -> {});
+            msg.delete().queue(null, e -> ExceptionHandler.handle(this.getClass(), e));
         }
 
         Log.debug(this.getClass(), "Removed prior Powerup Event messages");
@@ -146,8 +149,12 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
 
             if (!this.userTimes.isEmpty()) {
                 for (String userID : this.userTimes.keySet()) {
-                    BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
-                    boarUser.passSynchronizedAction(this);
+                    try {
+                        BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
+                        boarUser.passSynchronizedAction(this);
+                    } catch (SQLException exception) {
+                        Log.error(this.getClass(), "Failed to update user data", exception);
+                    }
                 }
                 Log.debug(this.getClass(), "Updated participant stats");
             }
@@ -173,20 +180,21 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
     }
 
     private void updateEventEnd(String fastestStr, String avgStr) {
+        MessageCreateData msgData = SpecialReply.getErrorMsgData();
+
         try {
             this.currentImage = ((PowerupEventImageGenerator) this.imageGenerator).setEndStrings(fastestStr, avgStr)
                 .generate().getFileUpload();
+            msgData = new MessageCreateBuilder().setComponents().setFiles(this.currentImage).build();
         } catch (IOException | URISyntaxException exception) {
-            this.currentImage = SpecialReply.getErrorEmbed();
             Log.error(this.getClass(), "Failed to generate Powerup Event end message", exception);
-        } finally {
-            MessageEditBuilder editedMsg = new MessageEditBuilder().setComponents().setFiles(this.currentImage);
-
-            for (Message msg : curMessages) {
-                msg.editMessage(editedMsg.build()).queue(null, e -> {});
-            }
-
-            Log.debug(this.getClass(), "Edited all Powerup Event messages");
         }
+
+        for (Message msg : curMessages) {
+            msg.editMessage(MessageEditData.fromCreateData(msgData))
+                .queue(null, e -> ExceptionHandler.handle(this.getClass(), e));
+        }
+
+        Log.debug(this.getClass(), "Edited all Powerup Event messages");
     }
 }

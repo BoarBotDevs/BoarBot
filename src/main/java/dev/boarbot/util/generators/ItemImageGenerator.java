@@ -8,7 +8,6 @@ import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
-import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.python.PythonUtil;
 import dev.boarbot.util.resource.ResourceUtil;
 import lombok.Getter;
@@ -148,13 +147,7 @@ public class ItemImageGenerator extends ImageGenerator {
     private void generateAnimated() throws IOException {
         Gson g = new Gson();
 
-        byte[] animatedImage = {};
-
-        try {
-            animatedImage = GraphicsUtil.getImageBytes(this.filePath);
-        } catch (IOException exception) {
-            Log.error(this.user, this.getClass(), "Failed to get animated item image", exception);
-        }
+        byte[] animatedImage = GraphicsUtil.getImageBytes(this.filePath);
 
         Process pythonProcess = new ProcessBuilder(
             "python",
@@ -167,18 +160,12 @@ public class ItemImageGenerator extends ImageGenerator {
         this.generatedImageBytes = PythonUtil.getResult(pythonProcess, this.generatedImageBytes, animatedImage);
     }
 
-    private void addAnimatedUser() throws IOException {
-        byte[] userOverlayBytes = {};
+    private void addAnimatedUser() throws IOException, URISyntaxException {
+        BufferedImage userOverlay = this.generateUserImageData();
 
-        try {
-            BufferedImage userOverlay = this.generateUserImageData();
-
-            ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
-            ImageIO.write(userOverlay, "png", byteArrayOS);
-            userOverlayBytes = byteArrayOS.toByteArray();
-        } catch (IOException | URISyntaxException exception) {
-            Log.error(this.user, this.getClass(), "Failed to get animated user image overlay", exception);
-        }
+        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+        ImageIO.write(userOverlay, "png", byteArrayOS);
+        byte[] userOverlayBytes = byteArrayOS.toByteArray();
 
         Process pythonProcess = new ProcessBuilder(
             "python",

@@ -11,6 +11,7 @@ import dev.boarbot.util.data.top.TopType;
 import dev.boarbot.util.generators.TopImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -93,9 +94,7 @@ public class TopInteractive extends ModalInteractive implements Configured {
         String compID = compEvent.getComponentId().split(",")[1];
 
         if (!compID.equals("PAGE")) {
-            compEvent.deferEdit().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Failed to defer edit", e
-            ));
+            compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
         }
 
         Log.debug(
@@ -121,7 +120,7 @@ public class TopInteractive extends ModalInteractive implements Configured {
                 );
 
                 this.setModalHandler(new ModalHandler(compEvent, this));
-                compEvent.replyModal(modal).complete();
+                compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent page/username input modal");
             }
 
@@ -143,9 +142,7 @@ public class TopInteractive extends ModalInteractive implements Configured {
 
     @Override
     public void modalExecute(ModalInteractionEvent modalEvent) {
-        modalEvent.deferEdit().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer edit", e
-        ));
+        modalEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(modalEvent, this, e));
 
         String pageInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
         String usernameInput = modalEvent.getValues().get(1).getAsString();
@@ -166,10 +163,10 @@ public class TopInteractive extends ModalInteractive implements Configured {
             this.setPage(Integer.parseInt(pageInput)-1);
         } catch (NumberFormatException exception) {
             Log.debug(this.user, this.getClass(), "Invalid modal input");
-        } finally {
-            this.setPage(this.page);
-            this.execute(null);
         }
+
+        this.setPage(this.page);
+        this.execute(null);
     }
 
     private void sendResponse() {
@@ -179,11 +176,7 @@ public class TopInteractive extends ModalInteractive implements Configured {
             MessageEditBuilder editedMsg = new MessageEditBuilder()
                 .setFiles(fileUpload).setComponents(this.getCurComponents());
 
-            if (this.isStopped) {
-                return;
-            }
-
-            this.updateInteractive(editedMsg.build());
+            this.updateInteractive(false, editedMsg.build());
         } catch (IOException | URISyntaxException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate leaderboard image", exception);

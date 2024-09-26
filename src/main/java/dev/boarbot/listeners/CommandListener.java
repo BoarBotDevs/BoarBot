@@ -3,13 +3,16 @@ package dev.boarbot.listeners;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.commands.Subcommand;
+import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interaction.SpecialReply;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -34,8 +37,6 @@ public class CommandListener extends ListenerAdapter implements Runnable, Config
 
     @Override
     public void run() {
-        String commandStr = "/%s %s".formatted(this.event.getName(), this.event.getSubcommandName());
-
         if (!this.event.isFromGuild()) {
             return;
         }
@@ -44,31 +45,45 @@ public class CommandListener extends ListenerAdapter implements Runnable, Config
         boolean isDev = Arrays.asList(CONFIG.getMainConfig().getDevs()).contains(this.event.getUser().getId());
 
         if (isMaintenance && !isDev) {
-            SpecialReply.sendMaintenanceEmbed(this.event.getInteraction());
+            MessageCreateBuilder msg = new MessageCreateBuilder();
+
+            try {
+                msg.setFiles(new EmbedImageGenerator(
+                    STRS.getMaintenance(), COLORS.get("maintenance")
+                ).generate().getFileUpload());
+            } catch (IOException exception) {
+                Log.error(this.event.getUser(), this.getClass(), "Failed to generate maintenance embed", exception);
+                msg.setContent(STRS.getMaintenance());
+            }
+
+            this.event.getInteraction().reply(msg.build()).setEphemeral(true).queue(null,
+                e -> ExceptionHandler.replyHandle(this.event, this.getClass(), e)
+            );
+
             return;
         }
 
+        String commandStr = "/%s %s".formatted(this.event.getName(), this.event.getSubcommandName());
         Log.debug(this.event.getUser(), this.getClass(), "Running %s".formatted(commandStr));
 
         try {
             Subcommand subcommand = subcommands.get(this.event.getName() + this.event.getSubcommandName())
                 .newInstance(this.event);
             subcommand.execute();
+
             Log.debug(this.event.getUser(), this.getClass(), "Finished processing %s".formatted(commandStr));
 
-            Thread.sleep(3000);
             subcommand.trySendEventDisabled();
         } catch (InstantiationException exception) {
-            SpecialReply.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorMessage(this.event.getInteraction(), this);
             Log.error(
                 this.event.getUser(),
                 this.getClass(),
                 "%s's class is an abstract class".formatted(commandStr),
                 exception
             );
-        } catch (InterruptedException ignored) {
         } catch (IllegalAccessException exception) {
-            SpecialReply.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorMessage(this.event.getInteraction(), this);
             Log.error(
                 this.event.getUser(),
                 this.getClass(),
@@ -76,23 +91,15 @@ public class CommandListener extends ListenerAdapter implements Runnable, Config
                 exception
             );
         } catch (InvocationTargetException exception) {
-            SpecialReply.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorMessage(this.event.getInteraction(), this);
             Log.error(
                 this.event.getUser(),
                 this.getClass(),
                 "%s's constructor threw exception".formatted(commandStr),
                 exception
             );
-        } catch (ErrorResponseException exception) {
-            SpecialReply.sendErrorEmbed(this.event.getInteraction());
-            Log.warn(
-                this.event.getUser(),
-                this.getClass(),
-                "%s's execute method threw a Discord exception".formatted(commandStr),
-                exception
-            );
         } catch (RuntimeException exception) {
-            SpecialReply.sendErrorEmbed(this.event.getInteraction());
+            SpecialReply.sendErrorMessage(this.event.getInteraction(), this);
             Log.error(
                 this.event.getUser(),
                 this.getClass(),

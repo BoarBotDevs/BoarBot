@@ -1,7 +1,5 @@
 package dev.boarbot.util.resource;
 
-import dev.boarbot.util.logging.Log;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -63,29 +61,21 @@ public class ResourceUtil {
     public static final String itemGroupScript = scriptsPath + "animated_item_grouper.py";
     public static final String animOverlayScript = scriptsPath + "apply_animated.py";
 
-    public static URL getResource(String pathStr) {
+    public static URL getResource(String pathStr) throws MalformedURLException {
         Path path = resourcepackDir.resolve(pathStr);
 
         if (Files.exists(path)) {
-            try {
-                return path.toUri().toURL();
-            } catch (MalformedURLException exception) {
-                Log.error(ResourceUtil.class, "Failed to get URL from resource: " + pathStr, exception);
-            }
+            return path.toUri().toURL();
         }
 
         return ResourceUtil.class.getClassLoader().getResource(pathStr);
     }
 
-    public static InputStream getResourceStream(String pathStr) {
+    public static InputStream getResourceStream(String pathStr) throws FileNotFoundException {
         Path path = resourcepackDir.resolve(pathStr);
 
         if (Files.exists(path)) {
-            try {
-                return new FileInputStream(path.toFile());
-            } catch (FileNotFoundException exception) {
-                Log.error(ResourceUtil.class, "Failed to open resource: " + pathStr, exception);
-            }
+            return new FileInputStream(path.toFile());
         }
 
         return ResourceUtil.class.getClassLoader().getResourceAsStream(pathStr);

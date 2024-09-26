@@ -3,19 +3,19 @@ package dev.boarbot.interactives.event;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
+import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 public abstract class EventInteractive extends Interactive {
-    private final TextChannel channel;
-    private Message msg;
+    protected final TextChannel channel;
+    @Getter protected Message msg;
 
     protected EventInteractive(TextChannel channel) {
         super(channel.getId() + TimeUtil.getCurMilli(), channel.getGuild().getId());
@@ -28,36 +28,37 @@ public abstract class EventInteractive extends Interactive {
     }
 
     @Override
-    public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
+    public void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
         this.execute(compEvent);
     }
 
     @Override
-    public Message updateInteractive(MessageEditData editedMsg) {
-        if (this.msg == null) {
-            this.msg = this.channel.sendMessage(MessageCreateData.fromEditData(editedMsg)).complete();
-            return this.msg;
-        }
-
-        return this.msg.editMessage(editedMsg).complete();
-    }
+    public abstract void updateInteractive(boolean stopping, MessageEditData editedMsg);
 
     @Override
-    public Message updateComponents(ActionRow... rows) {
+    public void updateComponents(boolean stopping, ActionRow... rows) {
+        if (this.isStopped && !stopping) {
+            return;
+        }
+
         if (this.msg == null) {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }
 
-        return this.msg.editMessageComponents(rows).complete();
+        this.msg.editMessageComponents(rows).queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
     }
 
     @Override
-    public void deleteInteractive() {
+    public void deleteInteractive(boolean stopping) {
+        if (this.isStopped && !stopping) {
+            return;
+        }
+
         if (this.msg == null) {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }
 
-        this.msg.delete().complete();
+        this.msg.delete().queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
     }
 
     @Override
@@ -70,15 +71,17 @@ public abstract class EventInteractive extends Interactive {
         }
 
         if (type.equals(StopType.EXCEPTION)) {
-            MessageEditBuilder msg = new MessageEditBuilder()
-                .setFiles(SpecialReply.getErrorEmbed())
-                .setComponents();
-
-            this.msg.editMessage(msg.build()).complete();
+            this.msg.editMessage(MessageEditData.fromCreateData(SpecialReply.getErrorMsgData()))
+                .queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
             return;
         }
 
-        this.msg.editMessageComponents().complete();
         Log.debug(this.getClass(), "Interactive expired");
+        this.msg.editMessageComponents().queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
+    }
+
+    @Override
+    public Interactive removeInteractive() {
+        return super.removeInteractive();
     }
 }

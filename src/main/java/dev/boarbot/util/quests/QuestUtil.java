@@ -3,6 +3,7 @@ package dev.boarbot.util.quests;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.quests.IndivQuestConfig;
 import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -31,7 +32,8 @@ public class QuestUtil implements Configured {
         try {
             MessageCreateBuilder msg = new MessageCreateBuilder()
                 .setFiles(embedImageGenerator.generate().getFileUpload());
-            hook.sendMessage(msg.build()).setEphemeral(true).complete();
+            hook.sendMessage(msg.build()).setEphemeral(true)
+                .queue(null, e -> ExceptionHandler.replyHandle(hook, QuestUtil.class, e));
         } catch (IOException exception) {
             Log.error(
                 hook.getInteraction().getUser(), QuestUtil.class, "Failed to send quest claim message", exception

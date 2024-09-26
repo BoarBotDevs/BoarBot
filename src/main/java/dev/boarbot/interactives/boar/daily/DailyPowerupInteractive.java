@@ -15,6 +15,7 @@ import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.graphics.TextUtil;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -79,18 +80,22 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 );
 
                 this.modalHandler = new ModalHandler(compEvent, this);
-                compEvent.replyModal(modal).complete();
+                compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
 
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
 
             case "SUBMIT_POW" -> {
-                compEvent.deferEdit().queue(null, e -> Log.warn(
-                    this.user, this.getClass(), "Failed to defer edit", e
-                ));
+                compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
 
-                BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-                boarUser.passSynchronizedAction(this);
+                try {
+                    BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
+                    boarUser.passSynchronizedAction(this);
+                } catch (SQLException exception) {
+                    this.stop(StopType.EXCEPTION);
+                    Log.error(this.user, this.getClass(), "Failed to update data", exception);
+                    return;
+                }
             }
 
             case "CANCEL_POW" -> this.stop(StopType.EXPIRED);
@@ -111,11 +116,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                 .setFiles(this.currentImageUpload)
                 .setComponents(this.getCurComponents());
 
-            if (this.isStopped) {
-                return;
-            }
-
-            this.updateInteractive(editedMsg.build());
+            this.updateInteractive(false, editedMsg.build());
         } catch (IOException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate powerup use message", exception);
@@ -136,6 +137,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             this.currentImageUpload = new EmbedImageGenerator(
                 STRS.getNoPow().formatted(POWS.get("miracle").getPluralName()) + " " + STRS.getDailyPow()
             ).generate().getFileUpload();
+            this.sendResponse();
 
             Log.debug(this.user, this.getClass(), "Not enough of this powerup owned");
         } catch (SQLException exception) {
@@ -143,10 +145,8 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             Log.error(this.user, this.getClass(), "Failed to query powerups", exception);
         } catch (IOException exception) {
             this.stop(StopType.EXCEPTION);
-            Log.error(this.user, this.getClass(), "Failed to generate no powerup message", exception);
+            Log.error(this.user, this.getClass(), "Failed to generate not enough miracles embed", exception);
         }
-
-        this.sendResponse();
     }
 
     @Override
@@ -164,7 +164,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         }
 
         if (type.equals(StopType.EXPIRED)) {
-            this.deleteInteractive();
+            this.deleteInteractive(true);
             Log.debug(this.user, this.getClass(), "Cancelled interactive");
         }
 
@@ -196,18 +196,16 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     @Override
     public void modalExecute(ModalInteractionEvent modalEvent) {
-        modalEvent.deferEdit().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer edit", e
-        ));
+        modalEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(modalEvent, this, e));
 
         PowerupItemConfig miracleConfig = POWS.get("miracle");
 
         Log.debug(this.user, this.getClass(), "Miracle input: " + modalEvent.getValues().getFirst().getAsString());
 
         try {
-            BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-
             try (Connection connection = DataUtil.getConnection()) {
+                BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
+
                 int numMiraclesHas = boarUser.powQuery().getPowerupAmount(connection, "miracle");
                 String amountInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
                 int amount = Math.min(Integer.parseInt(amountInput), numMiraclesHas);

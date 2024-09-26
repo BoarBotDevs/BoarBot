@@ -1,7 +1,9 @@
 package dev.boarbot.interactives;
 
 import dev.boarbot.commands.boar.DailySubcommand;
+import dev.boarbot.interactives.boar.ReportInteractive;
 import dev.boarbot.interactives.boar.TopInteractive;
+import dev.boarbot.interactives.boar.WipeInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
@@ -24,6 +26,10 @@ public class InteractiveFactory {
             return new DailyNotifyInteractive(initEvent);
         } else if (interactiveClass == TopInteractive.class) {
             return new TopInteractive(initEvent);
+        } else if (interactiveClass == ReportInteractive.class) {
+            return new ReportInteractive(initEvent);
+        } else if (interactiveClass == WipeInteractive.class) {
+            return new WipeInteractive(initEvent);
         }
 
         throw new IllegalArgumentException("Not a valid interactive class: " + interactiveClass);

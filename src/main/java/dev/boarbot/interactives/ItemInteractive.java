@@ -6,7 +6,7 @@ import dev.boarbot.util.generators.ItemImageGenerator;
 import dev.boarbot.util.generators.ItemImageGrouper;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
-import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.logging.ExceptionHandler;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -34,6 +34,8 @@ public class ItemInteractive extends UserInteractive {
 
     private final List<String> boarIDs;
     private final List<Integer> boarEditions;
+
+    private final MessageEditBuilder messageBuilder = new MessageEditBuilder();
 
     private final static Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getDaily();
 
@@ -85,15 +87,8 @@ public class ItemInteractive extends UserInteractive {
 
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
-        if (this.itemGens.size() == 1) {
-            this.stop(StopType.EXPIRED);
-            return;
-        }
-
         if (compEvent != null) {
-            compEvent.deferEdit().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Failed to defer edit", e
-            ));
+            compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
 
             if (!this.user.getId().equals(compEvent.getUser().getId())) {
                 return;
@@ -112,23 +107,24 @@ public class ItemInteractive extends UserInteractive {
             }
         }
 
-        try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {
-            MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(imageToSend);
-
-            if (this.boarIDs != null) {
-                editedMsg.setComponents(this.getCurComponents());
-            }
-
-            if (this.isStopped) {
-                return;
-            }
-
-            this.updateInteractive(editedMsg.build());
+        try {
+            FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page);
+            this.messageBuilder.setFiles(imageToSend);
         } catch (IOException | URISyntaxException exception) {
             this.stop(StopType.EXCEPTION);
-            Log.error(this.user, this.getClass(), "Failed to generate grouped items", exception);
+            return;
         }
+
+        if (this.itemGens.size() == 1) {
+            this.stop(StopType.EXPIRED);
+            return;
+        }
+
+        if (this.boarIDs != null) {
+            this.messageBuilder.setComponents(this.getCurComponents());
+        }
+
+        this.updateInteractive(false, this.messageBuilder.build());
     }
 
     @Override
@@ -149,18 +145,11 @@ public class ItemInteractive extends UserInteractive {
             this.makeSelectOptions(this.boarIDs, this.boarEditions);
         }
 
-        try (FileUpload imageToSend = ItemImageGrouper.groupItems(this.itemGens, this.page)) {
-            MessageEditBuilder editedMsg = new MessageEditBuilder().setFiles(imageToSend);
-
-            if (this.boarIDs != null) {
-                editedMsg.setComponents(this.getCurComponents()[0]);
-            }
-
-            this.updateInteractive(editedMsg.build());
-        } catch (IOException | URISyntaxException exception) {
-            this.stop(StopType.EXCEPTION);
-            Log.error(this.user, this.getClass(), "Failed to generate grouped items", exception);
+        if (this.boarIDs != null) {
+            this.messageBuilder.setComponents(this.getCurComponents()[0]);
         }
+
+        this.updateInteractive(true, this.messageBuilder.build());
     }
 
     @Override

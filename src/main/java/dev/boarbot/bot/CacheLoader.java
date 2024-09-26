@@ -5,7 +5,9 @@ import dev.boarbot.api.util.Configured;
 
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.interactives.boar.TopInteractive;
+import dev.boarbot.listeners.ReadyListener;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.data.UserDataUtil;
 import dev.boarbot.util.data.top.TopData;
 import dev.boarbot.util.data.top.TopDataUtil;
 import dev.boarbot.util.data.top.TopType;
@@ -88,10 +90,10 @@ public class CacheLoader implements Configured {
 
                 GraphicsUtil.drawImage(mediumBoarGraphics, filePath, ORIGIN, MEDIUM_SIZE);
                 imageCacheMap.put("medium" + boarID, mediumBoarImage);
-            } catch (IOException exception) {
+            } catch (IOException | URISyntaxException exception) {
                 Log.error(CacheLoader.class, "Failed to read image file for %s".formatted(boarID), exception);
                 System.exit(-1);
-            } catch (URISyntaxException ignored) {}
+            }
         }
 
         Log.debug(CacheLoader.class, "Successfully loaded all boar images into cache");
@@ -127,10 +129,10 @@ public class CacheLoader implements Configured {
                 );
                 rarityMediumBigBorderG2D.setComposite(AlphaComposite.SrcIn);
                 imageCacheMap.put("borderMediumBig" + rarityID, rarityMediumBigBorderImage);
-            } catch (IOException exception) {
+            } catch (IOException | URISyntaxException exception) {
                 Log.error(CacheLoader.class, "Failed to read image file for %s border".formatted(rarityID), exception);
                 System.exit(-1);
-            } catch (URISyntaxException ignored) {}
+            }
         }
 
         Log.debug(CacheLoader.class, "Successfully loaded all rarity borders into cache");
@@ -141,6 +143,10 @@ public class CacheLoader implements Configured {
             Set<String> firstUsernames = new HashSet<>();
             Set<String> secondUsernames = new HashSet<>();
             Set<String> thirdUsernames = new HashSet<>();
+
+            if (ReadyListener.isDone()) {
+                UserDataUtil.fixUsernames(connection);
+            }
 
             for (TopType topType : TopType.values()) {
                 Map<String, TopData> board = TopDataUtil.getBoard(topType, connection);
@@ -169,6 +175,8 @@ public class CacheLoader implements Configured {
             TopDataUtil.setAthleteBadges(firstUsernames, secondUsernames, thirdUsernames, connection);
         } catch (SQLException exception) {
             Log.error(CacheLoader.class, "Failed to retrieve leaderboard data", exception);
+        } catch (RuntimeException exception) {
+            Log.error(CacheLoader.class, "A problem occurred while reloading leaderboards", exception);
         }
     }
 }

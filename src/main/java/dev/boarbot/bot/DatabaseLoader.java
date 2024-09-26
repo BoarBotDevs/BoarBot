@@ -64,7 +64,7 @@ class DatabaseLoader implements Configured {
                         String foundRarityID = BoarUtil.findRarityKey(boarID);
                         boolean isSkyblock = resultSet.getBoolean("is_skyblock");
 
-                        boolean boarExists = BOARS.containsKey(boarID);
+                        boolean boarExists = BOARS.containsKey(boarID) && !BOARS.get(boarID).isBlacklisted();
                         boolean needsFixed = boarExists &&
                             (!rarityID.equals(foundRarityID) || isSkyblock != BOARS.get(boarID).isSB());
 

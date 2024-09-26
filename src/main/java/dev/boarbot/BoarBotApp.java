@@ -3,6 +3,7 @@ package dev.boarbot;
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.BoarBot;
 import dev.boarbot.migration.MigrationHandler;
+import dev.boarbot.util.logging.Log;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.Getter;
 
@@ -31,7 +32,10 @@ public class BoarBotApp {
         if (args.length != 0 && args[0].equals("migrate")) {
             try {
                 bot.getJDA().awaitReady();
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException exception) {
+                Log.error(BoarBotApp.class, "Main thread interrupted before bot was ready", exception);
+                System.exit(-1);
+            }
 
             MigrationHandler.doMigration();
         }
@@ -39,7 +43,10 @@ public class BoarBotApp {
         if (args.length != 0 && args[0].equals("deploy-commands")) {
             try {
                 bot.getJDA().awaitReady();
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException exception) {
+                Log.error(BoarBotApp.class, "Main thread interrupted before bot was ready", exception);
+                System.exit(-1);
+            }
 
             bot.deployCommands();
         }

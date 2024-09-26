@@ -8,7 +8,9 @@ import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interaction.SpecialReply;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -30,12 +32,18 @@ public class GiftSubcommand extends Subcommand {
         }
 
         boolean noGift = true;
+        boolean giftSent = true;
 
         try (Connection connection = DataUtil.getConnection()) {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
             noGift = boarUser.powQuery().getPowerupAmount(connection, "gift") == 0;
+            giftSent = boarUser.powQuery().getLastGiftSent(connection) > TimeUtil.getCurMilli() - NUMS.getGiftIdle();
+
+            if (!noGift && !giftSent) {
+                boarUser.powQuery().setLastGiftSent(connection, TimeUtil.getCurMilli());
+            }
         } catch (SQLException exception) {
-            SpecialReply.sendErrorEmbed(this.interaction);
+            SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.user, this.getClass(), "Failed to get number of gifts", exception);
         }
 
@@ -45,18 +53,36 @@ public class GiftSubcommand extends Subcommand {
                 FileUpload fileUpload = new EmbedImageGenerator(replyStr).generate().getFileUpload();
                 MessageCreateBuilder messageBuilder = new MessageCreateBuilder().setFiles(fileUpload);
 
-                this.interaction.reply(messageBuilder.build()).setEphemeral(true).complete();
+                this.interaction.reply(messageBuilder.build()).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
+
+                Log.debug(this.user, this.getClass(), "Failed to gift: Not enough");
             } catch (IOException exception) {
-                SpecialReply.sendErrorEmbed(this.interaction);
+                SpecialReply.sendErrorMessage(this.interaction, this);
                 Log.error(this.user, this.getClass(), "Failed to generate no gifts message", exception);
             }
 
             return;
         }
 
-        this.interaction.deferReply().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer reply", e
-        ));
+        if (giftSent) {
+            try {
+                FileUpload fileUpload = new EmbedImageGenerator(STRS.getGiftAlreadySent()).generate().getFileUpload();
+                MessageCreateBuilder messageBuilder = new MessageCreateBuilder().setFiles(fileUpload);
+
+                this.interaction.reply(messageBuilder.build()).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
+
+                Log.debug(this.user, this.getClass(), "Failed to gift: Already sent");
+            } catch (IOException exception) {
+                SpecialReply.sendErrorMessage(this.interaction, this);
+                Log.error(this.user, this.getClass(), "Failed to generate gift sent message", exception);
+            }
+
+            return;
+        }
+
+        this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
         Interactive interactive = InteractiveFactory.constructGiftInteractive(this.event, false);
         interactive.execute(null);

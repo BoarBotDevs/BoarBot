@@ -9,6 +9,7 @@ import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.util.interaction.SpecialReply;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestUtil;
@@ -51,13 +52,18 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             return;
         }
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-        boarUser.passSynchronizedAction(this);
+        try {
+            BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
+            boarUser.passSynchronizedAction(this);
+        } catch (SQLException exception) {
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.user, this.getClass(), "Failed to update data", exception);
+            return;
+        }
 
         if (!this.canDaily) {
-            this.interaction.deferReply().setEphemeral(true).queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Failed to defer reply", e
-            ));
+            this.interaction.deferReply().setEphemeral(true)
+                .queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
             if (!this.notificationsOn) {
                 Interactive interactive = InteractiveFactory.constructInteractive(
@@ -75,9 +81,10 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             try {
                 FileUpload fileUpload = new EmbedImageGenerator(replyStr).generate().getFileUpload();
                 MessageEditBuilder editedMsg = new MessageEditBuilder().setFiles(fileUpload).setComponents();
-                this.interaction.getHook().editOriginal(editedMsg.build()).complete();
+                this.interaction.getHook().editOriginal(editedMsg.build())
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
             } catch (IOException exception) {
-                SpecialReply.sendErrorEmbed(this.interaction);
+                SpecialReply.sendErrorMessage(this.interaction, this);
                 Log.error(this.user, this.getClass(), "Failed to generate daily used message", exception);
             }
 
@@ -99,15 +106,14 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 return;
             }
         } catch (SQLException exception) {
-            SpecialReply.sendErrorEmbed(this.interaction);
+            SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.user, this.getClass(), "Failed to get daily or notification status", exception);
+            return;
         }
 
         if (!this.hasDonePowerup && this.event.getOption("powerup") == null) {
             Log.debug(this.user, this.getClass(), "Doing daily without powerup");
-            this.interaction.deferReply().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Failed to defer reply", e
-            ));
+            this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
         }
 
         try (Connection connection = DataUtil.getConnection()) {
@@ -141,7 +147,9 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
                 QuestType.COLLECT_BUCKS, this.bucksGotten.stream().reduce(0, Integer::sum), connection
             ));
         } catch (SQLException exception) {
-            SpecialReply.sendErrorEmbed(this.interaction);
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            this.boarIDs.clear();
+            this.sendExtraResponses();
             Log.error(this.user, this.getClass(), "Failed to fully complete daily update logic", exception);
         }
     }
@@ -154,10 +162,15 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         );
         Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
 
+        this.sendExtraResponses();
+    }
+
+    private void sendExtraResponses() {
         if (this.isFirstDaily) {
             try {
                 EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getDailyFirstTime());
-                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
+                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
             } catch (IOException exception) {
                 Log.error(this.user, this.getClass(), "Failed to generate first daily reward message", exception);
             }
@@ -167,9 +180,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
     }
 
     private void sendPowResponse() {
-        this.interaction.deferReply().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer reply", e
-        ));
+        this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
         Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
         interactive.execute(null);

@@ -8,6 +8,7 @@ import dev.boarbot.events.PowerupEventHandler;
 import dev.boarbot.events.PromptType;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.interaction.SpecialReply;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestUtil;
 import dev.boarbot.util.quests.QuestType;
@@ -17,18 +18,20 @@ import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Setter;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 
 import java.io.IOException;
@@ -45,6 +48,8 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
     private final Map<String, Boolean> failUsers;
     private final Map<String, InteractionHook> userHooks = new HashMap<>();
     private long sentTimestamp;
+
+    private final Set<String> failedSynchronized = new HashSet<>();
 
     @Setter private FileUpload eventImage;
 
@@ -73,9 +78,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             return;
         }
 
-        compEvent.deferEdit().queue(null, e -> Log.warn(
-            compEvent.getUser(), this.getClass(), "Failed to defer edit", e
-        ));
+        compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
 
         String userID = compEvent.getUser().getId();
         EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getPowEventAttempted(), COLORS.get("error"));
@@ -87,7 +90,8 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 this.failUsers.containsKey(userID) && this.failUsers.get(userID);
 
             if (hasAttempted) {
-                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
+                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(compEvent.getHook(), this, e));
                 return;
             }
 
@@ -97,6 +101,10 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
                 boarUser.passSynchronizedAction(this);
 
+                if (this.failedSynchronized.contains(boarUser.getUserID())) {
+                    return;
+                }
+
                 int eventAmt = POWS.get(this.powerupID).getEventAmt();
                 String powStr = eventAmt == 1
                     ? POWS.get(this.powerupID).getName()
@@ -104,7 +112,8 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 embedGen.setStr(STRS.getPowEventSuccess().formatted(this.userTimes.get(userID), eventAmt, powStr))
                     .setColor(COLORS.get("font"));
 
-                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
+                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(compEvent.getHook(), this, e));
                 Log.debug(compEvent.getUser(), this.getClass(), "Gave powerup win rewards");
                 return;
             }
@@ -116,26 +125,63 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 boarUser.passSynchronizedAction(this);
 
                 embedGen.setStr(STRS.getPowEventFail()).setColor(COLORS.get("font"));
-                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
+                compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(compEvent.getHook(), this, e));
                 Log.debug(compEvent.getUser(), this.getClass(), "Updated powerup fail status");
                 return;
             }
 
             this.failUsers.put(userID, false);
             embedGen.setStr(STRS.getPowEventIncorrect()).setColor(COLORS.get("font"));
-            compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true).complete();
+            compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
+                .queue(null, e -> ExceptionHandler.replyHandle(compEvent.getHook(), this, e));
             Log.debug(compEvent.getUser(), this.getClass(), "Guessed incorrectly");
+        } catch (SQLException exception) {
+            SpecialReply.sendErrorMessage(compEvent.getHook(), this);
+            Log.error(compEvent.getUser(), this.getClass(), "Failed to update data", exception);
         } catch (IOException exception) {
-            SpecialReply.sendErrorEmbed(compEvent.getHook());
+            SpecialReply.sendErrorMessage(compEvent.getHook(), this);
             Log.error(compEvent.getUser(), this.getClass(), "Failed to generate response", exception);
         }
     }
 
     private void sendResponse() {
-        MessageEditBuilder messageBuilder = new MessageEditBuilder().setFiles(this.eventImage)
+        MessageEditBuilder messageBuilder = new MessageEditBuilder()
+            .setFiles(this.eventImage)
             .setComponents(this.getCurComponents());
-        Message interactiveMessage = this.updateInteractive(messageBuilder.build());
-        PowerupEventHandler.getCurMessages().add(interactiveMessage);
+        this.updateInteractive(false, messageBuilder.build());
+    }
+
+    @Override
+    public void updateInteractive(boolean stopping, MessageEditData editedMsg) {
+        if (this.isStopped && !stopping) {
+            return;
+        }
+
+        if (this.msg == null) {
+            try {
+                this.channel.sendMessage(MessageCreateData.fromEditData(editedMsg)).queue(
+                    msg -> {
+                        this.msg = msg;
+                        PowerupEventHandler.getCurMessages().add(this.msg);
+                        this.eventHandler.decNumPotential();
+                        this.eventHandler.incNumActive();
+                    },
+                    e -> {
+                        this.eventHandler.getFailedGuilds().add(this.channel.getGuild().getId());
+                        this.eventHandler.decNumPotential();
+                        ExceptionHandler.handle(this.getClass(), e);
+                    }
+                );
+            } catch (InsufficientPermissionException exception) {
+                this.eventHandler.decNumPotential();
+                this.eventHandler.getFailedGuilds().add(this.channel.getGuild().getId());
+            }
+
+            return;
+        }
+
+        this.msg.editMessage(editedMsg).queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
     }
 
     public void doSynchronizedAction(BoarUser boarUser) {
@@ -152,14 +198,18 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     boarUser.questQuery().addProgress(QuestType.POW_FAST, this.userTimes.get(userID), connection)
                 );
             } catch (SQLException exception) {
-                SpecialReply.sendErrorEmbed(this.userHooks.get(boarUser.getUserID()));
+
+                this.failedSynchronized.add(boarUser.getUserID());
+                SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
                 Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event win", exception);
             }
         } else if (this.failUsers.containsKey(userID) && this.failUsers.get(userID)) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.eventQuery().applyPowEventFail(connection);
             } catch (SQLException exception) {
-                SpecialReply.sendErrorEmbed(this.userHooks.get(boarUser.getUserID()));
+
+                this.failedSynchronized.add(boarUser.getUserID());
+                SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
                 Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);
             }
         }
@@ -181,7 +231,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
         }
 
         try {
-            this.updateComponents(ActionRow.of(tabulatingBtn));
+            this.updateComponents(true, ActionRow.of(tabulatingBtn));
             this.eventHandler.decNumActive();
         } catch (ErrorResponseException ignored) {}
     }

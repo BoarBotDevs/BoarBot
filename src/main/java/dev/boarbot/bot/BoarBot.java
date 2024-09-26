@@ -32,7 +32,7 @@ public class BoarBot implements Bot {
 
     private final Map<String, Constructor<? extends Subcommand>> subcommands = new HashMap<>();
     private final ConcurrentMap<String, Interactive> interactives = new ConcurrentHashMap<>();
-    private final Map<String, ModalHandler> modalHandlers = new HashMap<>();
+    private final Map<String, ModalHandler> modalHandlers = new ConcurrentHashMap<>();
 
     @Override
     public void create() {

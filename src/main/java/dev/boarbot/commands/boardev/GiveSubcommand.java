@@ -11,6 +11,8 @@ import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.ItemType;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.interaction.SpecialReply;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.resource.ResourceUtil;
 import net.dv8tion.jda.api.entities.User;
@@ -35,6 +37,8 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
     private final List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucks = new ArrayList<>();
     private final List<Integer> editions = new ArrayList<>();
+
+    private boolean failedSynchronized = false;
 
     public GiveSubcommand(SlashCommandInteractionEvent event) {
         super(event);
@@ -92,16 +96,24 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
             return;
         }
 
-        this.interaction.deferReply().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer reply", e
-        ));
+        this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
         for (int i=0; i<this.amount; i++) {
             this.boarIDs.add(this.itemID);
         }
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
-        boarUser.passSynchronizedAction(this);
+        try {
+            BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
+            boarUser.passSynchronizedAction(this);
+        } catch (SQLException exception) {
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.giftedUser, this.getClass(), "Failed to update data", exception);
+            return;
+        }
+
+        if (this.failedSynchronized) {
+            return;
+        }
 
         ItemInteractive.sendInteractive(
             this.boarIDs,
@@ -121,12 +133,20 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
             return;
         }
 
-        this.interaction.deferReply().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer reply", e
-        ));
+        this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
-        boarUser.passSynchronizedAction(this);
+        try {
+            BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
+            boarUser.passSynchronizedAction(this);
+        } catch (SQLException exception) {
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.giftedUser, this.getClass(), "Failed to update data", exception);
+            return;
+        }
+
+        if (this.failedSynchronized) {
+            return;
+        }
 
         BadgeItemConfig badge = BADGES.get(this.itemID);
         this.tier = Math.min(badge.getNames().length-1, this.tier);
@@ -149,12 +169,20 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
             return;
         }
 
-        this.interaction.deferReply().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer reply", e
-        ));
+        this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
-        boarUser.passSynchronizedAction(this);
+        try {
+            BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
+            boarUser.passSynchronizedAction(this);
+        } catch (SQLException exception) {
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.giftedUser, this.getClass(), "Failed to update data", exception);
+            return;
+        }
+
+        if (this.failedSynchronized) {
+            return;
+        }
 
         PowerupItemConfig powerup = POWS.get(this.itemID);
         String powerupName = POWS.get("gift").getOutcomes().get("powerup").getRewardStr().formatted(
@@ -174,12 +202,20 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
     }
 
     private void giveBucks() {
-        this.interaction.deferReply().queue(null, e -> Log.warn(
-            this.user, this.getClass(), "Failed to defer reply", e
-        ));
+        this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
-        boarUser.passSynchronizedAction(this);
+        try {
+            BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
+            boarUser.passSynchronizedAction(this);
+        } catch (SQLException exception) {
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.giftedUser, this.getClass(), "Failed to update data", exception);
+            return;
+        }
+
+        if (this.failedSynchronized) {
+            return;
+        }
 
         String bucksName = POWS.get("gift").getOutcomes().get("bucks").getRewardStr().formatted(
             this.amount, this.amount == 1 ? STRS.getBucksName() : STRS.getBucksPluralName()
@@ -205,24 +241,32 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
                     this.boarIDs, connection, BoarObtainType.OTHER, this.bucks, this.editions
                 );
             } catch (SQLException exception) {
+                this.failedSynchronized = true;
+                SpecialReply.sendErrorMessage(this.interaction, this);
                 Log.error(this.user, this.getClass(), "Failed to add boars", exception);
             }
         } else if (this.itemType == ItemType.BADGE) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.baseQuery().giveBadge(connection, this.itemID, this.tier);
             } catch (SQLException exception) {
+                this.failedSynchronized = true;
+                SpecialReply.sendErrorMessage(this.interaction, this);
                 Log.error(this.user, this.getClass(), "Failed to add badge", exception);
             }
         } else if (this.itemType == ItemType.POWERUP) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.powQuery().addPowerup(connection, this.itemID, this.amount, true);
             } catch (SQLException exception) {
+                this.failedSynchronized = true;
+                SpecialReply.sendErrorMessage(this.interaction, this);
                 Log.error(this.user, this.getClass(), "Failed to add powerup", exception);
             }
         } else if (this.itemType == ItemType.BUCKS) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.baseQuery().giveBucks(connection, this.amount);
             } catch (SQLException exception) {
+                this.failedSynchronized = true;
+                SpecialReply.sendErrorMessage(this.interaction, this);
                 Log.error(this.user, this.getClass(), "Failed to add bucks", exception);
             }
         }
@@ -232,8 +276,10 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
         try {
             FileUpload fileUpload = new EmbedImageGenerator(replyMsg, COLORS.get("error")).generate()
                 .getFileUpload();
-            this.interaction.replyFiles(fileUpload).setEphemeral(true).complete();
+            this.interaction.replyFiles(fileUpload).setEphemeral(true)
+                .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
         } catch (IOException exception) {
+            SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.user, this.getClass(), errorMsg, exception);
         }
     }

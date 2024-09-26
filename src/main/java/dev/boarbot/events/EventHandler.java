@@ -4,8 +4,8 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.ImageGenerator;
 import dev.boarbot.util.logging.Log;
+import lombok.Getter;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.FileUpload;
 
@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class EventHandler {
-    protected Set<String> failedGuilds = new HashSet<>();
+    @Getter protected Set<String> failedGuilds = new HashSet<>();
 
     protected ImageGenerator imageGenerator;
     protected FileUpload currentImage;
@@ -50,19 +50,9 @@ public abstract class EventHandler {
                     try {
                         incNumPotential();
                         this.sendInteractive(channel);
-                        this.incNumActive();
-                    } catch (InsufficientPermissionException exception) {
-                        this.failedGuilds.add(guildID);
-                    } catch (ErrorResponseException exception) {
-                        Log.warn(
-                            this.getClass(),
-                            "Failed to send event in channel %s in guild %s".formatted(channel.getId(), guildID),
-                            exception
-                        );
                     } catch (RuntimeException exception) {
-                        Log.error(this.getClass(), "A problem occurred when sending event", exception);
-                    } finally {
                         this.decNumPotential();
+                        Log.error(this.getClass(), "A problem occurred when sending event", exception);
                     }
                 });
             }
@@ -80,13 +70,13 @@ public abstract class EventHandler {
         this.numPotential++;
     }
 
-    private synchronized void decNumPotential() {
+    public synchronized void decNumPotential() {
         if (--this.numPotential == 0) {
             this.handleAfterSend();
         }
     }
 
-    private synchronized void incNumActive() {
+    public synchronized void incNumActive() {
         this.numActive++;
     }
 

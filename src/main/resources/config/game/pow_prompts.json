@@ -112,10 +112,10 @@
         "name": "Low Quality Boar",
         "description": "What is Low Quality Boar's internet speed?",
         "choices": [
-          "1 Kb/s",
+          "1 kb/s",
           "1 Mb/s",
-          "500 Kb/s",
-          "10 Kb/s"
+          "500 kb/s",
+          "10 kb/s"
         ]
       },
       "chocolateTrivia": {

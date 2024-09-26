@@ -4,10 +4,10 @@ import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.UserInteractive;
 import dev.boarbot.util.data.DataUtil;
-import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.interactive.InteractiveUtil;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
@@ -51,7 +51,7 @@ public class SetupInteractive extends UserInteractive {
             return;
         }
 
-        compEvent.deferEdit().queue(null, e -> Log.warn(this.user, this.getClass(), "Failed to defer edit", e));
+        compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this.getClass(), e));
         String compID = compEvent.getComponentId().split(",")[1];
 
         Log.debug(this.user, this.getClass(), "Page: " + this.page);
@@ -64,12 +64,12 @@ public class SetupInteractive extends UserInteractive {
                 case "INFO" -> this.doInfo(compEvent);
                 case "CANCEL" -> this.stop(StopType.CANCELLED);
             }
-        } catch (IOException exception){
-            this.stop(StopType.EXCEPTION);
-            Log.error(this.user, this.getClass(), "Failed to generate current message", exception);
-        }
 
-        this.sendResponse();
+            this.sendResponse();
+        } catch (IOException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to generate setup embed", exception);
+        }
     }
 
     private void sendResponse() {
@@ -83,11 +83,7 @@ public class SetupInteractive extends UserInteractive {
                 .setFiles(this.currentImageUpload)
                 .setComponents(this.getCurComponents());
 
-            if (this.isStopped) {
-                return;
-            }
-
-            this.updateInteractive(editedMsg.build());
+            this.updateInteractive(false, editedMsg.build());
         } catch (IOException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate initial message", exception);
@@ -131,7 +127,8 @@ public class SetupInteractive extends UserInteractive {
 
         MessageCreateBuilder infoMsg = new MessageCreateBuilder();
         infoMsg.setFiles(imageUpload);
-        compEvent.getHook().sendMessage(infoMsg.build()).setEphemeral(true).complete();
+        compEvent.getHook().sendMessage(infoMsg.build()).setEphemeral(true)
+            .queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
     }
 
     @Override
@@ -145,7 +142,10 @@ public class SetupInteractive extends UserInteractive {
 
         try {
             switch (type) {
-                case StopType.EXCEPTION -> this.currentImageUpload = SpecialReply.getErrorEmbed();
+                case StopType.EXCEPTION -> {
+                    super.stop(StopType.EXCEPTION);
+                    return;
+                }
 
                 case StopType.CANCELLED -> {
                     this.currentImageUpload = new EmbedImageGenerator(STRS.getSetupCancelled(), COLORS.get("error"))
@@ -211,7 +211,7 @@ public class SetupInteractive extends UserInteractive {
         }
 
         MessageEditBuilder editedMsg = new MessageEditBuilder().setFiles(this.currentImageUpload).setComponents();
-        this.updateInteractive(editedMsg.build());
+        this.updateInteractive(true, editedMsg.build());
     }
 
     @Override

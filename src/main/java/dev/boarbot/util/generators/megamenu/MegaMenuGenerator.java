@@ -61,7 +61,7 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         String view = classViewMap.get(this.getClass());
         String viewString = Character.toUpperCase(view.charAt(0)) + view.substring(1);
 
-        String userString = this.boarUser.getUser().getGlobalName() + "'s " + viewString;
+        String userString = this.boarUser.getUser().getEffectiveName() + "'s " + viewString;
 
         Graphics2D g2d = this.generatedImage.createGraphics();
 

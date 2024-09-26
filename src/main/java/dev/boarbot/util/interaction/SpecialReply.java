@@ -2,92 +2,57 @@ package dev.boarbot.util.interaction;
 
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.io.IOException;
 
 public class SpecialReply implements Configured {
-    public static void sendMaintenanceEmbed(SlashCommandInteraction interaction) {
-        MessageCreateBuilder msg = new MessageCreateBuilder()
-            .setFiles(getMaintenanceEmbed());
-
-        try {
-            interaction.reply(msg.build()).complete();
-        } catch (ErrorResponseException exception) {
-            Log.warn(EmbedImageGenerator.class, "Failed to send maintenance embed", exception);
-        }
+    public static void sendErrorMessage(SlashCommandInteraction interaction, Object obj) {
+        MessageCreateData msgData = getErrorMsgData();
+        interaction.reply(msgData).setEphemeral(true).queue(null, e ->
+            interaction.getHook().editOriginal(MessageEditData.fromCreateData(msgData)).queue(null, e1 ->
+                ExceptionHandler.handle(interaction.getUser(), obj.getClass(), e1)
+            )
+        );
     }
 
-    public static void sendEventDisabled(SlashCommandInteraction interaction) {
-        MessageCreateBuilder msg = new MessageCreateBuilder()
-            .setFiles(getEventDisabledEmbed())
-            .setComponents();
-
-        try {
-            interaction.getHook().sendMessage(msg.build()).complete();
-        } catch (ErrorResponseException exception) {
-            Log.warn(EmbedImageGenerator.class, "Failed to send error embed", exception);
-        }
+    public static void sendErrorMessage(GenericComponentInteractionCreateEvent interaction, Object obj) {
+        MessageCreateData msgData = getErrorMsgData();
+        interaction.reply(msgData).setEphemeral(true).queue(null, e ->
+            interaction.getHook().editOriginal(MessageEditData.fromCreateData(msgData)).queue(null, e1 ->
+                ExceptionHandler.handle(interaction.getUser(), obj.getClass(), e1)
+            )
+        );
     }
 
-    private static FileUpload getEventDisabledEmbed() {
+    public static void sendErrorMessage(InteractionHook hook, Object obj) {
+        hook.sendMessage(getErrorMsgData()).setEphemeral(true)
+            .queue(null, e -> ExceptionHandler.handle(hook.getInteraction().getUser(), obj.getClass(), e));
+    }
+
+    public static void sendErrorMessage(Message message, Object obj) {
+        message.editMessage(MessageEditData.fromCreateData(getErrorMsgData()))
+            .queue(null, e -> ExceptionHandler.handle(obj.getClass(), e));
+    }
+
+    public static MessageCreateData getErrorMsgData() {
+        MessageCreateBuilder msg = new MessageCreateBuilder();
+
         try {
-            return new EmbedImageGenerator(STRS.getEventDisabled()).generate().getFileUpload();
+            msg.setFiles(new EmbedImageGenerator(STRS.getError(), COLORS.get("error")).generate().getFileUpload());
         } catch (IOException exception) {
-            Log.error(EmbedImageGenerator.class, "Failed to generate event disabled embed", exception);
-            return FileUpload.fromData(new byte[0], "error.png");
+            Log.error(SpecialReply.class, "Failed to generate error embed", exception);
+            msg.setContent(STRS.getError());
         }
-    }
 
-    public static void sendErrorEmbed(SlashCommandInteraction interaction) {
-        MessageEditBuilder editedMsg = new MessageEditBuilder()
-            .setFiles(getErrorEmbed())
-            .setComponents();
-
-        try {
-            if (interaction.isAcknowledged()) {
-                interaction.getHook().editOriginal(editedMsg.build()).complete();
-                return;
-            }
-            interaction.reply(MessageCreateData.fromEditData(editedMsg.build())).complete();
-        } catch (ErrorResponseException exception) {
-            Log.warn(EmbedImageGenerator.class, "Failed to send error embed", exception);
-        }
-    }
-
-    public static void sendErrorEmbed(InteractionHook hook) {
-        MessageCreateBuilder msg = new MessageCreateBuilder()
-            .setFiles(getErrorEmbed());
-
-        try {
-            hook.sendMessage(msg.build()).complete();
-        } catch (ErrorResponseException exception) {
-            Log.warn(EmbedImageGenerator.class, "Failed to send error embed", exception);
-        }
-    }
-
-    public static FileUpload getErrorEmbed() {
-        try {
-            return new EmbedImageGenerator(STRS.getError(), COLORS.get("error")).generate().getFileUpload();
-        } catch (IOException exception) {
-            Log.error(EmbedImageGenerator.class, "Failed to generate error embed", exception);
-            return FileUpload.fromData(new byte[0], "error.png");
-        }
-    }
-
-    private static FileUpload getMaintenanceEmbed() {
-        try {
-            return new EmbedImageGenerator(STRS.getMaintenance(), COLORS.get("maintenance")).generate().getFileUpload();
-        } catch (IOException exception) {
-            Log.error(EmbedImageGenerator.class, "Failed to generate maintenance embed", exception);
-            return FileUpload.fromData(new byte[0], "maintenance.png");
-        }
+        return msg.build();
     }
 }

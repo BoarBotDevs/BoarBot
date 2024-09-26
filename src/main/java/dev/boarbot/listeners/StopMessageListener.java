@@ -4,6 +4,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -39,13 +40,15 @@ public class StopMessageListener extends ListenerAdapter implements Runnable, Co
             return;
         }
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.event.getAuthor());
-        boolean notificationsOn = false;
+        BoarUser boarUser;
+        boolean notificationsOn;
 
         try (Connection connection = DataUtil.getConnection()) {
+            boarUser = BoarUserFactory.getBoarUser(this.event.getAuthor());
             notificationsOn = boarUser.baseQuery().getNotificationStatus(connection);
         } catch (SQLException exception) {
             Log.error(this.event.getAuthor(), this.getClass(), "Failed to get notification status", exception);
+            return;
         }
 
         if (!notificationsOn) {
@@ -66,9 +69,11 @@ public class StopMessageListener extends ListenerAdapter implements Runnable, Co
                 Log.error(
                     this.event.getAuthor(), this.getClass(), "Failed to turn off notifications", exception
                 );
+                return;
             }
 
-            this.event.getMessage().reply(STRS.getNotificationDisabledStr()).complete();
+            this.event.getMessage().reply(STRS.getNotificationDisabledStr())
+                .queue(null, e -> ExceptionHandler.handle(this.event.getAuthor(), this.getClass(), e));
             break;
         }
     }

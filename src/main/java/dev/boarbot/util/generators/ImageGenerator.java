@@ -23,7 +23,11 @@ public abstract class ImageGenerator implements Configured {
     public abstract ImageGenerator generate() throws IOException, URISyntaxException;
 
     public BufferedImage getImage() throws IOException {
-        if (this.generatedImage == null && this.generatedImageBytes != null) {
+        if (this.generatedImage == null && this.generatedImageBytes == null) {
+            throw new IllegalStateException("No image has been generated");
+        }
+
+        if (this.generatedImage == null) {
             ByteArrayInputStream byteArrayIS;
             byteArrayIS = new ByteArrayInputStream(this.generatedImageBytes);
             this.generatedImage = ImageIO.read(byteArrayIS);
@@ -33,7 +37,11 @@ public abstract class ImageGenerator implements Configured {
     }
 
     public byte[] getBytes() throws IOException {
-        if (this.generatedImageBytes == null && this.generatedImage != null) {
+        if (this.generatedImage == null && this.generatedImageBytes == null) {
+            throw new IllegalStateException("No image has been generated");
+        }
+
+        if (this.generatedImageBytes == null) {
             ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             ImageIO.write(this.generatedImage, "png", byteArrayOS);
             this.generatedImageBytes = byteArrayOS.toByteArray();
@@ -43,6 +51,10 @@ public abstract class ImageGenerator implements Configured {
     }
 
     public FileUpload getFileUpload() throws IOException {
+        if (this.generatedImage == null && this.generatedImageBytes == null) {
+            throw new IllegalStateException("No image has been generated");
+        }
+
         return FileUpload.fromData(this.getBytes(), "unknown" + (this.animated ? ".gif" : ".png"));
     }
 }

@@ -9,24 +9,22 @@ import dev.boarbot.util.time.TimeUtil;
 
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
-import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
+import net.dv8tion.jda.api.interactions.Interaction;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class ModalHandler implements Configured {
     private final ModalInteractive receiver;
 
-    private final Future<?> future;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledFuture<?> future;
 
-    private final ComponentInteraction interaction;
+    private final Interaction interaction;
     private final User user;
 
-    public ModalHandler(GenericComponentInteractionCreateEvent compEvent, ModalInteractive receiver) {
-        this.interaction = compEvent.getInteraction();
-        this.user = compEvent.getUser();
+    public ModalHandler(Interaction interaction, ModalInteractive receiver) {
+        this.interaction = interaction;
+        this.user = interaction.getUser();
 
         this.receiver = receiver;
 
@@ -37,10 +35,7 @@ public class ModalHandler implements Configured {
         }
 
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        this.future = executor.submit(() -> this.delayStop(NUMS.getInteractiveIdle()));
-        executor.shutdown();
+        this.future = this.scheduler.schedule(this::delayStop, NUMS.getInteractiveIdle(), TimeUnit.MILLISECONDS);
     }
 
     public void execute(ModalInteractionEvent modalEvent) {
@@ -48,27 +43,17 @@ public class ModalHandler implements Configured {
         this.stop();
     }
 
-    private void delayStop(long waitTime) {
-        try {
-            Thread.sleep(waitTime);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            return;
-        }
-
+    private void delayStop() {
         try {
             this.stop();
         } catch (RuntimeException exception) {
-            Log.error(this.getClass(), "Failed to stop modal", exception);
+            Log.error(this.user, this.getClass(), "Failed to stop modal", exception);
         }
-
     }
 
     public void stop() {
-        if (Thread.currentThread().getState().equals(Thread.State.TIMED_WAITING)) {
-            this.future.cancel(true);
-        }
-
+        this.future.cancel(false);
+        this.scheduler.shutdown();
         BoarBotApp.getBot().getModalHandlers().remove(this.interaction.getId() + this.user.getId());
     }
 }

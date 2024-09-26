@@ -4,7 +4,6 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,14 +43,6 @@ public class ModalListener extends ListenerAdapter implements Runnable {
                 this.event.getUser(),
                 this.getClass(),
                 "Finished processing %s".formatted(modalID[2])
-            );
-        } catch (ErrorResponseException exception) {
-            modalHandler.stop();
-            Log.warn(
-                this.event.getUser(),
-                this.getClass(),
-                "%s threw a Discord exception".formatted(modalHandler.getClass().getSimpleName()),
-                exception
             );
         } catch (RuntimeException exception) {
             modalHandler.stop();

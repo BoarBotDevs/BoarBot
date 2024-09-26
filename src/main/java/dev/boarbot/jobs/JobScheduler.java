@@ -4,8 +4,6 @@ import dev.boarbot.util.logging.Log;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.sql.SQLException;
-
 public class JobScheduler {
     public static void scheduleJobs() {
         try {
@@ -19,12 +17,7 @@ public class JobScheduler {
             scheduler.scheduleJob(QuestResetJob.getJob(), QuestResetJob.getTrigger());
             scheduler.scheduleJob(LogJob.getJob(), LogJob.getTrigger());
 
-            try {
-                NotificationJob.cacheNotifUsers();
-            } catch (SQLException exception) {
-                Log.error(JobScheduler.class, "Failed to cache users with notifications on", exception);
-                System.exit(-1);
-            }
+            NotificationJob.cacheNotifUsers();
 
             scheduler.scheduleJob(NotificationJob.getJob(), NotificationJob.getTrigger());
             scheduler.scheduleJob(TopCacheJob.getJob(), TopCacheJob.getTrigger());
@@ -33,9 +26,5 @@ public class JobScheduler {
         } catch (SchedulerException exception) {
             Log.error(JobScheduler.class, "Failed to schedule one or more jobs", exception);
         }
-
-        // TODO
-        // This will schedule the following:
-        // Removing wiped users
     }
 }

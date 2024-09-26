@@ -78,5 +78,60 @@
         "placeholder": "Ex: weslay."
       }
     ]
+  },
+  "reportInput": {
+    "id": "REPORT_INPUT",
+    "title": "Report a bug/exploit",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "TITLE",
+        "style": 1,
+        "label": "What are you reporting?",
+        "max_length": 100,
+        "required": true
+      },
+      {
+        "type": 4,
+        "custom_id": "DETAILS",
+        "style": 2,
+        "label": "Provide some details",
+        "max_length": 1800,
+        "required": true
+      },
+      {
+        "type": 4,
+        "custom_id": "LINK",
+        "style": 1,
+        "label": "Relevant media (include https://)",
+        "max_length": 100,
+        "required": false,
+        "placeholder": "Ex: https://i.imgur.com/jvj0nsT.gif"
+      }
+    ]
+  },
+  "wipeInput": {
+    "id": "WIPE_INPUT",
+    "title": "Data removal request",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "CHECK_1",
+        "style": 1,
+        "label": "The word \"DELETE\"",
+        "max_length": 6,
+        "required": true,
+        "placeholder": "Doing this will delete ALL of your data!"
+      },
+      {
+        "type": 4,
+        "custom_id": "CHECK_2",
+        "style": 1,
+        "label": "Your username (Not display name)",
+        "max_length": 32,
+        "required": true,
+        "placeholder": "This action is instantaneous and irreversible!"
+      }
+    ]
   }
 }

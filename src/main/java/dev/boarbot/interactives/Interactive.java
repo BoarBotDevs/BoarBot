@@ -3,23 +3,21 @@ package dev.boarbot.interactives;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.interactive.StopType;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public abstract class Interactive implements Configured {
     protected static final ConcurrentMap<String, Interactive> interactives = BoarBotApp.getBot().getInteractives();
 
-    private final Future<?> future;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> future;
 
     @Getter protected final String interactiveID;
     @Getter protected final String guildID;
@@ -48,10 +46,7 @@ public abstract class Interactive implements Configured {
         }
 
         interactives.put(interactiveID, this);
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        this.future = executor.submit(() -> this.tryStop(waitTime));
-        executor.shutdown();
+        this.future = this.scheduler.schedule(this::tryStop, waitTime, TimeUnit.MILLISECONDS);
     }
 
     protected String findDuplicateKey() {
@@ -69,30 +64,24 @@ public abstract class Interactive implements Configured {
 
     public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
         if (startTime < this.lastEndTime) {
+            compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
             Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
             return;
         }
 
         this.curStopTime = TimeUtil.getCurMilli() + this.waitTime;
         this.execute(compEvent);
-        this.lastEndTime = TimeUtil.getCurMilli();
+        this.lastEndTime = TimeUtil.getCurMilli() + this.waitTime;
     }
 
     public abstract void execute(GenericComponentInteractionCreateEvent compEvent);
     public abstract ActionRow[] getCurComponents();
 
-    public abstract Message updateInteractive(MessageEditData editedMsg);
-    public abstract Message updateComponents(ActionRow... rows);
-    public abstract void deleteInteractive();
+    public abstract void updateInteractive(boolean stopping, MessageEditData editedMsg);
+    public abstract void updateComponents(boolean stopping, ActionRow... rows);
+    public abstract void deleteInteractive(boolean stopping);
 
-    private void tryStop(long waitTime) {
-        try {
-            Thread.sleep(waitTime);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            return;
-        }
-
+    private void tryStop() {
         try {
             long curTime = TimeUtil.getCurMilli();
 
@@ -100,7 +89,7 @@ public abstract class Interactive implements Configured {
                 this.stop(StopType.EXPIRED);
             } else if (!this.isStopped) {
                 long newWaitTime = Math.min(this.curStopTime - curTime, hardStopTime - curTime);
-                this.tryStop(newWaitTime);
+                this.future = this.scheduler.schedule(this::tryStop, newWaitTime, TimeUnit.MILLISECONDS);
             }
         } catch (RuntimeException exception) {
             Log.error(this.getClass(), "Failed to stop interactive", exception);
@@ -114,10 +103,8 @@ public abstract class Interactive implements Configured {
     }
 
     public Interactive removeInteractive() {
-        if (Thread.currentThread().getState().equals(Thread.State.TIMED_WAITING)) {
-            this.future.cancel(true);
-        }
-
+        this.future.cancel(false);
+        this.scheduler.shutdown();
         return interactives.remove(this.interactiveID);
     }
 }

@@ -11,6 +11,7 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.UserInteractive;
+import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestUtil;
@@ -28,6 +29,7 @@ import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -42,7 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
 public class BoarGiftInteractive extends UserInteractive implements Synchronizable {
     private final PowerupItemConfig giftConfig = POWS.get("gift");
@@ -71,6 +73,8 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     private final List<QuestInfo> senderQuestInfos = new ArrayList<>();
     private final List<QuestInfo> openerQuestInfos = new ArrayList<>();
 
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
     private final Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getGift();
 
     public BoarGiftInteractive(Interaction interaction, boolean isMsg) {
@@ -93,7 +97,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     }
 
     @Override
-    public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
+    public void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
         this.execute(compEvent);
     }
 
@@ -106,28 +110,18 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 NUMS.getGiftLowWait();
 
             this.enabled = true;
-
-            CompletableFuture.runAsync(() -> {
-                try {
-                    this.enableGift(randWaitTime);
-                } catch (RuntimeException exception) {
-                    this.stop(StopType.EXCEPTION);
-                    Log.error(this.getUser(), this.getClass(), "A problem occurred when enabling gift", exception);
-                }
-            });
-
+            this.scheduler.schedule(this::enableGift, randWaitTime, TimeUnit.MILLISECONDS);
             return;
         }
 
         if (this.user.getId().equals(compEvent.getUser().getId())) {
-            compEvent.deferEdit().queue(null, e -> Log.warn(
-                this.user, this.getClass(), "Failed to defer edit", e
-            ));
+            compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
 
             try {
                 MessageCreateBuilder msg = new MessageCreateBuilder()
                     .setFiles(new EmbedImageGenerator(STRS.getGiftSelfOpen()).generate().getFileUpload());
-                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true).complete();
+                compEvent.getHook().sendMessage(msg.build()).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(compEvent.getHook(), this, e));
             } catch (IOException exception) {
                 this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to generate self open response", exception);
@@ -136,7 +130,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             return;
         }
 
-        compEvent.deferEdit().complete();
+        compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
 
         if (this.giftTimes.get(compEvent.getUser()) != null) {
             return;
@@ -153,53 +147,35 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     }
 
     private void sendResponse() {
-        try {
-            MessageEditBuilder editedMsg = new MessageEditBuilder()
-                .setFiles(this.giftImage)
-                .setComponents(this.getCurComponents());
-
-            if (this.isStopped) {
-                return;
-            }
-
-            this.updateInteractive(editedMsg.build());
-        } catch (Exception ignored) {}
+        MessageEditBuilder editedMsg = new MessageEditBuilder()
+            .setFiles(this.giftImage)
+            .setComponents(this.getCurComponents());
+        this.updateInteractive(false, editedMsg.build());
     }
 
-    private void enableGift(int waitTime) {
+    private void enableGift() {
         try {
-            Thread.sleep(waitTime);
-        } catch (InterruptedException exception) {
-            if (!this.isStopped) {
-                this.stop(StopType.EXPIRED);
-            }
+            this.sendResponse();
+            this.giftEnabledTimestamp = TimeUtil.getCurMilli();
+        } catch (RuntimeException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "A problem occurred while enabling gift", exception);
         }
 
-        this.sendResponse();
-        this.giftEnabledTimestamp = TimeUtil.getCurMilli();
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                this.tryClaimAtMaxHandicap();
-            } catch (RuntimeException exception) {
-                this.stop(StopType.EXCEPTION);
-                Log.error(this.user, this.getClass(), "A problem occurred while trying to claim gift", exception);
-            }
-        });
+        this.scheduler.schedule(this::tryClaimAtMaxHandicap, NUMS.getGiftMaxHandicap(), TimeUnit.MILLISECONDS);
     }
 
     private void tryClaimAtMaxHandicap() {
         try {
-            Thread.sleep(NUMS.getGiftMaxHandicap());
-        } catch (InterruptedException exception) {
-            if (!this.isStopped) {
-                this.stop(StopType.EXPIRED);
+            if (!this.giftTimes.isEmpty()) {
+                this.giveGift();
             }
+        } catch (RuntimeException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "A problem occurred while enabling gift", exception);
         }
 
-        if (!this.giftTimes.isEmpty()) {
-            this.giveGift();
-        }
+        this.scheduler.shutdown();
     }
 
     private synchronized void giveGift() {
@@ -209,8 +185,16 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         this.givenGift = true;
 
-        BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-        boarUser.passSynchronizedAction(this);
+        BoarUser boarUser;
+
+        try {
+            boarUser = BoarUserFactory.getBoarUser(this.user);
+            boarUser.passSynchronizedAction(this);
+        } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to update data", exception);
+            return;
+        }
 
         if (!this.hasGift) {
             Log.debug(this.user, this.getClass(), "No gifts");
@@ -221,8 +205,13 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         this.giftWinner = this.giftTimes.keySet().toArray(new User[0])[0];
 
         for (User user : this.giftTimes.keySet()) {
-            BoarUser openUser = BoarUserFactory.getBoarUser(user);
-            openUser.passSynchronizedAction(this);
+            try {
+                BoarUser openUser = BoarUserFactory.getBoarUser(user);
+                openUser.passSynchronizedAction(this);
+            } catch (SQLException exception) {
+
+                Log.error(user, this.getClass(), "Failed to update data", exception);
+            }
         }
 
         try {
@@ -232,10 +221,14 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 )).generate().getFileUpload()
             );
 
-            this.giftInteractions.get(this.giftWinner).getHook().sendMessage(msg.build()).setEphemeral(true).complete();
+            InteractionHook winnerHook = this.giftInteractions.get(this.giftWinner).getHook();
+            winnerHook.sendMessage(msg.build()).setEphemeral(true)
+                .queue(null, e -> ExceptionHandler.replyHandle(winnerHook, this, e));
         } catch (IOException exception) {
+
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate gift time message", exception);
+            return;
         }
 
         this.stop(StopType.FINISHED);
@@ -272,11 +265,19 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             );
         }
 
-        BoarUser openUser = BoarUserFactory.getBoarUser(this.giftWinner);
-        openUser.passSynchronizedAction(this);
+        try {
+            BoarUser openUser = BoarUserFactory.getBoarUser(this.giftWinner);
+            openUser.passSynchronizedAction(this);
+        } catch (SQLException exception) {
+            Log.error(this.giftWinner, this.getClass(), "Failed to update gift winner data", exception);
+        }
 
-        BoarUser sendUser = BoarUserFactory.getBoarUser(this.user);
-        sendUser.passSynchronizedAction(this);
+        try {
+            BoarUser sendUser = BoarUserFactory.getBoarUser(this.user);
+            sendUser.passSynchronizedAction(this);
+        } catch (SQLException exception) {
+            Log.error(this.giftWinner, this.getClass(), "Failed to update gifter data", exception);
+        }
     }
 
     private void setOutcome() {
@@ -357,6 +358,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
                     if (this.hasGift) {
                         boarUser.powQuery().usePowerup(connection, "gift", 1);
+                        boarUser.powQuery().setLastGiftSent(connection, 0);
                         this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
                             QuestType.SEND_GIFTS, 1, connection
                         ));
@@ -535,12 +537,12 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             case EXCEPTION -> super.stop(type);
 
             case EXPIRED -> {
-                this.deleteInteractive();
+                this.deleteInteractive(true);
                 Log.debug(this.user, this.getClass(), "Interactive expired");
             }
 
             case FINISHED -> {
-                this.updateComponents();
+                this.updateComponents(true);
                 Log.debug(this.user, this.getClass(), "Finished Interactive");
             }
         }

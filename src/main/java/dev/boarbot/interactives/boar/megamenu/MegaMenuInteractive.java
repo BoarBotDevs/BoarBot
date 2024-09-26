@@ -50,7 +50,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     boolean acknowledgeOpen = false;
     OverlayImageGenerator acknowledgeImageGen;
 
-    @Getter private final BoarUser boarUser;
+    @Getter private BoarUser boarUser;
     @Getter private boolean isSkyblockGuild;
     @Getter private String firstJoinedDate;
     @Getter private List<BadgeData> badges;
@@ -91,9 +91,16 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         this.boarPage = event.getOption("search") != null
             ? Objects.requireNonNull(event.getOption("search")).getAsString()
             : null;
-        this.boarUser = event.getOption("user") != null
-            ? BoarUserFactory.getBoarUser(Objects.requireNonNull(event.getOption("user")).getAsUser())
-            : BoarUserFactory.getBoarUser(event.getUser());
+
+        try {
+            this.boarUser = event.getOption("user") != null
+                ? BoarUserFactory.getBoarUser(Objects.requireNonNull(event.getOption("user")).getAsUser())
+                : BoarUserFactory.getBoarUser(event.getUser());
+        } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to update data", exception);
+            return;
+        }
 
         this.curView = curView;
     }
@@ -181,11 +188,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         MessageEditBuilder editedMsg = new MessageEditBuilder()
             .setFiles(this.currentImageUpload).setComponents(this.getCurComponents());
 
-        if (this.isStopped) {
-            return;
-        }
-
-        this.updateInteractive(editedMsg.build());
+        this.updateInteractive(false, editedMsg.build());
     }
 
     public int getFindBoarPage(String input) {

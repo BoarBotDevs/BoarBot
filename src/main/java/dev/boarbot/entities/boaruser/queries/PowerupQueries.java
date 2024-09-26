@@ -5,10 +5,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.logging.Log;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 
 public class PowerupQueries implements Configured {
@@ -214,5 +211,43 @@ public class PowerupQueries implements Configured {
         }
 
         Log.debug(this.boarUser.getUser(), this.getClass(), "Used activate miracles (if user had any active)");
+    }
+
+    public long getLastGiftSent(Connection connection) throws SQLException {
+        long lastSent = 0;
+
+        String query = """
+            SELECT gift_last_sent
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    lastSent = results.getTimestamp("gift_last_sent") == null
+                        ? 0
+                        : results.getTimestamp("gift_last_sent").getTime();
+                }
+            }
+        }
+
+        return lastSent;
+    }
+
+    public void setLastGiftSent(Connection connection, long lastSent) throws SQLException {
+        String updateQuery = """
+            UPDATE users
+            SET gift_last_sent = ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setTimestamp(1, lastSent == 0 ? null : new Timestamp(lastSent));
+            statement.setString(2, this.boarUser.getUserID());
+            statement.executeUpdate();
+        }
     }
 }
