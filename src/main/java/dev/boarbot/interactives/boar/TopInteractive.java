@@ -35,7 +35,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TopInteractive extends ModalInteractive implements Configured {
-    private static final int ENTRIES_PER_PAGE = 44;
+    private static final int ENTRIES_PER_PAGE = 40;
 
     private int page;
     private String username;
@@ -121,13 +121,17 @@ public class TopInteractive extends ModalInteractive implements Configured {
 
                 this.setModalHandler(new ModalHandler(compEvent, this));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
+
                 Log.debug(this.user, this.getClass(), "Sent page/username input modal");
             }
 
             case "RIGHT" -> this.setPage(this.page + 1);
         }
 
-        this.usernameIndex = cachedBoards.get(this.boardType).get(this.username).index();
+        if (cachedBoards.get(this.boardType).containsKey(this.username)) {
+            this.usernameIndex = cachedBoards.get(this.boardType).get(this.username).index();
+        }
+
         this.sendResponse();
     }
 
@@ -157,6 +161,8 @@ public class TopInteractive extends ModalInteractive implements Configured {
                 this.username = usernameInput;
                 this.usernameIndex = cachedBoards.get(this.boardType).get(usernameInput).index();
                 this.setPage(this.usernameIndex / ENTRIES_PER_PAGE);
+
+                this.execute(null);
                 return;
             }
 

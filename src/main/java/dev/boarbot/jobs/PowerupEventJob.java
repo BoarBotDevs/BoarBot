@@ -17,7 +17,7 @@ public class PowerupEventJob implements Job, Configured {
             "0 %d */%d ? * *".formatted(30 - NUMS.getPowPlusMinusMins(), NUMS.getPowIntervalHours())
         )).build();
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -26,7 +26,7 @@ public class PowerupEventJob implements Job, Configured {
         }
 
         int delay = (int) (Math.random() * NUMS.getPowPlusMinusMins() * 2 * 60000);
-        this.scheduler.schedule(this::sendEvent, delay, TimeUnit.MILLISECONDS);
+        scheduler.schedule(this::sendEvent, delay, TimeUnit.MILLISECONDS);
     }
 
     private void sendEvent() {
@@ -36,7 +36,9 @@ public class PowerupEventJob implements Job, Configured {
         } catch (RuntimeException exception) {
             Log.error(this.getClass(), "A runtime exception occurred with powerup event", exception);
         }
+    }
 
-        this.scheduler.shutdown();
+    public static void shutdownScheduler() {
+        scheduler.shutdown();
     }
 }

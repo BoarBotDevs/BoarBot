@@ -8,6 +8,7 @@ import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class MaintenanceSubcommand extends Subcommand {
     public MaintenanceSubcommand(SlashCommandInteractionEvent event) {
@@ -17,7 +18,7 @@ public class MaintenanceSubcommand extends Subcommand {
     @Override
     public void execute() {
         try {
-            ConfigUpdater.toggleMaintenance();
+            ConfigUpdater.setMaintenance(Objects.requireNonNull(this.event.getOption("value")).getAsBoolean());
             this.interaction.reply("Maintenance status: `" + CONFIG.getMainConfig().isMaintenanceMode() + "`")
                 .setEphemeral(true).queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
         } catch (IOException exception) {

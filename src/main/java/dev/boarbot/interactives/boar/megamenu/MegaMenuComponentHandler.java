@@ -39,7 +39,7 @@ class MegaMenuComponentHandler implements Configured {
     private final MegaMenuInteractive interactive;
     private GenericComponentInteractionCreateEvent compEvent;
     private ModalInteractionEvent modalEvent;
-    private User user;
+    private final User user;
 
     public MegaMenuComponentHandler(GenericComponentInteractionCreateEvent compEvent, MegaMenuInteractive interactive) {
         this.interactive = interactive;
@@ -52,6 +52,7 @@ class MegaMenuComponentHandler implements Configured {
         this.interactive = interactive;
         this.modalEvent = modalEvent;
         this.interactive.modalEvent = modalEvent;
+        this.user = modalEvent.getUser();
     }
 
     public void handleCompEvent() {
@@ -240,6 +241,7 @@ class MegaMenuComponentHandler implements Configured {
                         );
 
                         Log.debug(this.user, this.getClass(), "Failed to clone: Not enough");
+                        this.interactive.execute(null);
                         return;
                     }
 
@@ -249,6 +251,7 @@ class MegaMenuComponentHandler implements Configured {
 
                     if (hasBoar) {
                         this.confirmClone(input);
+                        this.interactive.execute(null);
                         return;
                     }
 
@@ -267,6 +270,7 @@ class MegaMenuComponentHandler implements Configured {
                 } catch (SQLException exception) {
                     this.interactive.stop(StopType.EXCEPTION);
                     Log.error(this.user, this.getClass(), "Failed to get clone data", exception);
+                    return;
                 }
 
                 this.interactive.execute(null);
@@ -297,6 +301,7 @@ class MegaMenuComponentHandler implements Configured {
                         );
 
                         Log.debug(this.user, this.getClass(), "Failed to miracle: Not enough");
+                        this.interactive.execute(null);
                         return;
                     }
 
@@ -323,6 +328,7 @@ class MegaMenuComponentHandler implements Configured {
                 } catch (SQLException exception) {
                     this.interactive.stop(StopType.EXCEPTION);
                     Log.error(this.user, this.getClass(), "Failed to get miracle data", exception);
+                    return;
                 }
 
                 this.interactive.execute(null);

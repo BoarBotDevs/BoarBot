@@ -167,7 +167,13 @@ class MegaMenuActionHandler implements Configured {
 
                 if (newBoarIDs.isEmpty()) {
                     this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                        null, STRS.getCompCloneFailed().formatted("<>" + this.curRarityKey + "<>" + boarName)
+                        null,
+                        STRS.getCompCloneFailed().formatted(
+                            this.interactive.numTryClone == 1
+                                ? POWS.get("clone").getName()
+                                : POWS.get("clone").getPluralName(),
+                            "<>" + this.curRarityKey + "<>" + boarName
+                        )
                     );
                 } else {
                     boarUser.boarQuery().addBoars(
@@ -380,7 +386,9 @@ class MegaMenuActionHandler implements Configured {
 
         CompletableFuture.runAsync(() -> {
             try {
-                Interactive giftInteractive = InteractiveFactory.constructGiftInteractive(this.interactive.compEvent, true);
+                Interactive giftInteractive = InteractiveFactory.constructGiftInteractive(
+                    this.interactive.compEvent, true
+                );
                 giftInteractive.execute(null);
                 Log.debug(this.user, this.getClass(), "Sent BoarGiftInteractive");
             } catch (RuntimeException exception) {

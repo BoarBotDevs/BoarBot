@@ -56,4 +56,8 @@ public class ModalHandler implements Configured {
         this.scheduler.shutdown();
         BoarBotApp.getBot().getModalHandlers().remove(this.interaction.getId() + this.user.getId());
     }
+
+    public void shutdownScheduler() {
+        this.scheduler.shutdown();
+    }
 }

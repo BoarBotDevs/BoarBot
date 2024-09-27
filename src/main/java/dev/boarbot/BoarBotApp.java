@@ -2,7 +2,12 @@ package dev.boarbot;
 
 import dev.boarbot.api.bot.Bot;
 import dev.boarbot.bot.BoarBot;
+import dev.boarbot.interactives.Interactive;
+import dev.boarbot.interactives.gift.BoarGiftInteractive;
+import dev.boarbot.jobs.PowerupEventJob;
 import dev.boarbot.migration.MigrationHandler;
+import dev.boarbot.modals.ModalHandler;
+import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.logging.Log;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.Getter;
@@ -29,6 +34,8 @@ public class BoarBotApp {
         bot = new BoarBot();
         bot.create();
 
+        Runtime.getRuntime().addShutdownHook(new Thread(BoarBotApp::cleanup));
+
         if (args.length != 0 && args[0].equals("migrate")) {
             try {
                 bot.getJDA().awaitReady();
@@ -49,6 +56,23 @@ public class BoarBotApp {
             }
 
             bot.deployCommands();
+        }
+    }
+
+    private static void cleanup() {
+        InteractionUtil.shutdownScheduler();
+        PowerupEventJob.shutdownScheduler();
+
+        for (ModalHandler modalHandler : BoarBotApp.getBot().getModalHandlers().values()) {
+            modalHandler.shutdownScheduler();
+        }
+
+        for (Interactive interactive : BoarBotApp.getBot().getInteractives().values()) {
+            interactive.shutdownScheduler();
+
+            if (interactive instanceof BoarGiftInteractive) {
+                ((BoarGiftInteractive) interactive).shutdownGiftScheduler();
+            }
         }
     }
 

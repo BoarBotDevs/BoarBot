@@ -8,12 +8,12 @@ import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
@@ -57,8 +57,7 @@ public abstract class UserInteractive extends Interactive {
         }
 
         if (this.msg == null && this.isMsg) {
-            GenericComponentInteractionCreateEvent compInter =
-                (GenericComponentInteractionCreateEvent) this.interaction;
+            ComponentInteraction compInter = (ComponentInteraction) this.interaction;
             compInter.getHook().sendMessage(MessageCreateData.fromEditData(editedMsg)).queue(
                 msg -> {
                     this.msg = msg;

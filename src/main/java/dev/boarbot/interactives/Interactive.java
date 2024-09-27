@@ -107,4 +107,8 @@ public abstract class Interactive implements Configured {
         this.scheduler.shutdown();
         return interactives.remove(this.interactiveID);
     }
+
+    public void shutdownScheduler() {
+        this.scheduler.shutdown();
+    }
 }

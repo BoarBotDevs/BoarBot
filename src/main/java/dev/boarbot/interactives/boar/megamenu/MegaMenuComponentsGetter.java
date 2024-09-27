@@ -344,14 +344,13 @@ class MegaMenuComponentsGetter implements Configured {
         boolean transmutable = curRarity.getChargesNeeded() != 0 &&
             curRarity.getChargesNeeded() <= this.interactive.numTransmute;
 
-        if (!cloneable) {
+        if (!cloneable && !transmutable) {
             selectOptions.remove(1);
-        }
-
-        if (cloneable && !transmutable) {
+            selectOptions.remove(1);
+        } else if (!cloneable) {
+            selectOptions.remove(1);
+        } else if (!transmutable) {
             selectOptions.remove(2);
-        } else if (!cloneable && !transmutable) {
-            selectOptions.remove(1);
         }
 
         boolean userSelf = this.interactive.getUser().getId().equals(this.interactive.getBoarUser().getUserID());

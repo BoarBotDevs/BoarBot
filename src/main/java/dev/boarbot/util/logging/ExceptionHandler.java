@@ -5,13 +5,13 @@ import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.interactive.StopType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.exceptions.InteractionFailureException;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 
 public class ExceptionHandler {
@@ -27,9 +27,7 @@ public class ExceptionHandler {
         }
     }
 
-    public static void replyHandle(
-        GenericComponentInteractionCreateEvent interaction, Object obj, Throwable exception
-    ) {
+    public static void replyHandle(ComponentInteraction interaction, Object obj, Throwable exception) {
         try {
             stopInteractive(obj);
             handle(interaction.getUser(), obj.getClass(), exception);

@@ -4,6 +4,7 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
@@ -16,7 +17,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public abstract class Subcommand implements Configured {
     protected final SlashCommandInteractionEvent event;
@@ -82,16 +82,22 @@ public abstract class Subcommand implements Configured {
                 return;
             }
 
-            this.interaction.getHook()
-                .sendFiles(
-                    new EmbedImageGenerator(STRS.getEventDisabled(), COLORS.get("error")).generate().getFileUpload()
-                )
-                .timeout(30000, TimeUnit.MILLISECONDS)
-                .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this.getClass(), e));
+            InteractionUtil.runWhenEdited(
+                this.interaction,
+                () -> {
+                    try {
+                        this.interaction.getHook().sendFiles(new EmbedImageGenerator(
+                            STRS.getEventDisabled(), COLORS.get("error")).generate().getFileUpload()
+                        ).queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this.getClass(), e));
+                    } catch (IOException exception) {
+                        Log.error(this.user, this.getClass(), "Failed to generate event fail image", exception);
+                    }
+                },
+                15000
+            );
+
         } catch (SQLException exception) {
             Log.error(this.user, this.getClass(), "Failed to get event fail flag", exception);
-        } catch (IOException exception) {
-            Log.error(this.user, this.getClass(), "Failed to generate event fail image", exception);
         }
     }
 }

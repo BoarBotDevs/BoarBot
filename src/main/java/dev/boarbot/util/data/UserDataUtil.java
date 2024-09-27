@@ -108,4 +108,16 @@ public class UserDataUtil {
             }
         }
     }
+
+    public static void setStreakFreeze(Connection connection, boolean shouldFreeze) throws SQLException {
+        String query = """
+            UPDATE users
+            SET streak_frozen = ?;
+        """;
+
+        try (PreparedStatement statement1 = connection.prepareStatement(query)) {
+            statement1.setBoolean(1, shouldFreeze);
+            statement1.executeUpdate();
+        }
+    }
 }

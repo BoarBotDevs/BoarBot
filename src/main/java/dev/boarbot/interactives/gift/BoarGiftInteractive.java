@@ -73,7 +73,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     private final List<QuestInfo> senderQuestInfos = new ArrayList<>();
     private final List<QuestInfo> openerQuestInfos = new ArrayList<>();
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService giftScheduler = Executors.newScheduledThreadPool(1);
 
     private final Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getGift();
 
@@ -110,7 +110,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 NUMS.getGiftLowWait();
 
             this.enabled = true;
-            this.scheduler.schedule(this::enableGift, randWaitTime, TimeUnit.MILLISECONDS);
+            this.giftScheduler.schedule(this::enableGift, randWaitTime, TimeUnit.MILLISECONDS);
             return;
         }
 
@@ -162,7 +162,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             Log.error(this.user, this.getClass(), "A problem occurred while enabling gift", exception);
         }
 
-        this.scheduler.schedule(this::tryClaimAtMaxHandicap, NUMS.getGiftMaxHandicap(), TimeUnit.MILLISECONDS);
+        this.giftScheduler.schedule(this::tryClaimAtMaxHandicap, NUMS.getGiftMaxHandicap(), TimeUnit.MILLISECONDS);
     }
 
     private void tryClaimAtMaxHandicap() {
@@ -173,9 +173,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         } catch (RuntimeException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "A problem occurred while enabling gift", exception);
+        } finally {
+            this.giftScheduler.shutdown();
         }
-
-        this.scheduler.shutdown();
     }
 
     private synchronized void giveGift() {
@@ -591,5 +591,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         return this.senderQuestInfos;
+    }
+
+    public void shutdownGiftScheduler() {
+        this.giftScheduler.shutdown();
     }
 }

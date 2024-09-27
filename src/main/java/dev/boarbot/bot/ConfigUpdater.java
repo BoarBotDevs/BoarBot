@@ -13,8 +13,12 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class ConfigUpdater implements Configured {
-    public static void toggleMaintenance() throws IOException {
-        CONFIG.getMainConfig().setMaintenanceMode(!CONFIG.getMainConfig().isMaintenanceMode());
+    public static void setMaintenance(boolean status) throws IOException {
+        if (CONFIG.getMainConfig().isMaintenanceMode() == status) {
+            return;
+        }
+
+        CONFIG.getMainConfig().setMaintenanceMode(status);
         String jsonStr = new Gson().toJson(CONFIG.getMainConfig());
 
         updateFile(ConfigLoader.mainPath, jsonStr);

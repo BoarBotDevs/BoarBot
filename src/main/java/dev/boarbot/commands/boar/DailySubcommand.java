@@ -8,6 +8,7 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
+import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
@@ -149,7 +150,15 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         } catch (SQLException exception) {
             SpecialReply.sendErrorMessage(this.interaction, this);
             this.boarIDs.clear();
-            this.sendExtraResponses();
+
+            if (this.isFirstDaily) {
+                this.sendFirstDaily();
+            }
+
+            if (QuestUtil.shouldSendQuest(this.questInfos)) {
+                QuestUtil.sendQuestClaimMessage(this.interaction.getHook(), this.questInfos);
+            }
+
             Log.error(this.user, this.getClass(), "Failed to fully complete daily update logic", exception);
         }
     }
@@ -162,21 +171,36 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         );
         Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
 
-        this.sendExtraResponses();
+        boolean shouldSendQuest = QuestUtil.shouldSendQuest(this.questInfos);
+
+        if (this.isFirstDaily && shouldSendQuest) {
+            InteractionUtil.runWhenEdited(
+                this.interaction,
+                () -> {
+                    sendFirstDaily();
+                    QuestUtil.sendQuestClaimMessage(this.interaction.getHook(), this.questInfos);
+                },
+                15000
+            );
+        } else if (this.isFirstDaily) {
+            InteractionUtil.runWhenEdited(this.interaction, this::sendFirstDaily, 15000);
+        } else if (shouldSendQuest) {
+            InteractionUtil.runWhenEdited(
+                this.interaction,
+                () -> QuestUtil.sendQuestClaimMessage(this.interaction.getHook(), this.questInfos),
+                15000
+            );
+        }
     }
 
-    private void sendExtraResponses() {
-        if (this.isFirstDaily) {
-            try {
-                EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getDailyFirstTime());
-                this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
-                    .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
-            } catch (IOException exception) {
-                Log.error(this.user, this.getClass(), "Failed to generate first daily reward message", exception);
-            }
+    private void sendFirstDaily() {
+        try {
+            EmbedImageGenerator embedGen = new EmbedImageGenerator(STRS.getDailyFirstTime());
+            this.interaction.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
+                .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
+        } catch (IOException exception) {
+            Log.error(this.user, this.getClass(), "Failed to generate first daily reward message", exception);
         }
-
-        QuestUtil.sendQuestClaimMessage(this.interaction.getHook(), this.questInfos);
     }
 
     private void sendPowResponse() {

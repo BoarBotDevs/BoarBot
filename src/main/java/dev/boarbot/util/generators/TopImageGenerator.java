@@ -15,11 +15,11 @@ import java.net.URISyntaxException;
 
 public class TopImageGenerator extends ImageGenerator {
     private static final int[] IMAGE_SIZE = {1920, 1403};
-    private static final int ENTRIES_PER_PAGE = 44;
+    private static final int ENTRIES_PER_PAGE = 40;
     private static final int LEFT_X = 478;
     private static final int RIGHT_X = 1443;
-    private static final int START_Y = 259;
-    private static final int SPACING_Y = 42;
+    private static final int START_Y = 260;
+    private static final int SPACING_Y = 46;
     private static final int WIDTH = 900;
     private static final int[] INFO_POS = {960, 1320};
     private static final int INFO_SPACING_Y = 54;
@@ -49,7 +49,7 @@ public class TopImageGenerator extends ImageGenerator {
         GraphicsUtil.drawImage(g2d, ResourceUtil.topUnderlayPath, ORIGIN);
 
         this.textDrawer = new TextDrawer(
-            g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), NUMS.getFontSmallest(), WIDTH
+            g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), NUMS.getFontSmallMedium(), WIDTH
         );
 
         int startIndex = this.page * ENTRIES_PER_PAGE;
@@ -58,7 +58,7 @@ public class TopImageGenerator extends ImageGenerator {
         int[] curPos = {LEFT_X, START_Y};
 
         for (int i=startIndex; i<endIndex; i++) {
-            if (i != startIndex && i % 22 == 0) {
+            if (i != startIndex && i % (ENTRIES_PER_PAGE/2) == 0) {
                 curPos = new int[] {RIGHT_X, START_Y};
             }
 

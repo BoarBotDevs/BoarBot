@@ -5,7 +5,6 @@ import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.data.*;
 import dev.boarbot.interactives.boar.megamenu.SortType;
-import dev.boarbot.util.logging.Log;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -455,7 +454,6 @@ public class MegaMenuQueries implements Configured {
                 }
 
                 while (results.next()) {
-                    Log.debug(results.getString("powerup_id"));
                     powAmts.put(results.getString("powerup_id"), results.getInt("amount"));
                 }
 

@@ -58,7 +58,7 @@
   "compCloneConfirmMultiple": "Are you sure? This will use <>powerup<>%s<>font<>, granting you <>silver<>%s %s <>font<>with a <>silver<>%s <>font<>chance of cloning another.",
   "compCloneTooMany": "<>error<>This would yield too many! The maximum you can clone is 25.",
   "compCloneSuccess": "You successfully <>font<>cloned your %s<>font<>!",
-  "compCloneFailed": "The serum had no effect on your %s<>font<>!",
+  "compCloneFailed": "The <>powerup<>%s<>font<> had no effect on your %s<>font<>!",
   "compCloneTitle": "%s Cloning!",
   "compNoBoar": "<>error<>It seems you don't own a %s<>error<>...",
   "compTransmuteConfirm": "Are you sure? This action will <>error<>completely drain <>font<>your <>powerup<>Transmutation Cell<>font<> and will replace one of your %s <>font<>with a random %s %s<>font<>.",

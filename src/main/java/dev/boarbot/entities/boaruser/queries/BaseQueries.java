@@ -54,12 +54,13 @@ public class BaseQueries implements Configured {
         }
 
         String query = """
-            SELECT username, last_daily_timestamp, last_streak_fix, first_joined_timestamp, boar_streak
+            SELECT username, last_daily_timestamp, last_streak_fix, first_joined_timestamp, boar_streak, streak_frozen
             FROM users
             WHERE user_id = ?;
         """;
 
         boolean usernameChanged;
+        boolean streakFrozen;
         long lastDailyLong = 0;
         long lastStreakLong = 0;
         long firstJoinedLong = 0;
@@ -73,6 +74,7 @@ public class BaseQueries implements Configured {
                     return;
                 }
 
+                streakFrozen = results.getBoolean("streak_frozen");
                 usernameChanged = this.boarUser.getUser(true) != null &&
                     !results.getString("username").equals(this.boarUser.getUser().getName());
 
@@ -110,6 +112,10 @@ public class BaseQueries implements Configured {
             }
         }
 
+        if (streakFrozen) {
+            return;
+        }
+
         int newBoarStreak = boarStreak;
         long timeToReach = Math.max(Math.max(lastDailyLong, lastStreakLong), firstJoinedLong);
         long curTimeCheck = TimeUtil.getLastDailyResetMilli() - TimeUtil.getOneDayMilli();
@@ -119,7 +125,11 @@ public class BaseQueries implements Configured {
         while (timeToReach < curTimeCheck) {
             newBoarStreak = Math.max(newBoarStreak - curRemove, 0);
             curTimeCheck -= TimeUtil.getOneDayMilli();
-            curRemove *= 2;
+
+            if (newBoarStreak != 0) {
+                curRemove *= 2;
+            }
+
             curDailiesMissed++;
         }
 

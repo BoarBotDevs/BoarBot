@@ -380,8 +380,29 @@
       },
       "maintenance": {
         "name": "maintenance",
-        "description": "Put BoarBot into maintenance mode",
-        "location": "dev.boarbot.commands.boardev.MaintenanceSubcommand"
+        "description": "Set BoarBot's maintenance status",
+        "location": "dev.boarbot.commands.boardev.MaintenanceSubcommand",
+        "options": [
+          {
+            "name": "value",
+            "type": 5,
+            "description": "Maintenance value",
+            "required": true
+          }
+        ]
+      },
+      "freeze": {
+        "name": "freeze",
+        "description": "Set every user's streak freeze status",
+        "location": "dev.boarbot.commands.boardev.FreezeSubcommand",
+        "options": [
+          {
+            "name": "value",
+            "type": 5,
+            "description": "Freeze value",
+            "required": true
+          }
+        ]
       }
     }
   }

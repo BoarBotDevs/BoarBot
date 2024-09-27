@@ -137,6 +137,27 @@ public class PowerupQueries implements Configured {
         }
     }
 
+    public int getActiveMiracles(Connection connection) throws SQLException {
+        int numActive = 0;
+
+        String query = """
+            SELECT miracles_active
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    numActive = results.getInt("miracles_active");
+                }
+            }
+        }
+
+        return numActive;
+    }
+
     public void activateMiracles(Connection connection, int amount) throws SQLException {
         this.boarUser.baseQuery().addUser(connection);
         this.boarUser.forceSynchronized();
@@ -166,6 +187,10 @@ public class PowerupQueries implements Configured {
     ) throws SQLException {
         this.boarUser.baseQuery().addUser(connection);
         this.boarUser.forceSynchronized();
+
+        if (this.boarUser.powQuery().getActiveMiracles(connection) == 0) {
+            return;
+        }
 
         int totalBucks = bucksGotten.stream().reduce(0, Integer::sum);
         String bestRarity = null;

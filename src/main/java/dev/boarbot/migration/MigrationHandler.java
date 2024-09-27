@@ -10,15 +10,11 @@ import java.util.List;
 
 public class MigrationHandler implements Configured {
     public static void doMigration() {
-        boolean priorMaintenance = CONFIG.getMainConfig().isMaintenanceMode();
-
-        if (!priorMaintenance) {
-            try {
-                ConfigUpdater.toggleMaintenance();
-            } catch (IOException exception) {
-                Log.error(MigrationHandler.class, "Failed to enable maintenance mode", exception);
-                System.exit(-1);
-            }
+        try {
+            ConfigUpdater.setMaintenance(true);
+        } catch (IOException exception) {
+            Log.error(MigrationHandler.class, "Failed to enable maintenance mode", exception);
+            System.exit(-1);
         }
 
         List<OldUserData> oldUsers = MigrationReader.getOldUsers();

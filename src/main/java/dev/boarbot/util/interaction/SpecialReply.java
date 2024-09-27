@@ -5,9 +5,9 @@ import dev.boarbot.util.generators.EmbedImageGenerator;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
@@ -24,7 +24,7 @@ public class SpecialReply implements Configured {
         );
     }
 
-    public static void sendErrorMessage(GenericComponentInteractionCreateEvent interaction, Object obj) {
+    public static void sendErrorMessage(ComponentInteraction interaction, Object obj) {
         MessageCreateData msgData = getErrorMsgData();
         interaction.reply(msgData).setEphemeral(true).queue(null, e ->
             interaction.getHook().editOriginal(MessageEditData.fromCreateData(msgData)).queue(null, e1 ->

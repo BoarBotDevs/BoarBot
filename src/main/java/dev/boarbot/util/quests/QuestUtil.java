@@ -131,4 +131,14 @@ public class QuestUtil implements Configured {
             case QuestType.POW_FAST -> actualAmt ? Integer.parseInt(requirement) : 1;
         };
     }
+
+    public static boolean shouldSendQuest(List<QuestInfo> questInfos) {
+        for (QuestInfo questInfo : questInfos) {
+            if (questInfo != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
