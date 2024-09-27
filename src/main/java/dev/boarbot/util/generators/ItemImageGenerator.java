@@ -23,6 +23,7 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ItemImageGenerator extends ImageGenerator {
     public static final int[] IMAGE_SIZE = {930, 1080};
@@ -44,6 +45,7 @@ public class ItemImageGenerator extends ImageGenerator {
     private static final int BOX_THREE_Y = 358;
     private static final int BOX_FOUR_Y = 429;
     private static final int BOX_HEIGHT = 71;
+    private static final int[] NEW_TAG_POS = {763, 933};
 
     private final User user;
     private final String title;
@@ -55,8 +57,11 @@ public class ItemImageGenerator extends ImageGenerator {
     @Getter @Setter private String colorKey;
     @Getter @Setter private User giftingUser;
     @Getter @Setter private long bucks;
+    @Getter @Setter private boolean addNewTag;
 
-    public ItemImageGenerator(User user, String title, String itemID, int badgeTier, User giftingUser, long bucks) {
+    public ItemImageGenerator(
+        User user, String title, String itemID, int badgeTier, User giftingUser, long bucks, boolean addNewTag
+    ) {
         this.user = user;
         this.title = title;
         this.itemID = itemID;
@@ -79,10 +84,18 @@ public class ItemImageGenerator extends ImageGenerator {
 
         this.giftingUser = giftingUser;
         this.bucks = bucks;
+        this.addNewTag = addNewTag;
     }
 
     public ItemImageGenerator(
-        User user, String title, String itemName, String filePath, String colorKey, User giftingUser, long bucks
+        User user,
+        String title,
+        String itemName,
+        String filePath,
+        String colorKey,
+        User giftingUser,
+        long bucks,
+        boolean addNewTag
     ) {
         this.user = user;
         this.title = title;
@@ -94,6 +107,7 @@ public class ItemImageGenerator extends ImageGenerator {
 
         this.giftingUser = giftingUser;
         this.bucks = bucks;
+        this.addNewTag = addNewTag;
     }
 
     @Override
@@ -224,7 +238,7 @@ public class ItemImageGenerator extends ImageGenerator {
         BufferedImage generatedImage = ImageIO.read(byteArrayIS);
         Graphics2D g2d = generatedImage.createGraphics();
 
-        g2d.drawImage(this.generateUserImageData(), BOX_X, BOX_ONE_Y, null);
+        g2d.drawImage(this.generateUserImageData(), ORIGIN[0], ORIGIN[1], null);
 
         ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
         ImageIO.write(generatedImage, "png", byteArrayOS);
@@ -353,13 +367,20 @@ public class ItemImageGenerator extends ImageGenerator {
             textDrawer.drawText();
         }
 
-        return userDataImage.getSubimage(
-            BOX_X, BOX_ONE_Y, NUMS.getBigBoarSize()[0], BOX_FOUR_Y + BOX_HEIGHT - BOX_ONE_Y
-        );
+        if (this.addNewTag) {
+            GraphicsUtil.drawImage(g2d, ResourceUtil.newTagPath, NEW_TAG_POS);
+        }
+
+        return userDataImage;
     }
 
     public static List<ItemImageGenerator> getItemImageGenerators(
-        List<String> boarIDs, List<Integer> bucksGotten, User user, String title, User giftingUser
+        List<String> boarIDs,
+        List<Integer> bucksGotten,
+        Set<String> firstBoarIDs,
+        User user,
+        String title,
+        User giftingUser
     ) {
         List<ItemImageGenerator> itemGens = new ArrayList<>();
         String baseTitle = title;
@@ -372,7 +393,7 @@ public class ItemImageGenerator extends ImageGenerator {
             }
 
             ItemImageGenerator boarItemGen = new ItemImageGenerator(
-                user, title, boarIDs.get(i), -1, giftingUser, bucksGotten.get(i)
+                user, title, boarIDs.get(i), -1, giftingUser, bucksGotten.get(i), firstBoarIDs.contains(boarIDs.get(i))
             );
 
             itemGens.add(boarItemGen);
@@ -382,12 +403,12 @@ public class ItemImageGenerator extends ImageGenerator {
     }
 
     public static List<ItemImageGenerator> getItemImageGenerators(
-        String itemName, String filePath, String colorKey, User user, String title, User giftingUser
+        String itemName, String filePath, String colorKey, User user, String title, User giftingUser, boolean addNewTag
     ) {
         List<ItemImageGenerator> itemGens = new ArrayList<>();
 
         itemGens.add(new ItemImageGenerator(
-            user, title, itemName, filePath, colorKey, giftingUser, 0
+            user, title, itemName, filePath, colorKey, giftingUser, 0, addNewTag
         )) ;
 
         return itemGens;

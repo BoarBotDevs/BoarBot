@@ -4,6 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.util.generators.EmbedImageGenerator;
+import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
@@ -54,6 +55,25 @@ public class CommandListener extends ListenerAdapter implements Runnable, Config
             } catch (IOException exception) {
                 Log.error(this.event.getUser(), this.getClass(), "Failed to generate maintenance embed", exception);
                 msg.setContent(STRS.getMaintenance());
+            }
+
+            this.event.getInteraction().reply(msg.build()).setEphemeral(true).queue(null,
+                e -> ExceptionHandler.replyHandle(this.event, this.getClass(), e)
+            );
+
+            return;
+        }
+
+        if (InteractionUtil.isOnCooldown(this.event.getUser())) {
+            MessageCreateBuilder msg = new MessageCreateBuilder();
+
+            try {
+                msg.setFiles(new EmbedImageGenerator(
+                    STRS.getOnCooldown(), COLORS.get("error")
+                ).generate().getFileUpload());
+            } catch (IOException exception) {
+                Log.error(this.event.getUser(), this.getClass(), "Failed to generate cooldown embed", exception);
+                msg.setContent(STRS.getOnCooldown());
             }
 
             this.event.getInteraction().reply(msg.build()).setEphemeral(true).queue(null,

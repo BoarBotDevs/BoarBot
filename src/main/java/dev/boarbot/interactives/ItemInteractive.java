@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ItemInteractive extends UserInteractive {
     private int page = 0;
@@ -46,7 +47,7 @@ public class ItemInteractive extends UserInteractive {
         List<Integer> boarEditions,
         boolean isMsg
     ) {
-        super(interaction, isMsg);
+        super(interaction, isMsg, NUMS.getInteractiveIdle(), NUMS.getInteractiveHardStop(), false);
         this.itemGens = itemGens;
         this.boarIDs = boarIDs;
         this.boarEditions = boarEditions;
@@ -222,6 +223,7 @@ public class ItemInteractive extends UserInteractive {
         List<String> boarIDs,
         List<Integer> bucksGotten,
         List<Integer> editions,
+        Set<String> firstBoarIDs,
         User giftingUser,
         User user,
         String title,
@@ -229,7 +231,7 @@ public class ItemInteractive extends UserInteractive {
         boolean isMsg
     ) {
         List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
-            boarIDs, bucksGotten, user, title, giftingUser
+            boarIDs, bucksGotten, firstBoarIDs, user, title, giftingUser
         );
 
         Interactive interactive = InteractiveFactory.constructItemInteractive(
@@ -245,11 +247,12 @@ public class ItemInteractive extends UserInteractive {
         User giftingUser,
         User user,
         String title,
+        boolean addNewTag,
         InteractionHook hook,
         boolean isMsg
     ) {
         List<ItemImageGenerator> itemGens = ItemImageGenerator.getItemImageGenerators(
-            itemName, filePath, colorKey, user, title, giftingUser
+            itemName, filePath, colorKey, user, title, giftingUser, addNewTag
         );
 
         Interactive interactive = InteractiveFactory.constructItemInteractive(

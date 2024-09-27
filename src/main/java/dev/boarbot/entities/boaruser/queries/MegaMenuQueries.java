@@ -551,9 +551,9 @@ public class MegaMenuQueries implements Configured {
 
     public List<BadgeData> getCurrentBadges(Connection connection) throws SQLException {
         String query = """
-            SELECT badge_id, badge_tier, obtained_timestamp
+            SELECT badge_id, badge_tier, obtained_timestamp, first_obtained_timestamp
             FROM collected_badges
-            WHERE user_id = ? AND `exists` = true;
+            WHERE user_id = ? AND `exists` = true AND badge_tier >= 0;
         """;
 
         List<BadgeData> badgeIDs = new ArrayList<>();
@@ -564,9 +564,10 @@ public class MegaMenuQueries implements Configured {
             try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
                     badgeIDs.add(new BadgeData(
-                            results.getString("badge_id"),
-                            results.getInt("badge_tier"),
-                            results.getTimestamp("obtained_timestamp").getTime()
+                        results.getString("badge_id"),
+                        results.getInt("badge_tier"),
+                        results.getTimestamp("obtained_timestamp").getTime(),
+                        results.getTimestamp("first_obtained_timestamp").getTime()
                     ));
                 }
             }

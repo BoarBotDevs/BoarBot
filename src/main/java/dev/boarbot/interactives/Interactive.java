@@ -33,16 +33,21 @@ public abstract class Interactive implements Configured {
     }
 
     protected Interactive(String interactiveID, String guildID, long waitTime, long hardStop) {
+        this(interactiveID, guildID, waitTime, hardStop, true);
+    }
+
+    protected Interactive(String interactiveID, String guildID, long waitTime, long hardStop, boolean checkDupe) {
         this.interactiveID = interactiveID;
         this.guildID = guildID;
         this.waitTime = waitTime;
         this.curStopTime = TimeUtil.getCurMilli() + waitTime;
         this.hardStopTime = TimeUtil.getCurMilli() + hardStop;
 
-        String duplicateInteractiveKey = this.findDuplicateKey();
-
-        if (duplicateInteractiveKey != null) {
-            interactives.get(duplicateInteractiveKey).stop(StopType.EXPIRED);
+        if (checkDupe) {
+            String duplicateInteractiveKey = this.findDuplicateKey();
+            if (duplicateInteractiveKey != null) {
+                interactives.get(duplicateInteractiveKey).stop(StopType.EXPIRED);
+            }
         }
 
         interactives.put(interactiveID, this);

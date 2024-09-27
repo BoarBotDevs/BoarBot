@@ -26,6 +26,7 @@ public class ResourceUtil {
     public static final String itemBackplatePath = itemAssetsPath + "ItemBackplate.png";
     public static final String itemShadowPathL = itemAssetsPath + "ShadowLeft.png";
     public static final String itemShadowPathR = itemAssetsPath + "ShadowRight.png";
+    public static final String newTagPath = itemAssetsPath + "NewTag.png";
 
     public static final String megaMenuAssetsPath = imagesPath + "megamenu/";
     public static final String megaMenuBasePath = megaMenuAssetsPath + "MegaMenuBase.png";

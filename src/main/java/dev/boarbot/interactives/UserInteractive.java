@@ -36,11 +36,16 @@ public abstract class UserInteractive extends Interactive {
     }
 
     protected UserInteractive(Interaction interaction, boolean isMsg, long waitTime, long hardTime) {
+        this(interaction, isMsg, waitTime, hardTime, true);
+    }
+
+    protected UserInteractive(Interaction interaction, boolean isMsg, long waitTime, long hardTime, boolean checkDupe) {
         super(
             interaction.getId() + "," + interaction.getUser().getId(),
             Objects.requireNonNull(interaction.getGuild()).getId(),
             waitTime,
-            hardTime
+            hardTime,
+            checkDupe
         );
 
         this.interaction = interaction;

@@ -10,4 +10,5 @@ import lombok.ToString;
 public class BadgeData {
     private boolean possession = false;
     private long curObtained = 0;
+    private long firstObtained = 0;
 }

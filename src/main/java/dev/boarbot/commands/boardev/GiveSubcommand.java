@@ -22,10 +22,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class GiveSubcommand extends Subcommand implements Synchronizable {
     private final User giftedUser;
@@ -37,6 +34,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
     private final List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucks = new ArrayList<>();
     private final List<Integer> editions = new ArrayList<>();
+    private final Set<String> firstBoarIDs = new HashSet<>();
 
     private boolean failedSynchronized = false;
 
@@ -119,6 +117,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
             this.boarIDs,
             this.bucks,
             this.editions,
+            this.firstBoarIDs,
             null,
             this.giftedUser,
             STRS.getGiveTitle(),
@@ -158,6 +157,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
             null,
             this.giftedUser,
             STRS.getGiveTitle(),
+            false,
             this.interaction.getHook(),
             false
         );
@@ -196,6 +196,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
             null,
             this.giftedUser,
             STRS.getGiveTitle(),
+            false,
             this.interaction.getHook(),
             false
         );
@@ -228,6 +229,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
             null,
             this.giftedUser,
             STRS.getGiveTitle(),
+            false,
             this.interaction.getHook(),
             false
         );
@@ -238,7 +240,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
         if (!this.boarIDs.isEmpty()) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.boarQuery().addBoars(
-                    this.boarIDs, connection, BoarObtainType.OTHER, this.bucks, this.editions
+                    this.boarIDs, connection, BoarObtainType.OTHER, this.bucks, this.editions, this.firstBoarIDs
                 );
             } catch (SQLException exception) {
                 this.failedSynchronized = true;

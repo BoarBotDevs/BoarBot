@@ -19,8 +19,10 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 public class BadgesImageGenerator extends MegaMenuGenerator {
-    private static final int[] LEFT_POS = {484, 762};
+    private static final int LEFT_X = 484;
+    private static final int LEFT_START_Y = 683;
     private static final int VALUE_Y_OFFSET = 78;
+    private static final int LABEL_Y_SPACING = 198;
     private static final int[] RARITY_POS = {1431, 403};
     private static final int[] NAME_POS = {1431, 469};
     private static final int[] BADGE_POS = {1108, 475};
@@ -39,6 +41,7 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
         BadgeItemConfig badge = BADGES.get(this.badges.get(this.page).badgeID());
         int badgeTier = this.badges.get(this.page).badgeTier();
         long badgeObtained = this.badges.get(this.page).obtainedTimestamp();
+        long badgeFirstObtained = this.badges.get(this.page).firstObtainedTimestamp();
 
         String badgeFile = ResourceUtil.badgeAssetsPath + badge.getFiles()[badgeTier];
         String badgeDescription = badge.getDescriptions()[badgeTier];
@@ -50,13 +53,23 @@ public class BadgesImageGenerator extends MegaMenuGenerator {
 
         this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), mediumFont);
 
+        int[] obtainedLabelPos = {LEFT_X, LEFT_START_Y};
         String obtainedStr = Instant.ofEpochMilli(badgeObtained)
             .atOffset(ZoneOffset.UTC)
             .format(TimeUtil.getDateFormatter());
-        int[] obtainedPos = {LEFT_POS[0], LEFT_POS[1] + VALUE_Y_OFFSET};
+        int[] obtainedPos = {LEFT_X, obtainedLabelPos[1] + VALUE_Y_OFFSET};
 
-        TextUtil.drawLabel(this.textDrawer, STRS.getBadgeObtainedLabel(), LEFT_POS);
+        int[] firstObtainedLabelPos = {LEFT_X, obtainedLabelPos[1] + LABEL_Y_SPACING};
+        String firstObtainedStr = Instant.ofEpochMilli(badgeFirstObtained)
+            .atOffset(ZoneOffset.UTC)
+            .format(TimeUtil.getDateFormatter());
+        int[] firstObtainedPos = {LEFT_X, firstObtainedLabelPos[1] + VALUE_Y_OFFSET};
+
+        TextUtil.drawLabel(this.textDrawer, STRS.getBadgeObtainedLabel(), obtainedLabelPos);
         TextUtil.drawValue(this.textDrawer, obtainedStr, obtainedPos);
+
+        TextUtil.drawLabel(this.textDrawer, STRS.getBadgeFirstObtainedLabel(), firstObtainedLabelPos);
+        TextUtil.drawValue(this.textDrawer, firstObtainedStr, firstObtainedPos);
 
         this.textDrawer.setText("BADGE");
         this.textDrawer.setPos(RARITY_POS);

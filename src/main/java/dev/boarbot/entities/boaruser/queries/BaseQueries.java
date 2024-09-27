@@ -321,47 +321,38 @@ public class BaseQueries implements Configured {
     }
 
     public void giveBadge(Connection connection, String badgeID, int tier) throws SQLException {
-        String query = """
-            SELECT 1
-            FROM collected_badges
-            WHERE user_id = ? AND badge_id = ? AND badge_tier = ?;
-        """;
-
-        String removeQuery = """
-            DELETE FROM collected_badges
-            WHERE user_id = ? AND badge_id = ?;
-        """;
-
         String insertQuery = """
-            INSERT INTO collected_badges (user_id, badge_id, badge_tier)
-            VALUES (?, ?, ?);
+            INSERT INTO collected_badges (user_id, badge_id, first_obtained_timestamp)
+            SELECT ?, ?, ?
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM collected_badges
+                WHERE badge_id = ? AND user_id = ?
+            );
+        """;
+
+        String updateQuery = """
+            UPDATE collected_badges
+            SET badge_tier = ?, obtained_timestamp = ?
+            WHERE badge_id = ? AND user_id = ?;
         """;
 
         try (
-            PreparedStatement statement1 = connection.prepareStatement(query);
-            PreparedStatement statement2 = connection.prepareStatement(removeQuery);
-            PreparedStatement statement3 = connection.prepareStatement(insertQuery)
+            PreparedStatement statement1 = connection.prepareStatement(insertQuery);
+            PreparedStatement statement2 = connection.prepareStatement(updateQuery)
         ) {
             statement1.setString(1, this.boarUser.getUserID());
             statement1.setString(2, badgeID);
-            statement1.setInt(3, tier);
+            statement1.setTimestamp(3, new Timestamp(TimeUtil.getCurMilli()));
+            statement1.setString(4, badgeID);
+            statement1.setString(5, this.boarUser.getUserID());
+            statement1.executeUpdate();
 
-            boolean hasBadge;
-
-            try (ResultSet results = statement1.executeQuery()) {
-                hasBadge = results.next();
-            }
-
-            if (!hasBadge) {
-                statement2.setString(1, this.boarUser.getUserID());
-                statement2.setString(2, badgeID);
-                statement2.executeUpdate();
-
-                statement3.setString(1, this.boarUser.getUserID());
-                statement3.setString(2, badgeID);
-                statement3.setInt(3, tier);
-                statement3.executeUpdate();
-            }
+            statement2.setInt(1, tier);
+            statement2.setTimestamp(2, new Timestamp(TimeUtil.getCurMilli()));
+            statement2.setString(3, badgeID);
+            statement2.setString(4, this.boarUser.getUserID());
+            statement2.executeUpdate();
         }
     }
 

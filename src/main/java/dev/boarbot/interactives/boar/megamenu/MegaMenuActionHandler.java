@@ -23,9 +23,7 @@ import net.dv8tion.jda.api.entities.User;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 class MegaMenuActionHandler implements Configured {
@@ -144,6 +142,7 @@ class MegaMenuActionHandler implements Configured {
         List<String> newBoarIDs = new ArrayList<>();
         List<Integer> bucksGotten = new ArrayList<>();
         List<Integer> editions = new ArrayList<>();
+        Set<String> firstBoarIDs = new HashSet<>();
 
         this.interactive.numClone = boarUser.powQuery().getPowerupAmount(connection, "clone");
         boolean cloneable = RARITIES.get(this.curRarityKey).getAvgClones() != 0 &&
@@ -181,7 +180,8 @@ class MegaMenuActionHandler implements Configured {
                         connection,
                         BoarObtainType.CLONE,
                         bucksGotten,
-                        editions
+                        editions,
+                        firstBoarIDs
                     );
 
                     boarUser.powQuery().usePowerup(connection, "clone", numTryClone);
@@ -219,6 +219,7 @@ class MegaMenuActionHandler implements Configured {
                         newBoarIDs,
                         bucksGotten,
                         editions,
+                        firstBoarIDs,
                         null,
                         this.user,
                         title,
@@ -243,6 +244,7 @@ class MegaMenuActionHandler implements Configured {
         List<String> newBoarIDs = new ArrayList<>();
         List<Integer> bucksGotten = new ArrayList<>();
         List<Integer> editions = new ArrayList<>();
+        Set<String> firstBoarIDs = new HashSet<>();
 
         this.interactive.numTransmute = boarUser.powQuery().getPowerupAmount(connection, "transmute");
         RarityConfig curRarity = RARITIES.get(this.curRarityKey);
@@ -260,7 +262,8 @@ class MegaMenuActionHandler implements Configured {
                     connection,
                     BoarObtainType.TRANSMUTE,
                     bucksGotten,
-                    editions
+                    editions,
+                    firstBoarIDs
                 );
 
                 boarUser.powQuery().usePowerup(connection, "transmute", this.interactive.numTransmute);
@@ -312,6 +315,7 @@ class MegaMenuActionHandler implements Configured {
                         newBoarIDs,
                         bucksGotten,
                         editions,
+                        firstBoarIDs,
                         null,
                         this.user,
                         title,

@@ -40,10 +40,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class BoarGiftInteractive extends UserInteractive implements Synchronizable {
@@ -405,9 +402,12 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     private void giveBoar(BoarUser boarUser) throws SQLException {
         List<Integer> bucksGotten = new ArrayList<>();
         List<Integer> editions = new ArrayList<>();
+        Set<String> firstBoarIDs = new HashSet<>();
 
         try (Connection connection = DataUtil.getConnection()) {
-            boarUser.boarQuery().addBoars(this.boarIDs, connection, BoarObtainType.GIFT, bucksGotten, editions);
+            boarUser.boarQuery().addBoars(
+                this.boarIDs, connection, BoarObtainType.GIFT, bucksGotten, editions, firstBoarIDs
+            );
             this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
                 QuestType.COLLECT_RARITY, this.boarIDs, connection
             ));
@@ -424,6 +424,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     this.boarIDs,
                     bucksGotten,
                     editions,
+                    firstBoarIDs,
                     this.user,
                     this.giftWinner,
                     title,
@@ -468,6 +469,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     this.user,
                     this.giftWinner,
                     title,
+                    false,
                     this.giftInteractions.get(this.giftWinner).getHook(),
                     false
                 );
@@ -512,6 +514,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     this.user,
                     this.giftWinner,
                     title,
+                    false,
                     this.giftInteractions.get(this.giftWinner).getHook(),
                     false
                 );

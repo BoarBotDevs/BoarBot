@@ -27,14 +27,13 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class DailySubcommand extends Subcommand implements Synchronizable {
     private List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucksGotten = new ArrayList<>();
     private final List<Integer> boarEditions = new ArrayList<>();
+    private final Set<String> firstBoarIDs = new HashSet<>();
 
     private boolean canDaily = true;
     private boolean notificationsOn = false;
@@ -136,7 +135,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
             boarUser.boarQuery().addBoars(
-                this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions
+                this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions, this.firstBoarIDs
             );
             boarUser.powQuery().useActiveMiracles(this.boarIDs, this.bucksGotten, connection);
 
@@ -167,7 +166,15 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         String title = STRS.getDailyTitle();
 
         ItemInteractive.sendInteractive(
-            this.boarIDs, this.bucksGotten, this.boarEditions, null, this.user, title, this.interaction.getHook(), false
+            this.boarIDs,
+            this.bucksGotten,
+            this.boarEditions,
+            this.firstBoarIDs,
+            null,
+            this.user,
+            title,
+            this.interaction.getHook(),
+            false
         );
         Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
 

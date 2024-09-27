@@ -165,6 +165,7 @@ public class StringConfig {
     private String questNoBonus = "";
     private String badgeBlocked = "";
     private String badgeObtainedLabel = "";
+    private String badgeFirstObtainedLabel = "";
 
     // Event strings
 

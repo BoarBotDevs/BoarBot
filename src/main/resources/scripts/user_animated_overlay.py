@@ -15,13 +15,11 @@ overlay_image_bytes = image_bytes[base_len:base_len+overlay_len]
 base_image = Image.open(BytesIO(image_bytes))
 overlay_image = Image.open(BytesIO(overlay_image_bytes))
 
-overlay_pos = (33, 195)
-
 frames = []
 
 for frame in ImageSequence.Iterator(base_image):
     frame = frame.copy().convert('RGBA')
-    frame.paste(overlay_image, overlay_pos, mask=overlay_image)
+    frame.paste(overlay_image, mask=overlay_image)
     frames.append(frame)
 
 output = BytesIO()

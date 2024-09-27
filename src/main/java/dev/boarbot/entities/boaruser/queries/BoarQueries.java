@@ -10,6 +10,7 @@ import dev.boarbot.util.time.TimeUtil;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class BoarQueries implements Configured {
     private final BoarUser boarUser;
@@ -23,7 +24,8 @@ public class BoarQueries implements Configured {
         Connection connection,
         BoarObtainType obtainType,
         List<Integer> bucksGotten,
-        List<Integer> boarEditions
+        List<Integer> boarEditions,
+        Set<String> firstBoarIDs
     ) throws SQLException {
         this.boarUser.baseQuery().addUser(connection);
         this.boarUser.forceSynchronized();
@@ -43,26 +45,46 @@ public class BoarQueries implements Configured {
                 VALUES (?, ?, ?)
                 RETURNING edition, bucks_gotten;
             """;
+
+            String isFirstQuery = """
+                SELECT COUNT(*) = 1
+                FROM collected_boars
+                WHERE user_id = ? AND boar_id = ?;
+            """;
+
             int curEdition;
 
-            try (PreparedStatement boarAddStatement = connection.prepareStatement(boarAddQuery)) {
+            try (
+                PreparedStatement boarAddStatement = connection.prepareStatement(boarAddQuery);
+                PreparedStatement isFirstStatement = connection.prepareStatement(isFirstQuery)
+            ) {
                 boarAddStatement.setString(1, this.boarUser.getUserID());
                 boarAddStatement.setString(2, boarID);
                 boarAddStatement.setString(3, obtainType.toString());
 
-                try (ResultSet results = boarAddStatement.executeQuery()) {
-                    if (results.next()) {
-                        curEdition = results.getInt("edition");
+                isFirstStatement.setString(1, this.boarUser.getUserID());
+                isFirstStatement.setString(2, boarID);
+
+                try (
+                    ResultSet results1 = boarAddStatement.executeQuery();
+                    ResultSet results2 = isFirstStatement.executeQuery()
+                ) {
+                    if (results1.next()) {
+                        curEdition = results1.getInt("edition");
 
                         newBoarIDs.add(boarID);
                         boarEditions.add(curEdition);
-                        bucksGotten.add(results.getInt("bucks_gotten"));
+                        bucksGotten.add(results1.getInt("bucks_gotten"));
 
                         String rarityKey = BoarUtil.findRarityKey(boarID);
 
                         if (curEdition == 1 && RARITIES.get(rarityKey).isGivesFirstBoar()) {
-                            this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions);
+                            this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions, firstBoarIDs);
                         }
+                    }
+
+                    if (results2.next() && results2.getBoolean(1)) {
+                        firstBoarIDs.add(boarID);
                     }
                 }
             }
@@ -121,29 +143,55 @@ public class BoarQueries implements Configured {
         List<String> newBoarIDs,
         Connection connection,
         List<Integer> bucksGotten,
-        List<Integer> boarEditions
+        List<Integer> boarEditions,
+        Set<String> firstBoarIDs
     ) throws SQLException {
         String insertFirstQuery = """
             INSERT INTO collected_boars (user_id, boar_id, original_obtain_type)
             VALUES (?, ?, ?)
-            RETURNING edition;
+            RETURNING edition, (
+                SELECT COUNT(*)
+                WHERE user_id = ? AND boar_id = ?
+            );
         """;
+
+        String isFirstQuery = """
+            SELECT COUNT(*) = 1
+            FROM collected_boars
+            WHERE user_id = ? AND boar_id = ?;
+        """;
+
         String firstBoarID = CONFIG.getMainConfig().getFirstBoarID();
 
         if (!BOARS.containsKey(firstBoarID)) {
             return;
         }
 
-        try (PreparedStatement insertFirstStatement = connection.prepareStatement(insertFirstQuery)) {
+        try (
+            PreparedStatement insertFirstStatement = connection.prepareStatement(insertFirstQuery);
+            PreparedStatement isFirstStatement = connection.prepareStatement(isFirstQuery)
+        ) {
             insertFirstStatement.setString(1, this.boarUser.getUserID());
             insertFirstStatement.setString(2, firstBoarID);
             insertFirstStatement.setString(3, BoarObtainType.OTHER.toString());
+            insertFirstStatement.setString(4, this.boarUser.getUserID());
+            insertFirstStatement.setString(5, firstBoarID);
 
-            try (ResultSet results = insertFirstStatement.executeQuery()) {
-                if (results.next()) {
+            isFirstStatement.setString(1, this.boarUser.getUserID());
+            isFirstStatement.setString(2, firstBoarID);
+
+            try (
+                ResultSet results1 = insertFirstStatement.executeQuery();
+                ResultSet results2 = isFirstStatement.executeQuery()
+            ) {
+                if (results1.next()) {
                     newBoarIDs.add(firstBoarID);
-                    boarEditions.add(results.getInt("edition"));
+                    boarEditions.add(results1.getInt("edition"));
                     bucksGotten.add(0);
+                }
+
+                if (results2.next() && results2.getBoolean(1)) {
+                    firstBoarIDs.add(firstBoarID);
                 }
             }
         }

@@ -1,14 +1,11 @@
 package dev.boarbot.util.data.top;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import dev.boarbot.util.time.TimeUtil;
+
+import java.sql.*;
 import java.util.*;
 
 public class TopDataUtil {
-    private static final int MAX_ATHLETE_TIER = 2;
-
     public static Map<String, TopData> getBoard(TopType type, Connection connection) throws SQLException {
         return switch (type) {
             case FASTEST_POWERUP -> getUserBoard(type, false, 120000, connection);
@@ -80,15 +77,16 @@ public class TopDataUtil {
     ) throws SQLException {
         List<Set<String>> usernameSets = new ArrayList<>();
 
-        usernameSets.add(firstUsernames);
-        usernameSets.add(secondUsernames);
         usernameSets.add(thirdUsernames);
+        usernameSets.add(secondUsernames);
+        usernameSets.add(firstUsernames);
 
         List<String> setStrs = getSetStrs(usernameSets);
         String allSetStrs = String.join(",", setStrs);
 
         String deleteQuery = """
-            DELETE FROM collected_badges
+            UPDATE collected_badges
+            SET badge_tier = -1
             WHERE
                 badge_id = 'athlete' AND
                 collected_badges.user_id NOT IN (
@@ -98,20 +96,8 @@ public class TopDataUtil {
                 );
         """.formatted(allSetStrs);
 
-        String updateQuery = """
-            UPDATE collected_badges
-            SET badge_tier = ?
-            WHERE
-                badge_id = 'athlete' AND
-                collected_badges.user_id IN (
-                    SELECT user_id
-                    FROM users
-                    WHERE username IN (%s)
-                );
-        """;
-
         String insertQuery = """
-            INSERT INTO collected_badges (user_id, badge_id, badge_tier)
+            INSERT INTO collected_badges (user_id, badge_id, first_obtained_timestamp)
             SELECT user_id, 'athlete', ?
             FROM users
             WHERE username = ? AND NOT EXISTS (
@@ -122,31 +108,44 @@ public class TopDataUtil {
             LIMIT 1;
         """;
 
+        String updateQuery = """
+            UPDATE collected_badges
+            SET badge_tier = ?, obtained_timestamp = ?
+            WHERE
+                badge_id = 'athlete' AND
+                collected_badges.user_id IN (
+                    SELECT user_id
+                    FROM users
+                    WHERE username IN (%s)
+                );
+        """;
+
         try (PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
             statement.executeUpdate();
         }
 
-        int tier = MAX_ATHLETE_TIER;
+        int tier = 0;
         for (Set<String> usernameSet : usernameSets) {
-            String setStr = setStrs.get(Math.abs(tier-MAX_ATHLETE_TIER));
+            String setStr = setStrs.get(tier);
 
             try (
-                PreparedStatement statement1 = connection.prepareStatement(updateQuery.formatted(setStr));
-                PreparedStatement statement2 = connection.prepareStatement(insertQuery.formatted(setStr))
+                PreparedStatement statement1 = connection.prepareStatement(insertQuery);
+                PreparedStatement statement2 = connection.prepareStatement(updateQuery.formatted(setStr))
             ) {
-                statement1.setInt(1, tier);
-                statement1.executeUpdate();
-
                 for (String username : usernameSet) {
-                    statement2.setInt(1, tier);
-                    statement2.setString(2, username);
-                    statement2.addBatch();
+                    statement1.setTimestamp(1, new Timestamp(TimeUtil.getCurMilli()));
+                    statement1.setString(2, username);
+                    statement1.addBatch();
                 }
 
-                statement2.executeBatch();
+                statement1.executeBatch();
+
+                statement2.setInt(1, tier);
+                statement2.setTimestamp(2, new Timestamp(TimeUtil.getCurMilli()));
+                statement2.executeUpdate();
             }
 
-            tier--;
+            tier++;
         }
     }
 

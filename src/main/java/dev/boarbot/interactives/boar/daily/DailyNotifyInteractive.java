@@ -70,6 +70,7 @@ public class DailyNotifyInteractive extends UserInteractive {
             MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(embedGen.generate().getFileUpload());
             compEvent.getHook().sendMessage(msg.build()).setEphemeral(true)
                 .queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
+            this.execute(null);
         } catch (IOException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate notification fail message", exception);

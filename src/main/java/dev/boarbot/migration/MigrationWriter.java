@@ -250,8 +250,8 @@ class MigrationWriter implements Configured {
 
     private static void writeBadgeUsers(List<OldUserData> oldUsers, Connection connection) throws SQLException {
         String badgeQuery = """
-            INSERT INTO collected_badges (user_id, badge_id, badge_tier, obtained_timestamp)
-            VALUES (?, ?, ?, ?);
+            INSERT INTO collected_badges (user_id, badge_id, badge_tier, obtained_timestamp, first_obtained_timestamp)
+            VALUES (?, ?, ?, ?, ?);
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(badgeQuery)) {
@@ -275,8 +275,16 @@ class MigrationWriter implements Configured {
 
                     statement.setString(1, oldUser.getUserID());
                     statement.setString(2, fixedBadgeID);
-                    statement.setInt(3, fixedBadgeID.equals("athlete") ? 2 : 0);
+
+                    int badgeTier = badge.isPossession() ? 0 : -1;
+
+                    if (fixedBadgeID.equals("athlete") && badgeTier == 0) {
+                        badgeTier = 2;
+                    }
+
+                    statement.setInt(3, badgeTier);
                     statement.setTimestamp(4, new Timestamp(badge.getCurObtained()));
+                    statement.setTimestamp(5, new Timestamp(badge.getFirstObtained()));
 
                     statement.addBatch();
                 }
