@@ -8,9 +8,7 @@ import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class BoarQueries implements Configured {
     private final BoarUser boarUser;
@@ -22,7 +20,7 @@ public class BoarQueries implements Configured {
     public void addBoars(
         List<String> boarIDs,
         Connection connection,
-        BoarObtainType obtainType,
+        String obtainType,
         List<Integer> bucksGotten,
         List<Integer> boarEditions,
         Set<String> firstBoarIDs
@@ -60,7 +58,7 @@ public class BoarQueries implements Configured {
             ) {
                 boarAddStatement.setString(1, this.boarUser.getUserID());
                 boarAddStatement.setString(2, boarID);
-                boarAddStatement.setString(3, obtainType.toString());
+                boarAddStatement.setString(3, obtainType);
 
                 isFirstStatement.setString(1, this.boarUser.getUserID());
                 isFirstStatement.setString(2, boarID);
@@ -116,6 +114,53 @@ public class BoarQueries implements Configured {
             statement.setString(2, this.boarUser.getUserID());
             return statement.executeQuery().next();
         }
+    }
+
+    public boolean hasYearlySpooky(Connection connection) throws SQLException {
+        StringJoiner joiner = new StringJoiner("','", "'", "'");
+
+        for (int i=0; i<STRS.getSpookGuessStrs().length; i++) {
+            joiner.add("SPOOK_%d_%d".formatted(i+1, TimeUtil.getYear()));
+        }
+
+        String query = """
+            SELECT 1
+            FROM collected_boars
+            WHERE user_id = ? AND boar_id = 'spooky' AND original_obtain_type IN (%s);
+        """.formatted(joiner.toString());
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean hasCurrentHalloween(Connection connection, String obtainType) throws SQLException {
+        String query = """
+            SELECT 1
+            FROM collected_boars
+            WHERE user_id = ? AND original_obtain_type = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+            statement.setString(2, obtainType);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public void removeBoar(String boarID, Connection connection) throws SQLException {

@@ -6,7 +6,7 @@
   "error": "An error occurred! Please report it using /%s %s if the issue persists!",
   "maintenance": "Maintenance mode is currently active!",
   "eventDisabled": "<>maintenance<>NOTICE!<>font<> Events cannot be sent in this server. Ensure that the bot has the <>silver<>View Channel<>font<> permission in <>green<>this channel<>font<>.",
-  "bannedString": "You're banned from doing this! You'll be unbanned %s!",
+  "bannedString": "<>error<>You're banned from doing this! You'll be unbanned %s!",
   "permBannedString": "You're permanently banned from doing this!",
   "banSuccess": "Successfully banned %s for %d hour(s)!",
   "invalidInput": "<>error<>You did not input a valid number!",
@@ -206,5 +206,26 @@
     "Not entirely sure why Spooky Boar wanted everyone to go through his nostalgia trip with him on that previous hunt. Anyways, this next one is a fan favorite... Trivia!\n\nThird video: https:<>youtu.be/5VflhcH1BCo",
     "Uh... Spooky Boar needs help with his homework? Maybe you could help him out with that? *Please check the video description*\n\nFourth video: https:<>youtu.be/6yoY79n6WsY",
     "The final hunt! Take a trip through Spooky Boar's Manor! Did you know he's lived there for over 100 years?\n\nFifth video: https:<>youtu.be/4B9tX43uk8Q"
-  ]
+  ],
+  "guessStrs": [
+    "weslayisverycool",
+    "nobodywilleverguessthis",
+    "whyareyoulookingatthegithubtherearenosecretshere"
+  ],
+  "guessReplyStrs": [
+    "You received <>bucks<>$37,382,880<>font<> for sucking up to Weslay! (real)",
+    "But it seems you did...?",
+    "Get out of here, Duggy."
+  ],
+  "spookGuessStrs": [
+    "PLACEHOLDER"
+  ],
+  "spookGuessReplyStrs": [
+    "PLACEHOLDER"
+  ],
+  "spookExtraStr": "You received %s<>font<> and a <>powerup<>%s<>font<>!",
+  "spookFirstExtraStr": "You received %s<>font<>, %s<>font<>, and a <>powerup<>%s<>font<>!",
+  "spookHasExtraStr": "You received %s<>font<> and your <>powerup<>Transmutation Cell<>font<> was filled!",
+  "spookTitle": "Boar-O-Ween Hunt!",
+  "incorrectGuess": "Your guess didn't match any secret phrases!"
 }

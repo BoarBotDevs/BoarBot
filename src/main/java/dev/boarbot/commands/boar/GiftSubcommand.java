@@ -31,20 +31,23 @@ public class GiftSubcommand extends Subcommand {
             return;
         }
 
-        boolean noGift = true;
-        boolean giftSent = true;
+        boolean noGift;
+        boolean giftSent;
+        long bannedTimestamp;
 
         try (Connection connection = DataUtil.getConnection()) {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
             noGift = boarUser.powQuery().getPowerupAmount(connection, "gift") == 0;
             giftSent = boarUser.powQuery().getLastGiftSent(connection) > TimeUtil.getCurMilli() - NUMS.getGiftIdle();
+            bannedTimestamp = boarUser.baseQuery().getBannedTime(connection);
 
-            if (!noGift && !giftSent) {
+            if (!noGift && !giftSent && bannedTimestamp <= TimeUtil.getCurMilli()) {
                 boarUser.powQuery().setLastGiftSent(connection, TimeUtil.getCurMilli());
             }
         } catch (SQLException exception) {
             SpecialReply.sendErrorMessage(this.interaction, this);
-            Log.error(this.user, this.getClass(), "Failed to get number of gifts", exception);
+            Log.error(this.user, this.getClass(), "Failed to do gift checks", exception);
+            return;
         }
 
         if (noGift) {
@@ -55,7 +58,6 @@ public class GiftSubcommand extends Subcommand {
 
                 this.interaction.reply(messageBuilder.build()).setEphemeral(true)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
-
                 Log.debug(this.user, this.getClass(), "Failed to gift: Not enough");
             } catch (IOException exception) {
                 SpecialReply.sendErrorMessage(this.interaction, this);
@@ -72,7 +74,23 @@ public class GiftSubcommand extends Subcommand {
 
                 this.interaction.reply(messageBuilder.build()).setEphemeral(true)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
+                Log.debug(this.user, this.getClass(), "Failed to gift: Already sent");
+            } catch (IOException exception) {
+                SpecialReply.sendErrorMessage(this.interaction, this);
+                Log.error(this.user, this.getClass(), "Failed to generate gift sent message", exception);
+            }
 
+            return;
+        }
+
+        if (bannedTimestamp > TimeUtil.getCurMilli()) {
+            try {
+                String bannedStr = STRS.getBannedString().formatted(TimeUtil.getTimeDistance(bannedTimestamp, false));
+                FileUpload fileUpload = new EmbedImageGenerator(bannedStr).generate().getFileUpload();
+                MessageCreateBuilder messageBuilder = new MessageCreateBuilder().setFiles(fileUpload);
+
+                this.interaction.reply(messageBuilder.build()).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
                 Log.debug(this.user, this.getClass(), "Failed to gift: Already sent");
             } catch (IOException exception) {
                 SpecialReply.sendErrorMessage(this.interaction, this);

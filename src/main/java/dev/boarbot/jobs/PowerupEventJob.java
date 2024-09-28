@@ -17,7 +17,7 @@ public class PowerupEventJob implements Job, Configured {
             "0 %d */%d ? * *".formatted(30 - NUMS.getPowPlusMinusMins(), NUMS.getPowIntervalHours())
         )).build();
 
-    private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {

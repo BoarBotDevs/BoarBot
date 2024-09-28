@@ -3,6 +3,7 @@ package dev.boarbot.modals;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.interactives.ModalInteractive;
+import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
 import dev.boarbot.util.time.TimeUtil;
@@ -16,7 +17,6 @@ import java.util.concurrent.*;
 public class ModalHandler implements Configured {
     private final ModalInteractive receiver;
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final ScheduledFuture<?> future;
 
     private final Interaction interaction;
@@ -35,7 +35,8 @@ public class ModalHandler implements Configured {
         }
 
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);
-        this.future = this.scheduler.schedule(this::delayStop, NUMS.getInteractiveIdle(), TimeUnit.MILLISECONDS);
+        this.future = InteractionUtil.scheduler
+            .schedule(this::delayStop, NUMS.getInteractiveIdle(), TimeUnit.MILLISECONDS);
     }
 
     public void execute(ModalInteractionEvent modalEvent) {
@@ -53,11 +54,6 @@ public class ModalHandler implements Configured {
 
     public void stop() {
         this.future.cancel(false);
-        this.scheduler.shutdown();
         BoarBotApp.getBot().getModalHandlers().remove(this.interaction.getId() + this.user.getId());
-    }
-
-    public void shutdownScheduler() {
-        this.scheduler.shutdown();
     }
 }

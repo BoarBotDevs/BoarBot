@@ -168,17 +168,17 @@ class MigrationWriter implements Configured {
                 for (String powerupID : powerups.keySet()) {
                     PowerupData powerup = powerups.get(powerupID);
 
-                    statement1.setString(1, oldUser.getUserID());
-                    statement1.setString(2, powerupID.equals("enhancer") ? "transmute" : powerupID);
-                    statement1.setInt(3, powerup.getNumTotal());
-                    statement1.setInt(4, powerup.getHighestTotal());
-                    statement1.setInt(5, powerup.getNumUsed());
-
                     if (powerupID.equals("clone")) {
                         tryWritePowRarities(powerupID, powerup, oldUser.getUserID(), statement2);
                     } else if (powerupID.equals("enhancer")) {
                         tryWritePowRarities(powerupID, powerup, oldUser.getUserID(), statement3);
                     }
+
+                    statement1.setString(1, oldUser.getUserID());
+                    statement1.setString(2, powerupID.equals("enhancer") ? "transmute" : powerupID);
+                    statement1.setInt(3, powerup.getNumTotal());
+                    statement1.setInt(4, powerup.getHighestTotal());
+                    statement1.setInt(5, powerup.getNumUsed());
 
                     statement1.addBatch();
                 }
@@ -238,6 +238,12 @@ class MigrationWriter implements Configured {
         for (int i=0; i<powerup.getRaritiesUsed().length; i++) {
             if (powerup.getRaritiesUsed()[i] == 0) {
                 continue;
+            }
+
+            if (powerupID.equals("enhancer")) {
+                powerup.setNumUsed(
+                    powerup.getNumUsed() + RARITIES.get(rarities[i]).getChargesNeeded() * powerup.getRaritiesUsed()[i]
+                );
             }
 
             statement.setString(1, userID);

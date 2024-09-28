@@ -334,7 +334,7 @@ public class BaseQueries implements Configured {
         String updateQuery = """
             UPDATE collected_badges
             SET badge_tier = ?, obtained_timestamp = ?
-            WHERE badge_id = ? AND user_id = ?;
+            WHERE badge_id = ? AND user_id = ? AND badge_tier != ?;
         """;
 
         try (
@@ -352,6 +352,7 @@ public class BaseQueries implements Configured {
             statement2.setTimestamp(2, new Timestamp(TimeUtil.getCurMilli()));
             statement2.setString(3, badgeID);
             statement2.setString(4, this.boarUser.getUserID());
+            statement2.setInt(5, tier);
             statement2.executeUpdate();
         }
     }
@@ -366,5 +367,44 @@ public class BaseQueries implements Configured {
             statement1.setString(1, this.boarUser.getUserID());
             statement1.executeUpdate();
         }
+    }
+
+    public void setBanDuration(Connection connection, long duration) throws SQLException {
+        String updateQuery = """
+            UPDATE users
+            SET unban_timestamp = ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setTimestamp(1, new Timestamp(TimeUtil.getCurMilli() + duration * 1000 * 60 * 60));
+            statement.setString(2, this.boarUser.getUserID());
+            statement.executeUpdate();
+        }
+    }
+
+    public long getBannedTime(Connection connection) throws SQLException {
+        long bannedTime = 0;
+
+        String query = """
+            SELECT unban_timestamp
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    Timestamp unbanTimestamp = results.getTimestamp("unban_timestamp");
+                    bannedTime = unbanTimestamp != null
+                        ? unbanTimestamp.getTime()
+                        : 0;
+                }
+            }
+        }
+
+        return bannedTime;
     }
 }

@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.exceptions.InteractionFailureException;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 
 public class ExceptionHandler {
@@ -27,7 +27,7 @@ public class ExceptionHandler {
         }
     }
 
-    public static void replyHandle(ComponentInteraction interaction, Object obj, Throwable exception) {
+    public static void replyHandle(IReplyCallback interaction, Object obj, Throwable exception) {
         try {
             stopInteractive(obj);
             handle(interaction.getUser(), obj.getClass(), exception);

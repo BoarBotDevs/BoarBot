@@ -110,12 +110,15 @@ public class QuestQueries implements Configured {
 
         String updateQuery = """
             UPDATE user_quests
-            SET full_claimed = full_claimed + 1
+            SET
+                full_claimed = full_claimed + 1,
+                fastest_full_millis = LEAST(fastest_full_millis, ?)
             WHERE user_id = ?;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
             statement.setString(1, this.boarUser.getUserID());
+            statement.setLong(2, TimeUtil.getCurMilli() - TimeUtil.getLastQuestResetMilli());
             statement.executeUpdate();
         }
 
@@ -260,6 +263,7 @@ public class QuestQueries implements Configured {
             statement.setString(5, this.boarUser.getUserID());
             statement.executeUpdate();
         }
+
         List<IndivQuestConfig> questConfigs = new ArrayList<>();
         IndivQuestConfig questConfig = CONFIG.getQuestConfig().get(quest.toString()).getQuestVals()[questIndex/2];
         String rewardType = questConfig.getRewardType();

@@ -234,4 +234,16 @@ public class StringConfig {
     private String githubImg = "";
     private String supportStr = "";
     private String[] spookMessages = {};
+    private String[] guessStrs = {};
+    private String[] guessReplyStrs = {};
+    private String[] spookGuessStrs = {};
+    private String[] spookGuessReplyStrs = {};
+    private String spookExtraStr = "";
+    private String spookFirstExtraStr = "";
+    private String spookHasExtraStr = "";
+    private String spookTitle = "";
+    private String trophyGuessStr;
+    private String trophyGuessReplyStr;
+    private String trophyTitle;
+    private String incorrectGuess = "";
 }

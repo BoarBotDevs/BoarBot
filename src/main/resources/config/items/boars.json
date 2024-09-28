@@ -163,6 +163,13 @@
     "classification": "Psychotic",
     "update": "Alpha"
   },
+  "trophy": {
+    "name": "Trophy Boar",
+    "file": "TrophyBoar.png",
+    "description": "The arch rival of Golden Boar, outshining it in every aspect of life. It's hard not to stare at this boar in awe.",
+    "classification": "Benign",
+    "update": "v1.0.0"
+  },
   "santa": {
     "name": "Santa Boar",
     "file": "SantaBoar.png",

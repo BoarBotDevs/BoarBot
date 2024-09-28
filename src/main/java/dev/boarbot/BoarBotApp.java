@@ -6,7 +6,6 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.gift.BoarGiftInteractive;
 import dev.boarbot.jobs.PowerupEventJob;
 import dev.boarbot.migration.MigrationHandler;
-import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.logging.Log;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -63,13 +62,7 @@ public class BoarBotApp {
         InteractionUtil.shutdownScheduler();
         PowerupEventJob.shutdownScheduler();
 
-        for (ModalHandler modalHandler : BoarBotApp.getBot().getModalHandlers().values()) {
-            modalHandler.shutdownScheduler();
-        }
-
         for (Interactive interactive : BoarBotApp.getBot().getInteractives().values()) {
-            interactive.shutdownScheduler();
-
             if (interactive instanceof BoarGiftInteractive) {
                 ((BoarGiftInteractive) interactive).shutdownGiftScheduler();
             }

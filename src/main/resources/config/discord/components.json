@@ -438,6 +438,10 @@
         {
           "label": "Fastest Powerup Event",
           "value": "powerup_fastest_time"
+        },
+        {
+          "label": "Transmutation Charges Used",
+          "value": "transmute"
         }
       ]
     },

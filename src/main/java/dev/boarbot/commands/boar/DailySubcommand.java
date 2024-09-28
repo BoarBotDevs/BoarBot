@@ -135,7 +135,12 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
             boarUser.boarQuery().addBoars(
-                this.boarIDs, connection, BoarObtainType.DAILY, this.bucksGotten, this.boarEditions, this.firstBoarIDs
+                this.boarIDs,
+                connection,
+                BoarObtainType.DAILY.toString(),
+                this.bucksGotten,
+                this.boarEditions,
+                this.firstBoarIDs
             );
             boarUser.powQuery().useActiveMiracles(this.boarIDs, this.bucksGotten, connection);
 

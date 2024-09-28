@@ -55,6 +55,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Getter private String firstJoinedDate;
     @Getter private List<BadgeData> badges;
     String favoriteID;
+    private long lastChanged = 0;
 
     ProfileData profileData;
 
@@ -128,8 +129,8 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     private void trySendResponse() {
         try {
             try (Connection connection = DataUtil.getConnection()) {
-                boolean shouldUpdateData = this.currentImageGen == null ||
-                    this.lastEndTime <= this.boarUser.baseQuery().getLastChanged(connection);
+                long curLastChanged = this.boarUser.baseQuery().getLastChanged(connection);
+                boolean shouldUpdateData = this.currentImageGen == null || this.lastChanged < curLastChanged;
 
                 if (shouldUpdateData) {
                     long firstJoinedTimestamp = this.boarUser.megaQuery().getFirstJoinedTimestamp(connection);
@@ -144,6 +145,8 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
                     this.isSkyblockGuild = GuildDataUtil.isSkyblockGuild(connection, this.guildID);
                     this.badges = this.boarUser.megaQuery().getCurrentBadges(connection);
                     this.viewsToUpdateData.replaceAll((k, v) -> false);
+
+                    this.lastChanged = curLastChanged;
                 }
             }
 

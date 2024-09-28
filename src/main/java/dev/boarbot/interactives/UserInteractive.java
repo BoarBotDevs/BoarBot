@@ -10,10 +10,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
@@ -51,7 +50,7 @@ public abstract class UserInteractive extends Interactive {
         this.interaction = interaction;
         this.interactionID = interaction.getId();
         this.user = interaction.getUser();
-        this.hook = ((IDeferrableCallback) interaction).getHook();
+        this.hook = ((IReplyCallback) interaction).getHook();
         this.isMsg = isMsg;
     }
 
@@ -62,11 +61,11 @@ public abstract class UserInteractive extends Interactive {
         }
 
         if (this.msg == null && this.isMsg) {
-            ComponentInteraction compInter = (ComponentInteraction) this.interaction;
+            IReplyCallback compInter = (IReplyCallback) this.interaction;
             compInter.getHook().sendMessage(MessageCreateData.fromEditData(editedMsg)).queue(
                 msg -> {
                     this.msg = msg;
-                    this.lastEndTime = TimeUtil.getCurMilli();
+                    this.lastEndTime = TimeUtil.getCurMilli() + 300;
                 },
                 e -> ExceptionHandler.replyHandle(compInter, this, e)
             );
@@ -75,16 +74,15 @@ public abstract class UserInteractive extends Interactive {
 
         if (this.msg != null) {
             this.msg.editMessage(editedMsg).queue(
-                msg -> this.lastEndTime = TimeUtil.getCurMilli(),
+                msg -> this.lastEndTime = TimeUtil.getCurMilli() + 300,
                 e -> ExceptionHandler.messageHandle(this.msg, this, e)
             );
             return;
         }
 
         this.hook.editOriginal(editedMsg).queue(
-            msg -> this.lastEndTime = TimeUtil.getCurMilli(),
-            e -> ExceptionHandler.replyHandle((SlashCommandInteraction) this.interaction, this, e)
-        );
+            msg -> this.lastEndTime = TimeUtil.getCurMilli() + 300,
+            e -> ExceptionHandler.replyHandle((SlashCommandInteraction) this.interaction, this, e));
     }
 
     @Override
@@ -99,14 +97,14 @@ public abstract class UserInteractive extends Interactive {
 
         if (this.msg != null) {
             this.msg.editMessageComponents(rows).queue(
-                msg -> this.lastEndTime = TimeUtil.getCurMilli(),
+                msg -> this.lastEndTime = TimeUtil.getCurMilli() + 300,
                 e -> ExceptionHandler.messageHandle(this.msg, this, e)
             );
             return;
         }
 
         this.hook.editOriginalComponents(rows).queue(
-            msg -> this.lastEndTime = TimeUtil.getCurMilli(),
+            msg -> this.lastEndTime = TimeUtil.getCurMilli() + 300,
             e -> ExceptionHandler.replyHandle((SlashCommandInteraction) this.interaction, this, e)
         );
     }
@@ -123,14 +121,14 @@ public abstract class UserInteractive extends Interactive {
 
         if (this.msg != null) {
             this.msg.delete().queue(
-                msg -> this.lastEndTime = TimeUtil.getCurMilli(),
+                msg -> this.lastEndTime = TimeUtil.getCurMilli() + 300,
                 e -> ExceptionHandler.messageHandle(this.msg, this, e)
             );
             return;
         }
 
         this.hook.deleteOriginal().queue(
-            msg -> this.lastEndTime = TimeUtil.getCurMilli(),
+            msg -> this.lastEndTime = TimeUtil.getCurMilli() + 300,
             e -> ExceptionHandler.replyHandle((SlashCommandInteraction) this.interaction, this, e)
         );
     }

@@ -6,8 +6,7 @@ import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
@@ -15,16 +14,7 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import java.io.IOException;
 
 public class SpecialReply implements Configured {
-    public static void sendErrorMessage(SlashCommandInteraction interaction, Object obj) {
-        MessageCreateData msgData = getErrorMsgData();
-        interaction.reply(msgData).setEphemeral(true).queue(null, e ->
-            interaction.getHook().editOriginal(MessageEditData.fromCreateData(msgData)).queue(null, e1 ->
-                ExceptionHandler.handle(interaction.getUser(), obj.getClass(), e1)
-            )
-        );
-    }
-
-    public static void sendErrorMessage(ComponentInteraction interaction, Object obj) {
+    public static void sendErrorMessage(IReplyCallback interaction, Object obj) {
         MessageCreateData msgData = getErrorMsgData();
         interaction.reply(msgData).setEphemeral(true).queue(null, e ->
             interaction.getHook().editOriginal(MessageEditData.fromCreateData(msgData)).queue(null, e1 ->

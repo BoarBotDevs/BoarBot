@@ -20,6 +20,7 @@ public class SubcommandArgsConfig {
     private Boolean required = false;
     private Boolean autocomplete = false;
     private Integer max_value = Integer.MAX_VALUE;
+    private Integer max_length = 50;
     private ArgChoicesConfig<?>[] choices;
 
     @Override
@@ -40,6 +41,8 @@ public class SubcommandArgsConfig {
         }
 
         sb.append(",\"max_value\":%d".formatted(max_value));
+
+        sb.append(",\"max_length\":%d".formatted(max_length));
 
         if (choices != null) {
             for (int i=0; i<choices.length; i++) {

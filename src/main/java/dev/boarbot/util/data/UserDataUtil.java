@@ -94,7 +94,6 @@ public class UserDataUtil {
                                 Log.warn(UserDataUtil.class, "Discord threw an exception while deleting users", e);
                             }
                         );
-
                     } catch (ErrorResponseException exception) {
                         if (exception.getErrorResponse() == ErrorResponse.UNKNOWN_USER) {
                             BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
@@ -119,5 +118,25 @@ public class UserDataUtil {
             statement1.setBoolean(1, shouldFreeze);
             statement1.executeUpdate();
         }
+    }
+
+    public static synchronized boolean isSpookyAvailable(Connection connection, String obtainType) throws SQLException {
+        String query = """
+            SELECT COUNT(*) < 3
+            FROM collected_boars
+            WHERE boar_id = 'spooky' AND original_obtain_type = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, obtainType);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return results.getBoolean(1);
+                }
+            }
+        }
+
+        return false;
     }
 }

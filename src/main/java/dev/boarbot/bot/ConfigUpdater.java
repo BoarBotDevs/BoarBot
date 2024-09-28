@@ -1,25 +1,28 @@
 package dev.boarbot.bot;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.resource.ResourceUtil;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 public class ConfigUpdater implements Configured {
+    private static final Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+
     public static void setMaintenance(boolean status) throws IOException {
         if (CONFIG.getMainConfig().isMaintenanceMode() == status) {
             return;
         }
 
         CONFIG.getMainConfig().setMaintenanceMode(status);
-        String jsonStr = new Gson().toJson(CONFIG.getMainConfig());
+        String jsonStr = g.toJson(CONFIG.getMainConfig());
 
         updateFile(ConfigLoader.mainPath, jsonStr);
 
@@ -28,6 +31,13 @@ public class ConfigUpdater implements Configured {
                 interactive.stop(StopType.EXPIRED);
             }
         }
+    }
+
+    public static void clearTrophyGuessStr() throws IOException {
+        STRS.setTrophyGuessStr(null);
+        String jsonStr = g.toJson(STRS);
+
+        updateFile(ConfigLoader.strsPath, jsonStr);
     }
 
     private static void updateFile(String pathStr, String jsonStr) throws IOException {
@@ -41,7 +51,6 @@ public class ConfigUpdater implements Configured {
             Files.createFile(path);
         }
 
-        List<String> lines = List.of(jsonStr);
-        Files.write(path, lines);
+        Files.write(path, List.of(jsonStr));
     }
 }

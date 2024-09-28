@@ -240,7 +240,12 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
         if (!this.boarIDs.isEmpty()) {
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.boarQuery().addBoars(
-                    this.boarIDs, connection, BoarObtainType.OTHER, this.bucks, this.editions, this.firstBoarIDs
+                    this.boarIDs,
+                    connection,
+                    BoarObtainType.OTHER.toString(),
+                    this.bucks,
+                    this.editions,
+                    this.firstBoarIDs
                 );
             } catch (SQLException exception) {
                 this.failedSynchronized = true;

@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.concurrent.*;
 
 public class InteractionUtil {
-    private final static int CORE_POOL_SIZE = 14;
-    private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+    private final static int CORE_POOL_SIZE = 20;
+    public final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
     private final static Set<String> usersOnCooldown = new HashSet<>();
 

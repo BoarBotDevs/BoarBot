@@ -206,7 +206,6 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 BoarUser openUser = BoarUserFactory.getBoarUser(user);
                 openUser.passSynchronizedAction(this);
             } catch (SQLException exception) {
-
                 Log.error(user, this.getClass(), "Failed to update data", exception);
             }
         }
@@ -222,7 +221,6 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             winnerHook.sendMessage(msg.build()).setEphemeral(true)
                 .queue(null, e -> ExceptionHandler.replyHandle(winnerHook, this, e));
         } catch (IOException exception) {
-
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to generate gift time message", exception);
             return;
@@ -345,6 +343,11 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     if (userVal > this.giftWinnerValue) {
                         this.giftWinner = boarUser.getUser();
                         this.giftWinnerValue = userVal;
+                        Log.info(
+                            this.user,
+                            this.getClass(),
+                            "Gift opened by %s (%s)".formatted(this.giftWinner.getName(), this.giftWinner.getId())
+                        );
                     }
 
                     boarUser.giftQuery().updateGiftHandicap(connection, this.giftTimes.get(boarUser.getUser()));
@@ -406,7 +409,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.boarQuery().addBoars(
-                this.boarIDs, connection, BoarObtainType.GIFT, bucksGotten, editions, firstBoarIDs
+                this.boarIDs, connection, BoarObtainType.GIFT.toString(), bucksGotten, editions, firstBoarIDs
             );
             this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
                 QuestType.COLLECT_RARITY, this.boarIDs, connection

@@ -95,7 +95,7 @@ class MegaMenuComponentsGetter implements Configured {
             selectRow = this.getFilterRow();
         } else if (this.interactive.sortOpen) {
             selectRow = this.getSortRow();
-        } else if (this.interactive.interactOpen) {
+        } else if (this.interactive.interactOpen && this.interactive.curBoarEntry.getValue().getAmount() > 0) {
             selectRow = this.getInteractRow();
         }
 

@@ -205,6 +205,10 @@
               {
                 "name": "Fastest Powerup Event",
                 "value": "powerup_fastest_time"
+              },
+              {
+                "name": "Transmutation Charges Used",
+                "value": "transmute"
               }
             ]
           },
@@ -362,7 +366,7 @@
       },
       "ban": {
         "name": "ban",
-        "description": "Ban a user from certain BoarBot features",
+        "description": "Ban a user from community BoarBot features",
         "location": "dev.boarbot.commands.boardev.BanSubcommand",
         "options": [
           {
@@ -374,7 +378,7 @@
           {
             "name": "duration",
             "type": 4,
-            "description": "Duration of ban in hours"
+            "description": "Duration of ban in hours (blank for unban)"
           }
         ]
       },

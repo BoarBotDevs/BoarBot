@@ -57,12 +57,18 @@ public final class TimeUtil {
 
     public static boolean isHalloween() {
         LocalDateTime curDateTime = LocalDateTime.now();
-        return curDateTime.getMonth() == Month.OCTOBER && curDateTime.getDayOfMonth() >= 24;
+        return curDateTime.getMonth() == Month.OCTOBER && curDateTime.getDayOfMonth() >= 25 ||
+            curDateTime.getMonth() == Month.NOVEMBER && curDateTime.getDayOfMonth() == 1;
     }
 
     public static boolean isChristmas() {
         LocalDateTime curDateTime = LocalDateTime.now();
-        return curDateTime.getMonth() == Month.DECEMBER && curDateTime.getDayOfMonth() >= 24;
+        return curDateTime.getMonth() == Month.DECEMBER && curDateTime.getDayOfMonth() >= 19 &&
+            curDateTime.getDayOfMonth() <= 26;
+    }
+
+    public static int getYear() {
+        return LocalDate.now().getYear();
     }
 
     public static String getTimeDistance(long milli, boolean shortened) {

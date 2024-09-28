@@ -178,7 +178,7 @@ class MegaMenuActionHandler implements Configured {
                     boarUser.boarQuery().addBoars(
                         newBoarIDs,
                         connection,
-                        BoarObtainType.CLONE,
+                        BoarObtainType.CLONE.toString(),
                         bucksGotten,
                         editions,
                         firstBoarIDs
@@ -260,7 +260,7 @@ class MegaMenuActionHandler implements Configured {
                 boarUser.boarQuery().addBoars(
                     newBoarIDs,
                     connection,
-                    BoarObtainType.TRANSMUTE,
+                    BoarObtainType.TRANSMUTE.toString(),
                     bucksGotten,
                     editions,
                     firstBoarIDs
@@ -379,6 +379,15 @@ class MegaMenuActionHandler implements Configured {
         if (lastGiftSent > TimeUtil.getCurMilli() - NUMS.getGiftIdle()) {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getGiftAlreadySent());
             Log.debug(this.user, this.getClass(), "Failed to gift: Already sent");
+            return;
+        }
+
+        long bannedTimestamp = boarUser.baseQuery().getBannedTime(connection);
+
+        if (bannedTimestamp > TimeUtil.getCurMilli()) {
+            String banStr = STRS.getBannedString().formatted(TimeUtil.getTimeDistance(bannedTimestamp, false));
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, banStr);
+            Log.debug(this.user, this.getClass(), "Failed to gift: Banned");
             return;
         }
 

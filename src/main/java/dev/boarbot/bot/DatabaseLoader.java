@@ -243,7 +243,7 @@ class DatabaseLoader implements Configured {
                 for (String badgeID : BADGES.keySet()) {
                     BadgeItemConfig badge = BADGES.get(badgeID);
 
-                    for (int i=0; i<badge.getFiles().length; i++) {
+                    for (int i=-1; i<badge.getFiles().length; i++) {
                         statement2.setString(1, badgeID);
                         statement2.setInt(2, i);
                         statement2.addBatch();

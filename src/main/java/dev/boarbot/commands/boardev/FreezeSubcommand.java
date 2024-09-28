@@ -26,7 +26,7 @@ public class FreezeSubcommand extends Subcommand {
             this.interaction.reply("Streak freeze set to: `" + value + "`")
                 .setEphemeral(true).queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
         } catch (SQLException exception) {
-            SpecialReply.sendErrorMessage(this.interaction, exception);
+            SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.user, this.getClass(), "Failed to set streak freeze", exception);
         }
     }

@@ -113,6 +113,7 @@ public class TopDataUtil {
             SET badge_tier = ?, obtained_timestamp = ?
             WHERE
                 badge_id = 'athlete' AND
+                badge_tier != ? AND
                 collected_badges.user_id IN (
                     SELECT user_id
                     FROM users
@@ -142,6 +143,7 @@ public class TopDataUtil {
 
                 statement2.setInt(1, tier);
                 statement2.setTimestamp(2, new Timestamp(TimeUtil.getCurMilli()));
+                statement2.setInt(3, tier);
                 statement2.executeUpdate();
             }
 

@@ -2,8 +2,8 @@ package dev.boarbot.interactives;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
+import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.interactive.StopType;
-import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
@@ -16,7 +16,6 @@ import java.util.concurrent.*;
 public abstract class Interactive implements Configured {
     protected static final ConcurrentMap<String, Interactive> interactives = BoarBotApp.getBot().getInteractives();
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> future;
 
     @Getter protected final String interactiveID;
@@ -51,7 +50,7 @@ public abstract class Interactive implements Configured {
         }
 
         interactives.put(interactiveID, this);
-        this.future = this.scheduler.schedule(this::tryStop, waitTime, TimeUnit.MILLISECONDS);
+        this.future = InteractionUtil.scheduler.schedule(this::tryStop, waitTime, TimeUnit.MILLISECONDS);
     }
 
     protected String findDuplicateKey() {
@@ -69,7 +68,6 @@ public abstract class Interactive implements Configured {
 
     public synchronized void attemptExecute(GenericComponentInteractionCreateEvent compEvent, long startTime) {
         if (startTime < this.lastEndTime) {
-            compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
             Log.debug(compEvent.getUser(), this.getClass(), "Clicked too fast!");
             return;
         }
@@ -94,7 +92,7 @@ public abstract class Interactive implements Configured {
                 this.stop(StopType.EXPIRED);
             } else if (!this.isStopped) {
                 long newWaitTime = Math.min(this.curStopTime - curTime, hardStopTime - curTime);
-                this.future = this.scheduler.schedule(this::tryStop, newWaitTime, TimeUnit.MILLISECONDS);
+                this.future = InteractionUtil.scheduler.schedule(this::tryStop, newWaitTime, TimeUnit.MILLISECONDS);
             }
         } catch (RuntimeException exception) {
             Log.error(this.getClass(), "Failed to stop interactive", exception);
@@ -109,11 +107,6 @@ public abstract class Interactive implements Configured {
 
     public Interactive removeInteractive() {
         this.future.cancel(false);
-        this.scheduler.shutdown();
         return interactives.remove(this.interactiveID);
-    }
-
-    public void shutdownScheduler() {
-        this.scheduler.shutdown();
     }
 }
