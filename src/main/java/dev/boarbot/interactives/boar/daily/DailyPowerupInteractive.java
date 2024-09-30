@@ -44,7 +44,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
     private final DailySubcommand callingObj;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getDaily();
+    private static final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getDaily();
 
     public DailyPowerupInteractive(SlashCommandInteractionEvent initEvent, DailySubcommand callingObj) {
         super(initEvent);
@@ -174,10 +174,10 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
     @Override
     public ActionRow[] getCurComponents() {
         List<ItemComponent> powSelect = InteractiveUtil.makeComponents(
-            this.interactionID, this.COMPONENTS.get("powSelect")
+            this.interactionID, COMPONENTS.get("powSelect")
         );
         List<ItemComponent> submitCancelBtns = InteractiveUtil.makeComponents(
-            this.interactionID, this.COMPONENTS.get("powSubmitBtn"), this.COMPONENTS.get("powCancelBtn")
+            this.interactionID, COMPONENTS.get("powSubmitBtn"), COMPONENTS.get("powCancelBtn")
         );
 
         Button powSubmitBtn = ((Button) submitCancelBtns.getFirst()).withDisabled(true);

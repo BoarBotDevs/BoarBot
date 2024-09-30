@@ -38,7 +38,7 @@ public class SetupInteractive extends UserInteractive {
     private List<GuildChannel> chosenChannels = new ArrayList<>();
     private boolean isSb = false;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getSetup();
+    private static final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getSetup();
 
     public SetupInteractive(Interaction initEvent) {
         super(initEvent);
@@ -227,7 +227,7 @@ public class SetupInteractive extends UserInteractive {
         ActionRow navRow = this.getNavRow();
 
         List<ItemComponent> channelSelect1 = InteractiveUtil.makeComponents(
-            this.interactionID, this.COMPONENTS.get("channelSelect")
+            this.interactionID, COMPONENTS.get("channelSelect")
         );
 
         return new ActionRow[] {
@@ -240,7 +240,7 @@ public class SetupInteractive extends UserInteractive {
         ActionRow navRow = this.getNavRow();
 
         List<ItemComponent> sbChoice = InteractiveUtil.makeComponents(
-            this.interactionID, this.COMPONENTS.get("sbYesBtn"), this.COMPONENTS.get("sbNoBtn")
+            this.interactionID, COMPONENTS.get("sbYesBtn"), COMPONENTS.get("sbNoBtn")
         );
 
         return new ActionRow[] {
@@ -252,9 +252,9 @@ public class SetupInteractive extends UserInteractive {
     private ActionRow getNavRow() {
         List<ItemComponent> components = InteractiveUtil.makeComponents(
             this.interactionID,
-            this.COMPONENTS.get("cancelBtn"),
-            this.COMPONENTS.get("infoBtn"),
-            this.COMPONENTS.get("nextBtn")
+            COMPONENTS.get("cancelBtn"),
+            COMPONENTS.get("infoBtn"),
+            COMPONENTS.get("nextBtn")
         );
 
         if (this.selected) {

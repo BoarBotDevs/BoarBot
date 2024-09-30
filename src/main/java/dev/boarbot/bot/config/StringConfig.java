@@ -215,6 +215,40 @@ public class StringConfig {
     private String deleteMsgOne = "";
     private String deleteMsgTwo = "";
 
+    // Help strings
+
+    private String helpGen1HL = "";
+    private String[] helpGen1PL = {};
+    private String helpGen1HR = "";
+    private String[] helpGen1PR = {};
+    private String helpGen2HL = "";
+    private String[] helpGen2PL = {};
+    private String helpGen2HR = "";
+    private String[] helpGen2PR = {};
+    private String helpBoar1HL = "";
+    private String[] helpBoar1PL = {};
+    private String helpBoar1HR = "";
+    private String[] helpBoar1PR = {};
+    private String helpBoar2HL = "";
+    private String[] helpBoar2PL = {};
+    private String helpBoar2HR = "";
+    private String[] helpBoar2PR = {};
+    private String helpBadge1HL = "";
+    private String[] helpBadge1PL = {};
+    private String[] helpBadge1PR = {};
+    private String helpPow1HL = "";
+    private String[] helpPow1PL = {};
+    private String helpPow1HR = "";
+    private String[] helpPow1PR = {};
+    private String helpPow2HL = "";
+    private String[] helpPow2PL = {};
+    private String helpPow2HR = "";
+    private String[] helpPow2PR = {};
+    private String helpPow3HL = "";
+    private String[] helpPow3PL = {};
+    private String helpPow3HR = "";
+    private String[] helpPow3PR = {};
+
     // Miscellaneous strings
 
     private String noPow = "";

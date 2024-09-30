@@ -28,18 +28,18 @@ class MegaMenuComponentsGetter implements Configured {
     private List<SelectOption> interactOptions = new ArrayList<>();
     private List<SelectOption> powOptions = new ArrayList<>();
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getMegaMenu();
+    private static final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getMegaMenu();
 
     public MegaMenuComponentsGetter(MegaMenuInteractive interactive) {
         this.interactive = interactive;
-        this.makeSelectOptions(this.COMPONENTS.get("viewSelect"));
+        this.makeSelectOptions(COMPONENTS.get("viewSelect"));
     }
 
     public ActionRow[] getComponents() {
         if (this.interactive.acknowledgeOpen) {
             List<ItemComponent> backRow = InteractiveUtil.makeComponents(
                 this.interactive.getInteractionID(),
-                this.COMPONENTS.get("backBtn")
+                COMPONENTS.get("backBtn")
             );
 
             return new ActionRow[] {ActionRow.of(backRow)};
@@ -48,8 +48,8 @@ class MegaMenuComponentsGetter implements Configured {
         if (this.interactive.confirmOpen) {
             List<ItemComponent> confirmRow = InteractiveUtil.makeComponents(
                 this.interactive.getInteractionID(),
-                this.COMPONENTS.get("cancelBtn"),
-                this.COMPONENTS.get("confirmBtn")
+                COMPONENTS.get("cancelBtn"),
+                COMPONENTS.get("confirmBtn")
             );
 
             return new ActionRow[] {ActionRow.of(confirmRow)};
@@ -78,15 +78,15 @@ class MegaMenuComponentsGetter implements Configured {
         if (isCompendium) {
             interactRow = InteractiveUtil.makeComponents(
                 this.interactive.getInteractionID(),
-                this.COMPONENTS.get("boarFindBtn"),
-                this.COMPONENTS.get("interactBtn")
+                COMPONENTS.get("boarFindBtn"),
+                COMPONENTS.get("interactBtn")
             );
         }
 
         List<ItemComponent> filterSortRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("filterBtn"),
-            this.COMPONENTS.get("sortBtn")
+            COMPONENTS.get("filterBtn"),
+            COMPONENTS.get("sortBtn")
         );
 
         List<ItemComponent> selectRow = null;
@@ -139,7 +139,7 @@ class MegaMenuComponentsGetter implements Configured {
 
         List<ItemComponent> backRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("backBtn")
+            COMPONENTS.get("backBtn")
         );
 
         String rarityEmoji = RARITIES.get(this.interactive.curRarityKey).getEmoji();
@@ -178,12 +178,12 @@ class MegaMenuComponentsGetter implements Configured {
         }
 
         if (this.powOptions.isEmpty()) {
-            this.makeSelectOptions(this.COMPONENTS.get("powSelect"));
+            this.makeSelectOptions(COMPONENTS.get("powSelect"));
         }
 
         List<ItemComponent> selectRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("powSelect")
+            COMPONENTS.get("powSelect")
         );
 
         return new ActionRow[] {nav[0], nav[1], ActionRow.of(selectRow)};
@@ -200,9 +200,9 @@ class MegaMenuComponentsGetter implements Configured {
 
         List<ItemComponent> allBtnsRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("questClaimBtn"),
-            this.COMPONENTS.get("questBonusBtn"),
-            this.COMPONENTS.get("questAutoBtn")
+            COMPONENTS.get("questClaimBtn"),
+            COMPONENTS.get("questBonusBtn"),
+            COMPONENTS.get("questAutoBtn")
         );
 
         Button claimBtn = ((Button) allBtnsRow.getFirst());
@@ -252,12 +252,12 @@ class MegaMenuComponentsGetter implements Configured {
 
     private List<ItemComponent> getFilterRow() {
         if (this.filterOptions.isEmpty()) {
-            this.makeSelectOptions(this.COMPONENTS.get("filterSelect"));
+            this.makeSelectOptions(COMPONENTS.get("filterSelect"));
         }
 
         List<ItemComponent> selectRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("filterSelect")
+            COMPONENTS.get("filterSelect")
         );
 
         for (int i=0; i<this.filterOptions.size(); i++) {
@@ -286,12 +286,12 @@ class MegaMenuComponentsGetter implements Configured {
 
     private List<ItemComponent> getSortRow() {
         if (this.sortOptions.isEmpty()) {
-            this.makeSelectOptions(this.COMPONENTS.get("sortSelect"));
+            this.makeSelectOptions(COMPONENTS.get("sortSelect"));
         }
 
         List<ItemComponent> selectRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("sortSelect")
+            COMPONENTS.get("sortSelect")
         );
 
         for (int i=0; i<this.sortOptions.size(); i++) {
@@ -320,12 +320,12 @@ class MegaMenuComponentsGetter implements Configured {
 
     private List<ItemComponent> getInteractRow() {
         if (this.interactOptions.isEmpty()) {
-            this.makeSelectOptions(this.COMPONENTS.get("interactSelect"));
+            this.makeSelectOptions(COMPONENTS.get("interactSelect"));
         }
 
         List<ItemComponent> selectRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("interactSelect")
+            COMPONENTS.get("interactSelect")
         );
 
         boolean canFavorite = this.interactive.favoriteID == null ||
@@ -377,15 +377,15 @@ class MegaMenuComponentsGetter implements Configured {
     private ActionRow[] getNav() {
         List<ItemComponent> viewSelect = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("viewSelect")
+            COMPONENTS.get("viewSelect")
         );
 
         List<ItemComponent> navBtns = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(),
-            this.COMPONENTS.get("leftBtn"),
-            this.COMPONENTS.get("pageBtn"),
-            this.COMPONENTS.get("rightBtn"),
-            this.COMPONENTS.get("refreshBtn")
+            COMPONENTS.get("leftBtn"),
+            COMPONENTS.get("pageBtn"),
+            COMPONENTS.get("rightBtn"),
+            COMPONENTS.get("refreshBtn")
         );
 
         for (int i=0; i<this.navOptions.size(); i++) {
@@ -467,7 +467,7 @@ class MegaMenuComponentsGetter implements Configured {
                     }
                 }
 
-                this.COMPONENTS.get("filterSelect").setMax_values(options.size());
+                COMPONENTS.get("filterSelect").setMax_values(options.size());
                 this.filterOptions = options;
             }
             case "SORT_SELECT" -> this.sortOptions = options;

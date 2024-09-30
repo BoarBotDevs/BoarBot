@@ -106,6 +106,19 @@ public class TextDrawer implements Configured {
         double lineHeight = (fm.getAscent() + fm.getDescent()) * 1.1;
 
         for (String word : this.words) {
+            if (word.equals("<br>")) {
+                if (curLine.isEmpty()) {
+                    lines.add("");
+                } else {
+                    lines.add(curLine.toString());
+                }
+
+                curIndex += word.length();
+                lineStarts.add(curIndex);
+                curLine.setLength(0);
+                continue;
+            }
+
             if (curLine.isEmpty() || fm.stringWidth(curLine + word) <= this.width) {
                 curLine.append(word).append(" ");
                 curIndex += word.length();

@@ -9,25 +9,25 @@
         "location": "dev.boarbot.commands.boar.HelpSubcommand",
         "options": [
           {
-            "name": "area",
-            "type": 4,
-            "description": "The area you may need help with",
+            "name": "menu",
+            "type": 3,
+            "description": "The help menu you want to view",
             "choices": [
               {
                 "name": "General",
-                "value": 0
+                "value": "general"
+              },
+              {
+                "name": "Boars",
+                "value": "boars"
+              },
+              {
+                "name": "Badges",
+                "value": "badges"
               },
               {
                 "name": "Powerups",
-                "value": 1
-              },
-              {
-                "name": "Market",
-                "value": 2
-              },
-              {
-                "name": "Badges & Special Boars",
-                "value": 3
+                "value": "powerups"
               }
             ]
           },

@@ -72,7 +72,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
     private final ScheduledExecutorService giftScheduler = Executors.newScheduledThreadPool(1);
 
-    private final Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getGift();
+    private static final Map<String, IndivComponentConfig> components = CONFIG.getComponentConfig().getGift();
 
     public BoarGiftInteractive(Interaction interaction, boolean isMsg) {
         super(interaction, isMsg, NUMS.getGiftIdle(), NUMS.getGiftIdle());

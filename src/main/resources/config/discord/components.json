@@ -460,5 +460,55 @@
       "emoji": "<:forward:1073071982096175184>",
       "style": 2
     }
+  },
+  "help": {
+    "menuSelect": {
+      "type": 3,
+      "custom_id": "MENU_SELECT",
+      "min_values": 1,
+      "max_values": 1,
+      "placeholder": "Select menu...",
+      "options": [
+        {
+          "label": "General",
+          "value": "general",
+          "emoji": "\u2754",
+          "description": "Describes general information pertaining to BoarBot"
+        },
+        {
+          "label": "Boars",
+          "value": "boars",
+          "emoji": "\uD83D\uDC17",
+          "description": "Provides details regarding boars and rarities"
+        },
+        {
+          "label": "Badges",
+          "value": "badges",
+          "emoji": "\uD83C\uDFA8",
+          "description": "Lists all badges and what they are"
+        },
+        {
+          "label": "Powerups",
+          "value": "powerups",
+          "emoji": "<:powerup:1250134593651085392>",
+          "description": "Outlines what powerups are and how they work"
+        }
+      ]
+    },
+    "leftBtn": {
+      "custom_id": "LEFT",
+      "emoji": "<:back:1073072529507369072>",
+      "style": 2
+    },
+    "pageBtn": {
+      "custom_id": "PAGE",
+      "emoji": "\uD83D\uDCDD",
+      "style": 2
+    },
+    "rightBtn": {
+      "custom_id": "RIGHT",
+      "emoji": "<:forward:1073071982096175184>",
+      "style": 2
+    }
   }
 }

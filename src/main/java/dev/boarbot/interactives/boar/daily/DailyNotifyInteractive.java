@@ -29,7 +29,7 @@ import java.util.Map;
 public class DailyNotifyInteractive extends UserInteractive {
     private boolean hasButton = true;
 
-    private final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getDaily();
+    private static final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getDaily();
 
     public DailyNotifyInteractive(Interaction initEvent) {
         super(initEvent);
@@ -122,7 +122,7 @@ public class DailyNotifyInteractive extends UserInteractive {
     @Override
     public ActionRow[] getCurComponents() {
         List<ItemComponent> notifyBtn = InteractiveUtil.makeComponents(
-            this.interactionID, this.COMPONENTS.get("notifyBtn")
+            this.interactionID, COMPONENTS.get("notifyBtn")
         );
 
         return new ActionRow[] {ActionRow.of(notifyBtn)};

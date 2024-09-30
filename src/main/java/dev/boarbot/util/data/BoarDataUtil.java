@@ -1,26 +1,24 @@
 package dev.boarbot.util.data;
 
+import dev.boarbot.api.util.Configured;
+import dev.boarbot.bot.config.items.BoarItemConfig;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class BoarDataUtil {
+public class BoarDataUtil implements Configured {
     public static int getTotalUniques(Connection connection) throws SQLException {
-        String query = """
-            SELECT COUNT(*)
-            FROM boars_info;
-        """;
+        int i=0;
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            try (ResultSet results = statement.executeQuery()) {
-                if (results.next()) {
-                    return results.getInt(1);
-                }
+        for (BoarItemConfig boar : BOARS.values()) {
+            if (!boar.isBlacklisted()) {
+                i++;
             }
         }
 
-        return 0;
+        return i;
     }
 
     public static int getTotalBoars(Connection connection) throws SQLException {

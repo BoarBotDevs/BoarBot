@@ -16,4 +16,5 @@ public class ComponentConfig {
     private Map<String, IndivComponentConfig> megaMenu = new HashMap<>();
     private Map<String, IndivComponentConfig> gift = new HashMap<>();
     private Map<String, IndivComponentConfig> leaderboard = new HashMap<>();
+    private Map<String, IndivComponentConfig> help = new HashMap<>();
 }
