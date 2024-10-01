@@ -4,6 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
+import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.BoarDataUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
@@ -95,10 +96,10 @@ public class NotificationJob implements Job, Configured {
     }
 
     private static void updateDynamicValues(Connection connection) throws SQLException {
-        dynamicValues.put(3, BoarDataUtil.getTotalUniques(connection)); // Unique boars
-        dynamicValues.put(5, UserDataUtil.getTotalUsers(connection)); // Users
-        dynamicValues.put(9, GuildDataUtil.getTotalGuilds(connection)); // Servers
-        dynamicValues.put(15, BoarDataUtil.getTotalBoars(connection)); // Global boars
+        dynamicValues.put(3, BoarUtil.getTotalUniques());
+        dynamicValues.put(5, UserDataUtil.getTotalUsers(connection));
+        dynamicValues.put(9, GuildDataUtil.getTotalGuilds(connection));
+        dynamicValues.put(15, BoarDataUtil.getTotalBoars(connection));
     }
 
     private static String getNotificationStr(

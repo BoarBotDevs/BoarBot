@@ -1,6 +1,8 @@
 package dev.boarbot.util.generators;
 
+import dev.boarbot.bot.config.commands.ArgChoicesConfig;
 import dev.boarbot.interactives.boar.help.HelpView;
+import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
@@ -10,6 +12,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HelpImageGenerator extends ImageGenerator {
     private static final int[] IMAGE_SIZE = {1920, 1403};
@@ -18,18 +22,30 @@ public class HelpImageGenerator extends ImageGenerator {
     private static final int RIGHT_X = 1000;
     private static final int HEADER_Y = 314;
     private static final int PARA_Y = 790;
+    private static final int[] INFO_POS = {960, 1320};
+    private static final int INFO_SPACING_Y = 54;
 
     private final HelpView curView;
     private final int page;
+    private final int maxPage;
 
     private String headerLeft;
     private String headerRight;
     private String paraLeft;
     private String paraRight;
 
-    public HelpImageGenerator(HelpView curView, int page) {
+    private static final Map<String, Integer> rarityBoarAmounts = new HashMap<>();
+
+    static {
+        for (String key : RARITIES.keySet()) {
+            rarityBoarAmounts.put(key, BoarUtil.getNumRarityBoars(RARITIES.get(key)));
+        }
+    }
+
+    public HelpImageGenerator(HelpView curView, int page, int maxPage) {
         this.curView = curView;
         this.page = page;
+        this.maxPage = maxPage;
     }
 
     @Override
@@ -55,6 +71,18 @@ public class HelpImageGenerator extends ImageGenerator {
         drawPara(this.paraLeft, new int[] {LEFT_X, PARA_Y});
         drawPara(this.paraRight, new int[] {RIGHT_X, PARA_Y});
 
+        this.textDrawer.setText(STRS.getHelpPageInfo().formatted(this.page+1, this.maxPage+1));
+        this.textDrawer.setPos(INFO_POS);
+        this.textDrawer.setColorVal(COLORS.get("font"));
+        this.textDrawer.setFontSize(NUMS.getFontMedium());
+        this.textDrawer.setWidth(-1);
+        this.textDrawer.setAlign(Align.CENTER);
+        this.textDrawer.drawText();
+
+        this.textDrawer.setText(STRS.getHelpMenuInfo().formatted(this.getMenuName()));
+        this.textDrawer.setPos(new int[] {INFO_POS[0], INFO_POS[1] + INFO_SPACING_Y});
+        this.textDrawer.drawText();
+
         return this;
     }
 
@@ -76,13 +104,33 @@ public class HelpImageGenerator extends ImageGenerator {
         if (this.page == 0) {
             this.headerLeft = STRS.getHelpBoar1HL();
             this.headerRight = STRS.getHelpBoar1HR();
-            this.paraLeft = String.join(" ", STRS.getHelpBoar1PL());
+
+            this.paraLeft = String.join(" ", STRS.getHelpBoar1PL()).formatted(
+                BoarUtil.getTotalUniques(),
+                rarityBoarAmounts.get("common"),
+                rarityBoarAmounts.get("uncommon"),
+                rarityBoarAmounts.get("rare"),
+                rarityBoarAmounts.get("epic"),
+                rarityBoarAmounts.get("legendary"),
+                rarityBoarAmounts.get("mythic"),
+                rarityBoarAmounts.get("divine"),
+                rarityBoarAmounts.get("immaculate"),
+                rarityBoarAmounts.get("entropic"),
+                rarityBoarAmounts.get("truth"),
+                rarityBoarAmounts.get("special")
+            );
+
             this.paraRight = String.join(" ", STRS.getHelpBoar1PR());
         } else {
             this.headerLeft = STRS.getHelpBoar2HL();
             this.headerRight = STRS.getHelpBoar2HR();
             this.paraLeft = String.join(" ", STRS.getHelpBoar2PL());
-            this.paraRight = String.join(" ", STRS.getHelpBoar2PR());
+
+            this.paraRight = String.join(" ", STRS.getHelpBoar2PR()).formatted(
+                rarityBoarAmounts.get("halloween"),
+                rarityBoarAmounts.get("christmas"),
+                rarityBoarAmounts.get("event")
+            );
         }
     }
 
@@ -131,5 +179,18 @@ public class HelpImageGenerator extends ImageGenerator {
         this.textDrawer.setText(para);
         this.textDrawer.setPos(pos);
         this.textDrawer.drawText();
+    }
+
+    private String getMenuName() {
+        ArgChoicesConfig<?>[] choices = CONFIG.getCommandConfig().get("main").getSubcommands().get("help")
+            .getOptions()[0].getChoices();
+
+        for (ArgChoicesConfig<?> choice : choices) {
+            if (choice.getValue().equals(this.curView.toString())) {
+                return choice.getName();
+            }
+        }
+
+        return null;
     }
 }

@@ -33,6 +33,7 @@ import java.util.*;
 public class HelpInteractive extends ModalInteractive {
     private HelpView curView;
     private int page = 0;
+    private int maxPage = 0;
 
     private final static Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getHelp();
     private final static Map<String, ModalConfig> MODALS = CONFIG.getModalConfig();
@@ -73,13 +74,13 @@ public class HelpInteractive extends ModalInteractive {
         Log.debug(
             this.user,
             this.getClass(),
-            "Page: %d | Menu: %s | Component: %s".formatted(this.page, this.curView, compID)
+            "Page: %d | Menu: %s | Component: %s".formatted(this.page, this.curView.toString(), compID)
         );
 
         switch (compID) {
             case "MENU_SELECT" -> {
-                this.page = 0;
                 this.curView = HelpView.fromString(((StringSelectInteractionEvent) compEvent).getValues().getFirst());
+                this.setPage(0);
                 Log.debug(this.user, this.getClass(), "Selected menu: " + this.curView);
             }
 
@@ -95,7 +96,7 @@ public class HelpInteractive extends ModalInteractive {
                 this.setModalHandler(new ModalHandler(compEvent, this));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
 
-                Log.debug(this.user, this.getClass(), "Sent page/username input modal");
+                Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
 
             case "RIGHT" -> this.setPage(this.page + 1);
@@ -124,7 +125,8 @@ public class HelpInteractive extends ModalInteractive {
 
     private void sendResponse() {
         try {
-            FileUpload fileUpload = new HelpImageGenerator(this.curView, this.page).generate().getFileUpload();
+            FileUpload fileUpload = new HelpImageGenerator(this.curView, this.page, this.maxPage).generate()
+                .getFileUpload();
             MessageEditBuilder editedMsg = new MessageEditBuilder()
                 .setFiles(fileUpload).setComponents(this.getCurComponents());
 
@@ -144,21 +146,18 @@ public class HelpInteractive extends ModalInteractive {
     }
 
     private void setPage(int page) {
-        this.page = Math.max(Math.min(page, getMaxPage()), 0);
+        this.maxPage = getMaxPage();
+        this.page = Math.max(Math.min(page, this.maxPage), 0);
     }
 
     @Override
     public ActionRow[] getCurComponents() {
         List<ItemComponent> viewSelect = InteractiveUtil.makeComponents(
-            this.getInteractionID(),
-            COMPONENTS.get("menuSelect")
+            this.getInteractionID(), COMPONENTS.get("menuSelect")
         );
 
         List<ItemComponent> navBtns = InteractiveUtil.makeComponents(
-            this.getInteractionID(),
-            COMPONENTS.get("leftBtn"),
-            COMPONENTS.get("pageBtn"),
-            COMPONENTS.get("rightBtn")
+            this.getInteractionID(), COMPONENTS.get("leftBtn"), COMPONENTS.get("pageBtn"), COMPONENTS.get("rightBtn")
         );
 
         for (int i=0; i<this.navOptions.size(); i++) {
@@ -180,11 +179,11 @@ public class HelpInteractive extends ModalInteractive {
             leftBtn = leftBtn.withDisabled(false);
         }
 
-        if (this.getMaxPage() > 0) {
+        if (this.maxPage > 0) {
             pageBtn = pageBtn.withDisabled(false);
         }
 
-        if (this.page < this.getMaxPage()) {
+        if (this.page < this.maxPage) {
             rightBtn = rightBtn.withDisabled(false);
         }
 

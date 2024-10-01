@@ -5,6 +5,7 @@ import dev.boarbot.interactives.boar.ReportInteractive;
 import dev.boarbot.interactives.boar.TopInteractive;
 import dev.boarbot.interactives.boar.WipeInteractive;
 import dev.boarbot.interactives.boar.help.HelpInteractive;
+import dev.boarbot.interactives.boar.market.MarketInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuInteractive;
 import dev.boarbot.interactives.boar.megamenu.MegaMenuView;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
@@ -33,6 +34,8 @@ public class InteractiveFactory {
             return new WipeInteractive(initEvent);
         } else if (interactiveClass == HelpInteractive.class) {
             return new HelpInteractive(initEvent);
+        } else if (interactiveClass == MarketInteractive.class) {
+            return new MarketInteractive(initEvent);
         }
 
         throw new IllegalArgumentException("Not a valid interactive class: " + interactiveClass);

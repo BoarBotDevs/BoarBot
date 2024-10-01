@@ -207,4 +207,28 @@ public final class BoarUtil implements Configured {
 
         return STRS.getUnavailable();
     }
+
+    public static int getTotalUniques() {
+        int num = 0;
+
+        for (BoarItemConfig boar : BOARS.values()) {
+            if (!boar.isBlacklisted()) {
+                num++;
+            }
+        }
+
+        return num;
+    }
+
+    public static int getNumRarityBoars(RarityConfig rarityConfig) {
+        int num = 0;
+
+        for (String boarID : rarityConfig.getBoars()) {
+            if (!BOARS.get(boarID).isBlacklisted()) {
+                num++;
+            }
+        }
+
+        return num;
+    }
 }

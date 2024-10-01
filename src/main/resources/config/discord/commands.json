@@ -230,28 +230,9 @@
         "location": "dev.boarbot.commands.boar.MarketSubcommand",
         "options": [
           {
-            "name": "view",
-            "type": 4,
-            "description": "What view to start off in (Overview, Buy/Sell, Your Orders)",
-            "choices": [
-              {
-                "name": "Overview",
-                "value": 0
-              },
-              {
-                "name": "Buy/Sell",
-                "value": 1
-              },
-              {
-                "name": "Your Orders",
-                "value": 2
-              }
-            ]
-          },
-          {
-            "name": "page",
-            "type": 4,
-            "description": "The page to start out on"
+            "name": "search",
+            "type": 3,
+            "description": "The item you want to buy/sell"
           }
         ]
       },

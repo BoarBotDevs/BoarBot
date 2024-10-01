@@ -217,6 +217,8 @@ public class StringConfig {
 
     // Help strings
 
+    private String helpPageInfo = "";
+    private String helpMenuInfo = "";
     private String helpGen1HL = "";
     private String[] helpGen1PL = {};
     private String helpGen1HR = "";

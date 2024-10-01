@@ -510,5 +510,68 @@
       "emoji": "<:forward:1073071982096175184>",
       "style": 2
     }
+  },
+  "market": {
+    "powerupsBtn": {
+      "custom_id": "POWERUPS",
+      "label": "Powerups",
+      "style": 2
+    },
+    "boarsBtn": {
+      "custom_id": "BOARS",
+      "label": "Boars",
+      "style": 2
+    },
+    "searchBtn": {
+      "custom_id": "SEARCH",
+      "label": "Search",
+      "emoji": "\uD83D\uDD0E",
+      "style": 1
+    },
+    "backBtn": {
+      "custom_id": "BACK",
+      "label": "Go Back",
+      "style": 2
+    },
+    "raritySelect": {
+      "type": 3,
+      "custom_id": "RARITY_SELECT",
+      "min_values": 1,
+      "max_values": 1,
+      "placeholder": "Select rarity..."
+    },
+    "itemSelect": {
+      "type": 3,
+      "custom_id": "ITEM_SELECT",
+      "min_values": 1,
+      "max_values": 1,
+      "placeholder": "Select item..."
+    },
+    "leftBtn": {
+      "custom_id": "LEFT",
+      "emoji": "<:back:1073072529507369072>",
+      "style": 2
+    },
+    "pageBtn": {
+      "custom_id": "PAGE",
+      "emoji": "\uD83D\uDCDD",
+      "style": 2
+    },
+    "rightBtn": {
+      "custom_id": "RIGHT",
+      "emoji": "<:forward:1073071982096175184>",
+      "style": 2
+    },
+    "buyBtn": {
+      "custom_id": "BUY",
+      "label": "Buy",
+      "style": 1,
+      "disabled": true
+    },
+    "sellBtn": {
+      "custom_id": "SELL",
+      "label": "Sell",
+      "style": 1
+    }
   }
 }

@@ -214,14 +214,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             newPage++;
         }
 
-        // Find by boar name (startsWith) second
-        newPage = this.matchFront(cleanInput, filteredBoars);
-        if (newPage <= this.maxPage) {
-            return newPage;
-        }
-
-        // Find by shrinking boar name (startsWith) third
-        cleanInput = cleanInput.substring(0, cleanInput.length()-1);
+        // Find by shrinking boar name (startsWith) next
         while (!cleanInput.isEmpty()) {
             newPage = this.matchFront(cleanInput, filteredBoars);
 
