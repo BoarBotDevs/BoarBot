@@ -60,8 +60,8 @@ public class CollectionImageGenerator extends MegaMenuGenerator {
             int relativeIndex = i - this.page*BOARS_PER_PAGE;
 
             int[] boarPos = {
-                START_X + (relativeIndex % NUM_COLS) * (boarImageSize[0] + NUMS.getBorder()),
-                START_Y + (relativeIndex / NUM_COLS) * (boarImageSize[1] + NUMS.getBorder())
+                START_X + (relativeIndex % NUM_COLS) * (boarImageSize[0] + border),
+                START_Y + (relativeIndex / NUM_COLS) * (boarImageSize[1] + border)
             };
 
             int[] amountPos = new int[] {boarPos[0] + AMOUNT_X_OFFSET, boarPos[1] + AMOUNT_Y_OFFSET};
@@ -97,7 +97,6 @@ public class CollectionImageGenerator extends MegaMenuGenerator {
                 ));
                 textDrawer.drawText();
             }
-
         }
 
         this.drawTopInfo();

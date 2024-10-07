@@ -160,7 +160,7 @@ public class MegaMenuQueries implements Configured {
             try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
                     boarInfo.put(results.getString("boar_id"), new BoarInfo(
-                            results.getString("rarity_id")
+                        results.getString("rarity_id")
                     ));
                 }
             }
@@ -172,20 +172,20 @@ public class MegaMenuQueries implements Configured {
             try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
                     boarInfo.get(results.getString("boar_id")).addEdition(
-                            results.getLong("edition"), results.getTimestamp("obtained_timestamp").getTime()
+                        results.getLong("edition"), results.getTimestamp("obtained_timestamp").getTime()
                     );
                 }
             }
         }
 
         boarInfo = boarInfo.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue())
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new
-                ));
+            .stream()
+            .sorted(Map.Entry.comparingByValue())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (oldValue, newValue) -> oldValue, LinkedHashMap::new
+            ));
 
         return boarInfo;
     }
@@ -216,19 +216,19 @@ public class MegaMenuQueries implements Configured {
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
                     profileData = new ProfileData(
-                            results.getString("last_boar_id"),
-                            results.getLong("total_bucks"),
-                            results.getLong("total_boars"),
-                            results.getInt("num_dailies"),
-                            results.getTimestamp("last_daily_timestamp"),
-                            results.getInt("unique_boars"),
-                            results.getInt("num_skyblock"),
-                            results.getInt("boar_streak"),
-                            this.boarUser.baseQuery().getBlessings(connection),
-                            results.getInt("streak_bless"),
-                            results.getInt("unique_bless"),
-                            results.getInt("quest_bless"),
-                            results.getInt("other_bless")
+                        results.getString("last_boar_id"),
+                        results.getLong("total_bucks"),
+                        results.getLong("total_boars"),
+                        results.getInt("num_dailies"),
+                        results.getTimestamp("last_daily_timestamp"),
+                        results.getInt("unique_boars"),
+                        results.getInt("num_skyblock"),
+                        results.getInt("boar_streak"),
+                        this.boarUser.baseQuery().getBlessings(connection),
+                        results.getInt("streak_bless"),
+                        results.getInt("unique_bless"),
+                        results.getInt("quest_bless"),
+                        results.getInt("other_bless")
                     );
                 }
             }

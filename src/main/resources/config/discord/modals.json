@@ -1,7 +1,7 @@
 {
   "miracleAmount": {
     "id": "MIRACLE_AMOUNT",
-    "title": "How many Miracle Charms?",
+    "title": "Miracle Charms Input",
     "components": [
       {
         "type": 4,
@@ -15,7 +15,7 @@
   },
   "pageInput": {
     "id": "PAGE_INPUT",
-    "title": "Enter a page number!",
+    "title": "Page Input",
     "components": [
       {
         "type": 4,
@@ -29,7 +29,7 @@
   },
   "findBoar": {
     "id": "FIND_BOAR",
-    "title": "Enter a value to search for!",
+    "title": "Find Item",
     "components": [
       {
         "type": 4,
@@ -43,7 +43,7 @@
   },
   "cloneAmount": {
     "id": "CLONE_AMOUNT",
-    "title": "How many Cloning Serums?",
+    "title": "Cloning Serum Input",
     "components": [
       {
         "type": 4,
@@ -57,7 +57,7 @@
   },
   "pageBoardInput": {
     "id": "PAGE_BOARD_INPUT",
-    "title": "Enter a page number/username!",
+    "title": "Page/User Input",
     "components": [
       {
         "type": 4,
@@ -81,7 +81,7 @@
   },
   "reportInput": {
     "id": "REPORT_INPUT",
-    "title": "Report a bug/exploit",
+    "title": "Report a Bug/Exploit",
     "components": [
       {
         "type": 4,
@@ -112,7 +112,7 @@
   },
   "wipeInput": {
     "id": "WIPE_INPUT",
-    "title": "Data removal request",
+    "title": "Data Removal Request",
     "components": [
       {
         "type": 4,
@@ -131,6 +131,34 @@
         "max_length": 32,
         "required": true,
         "placeholder": "This action is instantaneous and irreversible!"
+      }
+    ]
+  },
+  "buyInput": {
+    "id": "BUY_INPUT",
+    "title": "Buy an Item",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "AMOUNT",
+        "style": 1,
+        "label": "Number to buy",
+        "max_length": 9,
+        "placeholder": "Ex: 3"
+      }
+    ]
+  },
+  "sellInput": {
+    "id": "SELL_INPUT",
+    "title": "Sell an Item",
+    "components": [
+      {
+        "type": 4,
+        "custom_id": "AMOUNT",
+        "style": 1,
+        "label": "Number to sell",
+        "max_length": 9,
+        "placeholder": "Ex: 3"
       }
     ]
   }

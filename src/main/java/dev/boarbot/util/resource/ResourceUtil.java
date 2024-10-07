@@ -56,6 +56,10 @@ public class ResourceUtil {
     public static final String checkmarkPath = otherAssetsPath + "Checkmark.png";
     public static final String topUnderlayPath = otherAssetsPath + "LeaderboardUnderlay.png";
     public static final String helpUnderlayPath = otherAssetsPath + "HelpUnderlay.png";
+    public static final String marketOverviewUnderlayPath = otherAssetsPath + "MarketOverviewUnderlay.png";
+    public static final String marketRaritiesUnderlayPath = otherAssetsPath + "MarketRaritiesUnderlay.png";
+    public static final String marketItemsUnderlayPath = otherAssetsPath + "MarketItemsUnderlay.png";
+    public static final String marketFocusedUnderlayPath = otherAssetsPath + "MarketFocusedUnderlay.png";
 
     private static final String scriptsPath = "scripts/";
     public static final String animItemScript = scriptsPath + "make_animated_image.py";

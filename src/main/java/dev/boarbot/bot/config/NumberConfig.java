@@ -33,6 +33,11 @@ public class NumberConfig {
     private int maxOtherBless = 0;
     private int rarityIncreaseConst = 0;
     private int miracleIncreaseMax = 0;
+    private long buyPriceStart = 0;
+    private long buyPriceMinimum = 0;
+    private long sellPriceMinimum = 0;
+    private double priceDiffPercent = 0;
+    private double priceAdjustPercent = 0;
 
     // General default values
 

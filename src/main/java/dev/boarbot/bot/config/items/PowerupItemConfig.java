@@ -14,5 +14,7 @@ public class PowerupItemConfig extends BaseItemConfig {
     private String file = "";
     private String emoji = "";
     private Integer eventAmt = 0;
+    private Integer targetStock;
+    private Integer priceAdjustWaitHours;
     private Map<String, OutcomeConfig> outcomes = new HashMap<>();
 }

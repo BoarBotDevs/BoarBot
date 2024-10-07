@@ -2,7 +2,6 @@ package dev.boarbot.interactives.boar.daily;
 
 import dev.boarbot.bot.config.components.IndivComponentConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
-import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.commands.boar.DailySubcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
@@ -27,7 +26,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
-import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -71,17 +69,9 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
         switch(compID) {
             case "POW_SELECT" -> {
-                ModalConfig modalConfig = CONFIG.getModalConfig().get("miracleAmount");
-
-                Modal modal = new ModalImpl(
-                    ModalUtil.makeModalID(modalConfig.getId(), compEvent),
-                    modalConfig.getTitle(),
-                    ModalUtil.makeModalComponents(modalConfig.getComponents())
-                );
-
+                Modal modal = ModalUtil.getModal(CONFIG.getModalConfig().get("miracleAmount"), compEvent);
                 this.modalHandler = new ModalHandler(compEvent, this);
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
-
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
 

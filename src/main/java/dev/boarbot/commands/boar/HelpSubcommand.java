@@ -19,7 +19,7 @@ public class HelpSubcommand extends Subcommand {
             return;
         }
 
-        this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
+        this.interaction.deferReply(true).queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
         Interactive interactive = InteractiveFactory.constructInteractive(this.event, HelpInteractive.class);
         interactive.execute(null);

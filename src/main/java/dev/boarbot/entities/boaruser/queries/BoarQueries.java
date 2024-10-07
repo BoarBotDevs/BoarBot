@@ -4,6 +4,8 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.data.market.MarketDataUtil;
+import dev.boarbot.util.data.market.MarketUpdateType;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 
@@ -79,6 +81,10 @@ public class BoarQueries implements Configured {
                         if (curEdition == 1 && RARITIES.get(rarityKey).isGivesFirstBoar()) {
                             this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions, firstBoarIDs);
                         }
+
+                        if (curEdition == 1 && RARITIES.get(rarityKey).getTargetStock() != null) {
+                            MarketDataUtil.updateMarket(MarketUpdateType.ADD_ITEM, boarID, connection);
+                        }
                     }
 
                     if (results2.next() && results2.getBoolean(1)) {
@@ -102,9 +108,11 @@ public class BoarQueries implements Configured {
         }
     }
 
-    public boolean hasBoar(String boarID, Connection connection) throws SQLException {
+    public int getBoarAmount(String boarID, Connection connection) throws SQLException {
+        int amount = 0;
+
         String query = """
-            SELECT boar_id
+            SELECT COUNT(*)
             FROM collected_boars
             WHERE boar_id = ? AND user_id = ? AND `exists` = 1 AND deleted = 0;
         """;
@@ -112,8 +120,19 @@ public class BoarQueries implements Configured {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, boarID);
             statement.setString(2, this.boarUser.getUserID());
-            return statement.executeQuery().next();
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    amount = results.getInt(1);
+                }
+            }
         }
+
+        return amount;
+    }
+
+    public boolean hasBoar(String boarID, Connection connection) throws SQLException {
+        return this.getBoarAmount(boarID, connection) > 0;
     }
 
     public boolean hasYearlySpooky(Connection connection) throws SQLException {

@@ -118,7 +118,7 @@ public class PowerupQueries implements Configured {
         return amount;
     }
 
-    public void usePowerup(Connection connection, String powerupID, int amount) throws SQLException {
+    public void usePowerup(Connection connection, String powerupID, int amount, boolean doUse) throws SQLException {
         this.boarUser.baseQuery().addUser(connection);
         this.boarUser.forceSynchronized();
 
@@ -130,7 +130,7 @@ public class PowerupQueries implements Configured {
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, amount);
-            statement.setInt(2, amount);
+            statement.setInt(2, doUse ? amount : 0);
             statement.setString(3, this.boarUser.getUserID());
             statement.setString(4, powerupID);
             statement.executeUpdate();
@@ -178,7 +178,7 @@ public class PowerupQueries implements Configured {
             statement.executeUpdate();
         }
 
-        this.usePowerup(connection, "miracle", amount);
+        this.usePowerup(connection, "miracle", amount, true);
         Log.debug(this.boarUser.getUser(), this.getClass(), "Activated miracles");
     }
 

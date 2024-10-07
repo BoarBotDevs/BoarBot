@@ -2,6 +2,7 @@ package dev.boarbot.bot;
 
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.bot.Bot;
+import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.*;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
@@ -21,7 +22,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class BoarBot implements Bot {
+public class BoarBot implements Bot, Configured {
     private JDA jda;
 
     private final BotConfig config = new BotConfig();
@@ -51,7 +52,7 @@ public class BoarBot implements Bot {
                 new ModalListener(),
                 new ReadyListener()
             )
-            .setActivity(Activity.customStatus("/boar help | boarbot.dev"))
+            .setActivity(Activity.customStatus(STRS.getActivityStatus()))
             .setEnabledIntents(
                 GatewayIntent.GUILD_MEMBERS,
                 GatewayIntent.GUILD_VOICE_STATES,

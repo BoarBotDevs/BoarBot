@@ -177,6 +177,27 @@ public class BaseQueries implements Configured {
         return lastChangedTimestamp;
     }
 
+    public long getBucks(Connection connection) throws SQLException {
+        long bucks = 0;
+
+        String query = """
+            SELECT total_bucks
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    bucks = results.getLong("total_bucks");
+                }
+            }
+        }
+
+        return bucks;
+    }
+
     public void giveBucks(Connection connection, long amount) throws SQLException {
         this.addUser(connection);
         this.boarUser.forceSynchronized();
@@ -197,6 +218,22 @@ public class BaseQueries implements Configured {
             Log.info(this.boarUser.getUser(), this.getClass(), "Obtained +$%,d".formatted(amount));
         } else {
             Log.debug(this.boarUser.getUser(), this.getClass(), "Obtained +$%,d".formatted(amount));
+        }
+    }
+
+    public void useBucks(Connection connection, long amount) throws SQLException {
+        this.boarUser.forceSynchronized();
+
+        String query = """
+            UPDATE users
+            SET total_bucks = total_bucks - ?
+            WHERE user_id = ?
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setLong(1, amount);
+            statement.setString(2, this.boarUser.getUserID());
+            statement.executeUpdate();
         }
     }
 

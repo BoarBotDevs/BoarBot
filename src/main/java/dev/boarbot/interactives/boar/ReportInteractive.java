@@ -1,6 +1,5 @@
 package dev.boarbot.interactives.boar;
 
-import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.modals.ModalHandler;
@@ -17,7 +16,6 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
 import java.io.IOException;
 
@@ -34,17 +32,9 @@ public class ReportInteractive extends ModalInteractive {
 
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
-        ModalConfig modalConfig = CONFIG.getModalConfig().get("reportInput");
-
-        Modal modal = new ModalImpl(
-            ModalUtil.makeModalID(modalConfig.getId(), this.interaction),
-            modalConfig.getTitle(),
-            ModalUtil.makeModalComponents(modalConfig.getComponents())
-        );
-
+        Modal modal = ModalUtil.getModal(CONFIG.getModalConfig().get("reportInput"), compEvent);
         this.modalHandler = new ModalHandler(this.interaction, this);
         this.interaction.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
-
         Log.debug(this.user, this.getClass(), "Sent report modal");
     }
 

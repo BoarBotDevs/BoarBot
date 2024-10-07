@@ -175,7 +175,7 @@ class DatabaseLoader implements Configured {
 
                 for (String rarityID : fixRarityIDs) {
                     statement2.setString(1, BoarUtil.getPriorRarityKey(rarityID));
-                    statement2.setInt(2, RARITIES.get(rarityID).getBaseBucks());
+                    statement2.setLong(2, RARITIES.get(rarityID).getBaseBucks());
                     statement2.setBoolean(3, RARITIES.get(rarityID).isResearcherNeed());
                     statement2.setString(4, rarityID);
                     statement2.addBatch();
@@ -189,7 +189,7 @@ class DatabaseLoader implements Configured {
                 for (String rarityID : addRarityIDs) {
                     statement4.setString(1, rarityID);
                     statement4.setString(2, BoarUtil.getPriorRarityKey(rarityID));
-                    statement4.setInt(3, RARITIES.get(rarityID).getBaseBucks());
+                    statement4.setLong(3, RARITIES.get(rarityID).getBaseBucks());
                     statement4.setBoolean(4, RARITIES.get(rarityID).isResearcherNeed());
                     statement4.addBatch();
                 }

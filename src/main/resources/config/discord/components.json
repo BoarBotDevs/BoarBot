@@ -533,6 +533,11 @@
       "label": "Go Back",
       "style": 2
     },
+    "refreshBtn": {
+      "custom_id": "REFRESH",
+      "label": "Refresh",
+      "style": 2
+    },
     "raritySelect": {
       "type": 3,
       "custom_id": "RARITY_SELECT",
@@ -572,6 +577,16 @@
       "custom_id": "SELL",
       "label": "Sell",
       "style": 1
+    },
+    "confirmBtn": {
+      "custom_id": "CONFIRM",
+      "label": "Confirm",
+      "style": 3
+    },
+    "cancelBtn": {
+      "custom_id": "CANCEL",
+      "label": "Cancel",
+      "style": 4
     }
   }
 }

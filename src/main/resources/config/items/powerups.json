@@ -10,7 +10,9 @@
     ],
     "description": "Increases the number of Boar Blessings you have at 5% per charm (compounding).",
     "emoji": "<:miracle:1250135118744522802>",
-    "eventAmt": 1
+    "eventAmt": 1,
+    "targetStock": 30,
+    "priceAdjustWaitHours": 24
   },
   "gift": {
     "name": "Boar Gift",
@@ -23,6 +25,8 @@
     "description": "A gift that can be sent to and opened by other people. Contains boar bucks, boars, rare surprises, and more.",
     "emoji": "<:gift:1282041935799783424>",
     "eventAmt": 1,
+    "targetStock": 30,
+    "priceAdjustWaitHours": 24,
     "outcomes": {
       "special": {
         "weight": 10,
@@ -89,7 +93,9 @@
       "charg"
     ],
     "description": "Used to charge up the Transmutation Cell, which can be used to transmute a boar into a random boar of the next highest rarity.",
-    "emoji": "<:transmute:1270807233701220454>"
+    "emoji": "<:transmute:1270807233701220454>",
+    "targetStock": 10,
+    "priceAdjustWaitHours": 72
   },
   "clone": {
     "name": "Cloning Serum",
@@ -103,6 +109,8 @@
     ],
     "description": "Clones a boar of your choosing. Higher rarity boars are more difficult to clone than lower rarity boars.",
     "emoji": "<:clone:1270806135657599068>",
-    "eventAmt": 1
+    "eventAmt": 1,
+    "targetStock": 30,
+    "priceAdjustWaitHours": 24
   }
 }

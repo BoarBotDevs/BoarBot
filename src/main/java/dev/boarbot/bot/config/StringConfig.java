@@ -198,6 +198,7 @@ public class StringConfig {
     private String notificationEnding = "";
     private String notificationDisabledStr = "";
     private String[] notificationExtras = {};
+    private String notificationPingChannel = "";
     private String notificationHalloween = "";
     private String notificationChristmas = "";
 
@@ -251,6 +252,22 @@ public class StringConfig {
     private String helpPow3HR = "";
     private String[] helpPow3PR = {};
 
+    // Market strings
+
+    private String marketBuyLabel = "";
+    private String marketSellLabel = "";
+    private String marketTargetStockLabel = "";
+    private String marketStockLabel = "";
+    private String marketBuyConfirm = "";
+    private String marketSellConfirm = "";
+    private String marketNoBucks = "";
+    private String marketNoItems = "";
+    private String marketStockChange = "";
+    private String marketCostChange = "";
+    private String marketNoStorage = "";
+    private String marketBuySuccess = "";
+    private String marketSellSuccess = "";
+
     // Miscellaneous strings
 
     private String noPow = "";
@@ -282,4 +299,5 @@ public class StringConfig {
     private String trophyGuessReplyStr;
     private String trophyTitle;
     private String incorrectGuess = "";
+    private String activityStatus = "";
 }

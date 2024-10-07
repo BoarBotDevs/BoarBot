@@ -20,7 +20,7 @@ public class RarityConfig {
     private String pluralName;
     private String emoji = "";
     private double weight = 0;
-    private int baseBucks = 0;
+    private long baseBucks = 0;
     private boolean fromDaily = false;
     private int chargesNeeded = 0;
     private int avgClones = 0;
@@ -28,5 +28,7 @@ public class RarityConfig {
     private boolean givesFirstBoar = false;
     private boolean hidden = false;
     private boolean showEdition = false;
+    private Integer targetStock;
+    private Integer priceAdjustWaitHours;
     private String[] boars = {};
 }

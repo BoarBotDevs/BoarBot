@@ -7,6 +7,8 @@
     "researcherNeed": true,
     "givesFirstBoar": true,
     "avgClones": 100,
+    "targetStock": 5,
+    "priceAdjustWaitHours": 336,
     "boars": [
       "ghost"
     ]
@@ -19,6 +21,8 @@
     "researcherNeed": true,
     "givesFirstBoar": true,
     "avgClones": 100,
+    "targetStock": 5,
+    "priceAdjustWaitHours": 336,
     "boars": [
       "ice"
     ]
@@ -30,6 +34,8 @@
     "baseBucks": 20,
     "researcherNeed": true,
     "avgClones": 100,
+    "targetStock": 5,
+    "priceAdjustWaitHours": 336,
     "boars": [
       "birthday"
     ]
@@ -44,6 +50,8 @@
     "givesFirstBoar": true,
     "chargesNeeded": 1,
     "avgClones": 1,
+    "targetStock": 50,
+    "priceAdjustWaitHours": 12,
     "boars": [
       "normal"
     ]
@@ -58,6 +66,8 @@
     "givesFirstBoar": true,
     "chargesNeeded": 2,
     "avgClones": 2,
+    "targetStock": 30,
+    "priceAdjustWaitHours": 24,
     "boars": [
       "carrot"
     ]
@@ -72,6 +82,8 @@
     "givesFirstBoar": true,
     "chargesNeeded": 3,
     "avgClones": 5,
+    "targetStock": 20,
+    "priceAdjustWaitHours": 48,
     "boars": [
       "sphere"
     ]
@@ -86,6 +98,8 @@
     "givesFirstBoar": true,
     "chargesNeeded": 5,
     "avgClones": 10,
+    "targetStock": 15,
+    "priceAdjustWaitHours": 72,
     "boars": [
       "creepy"
     ]
@@ -101,6 +115,8 @@
     "givesFirstBoar": true,
     "chargesNeeded": 10,
     "avgClones": 20,
+    "targetStock": 10,
+    "priceAdjustWaitHours": 96,
     "boars": [
       "minimumwage"
     ]
@@ -115,6 +131,8 @@
     "givesFirstBoar": true,
     "chargesNeeded": 18,
     "avgClones": 50,
+    "targetStock": 5,
+    "priceAdjustWaitHours": 120,
     "boars": [
       "cowboy"
     ]
@@ -129,6 +147,8 @@
     "givesFirstBoar": true,
     "chargesNeeded": 30,
     "avgClones": 200,
+    "targetStock": 3,
+    "priceAdjustWaitHours": 144,
     "boars": [
       "rickroll"
     ]
@@ -142,6 +162,8 @@
     "givesFirstBoar": true,
     "showEdition": true,
     "avgClones": 500,
+    "targetStock": 1,
+    "priceAdjustWaitHours": 240,
     "boars": [
       "supernova"
     ]

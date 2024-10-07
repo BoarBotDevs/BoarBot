@@ -12,7 +12,7 @@ import java.util.TimeZone;
 
 public class QuestResetJob implements Job {
     @Getter
-    private final static JobDetail job = JobBuilder.newJob(PowerupEventJob.class).build();
+    private final static JobDetail job = JobBuilder.newJob(QuestResetJob.class).build();
     @Getter private final static Trigger trigger = TriggerBuilder.newTrigger()
         .withSchedule(CronScheduleBuilder.cronSchedule("0 59 23 ? * 6").inTimeZone(TimeZone.getTimeZone("UTC")))
         .build();

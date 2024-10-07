@@ -4,10 +4,15 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 
 import dev.boarbot.bot.config.items.BoarItemConfig;
+import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.interactives.boar.TopInteractive;
+import dev.boarbot.interactives.boar.market.MarketInteractive;
 import dev.boarbot.listeners.ReadyListener;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.UserDataUtil;
+import dev.boarbot.util.data.market.MarketData;
+import dev.boarbot.util.data.market.MarketDataUtil;
+import dev.boarbot.util.data.market.MarketUpdateType;
 import dev.boarbot.util.data.top.TopData;
 import dev.boarbot.util.data.top.TopDataUtil;
 import dev.boarbot.util.data.top.TopType;
@@ -36,8 +41,10 @@ public class CacheLoader implements Configured {
 
     static void loadCache() {
         loadBoars();
+        loadPowerups();
         loadBorders();
-        reloadTop();
+        reloadTopCache();
+        reloadMarketCache();
     }
 
     private static void loadBoars() {
@@ -99,46 +106,89 @@ public class CacheLoader implements Configured {
         Log.debug(CacheLoader.class, "Successfully loaded all boar images into cache");
     }
 
-    private static void loadBorders() {
-        Log.debug(CacheLoader.class, "Attempting to load rarity borders into cache...");
+    private static void loadPowerups() {
+        Log.debug(CacheLoader.class, "Attempting to load powerup images into cache...");
 
-        for (String rarityID : RARITIES.keySet()) {
-            String color = COLORS.get(rarityID);
-
-            BufferedImage rarityMediumBorderImage = new BufferedImage(
-                MEDIUM_SIZE[0], MEDIUM_SIZE[1], BufferedImage.TYPE_INT_ARGB
-            );
-            Graphics2D rarityMediumBorderG2D = rarityMediumBorderImage.createGraphics();
-
-            BufferedImage rarityMediumBigBorderImage = new BufferedImage(
-                MEDIUM_BIG_SIZE[0], MEDIUM_BIG_SIZE[1], BufferedImage.TYPE_INT_ARGB
-            );
-            Graphics2D rarityMediumBigBorderG2D = rarityMediumBigBorderImage.createGraphics();
-
+        for (String powerupID : POWS.keySet()) {
             try {
-                GraphicsUtil.drawRect(rarityMediumBorderG2D, ORIGIN, MEDIUM_SIZE, color);
-                rarityMediumBorderG2D.setComposite(AlphaComposite.DstIn);
-                GraphicsUtil.drawImage(rarityMediumBorderG2D, ResourceUtil.rarityBorderPath, ORIGIN, MEDIUM_SIZE);
-                rarityMediumBorderG2D.setComposite(AlphaComposite.SrcIn);
-                imageCacheMap.put("border" + rarityID, rarityMediumBorderImage);
+                PowerupItemConfig powerupInfo = POWS.get(powerupID);
 
-                GraphicsUtil.drawRect(rarityMediumBigBorderG2D, ORIGIN, MEDIUM_BIG_SIZE, color);
-                rarityMediumBigBorderG2D.setComposite(AlphaComposite.DstIn);
-                GraphicsUtil.drawImage(
-                    rarityMediumBigBorderG2D, ResourceUtil.rarityBorderPath, ORIGIN, MEDIUM_BIG_SIZE
+                if (powerupInfo.getFile().isEmpty()) {
+                    throw new IllegalArgumentException("Failed to find file");
+                }
+
+                String filePath = ResourceUtil.powerupAssetsPath + powerupInfo.getFile();
+
+                BufferedImage mediumBigPowImage = new BufferedImage(
+                    MEDIUM_BIG_SIZE[0], MEDIUM_BIG_SIZE[1], BufferedImage.TYPE_INT_ARGB
                 );
-                rarityMediumBigBorderG2D.setComposite(AlphaComposite.SrcIn);
-                imageCacheMap.put("borderMediumBig" + rarityID, rarityMediumBigBorderImage);
+                Graphics2D mediumBigPowGraphics = mediumBigPowImage.createGraphics();
+
+                BufferedImage mediumPowImage = new BufferedImage(
+                    MEDIUM_SIZE[0], MEDIUM_SIZE[1], BufferedImage.TYPE_INT_ARGB
+                );
+                Graphics2D mediumPowGraphics = mediumPowImage.createGraphics();
+
+                GraphicsUtil.drawImage(mediumBigPowGraphics, filePath, ORIGIN, MEDIUM_BIG_SIZE);
+                imageCacheMap.put("mediumBig" + powerupID, mediumBigPowImage);
+
+                GraphicsUtil.drawImage(mediumPowGraphics, filePath, ORIGIN, MEDIUM_SIZE);
+                imageCacheMap.put("medium" + powerupID, mediumPowImage);
             } catch (IOException | URISyntaxException exception) {
-                Log.error(CacheLoader.class, "Failed to read image file for %s border".formatted(rarityID), exception);
+                Log.error(CacheLoader.class, "Failed to read image file for %s".formatted(powerupID), exception);
                 System.exit(-1);
             }
         }
 
+        Log.debug(CacheLoader.class, "Successfully loaded all powerup images into cache");
+    }
+
+    private static void loadBorders() {
+        Log.debug(CacheLoader.class, "Attempting to load rarity borders into cache...");
+
+        for (String rarityID : RARITIES.keySet()) {
+            putRarityBorder(rarityID);
+        }
+
+        putRarityBorder("powerup");
+
         Log.debug(CacheLoader.class, "Successfully loaded all rarity borders into cache");
     }
 
-    public synchronized static void reloadTop() {
+    private static void putRarityBorder(String colorKey) {
+        String color = COLORS.get(colorKey);
+
+        BufferedImage rarityMediumBorderImage = new BufferedImage(
+            MEDIUM_SIZE[0], MEDIUM_SIZE[1], BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics2D rarityMediumBorderG2D = rarityMediumBorderImage.createGraphics();
+
+        BufferedImage rarityMediumBigBorderImage = new BufferedImage(
+            MEDIUM_BIG_SIZE[0], MEDIUM_BIG_SIZE[1], BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics2D rarityMediumBigBorderG2D = rarityMediumBigBorderImage.createGraphics();
+
+        try {
+            GraphicsUtil.drawRect(rarityMediumBorderG2D, ORIGIN, MEDIUM_SIZE, color);
+            rarityMediumBorderG2D.setComposite(AlphaComposite.DstIn);
+            GraphicsUtil.drawImage(rarityMediumBorderG2D, ResourceUtil.rarityBorderPath, ORIGIN, MEDIUM_SIZE);
+            rarityMediumBorderG2D.setComposite(AlphaComposite.SrcIn);
+            imageCacheMap.put("border" + colorKey, rarityMediumBorderImage);
+
+            GraphicsUtil.drawRect(rarityMediumBigBorderG2D, ORIGIN, MEDIUM_BIG_SIZE, color);
+            rarityMediumBigBorderG2D.setComposite(AlphaComposite.DstIn);
+            GraphicsUtil.drawImage(
+                rarityMediumBigBorderG2D, ResourceUtil.rarityBorderPath, ORIGIN, MEDIUM_BIG_SIZE
+            );
+            rarityMediumBigBorderG2D.setComposite(AlphaComposite.SrcIn);
+            imageCacheMap.put("borderMediumBig" + colorKey, rarityMediumBigBorderImage);
+        } catch (IOException | URISyntaxException exception) {
+            Log.error(CacheLoader.class, "Failed to read image file for %s border".formatted(colorKey), exception);
+            System.exit(-1);
+        }
+    }
+
+    public synchronized static void reloadTopCache() {
         try (Connection connection = DataUtil.getConnection()) {
             Set<String> firstUsernames = new HashSet<>();
             Set<String> secondUsernames = new HashSet<>();
@@ -175,8 +225,24 @@ public class CacheLoader implements Configured {
             TopDataUtil.setAthleteBadges(firstUsernames, secondUsernames, thirdUsernames, connection);
         } catch (SQLException exception) {
             Log.error(CacheLoader.class, "Failed to retrieve leaderboard data", exception);
-        } catch (RuntimeException exception) {
-            Log.error(CacheLoader.class, "A problem occurred while reloading leaderboards", exception);
+        }
+    }
+
+    public synchronized static void reloadMarketCache() {
+        try (Connection connection = DataUtil.getConnection()) {
+            Map<String, MarketData> marketData = MarketDataUtil.getMarketData(connection);
+
+            for (String itemID : marketData.keySet()) {
+                MarketInteractive.cachedMarketData.put(itemID, marketData.get(itemID));
+            }
+
+            for (String powerupID : POWS.keySet()) {
+                if (!MarketInteractive.cachedMarketData.containsKey(powerupID)) {
+                    MarketDataUtil.updateMarket(MarketUpdateType.ADD_ITEM, powerupID, connection);
+                }
+            }
+        } catch (SQLException exception) {
+            Log.error(CacheLoader.class, "Failed to retrieve market data", exception);
         }
     }
 }

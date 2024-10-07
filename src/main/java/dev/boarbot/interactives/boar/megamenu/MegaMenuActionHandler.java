@@ -184,7 +184,7 @@ class MegaMenuActionHandler implements Configured {
                         firstBoarIDs
                     );
 
-                    boarUser.powQuery().usePowerup(connection, "clone", numTryClone);
+                    boarUser.powQuery().usePowerup(connection, "clone", numTryClone, true);
 
                     QuestUtil.sendQuestClaimMessage(
                         this.interactive.compEvent.getHook(),
@@ -266,7 +266,7 @@ class MegaMenuActionHandler implements Configured {
                     firstBoarIDs
                 );
 
-                boarUser.powQuery().usePowerup(connection, "transmute", this.interactive.numTransmute);
+                boarUser.powQuery().usePowerup(connection, "transmute", this.interactive.numTransmute, true);
 
                 QuestUtil.sendQuestClaimMessage(
                     this.interactive.compEvent.getHook(),

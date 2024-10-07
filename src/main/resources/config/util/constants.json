@@ -12,6 +12,11 @@
   "maxOtherBless": 250,
   "rarityIncreaseConst": 25000,
   "miracleIncreaseMax": 1000,
+  "buyPriceStart": 100000,
+  "buyPriceMinimum": 2,
+  "sellPriceMinimum": 1,
+  "priceDiffPercent": 0.1,
+  "priceAdjustPercent": 0.05,
   "smallBoarSize": [
     244,
     244

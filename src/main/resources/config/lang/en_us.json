@@ -1,4 +1,5 @@
 {
+  "activityStatus": "/boar help | boarbot.dev",
   "noPermission": "You don't have permission to use this command.",
   "noSetup": "To use this command, an admin must first do /%s %s!",
   "wrongChannel": "Cannot use that command here!",
@@ -156,25 +157,27 @@
   "giveNoID": "This item type needs an ID.",
   "giveBadID": "This item type does not have an item with the ID \"%s\".",
   "giveTitle": "Item Given!",
+  "helpPageInfo": "Page: %,d/%,d",
+  "helpMenuInfo": "Menu: %s",
   "helpGen1HL": "What is BoarBot?",
   "helpGen1PL": [
     "BoarBot is a game built entirely around collecting boars. Some are <>divine<>rarer<>font<> than others, some are <>bucks<>worth<>font<> more than others, and some are more <>special<>exclusive<>font<> than others. <br> <br>",
     "Boars can be obtained in several ways, which are all listed below. <br> <br>",
     "<>silver<>/boar daily<>font<> - The primary way to roll for boars. Only usable daily. <br> <br>",
     "<>powerup<>Powerups<>font<> - Some boars are only obtainable through powerups. <br> <br>",
-    "<>special<>Events<>font<> - Some boars are only obtainable through hosted events. <br> <br>",
-    "<>christmas<>Holidays<>font<> - Some boars are only obtainable on specific days/week."
+    "<>green<>Events<>font<> - Some boars are only obtainable through hosted events. <br> <br>",
+    "<>gold<>Holidays<>font<> - Some boars are only obtainable on specific days/weeks."
   ],
   "helpGen1HR": "What else can I do?",
   "helpGen1PR": [
     "<>powerup<>Powerup Events<>font<> - These occur every two hours and yield <>powerup<>powerups<>font<> which can make collecting boars more interesting. <br> <br>",
     "<>bucks<>Buy & Sell<>font<> - Use your hard-earned <>bucks<>Boar Bucks<>font<> on the <>silver<>/boar market<>font<>. <br> <br>",
-    "<>gold<>Compete<>font<> - Climb for top spots on the <>silver<>/boar leaderboard<>font<>. <br> <br>",
+    "<>gold<>Compete<>font<> - Climb to the top spots on the <>silver<>/boar leaderboard<>font<>. <br> <br>",
     "<>green<>Quests<>font<> - Complete quests of varying difficulty in <>silver<>/boar quests<>font<>. <br> <br>",
     "<>blessing2<>100%<>font<> - Try to completely finish the game by getting <>blessing2<>1,000 Boar Blessings<>font<>. <br> <br>",
     "<>silver<>Make Friends<>font<> - Come up with ideas and talk with other players in our Discord server! <>green<>discord.boarbot.dev"
   ],
-  "helpGen2HL": "What are <>bucks<>BoarBot<>font<>?",
+  "helpGen2HL": "What are <>bucks<>Boar Bucks<>font<>?",
   "helpGen2PL": [
     "<>bucks<>Boar Bucks<>font<> are the currency that the game uses in its economy. They can be obtained from the boars you get from <>silver<>/boar daily<>font<>, <>powerup<>powerups<>font<>, and <>green<>quests<>font<>. <br> <br>",
     "Currently, these can only be used in the <>silver<>/boar market<>font<>, but there are plans to introduce more areas where you can use them. <br> <br>",
@@ -184,14 +187,14 @@
   "helpGen2HR": "What are <>blessing2<>Boar Blessings<>font<>?",
   "helpGen2PR": [
     "<>blessing2<>Boar Blessings<>font<> increase the odds of getting rarer boars. <br> <br>",
-    "This increase is not exponential, but logarithmic. This means they increase your odds more on the lower end, but less at the higher end, eventually leading to equal odds of obtaining each rarity. <br> <br>",
+    "This increase is not exponential, but logarithmic. This means they increase your odds more on the lower end, but less at the higher end, approaching roughly equal odds of obtaining each rarity. <br> <br>",
     "These <>blessing2<>Boar Blessings<>font<> are increased by collecting unique boars, keeping your <>silver<>Boar Streak<>font<> up, and doing <>green<>quests<>font<>. <br> <br>",
     "They can also be boosted temporarily through the usage of <>powerup<>Miracle Charms<>font<>. <br> <br>",
     "<>blessing2<>Boar Blessings<>font<> are capped at <>green<>1,000<>font<>."
   ],
   "helpBoar1HL": "How many Boars are there?",
   "helpBoar1PL": [
-    "BoarBot currently has %,d boars up for grabs. Here's how they're distributed. <br> <br>",
+    "BoarBot currently has <>green<>%,d<>font<> boars up for grabs. Here's how they're distributed. <br> <br>",
     "<>common<>Common<>font<> - <>green<>%,d <br>",
     "<>uncommon<>Uncommon<>font<> - <>green<>%,d <br>",
     "<>rare<>Rare<>font<> - <>green<>%,d <br>",
@@ -205,7 +208,7 @@
     "<>special<>Special<>font<> - <>green<>%,d <br> <br>",
     "<>font<>These values are always changing! We're open to any suggestions that our players may have, both artistic and simple!"
   ],
-  "helpBoar1HR": "What are <>blessing2<>Boar Blessings<>font<>?",
+  "helpBoar1HR": "How rare is each rarity?",
   "helpBoar1PR": [
     "<>common<>Common<>font<> - <>green<>33/40 <br>",
     "<>uncommon<>Uncommon<>font<> - <>green<>1/10 <br>",
@@ -217,30 +220,30 @@
     "<>immaculate<>Immaculate<>font<> - Obtained by <>powerup<>transmuting <>divine<>Divine Boars<>font<>. <br> <br>",
     "<>entropic<>???<>font<> - <>error<>SHOULD NOT EXIST<>font<>. <br> <br>",
     "<>truth<>???<>font<> - Become one with the heavens. <br> <br>",
-    "<>special<>Special<>font<> - Obtained from <>christmas<>Holidays<>font<>, <>special<>Events<>font<>, and special cases. <br> <br>",
+    "<>special<>Special<>font<> - Obtained from <>gold<>Holidays<>font<>, <>green<>Events<>font<>, and special cases. <br> <br>",
     "<>special<>Special Boars<>font<> are not required to max out your <>blessing2<>Boar Blessings<>font<>."
   ],
   "helpBoar2HL": "What are <>special<>Special Boars<>font<>?",
   "helpBoar2PL": [
     "<>special<>Special Boars<>font<> are given on special occasions! Here's a list of them all. <br> <br>",
-    "<>special<>%Trophy Boar<>font<> - Awarded to top Alpha players. Also a reward for completing secret hunts. <br> <br>",
+    "<>special<>Trophy Boar<>font<> - Awarded to top Alpha players. Also a reward for completing secret hunts. <br> <br>",
     "<>special<>Gameboarker<>font<> - Given to users that have reported several bugs. <br> <br>",
     "<>special<>Boarcterium<>font<> - Received alongside the first edition of a boar. <br> <br>",
     "<>special<>Boarnderwear<>font<> - A very rare boar obtained from <>powerup<>Boar Gifts<>font<>. <br> <br>",
     "<>special<>Spooky Boar<>font<> - Given to the top solvers of a <>halloween<>Boar-O-Ween<>font<> hunt. <br> <br>",
     "<>special<>Santa Boar<>font<> - <>christmas<>Boarmas <>powerup<>Boar Gifts<>font<>."
   ],
-  "helpBoar2HR": "What are <>christmas<>Holiday<>font<> boars?",
+  "helpBoar2HR": "What are <>gold<>Holiday<>font<> boars?",
   "helpBoar2PR": [
     "There are <>green<>3<>font<> rarities that only appear during certain times of the year. <br> <br>",
-    "<>halloween<>Haunting<>font<> - Replaces Common Boars during <>halloween<>Boar-O-Ween<>font<>Newest are only obtainable from <>halloween<>Boar-O-Ween<>font<> hunts. (<>green<>%,d<>font<>) <br> <br>",
+    "<>halloween<>Haunting<>font<> - Replaces Common Boars during <>halloween<>Boar-O-Ween<>font<>. Newest are only obtainable from <>halloween<>Boar-O-Ween<>font<> hunts. (<>green<>%,d<>font<>) <br> <br>",
     "<>christmas<>Festive<>font<> - Replaces Common Boars during <>christmas<>Boarmas<>font<>. (<>green<>%,d<>font<>) <br> <br>",
     "<>event<>Event<>font<> - Currently only obtainable on BoarBot's anniversary on <>green<>June 30th<>font<>. This rarity is a catch-all for boars only obtainable at certain times. (<>green<>%,d<>font<>) <br> <br>",
     "<>halloween<>Haunting<>font<> and <>christmas<>Festive<>font<> are very heavily aligned with the western holidays Halloween and Christmas. We apologize to non-observers."
   ],
-  "helpBadge1HL": "What are <>badge<>Badges<>font<>?",
+  "helpBadge1HL": "What are Badges?",
   "helpBadge1PL": [
-    "<>badge<>Badges<>font<> are purple cosmetic and denote special status of some users. <br> <br>",
+    "Badges are purely cosmetic and denote special status of some users. <br> <br>",
     "<>badge<>Boarvestigator<>font<> - Given to users with all unique boars. <br> <br>",
     "<>badge<>Boarcheologist<>font<> - Given to users with all unique boars. (+<>special<>Special<>font<>) <br> <br>",
     "<>badge<>Skilled Boarthlete<>font<> - Given to users that are <>bronze<>#3<>font<> on a leaderboard. <br> <br>",
@@ -254,8 +257,8 @@
     "<>badge<>Boar Supporter<>font<> - Given to Boar Supporter patrons. <br> <br>",
     "<>badge<>Boartist Follower<>font<> - Heavily inspired a boar that made it into the game. <br> <br>",
     "<>badge<>Boartist Devotee<>font<> - Heavily inspired 10+ boars that made it into the game. <br> <br>",
-    "<>badge<>Badges<>font<>, unlike boars, are not able to be sold or traded. <br> <br>",
-    "<>badge<>Badges<>font<> were inspired by Discord's badge system."
+    "Badges, unlike boars, are not able to be sold or traded. <br> <br>",
+    "Badges were inspired by Discord's badge system."
   ],
   "helpPow1HL": "What are <>powerup<>Powerups<>font<>?",
   "helpPow1PL": [
@@ -318,10 +321,10 @@
     "Most <>powerup<>powerups<>font<> are used in <>green<>quests<>font<>. Plan accordingly! <br> <br>",
     "<>powerup<>Powerup Events<>font<> spawn around the <>green<>30 minute mark<>font<> of the hour."
   ],
-  "notificationSuccess": "You've successfully enabled notifications! You'll be notified when /%s %s is available again. \n\nTo disable notifications, simply message me STOP at any time.",
+  "notificationSuccess": "You've successfully enabled notifications! You'll be notified when /boar daily is available again. \n\nTo disable notifications, simply message me STOP at any time.",
   "notificationFailed": "<>error<>Failed to enable notifications! I'm unable to DM you. To fix this, invite me to a server where you have DMs open (Right click the server > Privacy Settings > Enable Direct Messages).",
   "notificationSuccessReply": "Success! You should've received a DM from me.",
-  "notificationEnding": "\n## Your daily %s is ready!\n# <#%s>\n||Message me STOP to turn off notifications||",
+  "notificationEnding": "\n## Your daily boar is ready!\n# <#boar>\n||Message me STOP to turn off notifications||",
   "notificationDisabledStr": "Successfully disabled notifications!",
   "notificationExtras": [
     "Maybe this time you'll get a divine!",
@@ -344,6 +347,20 @@
     "Interested in seeing more detailed information about your profile? Try /boar stats!",
     "Did you know that BoarBot has been in development since <t:1658094240:D>?"
   ],
+  "notificationPingChannel": "## Your daily boar is ready! <@&1001233916620972082>\n-# If you run /boar daily a second time, then click \"Enable Notifications\", you can receive your notifications through DMs instead. To disable this ping, un-react to the boar emoji in <#996887892737667204>.",
+  "marketBuyLabel": "Buy Price",
+  "marketSellLabel": "Sell Price",
+  "marketTargetStockLabel": "Target Stock",
+  "marketStockLabel": "Current Stock",
+  "marketBuyConfirm": "You are attempting to purchase %,d %s<>font<> for <>bucks<>$%,d<>font<>. Are you sure? <br> <br> Stock: <>green<>%,d <>silver<>-><>error<> %,d<>font<> <br> Sell Price: <>bucks<>$%,d <>silver<>-> <>bucks<>$%,d<>font<> <br> Buy Price: <>bucks<>$%,d <>silver<>-> <>bucks<>$%,d",
+  "marketSellConfirm": "You are attempting to sell %,d %s<>font<> for <>bucks<>$%,d<>font<>. Are you sure? <br> <br> Stock: <>error<>%,d <>silver<>-><>green<> %,d<>font<> <br> Sell Price: <>bucks<>$%,d <>silver<>-> <>bucks<>$%,d<>font<> <br> Buy Price: <>bucks<>$%,d <>silver<>-> <>bucks<>$%,d",
+  "marketNoBucks": "<>error<>This purchase would cost <>bucks<>$%,d<>error<>, but you only have <>bucks<>$%,d<>error<>!",
+  "marketNoItems": "<>error<>You don't have any of this item to sell!",
+  "marketStockChange": "<>error<>There's not enough stock for your purchase! Try again!",
+  "marketCostChange": "<>error<>The price has changed recently! Try again!",
+  "marketNoStorage": "<>error<>You don't have enough room in your collection to purchase this item!",
+  "marketBuySuccess": "You successfully purchased %,d %s for <>bucks<>$%,d<>font<>!",
+  "marketSellSuccess": "You successfully sold %,d %s for <>bucks<>$%,d<>font<>!",
   "notificationHalloween": "Boar-o-ween happens every year on Halloween and consists of a series of intricate hunts and unique rewards. Interested in playing? Join our Discord server: https://discord.boarbot.dev",
   "notificationChristmas": "Boarmas is now active for the Holidays! Boar Gifts are more frequent from Powerup Events, there's new boars to obtain, and Boar Gifts have improved odds for getting rarer boars!",
   "noPow": "<>error<>It seems you don't have enough <>powerup<>%s <>error<>to do this...",

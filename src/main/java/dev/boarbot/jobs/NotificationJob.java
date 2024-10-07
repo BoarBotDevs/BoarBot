@@ -16,6 +16,7 @@ import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.quartz.*;
 
 import java.sql.Connection;
@@ -37,6 +38,13 @@ public class NotificationJob implements Job, Configured {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         List<String> notifUserIDs;
+
+        TextChannel pingChannel = jda.getTextChannelById(CONFIG.getMainConfig().getPingChannel());
+
+        if (pingChannel != null) {
+            pingChannel.sendMessage(STRS.getNotificationPingChannel())
+                .queue(null, e -> Log.warn(this.getClass(), "Failed to sent legacy notification"));
+        }
 
         try (Connection connection = DataUtil.getConnection()) {
             updateDynamicValues(connection);

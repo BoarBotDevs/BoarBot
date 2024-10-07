@@ -318,7 +318,7 @@ class MigrationWriter implements Configured {
 
                         statement.setString(1, newBoar.getUserID());
                         statement.setString(2, boarID);
-                        statement.setTimestamp(3, newBoar.getObtainedTime() == 0
+                        statement.setTimestamp(3, newBoar.getObtainedTime() == Long.MAX_VALUE
                             ? null
                             : new Timestamp(newBoar.getObtainedTime())
                         );

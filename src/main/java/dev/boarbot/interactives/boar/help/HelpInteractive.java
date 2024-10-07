@@ -24,7 +24,6 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
-import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -87,15 +86,9 @@ public class HelpInteractive extends ModalInteractive {
             case "LEFT" -> this.setPage(this.page - 1);
 
             case "PAGE" -> {
-                Modal modal = new ModalImpl(
-                    ModalUtil.makeModalID(MODALS.get("pageInput").getId(), compEvent),
-                    MODALS.get("pageInput").getTitle(),
-                    ModalUtil.makeModalComponents(MODALS.get("pageInput").getComponents())
-                );
-
+                Modal modal = ModalUtil.getModal(MODALS.get("pageInput"), compEvent);
                 this.setModalHandler(new ModalHandler(compEvent, this));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
-
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
 

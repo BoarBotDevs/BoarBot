@@ -23,7 +23,6 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -106,8 +105,7 @@ class MegaMenuComponentHandler implements Configured {
             case "LEFT" -> this.interactive.page = this.interactive.page - 1;
 
             case "PAGE" -> {
-                Modal modal = this.makeModal(MODALS.get("pageInput"));
-
+                Modal modal = ModalUtil.getModal(MODALS.get("pageInput"), compEvent);
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
                 this.compEvent.replyModal(modal)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
@@ -117,8 +115,7 @@ class MegaMenuComponentHandler implements Configured {
             case "RIGHT" -> this.interactive.page = this.interactive.page + 1;
 
             case "BOAR_FIND" -> {
-                Modal modal = this.makeModal(MODALS.get("findBoar"));
-
+                Modal modal = ModalUtil.getModal(MODALS.get("findBoar"), compEvent);
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
                 this.compEvent.replyModal(modal)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
@@ -201,8 +198,6 @@ class MegaMenuComponentHandler implements Configured {
                 } catch (NumberFormatException exception) {
                     Log.debug(this.user, this.getClass(), "Invalid modal input");
                 }
-
-                this.interactive.execute(null);
             }
 
             case "FIND_BOAR" -> {
@@ -212,7 +207,6 @@ class MegaMenuComponentHandler implements Configured {
 
                 this.interactive.page = this.interactive
                     .getFindBoarPage(this.modalEvent.getValues().getFirst().getAsString());
-                this.interactive.execute(null);
             }
 
             case "CLONE_AMOUNT" -> {
@@ -272,8 +266,6 @@ class MegaMenuComponentHandler implements Configured {
                     Log.error(this.user, this.getClass(), "Failed to get clone data", exception);
                     return;
                 }
-
-                this.interactive.execute(null);
             }
 
             case "MIRACLE_AMOUNT" -> {
@@ -330,18 +322,10 @@ class MegaMenuComponentHandler implements Configured {
                     Log.error(this.user, this.getClass(), "Failed to get miracle data", exception);
                     return;
                 }
-
-                this.interactive.execute(null);
             }
         }
-    }
 
-    private Modal makeModal(ModalConfig modalConfig) {
-        return new ModalImpl(
-            ModalUtil.makeModalID(modalConfig.getId(), this.compEvent),
-            modalConfig.getTitle(),
-            ModalUtil.makeModalComponents(modalConfig.getComponents())
-        );
+        this.interactive.execute(null);
     }
 
     private void doInteract() {
@@ -358,20 +342,8 @@ class MegaMenuComponentHandler implements Configured {
             }
 
             case CLONE -> {
-                ModalConfig curModalConfig = MODALS.get("cloneAmount");
-
-                Modal modal = new ModalImpl(
-                    ModalUtil.makeModalID(curModalConfig.getId(), this.compEvent),
-                        curModalConfig.getTitle(),
-                    ModalUtil.makeModalComponents(curModalConfig.getComponents())
-                );
-
+                Modal modal = ModalUtil.getModal(MODALS.get("cloneAmount"), this.compEvent);
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
-
-                if (this.interactive.isStopped()) {
-                    return;
-                }
-
                 this.compEvent.replyModal(modal)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent clone input modal");
@@ -439,14 +411,7 @@ class MegaMenuComponentHandler implements Configured {
 
         switch (this.interactive.powerupUsing) {
             case "miracle" -> {
-                ModalConfig curModalConfig = MODALS.get("miracleAmount");
-
-                Modal modal = new ModalImpl(
-                    ModalUtil.makeModalID(curModalConfig.getId(), this.compEvent),
-                    curModalConfig.getTitle(),
-                    ModalUtil.makeModalComponents(curModalConfig.getComponents())
-                );
-
+                Modal modal = ModalUtil.getModal(MODALS.get("miracleAmount"), compEvent);
                 this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
                 this.compEvent.replyModal(modal)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));

@@ -27,7 +27,6 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
-import net.dv8tion.jda.internal.interactions.modal.ModalImpl;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -113,15 +112,9 @@ public class TopInteractive extends ModalInteractive implements Configured {
             case "LEFT" -> this.setPage(this.page - 1);
 
             case "PAGE" -> {
-                Modal modal = new ModalImpl(
-                    ModalUtil.makeModalID(MODALS.get("pageBoardInput").getId(), compEvent),
-                    MODALS.get("pageBoardInput").getTitle(),
-                    ModalUtil.makeModalComponents(MODALS.get("pageBoardInput").getComponents())
-                );
-
+                Modal modal = ModalUtil.getModal(MODALS.get("pageBoardInput"), compEvent);
                 this.setModalHandler(new ModalHandler(compEvent, this));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
-
                 Log.debug(this.user, this.getClass(), "Sent page/username input modal");
             }
 

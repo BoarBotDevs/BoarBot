@@ -357,7 +357,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                     this.hasGift = boarUser.powQuery().getPowerupAmount(connection, "gift") > 0;
 
                     if (this.hasGift) {
-                        boarUser.powQuery().usePowerup(connection, "gift", 1);
+                        boarUser.powQuery().usePowerup(connection, "gift", 1, true);
                         boarUser.powQuery().setLastGiftSent(connection, 0);
                         this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
                             QuestType.SEND_GIFTS, 1, connection

@@ -23,7 +23,7 @@ public class MarketComponentsGetter implements Configured {
     private static final Map<String, IndivComponentConfig> COMPONENTS = CONFIG.getComponentConfig().getMarket();
     private List<SelectOption> rarityOptions;
 
-    private static final int ITEMS_PER_PAGE = 12;
+    private static final int ITEMS_PER_PAGE = 15;
 
     public MarketComponentsGetter(MarketInteractive interactive) {
         this.interactive = interactive;
@@ -31,6 +31,20 @@ public class MarketComponentsGetter implements Configured {
     }
 
     public ActionRow[] getComponents() {
+        if (this.interactive.acknowledgeOpen) {
+            List<ItemComponent> backRow = InteractiveUtil.makeComponents(
+                this.interactive.getInteractionID(), COMPONENTS.get("backBtn")
+            );
+            return new ActionRow[] {ActionRow.of(backRow)};
+        }
+
+        if (this.interactive.confirmOpen) {
+            List<ItemComponent> confirmRow = InteractiveUtil.makeComponents(
+                this.interactive.getInteractionID(), COMPONENTS.get("cancelBtn"), COMPONENTS.get("confirmBtn")
+            );
+            return new ActionRow[] {ActionRow.of(confirmRow)};
+        }
+
         return switch (this.interactive.curView) {
             case OVERVIEW -> getOverviewComponents();
             case RARITIES -> getRaritiesComponents();
@@ -86,7 +100,10 @@ public class MarketComponentsGetter implements Configured {
         );
 
         List<ItemComponent> searchRow = InteractiveUtil.makeComponents(
-            this.interactive.getInteractionID(), COMPONENTS.get("backBtn"), COMPONENTS.get("searchBtn")
+            this.interactive.getInteractionID(),
+            COMPONENTS.get("backBtn"),
+            COMPONENTS.get("searchBtn"),
+            COMPONENTS.get("refreshBtn")
         );
 
         Button leftBtn = ((Button) navBtns.getFirst()).asDisabled();
@@ -133,8 +150,21 @@ public class MarketComponentsGetter implements Configured {
         );
 
         List<ItemComponent> searchRow = InteractiveUtil.makeComponents(
-            this.interactive.getInteractionID(), COMPONENTS.get("backBtn"), COMPONENTS.get("searchBtn")
+            this.interactive.getInteractionID(),
+            COMPONENTS.get("backBtn"),
+            COMPONENTS.get("searchBtn"),
+            COMPONENTS.get("refreshBtn")
         );
+
+        Button buyBtn = ((Button) buySellRow.getFirst()).asDisabled();
+
+        boolean canPurchase = MarketInteractive.cachedMarketData.get(this.interactive.focusedID) != null &&
+            MarketInteractive.cachedMarketData.get(this.interactive.focusedID).stock() > 0;
+        if (canPurchase) {
+            buyBtn = buyBtn.withDisabled(false);
+        }
+
+        buySellRow.set(0, buyBtn);
 
         return new ActionRow[] {ActionRow.of(buySellRow), ActionRow.of(searchRow)};
     }
