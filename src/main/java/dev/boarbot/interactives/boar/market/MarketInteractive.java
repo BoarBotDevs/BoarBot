@@ -17,6 +17,8 @@ import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
+import dev.boarbot.util.quests.QuestType;
+import dev.boarbot.util.quests.QuestUtil;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
@@ -53,6 +55,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
     long cost = 0;
 
     private final MarketComponentsGetter componentsGetter;
+    private GenericComponentInteractionCreateEvent compEvent;
 
     public final static Map<String, MarketData> cachedMarketData = new ConcurrentHashMap<>();
 
@@ -89,6 +92,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
         }
 
         String compID = compEvent.getComponentId().split(",")[1];
+        this.compEvent = compEvent;
 
         Set<String> modalPossibleIDs = new HashSet<>(
             Arrays.asList("PAGE", "SEARCH", "BUY", "SELL")
@@ -447,6 +451,10 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
             this.user, this.getClass(), "Purchased %,d %s for $%,d".formatted(this.amount, this.focusedID, this.cost)
         );
 
+        QuestUtil.sendQuestClaimMessage(
+            this.compEvent.getHook(), boarUser.questQuery().addProgress(QuestType.SPEND_BUCKS, this.cost, connection)
+        );
+
         String itemStr = POWS.containsKey(this.focusedID)
             ? "<>powerup<>" + (this.amount == 1
                 ? POWS.get(this.focusedID).getName()
@@ -493,6 +501,10 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
         }
 
         Log.info(this.user, this.getClass(), "Sold %,d %s for $%,d".formatted(this.amount, this.focusedID, this.cost));
+
+        QuestUtil.sendQuestClaimMessage(
+            this.compEvent.getHook(), boarUser.questQuery().addProgress(QuestType.COLLECT_BUCKS, this.cost, connection)
+        );
 
         String itemStr = POWS.containsKey(this.focusedID)
             ? "<>powerup<>" + (this.amount == 1

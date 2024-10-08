@@ -114,9 +114,14 @@ public class MarketDataUtil implements Configured {
 
         boolean isPowerup = POWS.containsKey(itemID);
         String rarityKey = isPowerup ? null : BoarUtil.findRarityKey(itemID);
-        int targetStock = isPowerup
+        Integer targetStock = isPowerup
             ? POWS.get(itemID).getTargetStock()
             : RARITIES.get(rarityKey).getTargetStock();
+
+        if (targetStock == null) {
+            return;
+        }
+
         long buyPrice = isPowerup || RARITIES.get(rarityKey).getBaseBucks() == 0
             ? NUMS.getBuyPriceStart()
             : RARITIES.get(rarityKey).getBaseBucks() * 100;

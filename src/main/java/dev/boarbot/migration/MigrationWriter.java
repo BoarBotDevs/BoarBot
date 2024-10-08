@@ -4,6 +4,8 @@ import dev.boarbot.api.util.Configured;
 import dev.boarbot.migration.guilddata.OldGuildData;
 import dev.boarbot.migration.userdata.*;
 import dev.boarbot.util.data.DataUtil;
+import dev.boarbot.util.data.market.MarketDataUtil;
+import dev.boarbot.util.data.market.MarketUpdateType;
 import dev.boarbot.util.logging.Log;
 
 import java.sql.*;
@@ -315,6 +317,8 @@ class MigrationWriter implements Configured {
 
                     while (newBoars != null && !newBoars.isEmpty()) {
                         NewBoarData newBoar = newBoars.poll();
+
+                        MarketDataUtil.updateMarket(MarketUpdateType.ADD_ITEM, boarID, connection);
 
                         statement.setString(1, newBoar.getUserID());
                         statement.setString(2, boarID);

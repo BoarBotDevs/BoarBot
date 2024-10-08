@@ -54,7 +54,6 @@
   "spendBucks": {
     "description": "Spend/Use <>bucks<>$%s",
     "descriptionAlt": "Spend/Use <>bucks<>$%s",
-    "disabled": true,
     "questVals": [
       {
         "requirement": "10",

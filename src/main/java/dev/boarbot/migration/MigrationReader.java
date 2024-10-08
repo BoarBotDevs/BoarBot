@@ -164,13 +164,16 @@ class MigrationReader implements Configured {
             List<String> convertedBoars = new ArrayList<>();
             String curRarity = "common";
 
-            while (numCharges >= RARITIES.get(curRarity).getChargesNeeded()) {
-                numCharges -= RARITIES.get(curRarity).getChargesNeeded();
-
-                if (curRarity.equals("divine")) {
+            while (numCharges >= RARITIES.get("common").getChargesNeeded()) {
+                if (numCharges < RARITIES.get(curRarity).getChargesNeeded()) {
+                    convertedBoars.add(BoarUtil.findValid(curRarity, false));
+                    curRarity = "common";
+                } else if (curRarity.equals("divine")) {
                     convertedBoars.add(BoarUtil.findValid("immaculate", false));
+                    numCharges -= RARITIES.get(curRarity).getChargesNeeded();
                     curRarity = "common";
                 } else {
+                    numCharges -= RARITIES.get(curRarity).getChargesNeeded();
                     curRarity = BoarUtil.getNextRarityKey(curRarity);
                 }
             }
