@@ -61,6 +61,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
     public void execute() {
         if (!Arrays.asList(CONFIG.getMainConfig().getDevs()).contains(this.user.getId())) {
             sendBadReply(STRS.getNoPermission(), "Failed to generate no permission message");
+            return;
         }
 
         if (this.itemType != ItemType.BUCKS && this.itemID == null) {
@@ -134,6 +135,9 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
 
         this.interaction.deferReply().queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
 
+        BadgeItemConfig badge = BADGES.get(this.itemID);
+        this.tier = Math.min(badge.getNames().length-1, this.tier);
+
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
             boarUser.passSynchronizedAction(this);
@@ -146,9 +150,6 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
         if (this.failedSynchronized) {
             return;
         }
-
-        BadgeItemConfig badge = BADGES.get(this.itemID);
-        this.tier = Math.min(badge.getNames().length-1, this.tier);
 
         ItemInteractive.sendInteractive(
             badge.getNames()[this.tier],

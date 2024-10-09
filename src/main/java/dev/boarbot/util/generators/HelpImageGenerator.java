@@ -108,8 +108,11 @@ public class HelpImageGenerator extends ImageGenerator {
             this.paraLeft = String.join(" ", STRS.getHelpBoar1PL()).formatted(
                 BoarUtil.getTotalUniques(),
                 rarityBoarAmounts.get("common"),
+                rarityBoarAmounts.get("halloween"),
                 rarityBoarAmounts.get("uncommon"),
+                rarityBoarAmounts.get("christmas"),
                 rarityBoarAmounts.get("rare"),
+                rarityBoarAmounts.get("event"),
                 rarityBoarAmounts.get("epic"),
                 rarityBoarAmounts.get("legendary"),
                 rarityBoarAmounts.get("mythic"),

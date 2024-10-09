@@ -210,7 +210,7 @@ class MegaMenuComponentsGetter implements Configured {
         Button autoBtn = ((Button) allBtnsRow.get(2));
 
         QuestData questData = this.interactive.questData;
-        boolean claimBonus = !questData.fullClaimed();
+        boolean claimBonus = !questData.fullClaimed() || questData.questProgress().isEmpty();
 
         for (int i=0; i<questData.questProgress().size(); i++) {
             QuestType quest = this.interactive.quests.get(i);
@@ -260,15 +260,37 @@ class MegaMenuComponentsGetter implements Configured {
             COMPONENTS.get("filterSelect")
         );
 
-        for (int i=0; i<this.filterOptions.size(); i++) {
-            SelectOption filterOption = this.filterOptions.get(i);
+        Set<String> ownedRarities = new HashSet<>();
+        for (BoarInfo boarInfo : this.interactive.ownedBoars.values()) {
+            ownedRarities.add(boarInfo.getRarityID());
+        }
 
-            if ((this.interactive.filterBits >> i) % 2 == 1) {
-                this.filterOptions.set(i, filterOption.withDefault(true));
+        List<SelectOption> selectOptions = new ArrayList<>();
+        List<Integer> shownOptionIndexes = new ArrayList<>();
+        shownOptionIndexes.add(0);
+        shownOptionIndexes.add(1);
+
+        int index = 2;
+        for (String rarityKey : RARITIES.keySet()) {
+            if (!RARITIES.get(rarityKey).isHidden() || ownedRarities.contains(rarityKey)) {
+                shownOptionIndexes.add(index);
+            }
+            index++;
+        }
+
+        for (int i=0; i<this.filterOptions.size(); i++) {
+            if (!shownOptionIndexes.contains(i)) {
                 continue;
             }
 
-            this.filterOptions.set(i, filterOption.withDefault(false));
+            SelectOption filterOption = this.filterOptions.get(i);
+
+            if ((this.interactive.filterBits >> i) % 2 == 1) {
+                selectOptions.add(filterOption.withDefault(true));
+                continue;
+            }
+
+            selectOptions.add(filterOption.withDefault(false));
         }
 
         StringSelectMenu filterSelectMenu = (StringSelectMenu) selectRow.getFirst();
@@ -276,9 +298,9 @@ class MegaMenuComponentsGetter implements Configured {
             filterSelectMenu.getId(),
             filterSelectMenu.getPlaceholder(),
             filterSelectMenu.getMinValues(),
-            filterSelectMenu.getMaxValues(),
+            selectOptions.size(),
             filterSelectMenu.isDisabled(),
-            this.filterOptions
+            selectOptions
         ));
 
         return selectRow;
@@ -447,24 +469,14 @@ class MegaMenuComponentsGetter implements Configured {
         switch (selectMenu.getCustom_id()) {
             case "VIEW_SELECT" -> this.navOptions = options;
             case "FILTER_SELECT" ->  {
-                Set<String> ownedRarities = new HashSet<>();
-
-                for (BoarInfo boarInfo : this.interactive.ownedBoars.values()) {
-                    ownedRarities.add(boarInfo.getRarityID());
-                }
-
                 int rarityBits = 4;
                 for (Map.Entry<String, RarityConfig> rarityEntry : RARITIES.entrySet()) {
-                    String rarityKey = rarityEntry.getKey();
                     RarityConfig rarity = rarityEntry.getValue();
-
-                    if (!rarityEntry.getValue().isHidden() || ownedRarities.contains(rarityKey)) {
-                        SelectOption option = SelectOption.of(rarity.getName(), Integer.toString(rarityBits))
-                            .withEmoji(InteractiveUtil.parseEmoji(rarity.getEmoji()))
-                            .withDescription("Filter by %s Boars".formatted(rarity.getName()));
-                        options.add(option);
-                        rarityBits *= 2;
-                    }
+                    SelectOption option = SelectOption.of(rarity.getName(), Integer.toString(rarityBits))
+                        .withEmoji(InteractiveUtil.parseEmoji(rarity.getEmoji()))
+                        .withDescription("Filter by %s Boars".formatted(rarity.getName()));
+                    options.add(option);
+                    rarityBits *= 2;
                 }
 
                 COMPONENTS.get("filterSelect").setMax_values(options.size());

@@ -209,6 +209,7 @@ class MegaMenuActionHandler implements Configured {
         if (!newBoarIDs.isEmpty()) {
             CompletableFuture.runAsync(() -> {
                 try {
+                    this.interactive.boarPage = BOARS.get(this.curBoarEntry.getKey()).getName();
                     this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
                         null, STRS.getCompCloneSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
                     );
@@ -291,7 +292,10 @@ class MegaMenuActionHandler implements Configured {
                     String newBoarName = BOARS.get(newBoarIDs.getFirst()).getName();
                     String newBoarRarityKey = BoarUtil.findRarityKey(newBoarIDs.getFirst());
 
-                    this.interactive.boarPage = newBoarName;
+                    if (this.interactive.filteredBoars.containsKey(newBoarIDs.getFirst())) {
+                        this.interactive.boarPage = newBoarName;
+                    }
+
                     String overlayStr = STRS.getCompTransmuteSuccess().formatted(
                         "<>" + this.curRarityKey + "<>" + boarName,
                         "<>" + newBoarRarityKey + "<>" + newBoarName
@@ -353,10 +357,8 @@ class MegaMenuActionHandler implements Configured {
             null,
             STRS.getPowMiracleSuccess().formatted(
                 STRS.getBlessingsPluralName(),
-                TextUtil.getBlessHex(blessings),
-                blessings > 1000
-                    ? STRS.getBlessingsSymbol() + " "
-                    : "",
+                TextUtil.getBlessHex(blessings, true),
+                STRS.getBlessingsSymbol() + " ",
                 blessings
             )
         );

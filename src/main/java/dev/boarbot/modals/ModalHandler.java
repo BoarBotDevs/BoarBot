@@ -22,7 +22,7 @@ public class ModalHandler implements Configured {
     private final Interaction interaction;
     private final User user;
 
-    public ModalHandler(Interaction interaction, ModalInteractive receiver) {
+    public ModalHandler(Interaction interaction, ModalInteractive receiver, long idleTime) {
         this.interaction = interaction;
         this.user = interaction.getUser();
 
@@ -36,7 +36,7 @@ public class ModalHandler implements Configured {
 
         BoarBotApp.getBot().getModalHandlers().put(this.interaction.getId() + this.user.getId(), this);
         this.future = InteractionUtil.scheduler
-            .schedule(this::delayStop, NUMS.getInteractiveIdle(), TimeUnit.MILLISECONDS);
+            .schedule(this::delayStop, idleTime, TimeUnit.MILLISECONDS);
     }
 
     public void execute(ModalInteractionEvent modalEvent) {

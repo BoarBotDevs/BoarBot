@@ -70,7 +70,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         switch(compID) {
             case "POW_SELECT" -> {
                 Modal modal = ModalUtil.getModal(CONFIG.getModalConfig().get("miracleAmount"), compEvent);
-                this.modalHandler = new ModalHandler(compEvent, this);
+                this.modalHandler = new ModalHandler(compEvent, this, NUMS.getInteractiveIdle());
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");
             }
@@ -215,10 +215,8 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
                                 ? miracleConfig.getName()
                                 : miracleConfig.getPluralName(),
                             STRS.getBlessingsPluralName(),
-                            TextUtil.getBlessHex(blessings),
-                            blessings > 1000
-                                ? STRS.getBlessingsSymbol() + " "
-                                : "",
+                            TextUtil.getBlessHex(blessings, true),
+                            STRS.getBlessingsSymbol() + " ",
                             blessings
                         )
                     ).generate().getFileUpload();

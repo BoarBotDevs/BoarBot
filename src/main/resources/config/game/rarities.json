@@ -173,6 +173,7 @@
     "emoji": "<:truth:1275180802799308912>",
     "weight": 0,
     "baseBucks": 0,
+    "hidden": true,
     "researcherNeed": true,
     "givesFirstBoar": true,
     "showEdition": true,

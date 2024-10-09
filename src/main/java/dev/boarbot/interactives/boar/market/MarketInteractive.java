@@ -122,7 +122,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
             case "SEARCH" -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("findBoar"), compEvent);
-                this.setModalHandler(new ModalHandler(compEvent, this));
+                this.setModalHandler(new ModalHandler(compEvent, this, NUMS.getInteractiveIdle()));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent search item modal");
             }
@@ -171,7 +171,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
             case "PAGE" -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("pageInput"), compEvent);
-                this.setModalHandler(new ModalHandler(compEvent, this));
+                this.setModalHandler(new ModalHandler(compEvent, this, NUMS.getInteractiveIdle()));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
             }
@@ -180,14 +180,14 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
             case "BUY" -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("buyInput"), compEvent);
-                this.setModalHandler(new ModalHandler(compEvent, this));
+                this.setModalHandler(new ModalHandler(compEvent, this, NUMS.getInteractiveIdle()));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent buy input modal");
             }
 
             case "SELL" -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("sellInput"), compEvent);
-                this.setModalHandler(new ModalHandler(compEvent, this));
+                this.setModalHandler(new ModalHandler(compEvent, this, NUMS.getInteractiveIdle()));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent sell input modal");
             }
@@ -405,6 +405,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
     }
 
     private void doBuy(BoarUser boarUser, Connection connection) throws SQLException {
+        this.isBuying = false;
         long userBucks = this.boarUser.baseQuery().getBucks(connection);
 
         if (userBucks < this.cost) {
@@ -463,13 +464,12 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
                 ? BOARS.get(this.focusedID).getName()
                 : BOARS.get(this.focusedID).getPluralName());
 
-        this.isBuying = false;
-
         this.acknowledgeOpen = true;
         this.acknowledgeString = STRS.getMarketBuySuccess().formatted(this.amount, itemStr, this.cost);
     }
 
     private void doSell(BoarUser boarUser, Connection connection) throws SQLException {
+        this.isBuying = false;
         int userAmount = POWS.containsKey(this.focusedID)
             ? this.boarUser.powQuery().getPowerupAmount(connection, this.focusedID)
             : this.boarUser.boarQuery().getBoarAmount(this.focusedID, connection);
@@ -513,8 +513,6 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
             : "<>" + BoarUtil.findRarityKey(this.focusedID) + "<>" + (this.amount == 1
                 ? BOARS.get(this.focusedID).getName()
                 : BOARS.get(this.focusedID).getPluralName());
-
-        this.isBuying = false;
 
         this.acknowledgeOpen = true;
         this.acknowledgeString = STRS.getMarketSellSuccess().formatted(this.amount, itemStr, this.cost);

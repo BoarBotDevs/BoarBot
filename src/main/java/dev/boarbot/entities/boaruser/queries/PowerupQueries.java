@@ -166,8 +166,7 @@ public class PowerupQueries implements Configured {
             UPDATE users
             SET
                 miracles_active = miracles_active + ?,
-                highest_blessings = GREATEST(highest_blessings, ?),
-                miracle_rolls = miracle_rolls + 1
+                highest_blessings = GREATEST(highest_blessings, ?)
             WHERE user_id = ?;
         """;
 
@@ -224,7 +223,11 @@ public class PowerupQueries implements Configured {
 
         String updateQuery = """
             UPDATE users
-            SET miracles_active = 0, miracle_best_bucks = GREATEST(miracle_best_bucks, ?), miracle_best_rarity = ?
+            SET
+                miracles_active = 0,
+                miracle_best_bucks = GREATEST(miracle_best_bucks, ?),
+                miracle_best_rarity = ?,
+                miracle_rolls = miracle_rolls + 1
             WHERE user_id = ?;
         """;
 

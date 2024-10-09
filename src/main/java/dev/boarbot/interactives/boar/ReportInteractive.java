@@ -33,7 +33,7 @@ public class ReportInteractive extends ModalInteractive {
     @Override
     public void execute(GenericComponentInteractionCreateEvent compEvent) {
         Modal modal = ModalUtil.getModal(CONFIG.getModalConfig().get("reportInput"), this.interaction);
-        this.modalHandler = new ModalHandler(this.interaction, this);
+        this.modalHandler = new ModalHandler(this.interaction, this, NUMS.getReportIdle());
         this.interaction.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
         Log.debug(this.user, this.getClass(), "Sent report modal");
     }

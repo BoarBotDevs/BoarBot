@@ -15,7 +15,8 @@ public record ProfileData(
     int streakBless,
     int uniqueBless,
     int questBless,
-    int otherBless
+    int otherBless,
+    boolean miraclesActive
 ) {
     public ProfileData() {
         this(
@@ -31,7 +32,8 @@ public record ProfileData(
             0,
             0,
             0,
-            0
+            0,
+            false
         );
     }
 }

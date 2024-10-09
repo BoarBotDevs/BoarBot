@@ -123,6 +123,8 @@ public class ItemInteractive extends UserInteractive {
 
         if (this.boarIDs != null) {
             this.messageBuilder.setComponents(this.getCurComponents());
+        } else {
+            this.messageBuilder.setComponents();
         }
 
         this.updateInteractive(false, this.messageBuilder.build());
@@ -148,6 +150,8 @@ public class ItemInteractive extends UserInteractive {
 
         if (this.boarIDs != null) {
             this.messageBuilder.setComponents(this.getCurComponents()[0]);
+        } else {
+            this.messageBuilder.setComponents();
         }
 
         this.updateInteractive(true, this.messageBuilder.build());

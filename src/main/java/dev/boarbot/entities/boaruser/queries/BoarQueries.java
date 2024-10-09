@@ -114,7 +114,7 @@ public class BoarQueries implements Configured {
         String query = """
             SELECT COUNT(*)
             FROM collected_boars
-            WHERE boar_id = ? AND user_id = ? AND `exists` = 1 AND deleted = 0;
+            WHERE boar_id = ? AND user_id = ? AND `exists` = true AND deleted = false;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {

@@ -87,7 +87,7 @@ public class HelpInteractive extends ModalInteractive {
 
             case "PAGE" -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("pageInput"), compEvent);
-                this.setModalHandler(new ModalHandler(compEvent, this));
+                this.setModalHandler(new ModalHandler(compEvent, this, NUMS.getInteractiveIdle()));
                 compEvent.replyModal(modal).queue(null, e -> ExceptionHandler.replyHandle(compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
             }

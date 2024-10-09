@@ -205,7 +205,8 @@ public class MegaMenuQueries implements Configured {
                 streak_bless,
                 quest_bless,
                 unique_bless,
-                other_bless
+                other_bless,
+                miracles_active
             FROM users
             WHERE user_id = ?;
         """;
@@ -228,7 +229,8 @@ public class MegaMenuQueries implements Configured {
                         results.getInt("streak_bless"),
                         results.getInt("unique_bless"),
                         results.getInt("quest_bless"),
-                        results.getInt("other_bless")
+                        results.getInt("other_bless"),
+                        results.getInt("miracles_active") > 0
                     );
                 }
             }
@@ -457,7 +459,11 @@ public class MegaMenuQueries implements Configured {
                     powAmts.put(results.getString("powerup_id"), results.getInt("amount"));
                 }
 
-                return new PowerupsData(this.boarUser.baseQuery().getBlessings(connection), powAmts);
+                return new PowerupsData(
+                    this.boarUser.baseQuery().getBlessings(connection),
+                    this.boarUser.powQuery().getActiveMiracles(connection) > 0,
+                    powAmts
+                );
             }
         }
     }

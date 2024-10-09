@@ -192,8 +192,8 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         final int LABEL_Y_SPACING = 145;
 
         int[] blessingsLabelPos = {LEFT_START_X, START_Y};
-        String blessHex = TextUtil.getBlessHex(this.statsData.blessings());
-        String blessingsStr = this.statsData.blessings() > 1000
+        String blessHex = TextUtil.getBlessHex(this.statsData.blessings(), this.statsData.miraclesActive() > 0);
+        String blessingsStr = this.statsData.miraclesActive() > 0
             ? "%s %,d".formatted(STRS.getBlessingsSymbol(), this.statsData.blessings())
             : "%,d".formatted(this.statsData.blessings());
         int[] blessingsPos = {LEFT_START_X, blessingsLabelPos[1] + VALUE_Y_OFFSET};
@@ -238,7 +238,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
             STRS.getBlessingsPluralName()
         );
         int[] peakBlessingsLabelPos = {RIGHT_START_X, START_Y};
-        String peakBlessHex = TextUtil.getBlessHex(this.statsData.highestBlessings());
+        String peakBlessHex = TextUtil.getBlessHex(this.statsData.highestBlessings(), false);
         String peakBlessingsStr = this.statsData.highestBlessings() > 1000
             ? "%s %,d".formatted(STRS.getBlessingsSymbol(), this.statsData.highestBlessings())
             : "%,d".formatted(this.statsData.highestBlessings());
@@ -328,7 +328,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         int[] powFastPos = {LEFT_START_X, powFastLabelPos[1] + VALUE_Y_OFFSET};
 
         int[] powAvgLabelPos = {RIGHT_START_X, START_Y};
-        String powAvgStr = this.statsData.avgPowerupPlacement() == -1
+        String powAvgStr = this.statsData.powerupWins() == 0
             ? STRS.getUnavailable()
             : "Top %,.2f%%".formatted(this.statsData.avgPowerupPlacement() * 100);
         int[] powAvgPos = {RIGHT_START_X, powAvgLabelPos[1] + VALUE_Y_OFFSET};

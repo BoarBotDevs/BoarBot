@@ -102,8 +102,8 @@ public class PowerupsImageGenerator extends MegaMenuGenerator {
         this.textDrawer = new TextDrawer(g2d, "", ORIGIN, Align.CENTER, COLORS.get("font"), NUMS.getFontMedium());
 
         int[] blessingsLabelPos = {LEFT_START_X, LEFT_START_Y};
-        String blessHex = TextUtil.getBlessHex(this.powData.blessings());
-        String blessingsStr = this.powData.blessings() > 1000
+        String blessHex = TextUtil.getBlessHex(this.powData.blessings(), this.powData.miraclesActive());
+        String blessingsStr = this.powData.miraclesActive()
             ? "%s %,d".formatted(STRS.getBlessingsSymbol(), this.powData.blessings())
             : "%,d".formatted(this.powData.blessings());
         int[] blessingsPos = {LEFT_START_X, blessingsLabelPos[1] + VALUE_Y_OFFSET};

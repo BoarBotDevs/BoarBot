@@ -27,14 +27,14 @@
   "normal": {
     "name": "Normal Boar",
     "file": "NormalBoar.png",
-    "description": "The original boar, the standard Creator Boar set and based many of their creations off of. Despite its historical significance, it's still rather unremarkable on its own.",
+    "description": "The original boar, the standard <>immaculate<>Creator Boar<>font<> set and based many of their creations off of. Despite its historical significance, it's still rather unremarkable on its own.",
     "classification": "Benign",
     "update": "Alpha"
   },
   "carrot": {
     "name": "Carrot Boar",
     "file": "CarrotBoar.png",
-    "description": "On the surface, this boar is indistinguishable from the grass around it. The only being capable of spotting them is Farmer Boar.",
+    "description": "On the surface, this boar is indistinguishable from the grass around it. The only being capable of spotting them is <>mythic<>Farmer Boar<>font<>.",
     "classification": "Sustenance",
     "update": "Alpha"
   },
@@ -85,7 +85,7 @@
     "name": "Rickroll Boar",
     "file": "RickrollBoar.gif",
     "staticFile": "RickrollBoarSTATIC.png",
-    "description": "Spreads the word of Creator Boar. It'll never give you up, nor will it let you down. It certainly won't run around and... desert you.",
+    "description": "Spreads the word of <>immaculate<>Creator Boar<>font<>. It'll never give you up, nor will it let you down. It certainly won't run around and... desert you.",
     "classification": "Underling",
     "update": "Alpha",
     "searchTerms": [
@@ -114,7 +114,7 @@
     "pluralName": "Boargaloses",
     "file": "Boargalos.gif",
     "staticFile": "BoargalosSTATIC.png",
-    "description": "An embodiment of pure entropy. Rarely ever seen in its physical form. This council member dictates the randomness of events and items.",
+    "description": "An embodiment of pure entropy. Rarely ever seen in its physical form. This <>truth<>Celesticon<>font<> dictates the randomness of events and items.",
     "classification": "Primordial",
     "update": "v1.1.22",
     "searchTerms": [
@@ -127,7 +127,7 @@
     "name": "Boarcterium",
     "pluralName": "Boarcteria",
     "file": "Boarcterium.png",
-    "description": "The first boar ever created by Creator Boar. Catching a cold from this boar results in explosive symptoms.",
+    "description": "The first boar ever created by <>immaculate<>Creator Boar<>font<>. Catching a cold from this boar results in explosive symptoms.",
     "classification": "Prehistoric",
     "update": "v1.0.0",
     "searchTerms": [
@@ -159,21 +159,21 @@
   "spooky": {
     "name": "Spooky Boar",
     "file": "SpookyBoar.png",
-    "description": "The suspicious host of Boar-o-ween. He can't go a sentence without rhyming and always seems to have traces of pig hair on his coat.",
+    "description": "The suspicious host of <>halloween<>Boar-o-ween<>font<>. He can't go a sentence without rhyming and always seems to have traces of pig hair on his coat.",
     "classification": "Psychotic",
     "update": "Alpha"
   },
   "trophy": {
     "name": "Trophy Boar",
     "file": "TrophyBoar.png",
-    "description": "The arch rival of Golden Boar, outshining it in every aspect of life. It's hard not to stare at this boar in awe.",
+    "description": "The arch rival of <>rare<>Golden Boar<>font<>, outshining it in every aspect of life. It's hard not to stare at this boar in awe.",
     "classification": "Benign",
     "update": "v1.0.0"
   },
   "santa": {
     "name": "Santa Boar",
     "file": "SantaBoar.png",
-    "description": "Every Boarmas, this boar delivers gifts to both young and old! Questioning its identity is highly discouraged.",
+    "description": "Every <>christmas<>Boarmas<>font<>, this boar delivers gifts to both young and old! Questioning its identity is highly discouraged.",
     "classification": "Psychotic",
     "update": "v1.1.30"
   }

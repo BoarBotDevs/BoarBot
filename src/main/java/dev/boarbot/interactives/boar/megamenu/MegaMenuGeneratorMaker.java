@@ -23,7 +23,6 @@ class MegaMenuGeneratorMaker implements Configured {
 
     public MegaMenuGeneratorMaker(MegaMenuInteractive interactive) {
         this.interactive = interactive;
-        this.view = this.interactive.curView;
     }
 
     public MegaMenuGenerator make() throws SQLException {
@@ -41,7 +40,7 @@ class MegaMenuGeneratorMaker implements Configured {
         };
     }
 
-    public MegaMenuGenerator makeProfileGen() throws SQLException {
+    private MegaMenuGenerator makeProfileGen() throws SQLException {
         boolean notUpdated = this.interactive.getViewsToUpdateData().get(this.view) == null ||
             !this.interactive.getViewsToUpdateData().get(this.view);
 
@@ -92,6 +91,10 @@ class MegaMenuGeneratorMaker implements Configured {
 
         if (this.interactive.filteredBoars.isEmpty()) {
             this.interactive.curView = MegaMenuView.COLLECTION;
+
+            this.interactive.filterOpen = false;
+            this.interactive.sortOpen = false;
+            this.interactive.interactOpen = false;
 
             this.interactive.acknowledgeOpen = true;
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getCompBlocked());
@@ -234,6 +237,10 @@ class MegaMenuGeneratorMaker implements Configured {
                 this.interactive.curView = this.interactive.prevView;
             }
 
+            this.interactive.filterOpen = false;
+            this.interactive.sortOpen = false;
+            this.interactive.interactOpen = false;
+
             this.interactive.acknowledgeOpen = true;
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getBadgeBlocked());
             Log.debug(this.interactive.getUser(), this.getClass(), "No badges");
@@ -261,14 +268,11 @@ class MegaMenuGeneratorMaker implements Configured {
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
                 this.interactive.ownedBoars = this.interactive.getBoarUser().megaQuery().getOwnedBoarInfo(connection);
-
-                if (this.view == MegaMenuView.COMPENDIUM) {
-                    this.interactive.favoriteID = this.interactive.getBoarUser().megaQuery().getFavoriteID(connection);
-                    this.interactive.numTransmute = this.interactive.getBoarUser().powQuery()
-                        .getPowerupAmount(connection, "transmute");
-                    this.interactive.numClone = this.interactive.getBoarUser().powQuery()
-                        .getPowerupAmount(connection, "clone");
-                }
+                this.interactive.favoriteID = this.interactive.getBoarUser().megaQuery().getFavoriteID(connection);
+                this.interactive.numTransmute = this.interactive.getBoarUser().powQuery()
+                    .getPowerupAmount(connection, "transmute");
+                this.interactive.numClone = this.interactive.getBoarUser().powQuery()
+                    .getPowerupAmount(connection, "clone");
 
                 BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
 
@@ -332,12 +336,12 @@ class MegaMenuGeneratorMaker implements Configured {
 
             case ALPHA_D -> this.interactive.filteredBoars.entrySet()
                 .stream()
-                .sorted(Map.Entry.comparingByKey())
+                .sorted(Map.Entry.comparingByKey(BoarInfo.alphaComparator()))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
 
             case ALPHA_A -> this.interactive.filteredBoars.entrySet()
                 .stream()
-                .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByKey(BoarInfo.alphaComparator())))
                 .forEachOrdered(entry -> sortedBoars.put(entry.getKey(), entry.getValue()));
         }
 

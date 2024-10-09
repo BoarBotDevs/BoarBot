@@ -547,10 +547,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 Log.debug(this.user, this.getClass(), "Interactive expired");
             }
 
-            case FINISHED -> {
-                this.updateComponents(true);
-                Log.debug(this.user, this.getClass(), "Finished Interactive");
-            }
+            case FINISHED -> Log.debug(this.user, this.getClass(), "Finished Interactive");
         }
     }
 

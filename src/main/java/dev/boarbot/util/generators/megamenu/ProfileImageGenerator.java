@@ -123,15 +123,13 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
 
         int[] blessLabelPos = {RIGHT_START_X, RIGHT_START_Y};
 
-        String blessHex = TextUtil.getBlessHex(this.profileData.blessings());
-        String blessStr = "%,d<>silver<>/<>blessing2<>%,d".formatted(
-            this.profileData.blessings(), NUMS.getMaxStreakBless() + NUMS.getMaxQuestBless() +
+        String blessHex = TextUtil.getBlessHex(this.profileData.blessings(), this.profileData.miraclesActive());
+        String blessStr = this.profileData.miraclesActive()
+            ? STRS.getBlessingsSymbol() + " " + "%,d".formatted(this.profileData.blessings())
+            : "%,d<>silver<>/<>blessing2<>%,d".formatted(
+                this.profileData.blessings(), NUMS.getMaxStreakBless() + NUMS.getMaxQuestBless() +
                 NUMS.getMaxUniqueBless() + NUMS.getMaxOtherBless()
-        );
-
-        if (this.profileData.blessings() > 1000) {
-            blessStr = STRS.getBlessingsSymbol() + " " + blessStr;
-        }
+            );
 
         int[] blessPos = {RIGHT_START_X, blessLabelPos[1] + VALUE_Y_OFFSET};
 

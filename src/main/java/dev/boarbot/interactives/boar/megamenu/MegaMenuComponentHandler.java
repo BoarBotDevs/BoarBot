@@ -106,7 +106,9 @@ class MegaMenuComponentHandler implements Configured {
 
             case "PAGE" -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("pageInput"), compEvent);
-                this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
+                this.interactive.setModalHandler(
+                    new ModalHandler(this.compEvent, this.interactive, NUMS.getInteractiveIdle())
+                );
                 this.compEvent.replyModal(modal)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent page input modal");
@@ -116,7 +118,9 @@ class MegaMenuComponentHandler implements Configured {
 
             case "BOAR_FIND" -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("findBoar"), compEvent);
-                this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
+                this.interactive.setModalHandler(
+                    new ModalHandler(this.compEvent, this.interactive, NUMS.getInteractiveIdle())
+                );
                 this.compEvent.replyModal(modal)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent boar find input modal");
@@ -307,10 +311,8 @@ class MegaMenuComponentHandler implements Configured {
                             ? miracleConfig.getName()
                             : miracleConfig.getPluralName(),
                         STRS.getBlessingsPluralName(),
-                        TextUtil.getBlessHex(blessings),
-                        blessings > 1000
-                            ? STRS.getBlessingsSymbol() + " "
-                            : "",
+                        TextUtil.getBlessHex(blessings, true),
+                        STRS.getBlessingsSymbol() + " ",
                         blessings
                     );
                 } catch (NumberFormatException exception) {
@@ -343,7 +345,9 @@ class MegaMenuComponentHandler implements Configured {
 
             case CLONE -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("cloneAmount"), this.compEvent);
-                this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
+                this.interactive.setModalHandler(
+                    new ModalHandler(this.compEvent, this.interactive, NUMS.getInteractiveIdle())
+                );
                 this.compEvent.replyModal(modal)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent clone input modal");
@@ -412,7 +416,9 @@ class MegaMenuComponentHandler implements Configured {
         switch (this.interactive.powerupUsing) {
             case "miracle" -> {
                 Modal modal = ModalUtil.getModal(MODALS.get("miracleAmount"), compEvent);
-                this.interactive.setModalHandler(new ModalHandler(this.compEvent, this.interactive));
+                this.interactive.setModalHandler(
+                    new ModalHandler(this.compEvent, this.interactive, NUMS.getInteractiveIdle())
+                );
                 this.compEvent.replyModal(modal)
                     .queue(null, e -> ExceptionHandler.replyHandle(this.compEvent, this, e));
                 Log.debug(this.user, this.getClass(), "Sent miracle input modal");

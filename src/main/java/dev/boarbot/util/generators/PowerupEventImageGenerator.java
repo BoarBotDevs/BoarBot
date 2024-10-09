@@ -125,7 +125,7 @@ public class PowerupEventImageGenerator extends ImageGenerator {
     private void drawMiddleText(String str) {
         this.textDrawer.setText(str);
         this.textDrawer.setPos(new int[] {TEXT_X, EVENT_DESC_Y});
-        this.textDrawer.setFontSize(NUMS.getFontMedium());
+        this.textDrawer.setFontSize(NUMS.getFontBig());
         this.textDrawer.setWidth(this.generatedImage.getWidth() - NUMS.getBorder() * 16);
         this.textDrawer.setWrap(true);
         this.textDrawer.drawText();

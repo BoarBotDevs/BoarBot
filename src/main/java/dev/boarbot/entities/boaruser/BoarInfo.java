@@ -57,4 +57,8 @@ public class BoarInfo implements Comparable<BoarInfo>, Configured {
     public static Comparator<BoarInfo> newestComparator() {
         return Comparator.comparingLong(o -> o.firstObtained);
     }
+
+    public static Comparator<String> alphaComparator() {
+        return Comparator.comparing(key -> BOARS.get(key).getName().toLowerCase());
+    }
 }

@@ -42,8 +42,8 @@ public class TextUtil implements Configured {
             : "<>error<>%,d<>silver<>/<>green<>%,d".formatted(val, max);
     }
 
-    public static String getBlessHex(long blessings) {
-        if (blessings > 1000) {
+    public static String getBlessHex(long blessings, boolean miraclesActive) {
+        if (miraclesActive || blessings > 1000) {
             return COLORS.get("powerup");
         }
 
