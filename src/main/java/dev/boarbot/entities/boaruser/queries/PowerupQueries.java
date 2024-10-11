@@ -187,7 +187,9 @@ public class PowerupQueries implements Configured {
         this.boarUser.baseQuery().addUser(connection);
         this.boarUser.forceSynchronized();
 
-        if (this.boarUser.powQuery().getActiveMiracles(connection) == 0) {
+        int activeMiracles = this.boarUser.powQuery().getActiveMiracles(connection);
+
+        if (activeMiracles == 0) {
             return;
         }
 
@@ -227,14 +229,16 @@ public class PowerupQueries implements Configured {
                 miracles_active = 0,
                 miracle_best_bucks = GREATEST(miracle_best_bucks, ?),
                 miracle_best_rarity = ?,
-                miracle_rolls = miracle_rolls + 1
+                miracle_rolls = miracle_rolls + 1,
+                highest_miracles_active = GREATEST(highest_miracles_active, ?)
             WHERE user_id = ?;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
             statement.setInt(1, totalBucks);
             statement.setString(2, bestRarity);
-            statement.setString(3, this.boarUser.getUserID());
+            statement.setInt(3, activeMiracles);
+            statement.setString(4, this.boarUser.getUserID());
             statement.executeUpdate();
         }
 

@@ -172,7 +172,7 @@ class ConfigLoader {
         ));
         strs.setDailyFirstTime(strs.getDailyFirstTime().formatted(
             pows.get("miracle").getPluralName(),
-            pows.get("gift").getPluralName(),
+            pows.get("gift").getName(),
             cmds.get("main").getName(),
             cmds.get("main").getSubcommands().get("help").getName()
         ));
@@ -206,13 +206,6 @@ class ConfigLoader {
         );
         strs.setStatsMiracleRollsLabel(
             strs.getStatsMiracleRollsLabel().formatted(pows.get("miracle").getShortName())
-        );
-
-        strs.setNotificationSuccess(strs.getNotificationSuccess().formatted(
-            cmds.get("main").getName(), cmds.get("main").getSubcommands().get("daily").getName()
-        ));
-        strs.setNotificationEnding(
-            strs.getNotificationEnding().formatted(strs.getMainItemName().toLowerCase(), "%s")
         );
     }
 

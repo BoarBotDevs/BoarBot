@@ -201,6 +201,7 @@ public class MegaMenuQueries implements Configured {
                 last_daily_timestamp,
                 unique_boars,
                 num_skyblock,
+                num_non_researcher,
                 boar_streak,
                 streak_bless,
                 quest_bless,
@@ -224,6 +225,7 @@ public class MegaMenuQueries implements Configured {
                         results.getTimestamp("last_daily_timestamp"),
                         results.getInt("unique_boars"),
                         results.getInt("num_skyblock"),
+                        results.getInt("num_non_researcher"),
                         results.getInt("boar_streak"),
                         this.boarUser.baseQuery().getBlessings(connection),
                         results.getInt("streak_bless"),
@@ -292,7 +294,7 @@ public class MegaMenuQueries implements Configured {
             SELECT prompt_id
             FROM prompt_stats
             WHERE user_id = ?
-            ORDER BY average_placement DESC LIMIT 3;
+            ORDER BY average_placement ASC LIMIT 3;
         """;
 
         String powAmtsQuery = """
@@ -390,7 +392,7 @@ public class MegaMenuQueries implements Configured {
                         results1.getInt("highest_streak"),
                         results1.getBoolean("notifications_on"),
                         this.boarUser.baseQuery().getBlessings(connection),
-                        results1.getInt("highest_blessings"),
+                        results1.getLong("highest_blessings"),
                         results1.getInt("streak_bless"),
                         results1.getInt("highest_streak_bless"),
                         results1.getInt("quest_bless"),
@@ -546,7 +548,7 @@ public class MegaMenuQueries implements Configured {
             statement.setString(1, this.boarUser.getUserID());
 
             try (ResultSet results = statement.executeQuery()) {
-                if (results.next()) {
+                if (results.next() && results.getTimestamp("first_joined_timestamp") != null) {
                     firstJoinedTimestamp = results.getTimestamp("first_joined_timestamp").getTime();
                 }
             }

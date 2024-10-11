@@ -29,7 +29,6 @@ public class WipeInteractive extends ModalInteractive implements Synchronizable 
 
     public WipeInteractive(SlashCommandInteractionEvent event) {
         super(event);
-
         this.interaction = event.getInteraction();
     }
 
@@ -47,6 +46,11 @@ public class WipeInteractive extends ModalInteractive implements Synchronizable 
         this.isStopped = true;
 
         if (interactive == null) {
+            return;
+        }
+
+        if (stopType.equals(StopType.EXCEPTION)) {
+            super.stop(stopType);
             return;
         }
 
@@ -105,7 +109,8 @@ public class WipeInteractive extends ModalInteractive implements Synchronizable 
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
-            boarUser.baseQuery().deleteUser(connection);
+            boarUser.baseQuery().wipeUser(connection);
+            Log.info(this.user, this.getClass(), "Wiped their data");
         } catch (SQLException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to remove data", exception);

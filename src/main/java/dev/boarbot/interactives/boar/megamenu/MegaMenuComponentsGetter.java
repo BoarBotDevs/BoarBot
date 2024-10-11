@@ -210,7 +210,7 @@ class MegaMenuComponentsGetter implements Configured {
         Button autoBtn = ((Button) allBtnsRow.get(2));
 
         QuestData questData = this.interactive.questData;
-        boolean claimBonus = !questData.fullClaimed() || questData.questProgress().isEmpty();
+        boolean claimBonus = !questData.fullClaimed() && !questData.questProgress().isEmpty();
 
         for (int i=0; i<questData.questProgress().size(); i++) {
             QuestType quest = this.interactive.quests.get(i);
@@ -235,6 +235,10 @@ class MegaMenuComponentsGetter implements Configured {
         autoBtn = autoBtn.withLabel(autoBtn.getLabel().formatted(questData.autoClaim() ? "ON" : "OFF"));
         if (!questData.autoClaim()) {
             autoBtn = autoBtn.withStyle(ButtonStyle.DANGER);
+        }
+
+        if (questData.questProgress().isEmpty()) {
+            autoBtn = autoBtn.withDisabled(true);
         }
 
         List<ItemComponent> mainRow = new ArrayList<>();
@@ -279,7 +283,7 @@ class MegaMenuComponentsGetter implements Configured {
         }
 
         for (int i=0; i<this.filterOptions.size(); i++) {
-            if (!shownOptionIndexes.contains(i)) {
+            if (!shownOptionIndexes.contains(i) && (this.interactive.filterBits >> i) % 2 == 0) {
                 continue;
             }
 

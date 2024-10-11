@@ -71,7 +71,7 @@ public class TopInteractive extends ModalInteractive implements Configured {
             this.setPage(Objects.requireNonNull(event.getOption("page")).getAsInt() - 1);
         }
 
-        if (this.usernameIndex == null && cachedBoards.get(this.boardType).containsKey(this.user.getName())) {
+        if (event.getOption("user") == null && cachedBoards.get(this.boardType).containsKey(this.user.getName())) {
             this.username = this.user.getName();
             this.usernameIndex = cachedBoards.get(this.boardType).get(this.user.getName()).index();
         }
@@ -149,6 +149,16 @@ public class TopInteractive extends ModalInteractive implements Configured {
         );
 
         try {
+            if (!usernameInput.isEmpty()) {
+                this.username = null;
+                this.usernameIndex = null;
+            } else {
+                this.username = this.user.getName();
+                if (cachedBoards.get(this.boardType).containsKey(this.username)) {
+                    this.usernameIndex = cachedBoards.get(this.boardType).get(this.username).index();
+                }
+            }
+
             boolean boardHasUser = cachedBoards.get(this.boardType).containsKey(usernameInput);
             if (boardHasUser) {
                 this.username = usernameInput;

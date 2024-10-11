@@ -85,12 +85,14 @@ public class StringConfig {
     private String compFavoriteSuccess = "";
     private String compUnfavoriteSuccess = "";
     private String compCloneConfirmOne = "";
+    private String compCloneConfirmClean = "";
     private String compCloneConfirmMultiple = "";
     private String compCloneTooMany = "";
     private String compCloneSuccess = "";
     private String compCloneFailed = "";
     private String compCloneTitle = "";
     private String compNoBoar = "";
+    private String compBoarFilterBlocked = "";
     private String compTransmuteConfirm = "";
     private String compTransmuteSuccess = "";
     private String compTransmuteFirst = "";
@@ -264,13 +266,17 @@ public class StringConfig {
     private String marketNoItems = "";
     private String marketStockChange = "";
     private String marketCostChange = "";
+    private String marketSomeStorage = "";
     private String marketNoStorage = "";
     private String marketBuySuccess = "";
     private String marketSellSuccess = "";
+    private String marketClosed = "";
 
     // Miscellaneous strings
 
-    private String noPow = "";
+    private String somePow = "";
+    private String badPow = "";
+    private String noItem = "";
     private String miracleAttempt = "";
     private String giftSelfOpen = "";
     private String giftTitle = "";

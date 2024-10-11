@@ -551,6 +551,8 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         final int EDGE_START_Y = 504;
         final int MIDDLE_START_Y = 431;
         final int LABEL_Y_SPACING = 145;
+        final int LAST_CLONE_WIDTH = 470;
+        final int LAST_CLONE_Y_VALUE_OFFSET = 41;
 
         PowerupItemConfig pow = POWS.get("clone");
 
@@ -583,7 +585,7 @@ public class StatsImageGenerator extends MegaMenuGenerator {
                 BoarUtil.findRarityKey(this.statsData.lastCloneBoar()),
                 BOARS.get(this.statsData.lastCloneBoar()).getName()
         );
-        int[] lastClonePos = {LEFT_START_X, lastCloneLabelPos[1] + VALUE_Y_OFFSET};
+        int[] lastClonePos = {LEFT_START_X, lastCloneLabelPos[1] + LAST_CLONE_Y_VALUE_OFFSET};
 
         String totalClonedLabel = STRS.getStatsTotalLabel()
             .formatted(STRS.getStatsClonedLabel().formatted(""));
@@ -637,7 +639,13 @@ public class StatsImageGenerator extends MegaMenuGenerator {
         TextUtil.drawValue(this.textDrawer, clonesUsedStr, clonesUsedPos, true);
 
         TextUtil.drawLabel(this.textDrawer, lastCloneLabel, lastCloneLabelPos);
-        TextUtil.drawValue(this.textDrawer, lastCloneStr, lastClonePos, true);
+        this.textDrawer.setText(lastCloneStr);
+        this.textDrawer.setPos(lastClonePos);
+        this.textDrawer.setFontSize(NUMS.getFontMedium());
+        this.textDrawer.setColorVal(COLORS.get("silver"));
+        this.textDrawer.setWidth(LAST_CLONE_WIDTH);
+        this.textDrawer.drawText();
+        this.textDrawer.setWidth(-1);
 
         TextUtil.drawLabel(this.textDrawer, totalClonedLabel, totalClonedLabelPos);
         TextUtil.drawValue(this.textDrawer, totalClonedStr, totalClonedPos, true);

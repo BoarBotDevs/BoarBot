@@ -199,7 +199,7 @@ public class MarketImageGenerator extends ImageGenerator {
         String colorKey = isPowerup ? "powerup" : BoarUtil.findRarityKey(this.focusedID);
         String rarityStr = isPowerup
             ? "<>" + colorKey + "<>" + "POWERUP"
-            : "<>" + colorKey + "<>" + RARITIES.get(colorKey).getName();
+            : "<>" + colorKey + "<>" + RARITIES.get(colorKey).getName().toUpperCase();
         String itemName = isPowerup
             ? POWS.get(this.focusedID).getName()
             : BOARS.get(this.focusedID).getName();

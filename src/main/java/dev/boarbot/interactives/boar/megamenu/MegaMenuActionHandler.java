@@ -144,99 +144,126 @@ class MegaMenuActionHandler implements Configured {
         List<Integer> editions = new ArrayList<>();
         Set<String> firstBoarIDs = new HashSet<>();
 
+        this.interactive.mustBeExact = true;
+        this.interactive.boarPage = boarName;
+
         this.interactive.numClone = boarUser.powQuery().getPowerupAmount(connection, "clone");
-        boolean cloneable = RARITIES.get(this.curRarityKey).getAvgClones() != 0 &&
-            numTryClone <= this.interactive.numClone;
 
-        if (cloneable) {
-            if (boarUser.boarQuery().hasBoar(this.curBoarEntry.getKey(), connection)) {
-                int avgClones = RARITIES.get(this.curRarityKey).getAvgClones();
-                double chance = numTryClone == avgClones
-                    ? 1
-                    : (double) (numTryClone % avgClones) / avgClones;
-                double randVal = Math.random();
+        if (this.interactive.numClone == 0) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getNoItem());
 
-                for (int i = 0; i < (numTryClone / avgClones); i++) {
-                    newBoarIDs.add(this.curBoarEntry.getKey());
-                }
+            Log.debug(this.user, this.getClass(), "Failed to transmute: Has none");
+            return;
+        }
 
-                if (chance < 1 && chance > randVal) {
-                    newBoarIDs.add(this.curBoarEntry.getKey());
-                }
-
-                if (newBoarIDs.isEmpty()) {
-                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                        null,
-                        STRS.getCompCloneFailed().formatted(
-                            this.interactive.numTryClone == 1
-                                ? POWS.get("clone").getName()
-                                : POWS.get("clone").getPluralName(),
-                            "<>" + this.curRarityKey + "<>" + boarName
-                        )
-                    );
-                } else {
-                    boarUser.boarQuery().addBoars(
-                        newBoarIDs,
-                        connection,
-                        BoarObtainType.CLONE.toString(),
-                        bucksGotten,
-                        editions,
-                        firstBoarIDs
-                    );
-
-                    boarUser.powQuery().usePowerup(connection, "clone", numTryClone, true);
-
-                    QuestUtil.sendQuestClaimMessage(
-                        this.interactive.compEvent.getHook(),
-                        boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection),
-                        boarUser.questQuery().addProgress(QuestType.CLONE_BOARS, newBoarIDs.size(), connection),
-                        boarUser.questQuery().addProgress(QuestType.CLONE_RARITY, newBoarIDs, connection)
-                    );
-                }
-            } else {
-                this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getCompNoBoar().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                );
-                Log.debug(this.user, this.getClass(), "Failed to clone: Lack of boar");
-            }
-        } else {
+        if (numTryClone > this.interactive.numClone) {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                null, STRS.getNoPow().formatted(POWS.get("transmute").getPluralName())
+                null,
+                STRS.getSomePow().formatted(
+                    numTryClone,
+                    numTryClone == 1
+                        ? POWS.get("clone").getName()
+                        : POWS.get("clone").getPluralName(),
+                    this.interactive.numClone
+                )
             );
+
             Log.debug(this.user, this.getClass(), "Failed to clone: Not enough");
+            return;
         }
 
-        if (!newBoarIDs.isEmpty()) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    this.interactive.boarPage = BOARS.get(this.curBoarEntry.getKey()).getName();
-                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                        null, STRS.getCompCloneSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                    );
+        if (RARITIES.get(this.curRarityKey).getAvgClones() == 0) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                null, STRS.getBadPow().formatted(POWS.get("clone").getPluralName())
+            );
 
-                    String title = STRS.getCompCloneTitle();
-
-                    ItemInteractive.sendInteractive(
-                        newBoarIDs,
-                        bucksGotten,
-                        editions,
-                        firstBoarIDs,
-                        null,
-                        this.user,
-                        title,
-                        this.interactive.compEvent.getHook(),
-                        true
-                    );
-
-                    Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
-                } catch (RuntimeException exception) {
-                    this.interactive.stop(StopType.EXCEPTION);
-                    Log.error(
-                        this.user, this.getClass(), "A problem occurred when sending clone item interactive", exception
-                    );
-                }
-            });
+            Log.debug(this.user, this.getClass(), "Failed to clone: Cannot clone");
+            return;
         }
+
+        if (!boarUser.boarQuery().hasBoar(this.curBoarEntry.getKey(), connection)) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                null, STRS.getCompNoBoar().formatted("<>" + this.interactive.curRarityKey + "<>" + boarName)
+            );
+
+            Log.debug(this.user, this.getClass(), "Failed to clone: Lack of boar");
+            return;
+        }
+
+        int avgClones = RARITIES.get(this.curRarityKey).getAvgClones();
+        double chance = numTryClone == avgClones
+            ? 1
+            : (double) (numTryClone % avgClones) / avgClones;
+        double randVal = Math.random();
+
+        for (int i=0; i<(numTryClone / avgClones); i++) {
+            newBoarIDs.add(this.curBoarEntry.getKey());
+        }
+
+        if (chance < 1 && chance > randVal) {
+            newBoarIDs.add(this.curBoarEntry.getKey());
+        }
+
+        boarUser.powQuery().usePowerup(connection, "clone", numTryClone, true);
+
+        if (newBoarIDs.isEmpty()) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                null,
+                STRS.getCompCloneFailed().formatted(
+                    this.interactive.numTryClone == 1
+                        ? POWS.get("clone").getName()
+                        : POWS.get("clone").getPluralName(),
+                    "<>" + this.curRarityKey + "<>" + boarName
+                )
+            );
+
+            return;
+        }
+
+        boarUser.boarQuery().addBoars(
+            newBoarIDs,
+            connection,
+            BoarObtainType.CLONE.toString(),
+            bucksGotten,
+            editions,
+            firstBoarIDs
+        );
+
+        QuestUtil.sendQuestClaimMessage(
+            this.interactive.compEvent.getHook(),
+            boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection),
+            boarUser.questQuery().addProgress(QuestType.CLONE_BOARS, newBoarIDs.size(), connection),
+            boarUser.questQuery().addProgress(QuestType.CLONE_RARITY, newBoarIDs, connection)
+        );
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                    null, STRS.getCompCloneSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
+                );
+
+                String title = STRS.getCompCloneTitle();
+
+                ItemInteractive.sendInteractive(
+                    newBoarIDs,
+                    bucksGotten,
+                    editions,
+                    firstBoarIDs,
+                    null,
+                    this.user,
+                    title,
+                    this.interactive.compEvent.getHook(),
+                    true
+                );
+
+                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+            } catch (RuntimeException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
+                Log.error(
+                    this.user, this.getClass(), "A problem occurred when sending clone item interactive", exception
+                );
+            }
+        });
     }
 
     public void doTransmute(BoarUser boarUser, Connection connection) throws SQLException {
@@ -247,105 +274,147 @@ class MegaMenuActionHandler implements Configured {
         List<Integer> editions = new ArrayList<>();
         Set<String> firstBoarIDs = new HashSet<>();
 
+        this.interactive.mustBeExact = true;
+        this.interactive.boarPage = boarName;
+
         this.interactive.numTransmute = boarUser.powQuery().getPowerupAmount(connection, "transmute");
         RarityConfig curRarity = RARITIES.get(this.curRarityKey);
-        boolean transmutable = curRarity.getChargesNeeded() != 0 &&
-            curRarity.getChargesNeeded() <= this.interactive.numTransmute;
 
-        if (transmutable) {
-            if (boarUser.boarQuery().hasBoar(this.curBoarEntry.getKey(), connection)) {
-                String nextRarityID = BoarUtil.getNextRarityKey(this.curRarityKey);
-                newBoarIDs.add(BoarUtil.findValid(nextRarityID, this.interactive.isSkyblockGuild()));
+        if (this.interactive.numTransmute == 0) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getNoItem());
 
-                boarUser.boarQuery().removeBoar(this.curBoarEntry.getKey(), connection);
-                boarUser.boarQuery().addBoars(
-                    newBoarIDs,
-                    connection,
-                    BoarObtainType.TRANSMUTE.toString(),
-                    bucksGotten,
-                    editions,
-                    firstBoarIDs
-                );
-
-                boarUser.powQuery().usePowerup(connection, "transmute", this.interactive.numTransmute, true);
-
-                QuestUtil.sendQuestClaimMessage(
-                    this.interactive.compEvent.getHook(),
-                    boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection)
-                );
-            } else {
-                this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                    null, STRS.getCompNoBoar().formatted("<>" + this.curRarityKey + "<>" + boarName)
-                );
-                Log.debug(this.user, this.getClass(), "Failed to transmute: Lack of boar");
-            }
-        } else {
-            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                null, STRS.getNoPow().formatted(POWS.get("transmute").getPluralName())
-            );
-            Log.debug(this.user, this.getClass(), "Failed to transmute: Not enough");
+            Log.debug(this.user, this.getClass(), "Failed to transmute: Has none");
+            return;
         }
 
-        if (!newBoarIDs.isEmpty()) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    String newBoarName = BOARS.get(newBoarIDs.getFirst()).getName();
-                    String newBoarRarityKey = BoarUtil.findRarityKey(newBoarIDs.getFirst());
+        if (curRarity.getChargesNeeded() > this.interactive.numTransmute) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                null,
+                STRS.getSomePow().formatted(
+                    curRarity.getChargesNeeded(),
+                    curRarity.getChargesNeeded() == 1
+                        ? POWS.get("transmute").getName()
+                        : POWS.get("transmute").getPluralName(),
+                    this.interactive.numTransmute
+                )
+            );
 
-                    if (this.interactive.filteredBoars.containsKey(newBoarIDs.getFirst())) {
-                        this.interactive.boarPage = newBoarName;
-                    }
+            Log.debug(this.user, this.getClass(), "Failed to transmute: Not enough");
+            return;
+        }
 
-                    String overlayStr = STRS.getCompTransmuteSuccess().formatted(
-                        "<>" + this.curRarityKey + "<>" + boarName,
-                        "<>" + newBoarRarityKey + "<>" + newBoarName
-                    );
+        if (curRarity.getChargesNeeded() == 0) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                null, STRS.getBadPow().formatted(POWS.get("transmute").getPluralName())
+            );
 
-                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, overlayStr);
+            Log.debug(this.user, this.getClass(), "Failed to transmute: Cannot transmute");
+            return;
+        }
 
-                    if (newBoarIDs.size() > 1) {
-                        String firstBoarID = CONFIG.getMainConfig().getFirstBoarID();
-                        String firstBoarName = BOARS.get(firstBoarID).getName();
-                        String firstRarityKey = BoarUtil.findRarityKey(firstBoarID);
+        if (!boarUser.boarQuery().hasBoar(this.curBoarEntry.getKey(), connection)) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                null, STRS.getCompNoBoar().formatted("<>" + this.interactive.curRarityKey + "<>" + boarName)
+            );
 
-                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                            null, STRS.getCompTransmuteFirst().formatted("<>" + firstRarityKey + "<>" + firstBoarName)
-                        );
-                    }
+            Log.debug(this.user, this.getClass(), "Failed to transmute: Lack of boar");
+            return;
+        }
 
-                    String title = STRS.getCompTransmuteTitle();
+        String nextRarityID = BoarUtil.getNextRarityKey(this.curRarityKey);
+        newBoarIDs.add(BoarUtil.findValid(nextRarityID, this.interactive.isSkyblockGuild()));
 
-                    ItemInteractive.sendInteractive(
-                        newBoarIDs,
-                        bucksGotten,
-                        editions,
-                        firstBoarIDs,
-                        null,
-                        this.user,
-                        title,
-                        this.interactive.compEvent.getHook(),
-                        true
-                    );
+        boarUser.boarQuery().removeBoar(this.curBoarEntry.getKey(), connection);
+        boarUser.boarQuery().addBoars(
+            newBoarIDs,
+            connection,
+            BoarObtainType.TRANSMUTE.toString(),
+            bucksGotten,
+            editions,
+            firstBoarIDs
+        );
 
-                    Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
-                } catch (RuntimeException exception) {
-                    this.interactive.stop(StopType.EXCEPTION);
-                    Log.error(
-                        this.user,
-                        this.getClass(),
-                        "A problem occurred when sending transmute item interactive",
-                        exception
+        boarUser.powQuery().usePowerup(connection, "transmute", this.interactive.numTransmute, true);
+
+        QuestUtil.sendQuestClaimMessage(
+            this.interactive.compEvent.getHook(),
+            boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, newBoarIDs, connection)
+        );
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                String newBoarName = BOARS.get(newBoarIDs.getFirst()).getName();
+                String newBoarRarityKey = BoarUtil.findRarityKey(newBoarIDs.getFirst());
+
+                this.interactive.mustBeExact = true;
+                this.interactive.boarPage = newBoarName;
+
+                String overlayStr = STRS.getCompTransmuteSuccess().formatted(
+                    "<>" + this.curRarityKey + "<>" + boarName,
+                    "<>" + newBoarRarityKey + "<>" + newBoarName
+                );
+
+                this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, overlayStr);
+
+                if (newBoarIDs.size() > 1) {
+                    String firstBoarID = CONFIG.getMainConfig().getFirstBoarID();
+                    String firstBoarName = BOARS.get(firstBoarID).getName();
+                    String firstRarityKey = BoarUtil.findRarityKey(firstBoarID);
+
+                    this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                        null, STRS.getCompTransmuteFirst().formatted("<>" + firstRarityKey + "<>" + firstBoarName)
                     );
                 }
-            });
-        }
+
+                String title = STRS.getCompTransmuteTitle();
+
+                ItemInteractive.sendInteractive(
+                    newBoarIDs,
+                    bucksGotten,
+                    editions,
+                    firstBoarIDs,
+                    null,
+                    this.user,
+                    title,
+                    this.interactive.compEvent.getHook(),
+                    true
+                );
+
+                Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
+            } catch (RuntimeException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
+                Log.error(
+                    this.user,
+                    this.getClass(),
+                    "A problem occurred when sending transmute item interactive",
+                    exception
+                );
+            }
+        });
     }
 
     public void doCharm(BoarUser boarUser, Connection connection) throws SQLException {
-        if (this.interactive.numTryCharm > boarUser.powQuery().getPowerupAmount(connection, "miracle")) {
+        int numCharms = boarUser.powQuery().getPowerupAmount(connection, "miracle");
+
+        if (numCharms == 0) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getNoItem());
+
+            Log.debug(this.user, this.getClass(), "Failed to miracle: Has none");
+            return;
+        }
+
+        if (this.interactive.numTryCharm > numCharms) {
             this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                null, STRS.getNoPow().formatted(POWS.get(this.interactive.powerupUsing).getPluralName())
+                null,
+                STRS.getSomePow().formatted(
+                    this.interactive.numTryCharm,
+                    this.interactive.numTryCharm == 1
+                        ? POWS.get("miracle").getName()
+                        : POWS.get("miracle").getPluralName(),
+                    numCharms
+                )
             );
+
             Log.debug(this.user, this.getClass(), "Failed to miracle: Not enough");
             return;
         }
@@ -369,10 +438,9 @@ class MegaMenuActionHandler implements Configured {
         int giftAmt = boarUser.powQuery().getPowerupAmount(connection, "gift");
 
         if (giftAmt == 0) {
-            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                null, STRS.getNoPow().formatted(powConfig.getPluralName())
-            );
-            Log.debug(this.user, this.getClass(), "Failed to gift: Not enough");
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getNoItem());
+
+            Log.debug(this.user, this.getClass(), "Failed to gift: Has none");
             return;
         }
 

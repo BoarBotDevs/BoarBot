@@ -41,7 +41,6 @@ public class ModalHandler implements Configured {
 
     public void execute(ModalInteractionEvent modalEvent) {
         this.receiver.attemptExecute(null, modalEvent, TimeUtil.getCurMilli());
-        this.stop();
     }
 
     private void delayStop() {

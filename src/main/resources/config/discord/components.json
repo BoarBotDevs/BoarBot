@@ -307,13 +307,13 @@
           "label": "Alphabetical",
           "value": "8",
           "emoji": "\uD83C\uDDE6",
-          "description": "Sort Alphabetically (Descending)"
+          "description": "Sort Alphabetically (Ascending)"
         },
         {
           "label": "Reverse Alphabetical",
           "value": "9",
           "emoji": "\uD83C\uDDFF",
-          "description": "Sort Alphabetically (Ascending)"
+          "description": "Sort Alphabetically (Descending)"
         }
       ]
     },

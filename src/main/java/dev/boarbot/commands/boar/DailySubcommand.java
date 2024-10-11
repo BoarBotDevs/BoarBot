@@ -1,5 +1,6 @@
 package dev.boarbot.commands.boar;
 
+import dev.boarbot.BoarBotApp;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
@@ -8,8 +9,10 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
+import dev.boarbot.interactives.boar.daily.DailyPowerupInteractive;
 import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.interaction.SpecialReply;
+import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
@@ -52,6 +55,11 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             return;
         }
 
+        String dailyPowKey = this.findDailyPowKey();
+        if (dailyPowKey != null) {
+            BoarBotApp.getBot().getInteractives().get(dailyPowKey).stop(StopType.EXPIRED);
+        }
+
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
             boarUser.passSynchronizedAction(this);
@@ -62,8 +70,10 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         }
 
         if (!this.canDaily) {
-            this.interaction.deferReply().setEphemeral(true)
-                .queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
+            if (!this.interaction.isAcknowledged()) {
+                this.interaction.deferReply().setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.deferHandle(this.interaction, this, e));
+            }
 
             if (!this.notificationsOn) {
                 Interactive interactive = InteractiveFactory.constructInteractive(
@@ -221,5 +231,20 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         Interactive interactive = InteractiveFactory.constructDailyPowerupInteractive(this.event, this);
         interactive.execute(null);
         Log.debug(this.user, this.getClass(), "Sent DailyPowerupInteractive");
+    }
+
+    private String findDailyPowKey() {
+        for (String key : BoarBotApp.getBot().getInteractives().keySet()) {
+            boolean isSameUser = key.endsWith(this.user.getId());
+            boolean isSameType = DailyPowerupInteractive.class.equals(
+                BoarBotApp.getBot().getInteractives().get(key).getClass()
+            );
+
+            if (isSameUser && isSameType) {
+                return key;
+            }
+        }
+
+        return null;
     }
 }

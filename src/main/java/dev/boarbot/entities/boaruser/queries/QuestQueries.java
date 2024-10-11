@@ -94,6 +94,8 @@ public class QuestQueries implements Configured {
             statement.executeUpdate();
         }
 
+        this.boarUser.baseQuery().updateHighestBlessings(connection);
+
         for (int i=0; i<claimQuests.size(); i++) {
             IndivQuestConfig claimQuest = claimQuests.get(i);
             this.giveReward(claimQuest, connection);
@@ -283,6 +285,8 @@ public class QuestQueries implements Configured {
                 shouldClaimBonus = shouldClaimBonus || bucksQuest.gaveBonus();
             }
         }
+
+        this.boarUser.baseQuery().updateHighestBlessings(connection);
 
         if (shouldClaimBonus) {
             this.giveBonus(connection);

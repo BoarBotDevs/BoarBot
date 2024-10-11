@@ -52,7 +52,7 @@ public class GiftSubcommand extends Subcommand {
 
         if (noGift) {
             try {
-                String replyStr = STRS.getNoPow().formatted(POWS.get("gift").getPluralName());
+                String replyStr = STRS.getNoItem();
                 FileUpload fileUpload = new EmbedImageGenerator(replyStr).generate().getFileUpload();
                 MessageCreateBuilder messageBuilder = new MessageCreateBuilder().setFiles(fileUpload);
 

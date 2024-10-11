@@ -168,14 +168,17 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                         this.eventHandler.incNumActive();
                     },
                     e -> {
+                        this.stop(StopType.EXCEPTION);
                         this.eventHandler.getFailedGuilds().add(this.channel.getGuild().getId());
                         this.eventHandler.decNumPotential();
                         ExceptionHandler.handle(this.getClass(), e);
                     }
                 );
             } catch (InsufficientPermissionException exception) {
+                this.stop(StopType.EXCEPTION);
                 this.eventHandler.decNumPotential();
                 this.eventHandler.getFailedGuilds().add(this.channel.getGuild().getId());
+                ExceptionHandler.handle(this.getClass(), exception);
             }
 
             return;
@@ -198,7 +201,6 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     boarUser.questQuery().addProgress(QuestType.POW_FAST, this.userTimes.get(userID), connection)
                 );
             } catch (SQLException exception) {
-
                 this.failedSynchronized.add(boarUser.getUserID());
                 SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
                 Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event win", exception);
@@ -207,7 +209,6 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             try (Connection connection = DataUtil.getConnection()) {
                 boarUser.eventQuery().applyPowEventFail(connection);
             } catch (SQLException exception) {
-
                 this.failedSynchronized.add(boarUser.getUserID());
                 SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
                 Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);

@@ -32,6 +32,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     int page;
     int maxPage;
     String boarPage;
+    boolean mustBeExact = false;
     MegaMenuView curView;
     MegaMenuView prevView;
     @Getter private final Map<MegaMenuView, Boolean> viewsToUpdateData = new HashMap<>();
@@ -64,7 +65,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     Map.Entry<String, BoarInfo> curBoarEntry;
     String curRarityKey;
     boolean filterOpen = false;
-    int filterBits = 0;
+    int filterBits = 1;
     boolean sortOpen = false;
     SortType sortVal = SortType.RARITY_D;
     boolean interactOpen = false;
@@ -207,6 +208,7 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             for (String searchTerm : boar.getSearchTerms()) {
                 if (cleanInput.equals(searchTerm)) {
                     Log.debug(this.user, this.getClass(), "Found boar: " + boarID);
+                    this.mustBeExact = false;
                     return newPage;
                 }
             }
@@ -219,13 +221,21 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
             newPage = this.matchFront(cleanInput, filteredBoars);
 
             if (newPage <= this.maxPage) {
+                this.mustBeExact = false;
                 return newPage;
+            }
+
+            if (this.mustBeExact) {
+                this.mustBeExact = false;
+                this.boarPage = BOARS.get(this.curBoarEntry.getKey()).getName();
+                return this.getFindBoarPage(this.boarPage);
             }
 
             cleanInput = cleanInput.substring(0, cleanInput.length()-1);
         }
 
         Log.debug(this.user, this.getClass(), "Failed to find boar");
+        this.mustBeExact = false;
         return this.page;
     }
 

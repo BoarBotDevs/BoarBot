@@ -68,7 +68,7 @@ class MegaMenuGeneratorMaker implements Configured {
     }
 
     private MegaMenuGenerator makeCollectionGen() throws SQLException {
-        this.updateCompendiumCollection();
+        this.updateCollection();
         this.refreshFilterSort();
 
         this.interactive.maxPage = Math.max((this.interactive.filteredBoars.size()-1) / 15, 0);
@@ -86,7 +86,7 @@ class MegaMenuGeneratorMaker implements Configured {
     }
 
     private MegaMenuGenerator makeCompendiumGen() throws SQLException {
-        this.updateCompendiumCollection();
+        this.updateCollection();
         this.refreshFilterSort();
 
         if (this.interactive.filteredBoars.isEmpty()) {
@@ -136,9 +136,36 @@ class MegaMenuGeneratorMaker implements Configured {
         );
     }
 
-    private MegaMenuGenerator makeEditionsGen() {
-        this.interactive.maxPage = Math.max((this.interactive.curBoarEntry.getValue().getEditions().size()-1) / 5, 0);
+    private MegaMenuGenerator makeEditionsGen() throws SQLException {
+        updateCollection();
+        refreshFilterSort();
 
+        String boarID = this.interactive.curBoarEntry.getKey();
+        boolean exists = this.interactive.filteredBoars.containsKey(boarID);
+        this.interactive.curBoarEntry = exists
+            ? new AbstractMap.SimpleEntry<>(boarID, this.interactive.filteredBoars.get(boarID))
+            : null;
+        int numEditions = exists ? this.interactive.curBoarEntry.getValue().getEditions().size() : 0;
+
+        if (numEditions == 0) {
+            this.interactive.curView = MegaMenuView.COMPENDIUM;
+
+            if (exists) {
+                this.interactive.boarPage = BOARS.get(boarID).getName();
+            } else {
+                this.interactive.page = 0;
+                this.interactive.acknowledgeOpen = true;
+                this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                    null,
+                    STRS.getCompBoarFilterBlocked()
+                        .formatted("<>" + this.interactive.curRarityKey + "<>" + BOARS.get(boarID).getName())
+                );
+            }
+
+            return this.makeCompendiumGen();
+        }
+
+        this.interactive.maxPage = Math.max((numEditions-1) / 5, 0);
         if (this.interactive.page > this.interactive.maxPage) {
             this.interactive.page = this.interactive.maxPage;
         }
@@ -261,9 +288,9 @@ class MegaMenuGeneratorMaker implements Configured {
         );
     }
 
-    private void updateCompendiumCollection() throws SQLException {
-        boolean notUpdated = this.interactive.getViewsToUpdateData().get(this.view) == null ||
-            !this.interactive.getViewsToUpdateData().get(this.view);
+    private void updateCollection() throws SQLException {
+        boolean notUpdated = this.interactive.getViewsToUpdateData().get(MegaMenuView.COLLECTION) == null ||
+            !this.interactive.getViewsToUpdateData().get(MegaMenuView.COLLECTION);
 
         if (notUpdated) {
             try (Connection connection = DataUtil.getConnection()) {
@@ -276,10 +303,12 @@ class MegaMenuGeneratorMaker implements Configured {
 
                 BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
 
-                this.interactive.filterBits = interBoarUser.megaQuery().getFilterBits(connection);
+                if (!this.interactive.ownedBoars.isEmpty()) {
+                    this.interactive.filterBits = interBoarUser.megaQuery().getFilterBits(connection);
+                }
+
                 this.interactive.sortVal = interBoarUser.megaQuery().getSortVal(connection);
 
-                this.interactive.getViewsToUpdateData().put(MegaMenuView.COMPENDIUM, true);
                 this.interactive.getViewsToUpdateData().put(MegaMenuView.COLLECTION, true);
             }
         }

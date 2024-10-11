@@ -268,7 +268,7 @@
   },
   "anniversary": {
     "name": "Anniversary",
-    "description": "It's BoarBot's %s anniversary today! To celebrate, claim your free Birthday Boar!",
+    "description": "It's BoarBot's %s anniversary today! To celebrate, claim your free <>event<>Birthday Boar<>font<>!",
     "prompts": {
       "firstAnn": {
         "name": "First"

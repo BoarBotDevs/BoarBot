@@ -2,6 +2,7 @@ package dev.boarbot.util.boar;
 
 public enum BoarObtainType {
     DAILY("DAILY"),
+    EXTRA("EXTRA"),
     CLONE("CLONE"),
     TRANSMUTE("TRANSMUTE"),
     GIFT("GIFT"),

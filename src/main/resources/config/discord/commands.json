@@ -5,7 +5,7 @@
     "subcommands": {
       "help": {
         "name": "help",
-        "description": "See all boar command information",
+        "description": "Learn more about how the bot works",
         "location": "dev.boarbot.commands.boar.HelpSubcommand",
         "options": [
           {
@@ -195,7 +195,7 @@
                 "value": "gift"
               },
               {
-                "name": "Boar Blessings",
+                "name": "Base Boar Blessings",
                 "value": "blessings"
               },
               {
@@ -248,7 +248,7 @@
       },
       "gift": {
         "name": "gift",
-        "description": "Use and send a Boar Gift in the channel you're currently in",
+        "description": "Send a Boar Gift in the channel you're currently in",
         "location": "dev.boarbot.commands.boar.GiftSubcommand"
       },
       "support": {

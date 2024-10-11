@@ -27,19 +27,24 @@ final class DiscordLog implements Configured {
 
         String prefix = "\n[\033[0;34mINFO\033[0m] [%s] [%s]\n> "
             .formatted(LocalDateTime.now().format(formatter), clazz.getName());
-        message = prefix + message + "\n";
-        message = message.substring(0, Math.min(message.length(), 1990));
+        String fixedMessage = prefix + message + "\n";
+        fixedMessage = fixedMessage.substring(0, Math.min(fixedMessage.length(), 1990));
 
-        if (curLogMessage.length() + message.length() + "```".length() > 2000) {
+        if (curLogMessage.length() + fixedMessage.length() + "```".length() > 2000) {
             sendLogs();
-            curLogMessage.append("```ansi");
+            addLog(clazz, message);
+            return;
         }
 
-        curLogMessage.append(message);
+        curLogMessage.append(fixedMessage);
     }
 
     private static void sendLogs() {
         if (logsDisabled || logChannel == null) {
+            return;
+        }
+
+        if (curLogMessage.isEmpty()) {
             return;
         }
 

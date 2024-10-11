@@ -57,8 +57,8 @@ public final class TimeUtil {
 
     public static boolean isHalloween() {
         LocalDateTime curDateTime = LocalDateTime.now();
-        return curDateTime.getMonth() == Month.OCTOBER && curDateTime.getDayOfMonth() >= 25 ||
-            curDateTime.getMonth() == Month.NOVEMBER && curDateTime.getDayOfMonth() == 1;
+        return curDateTime.getMonth() == Month.OCTOBER && curDateTime.getDayOfMonth() >= 26 ||
+            curDateTime.getMonth() == Month.NOVEMBER && curDateTime.getDayOfMonth() <= 2;
     }
 
     public static boolean isChristmas() {

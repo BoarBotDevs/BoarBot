@@ -48,7 +48,7 @@
   "giftIdle": 30000,
   "giftLowWait": 3000,
   "giftHighWait": 6000,
-  "giftMaxHandicap": 1500,
+  "giftMaxHandicap": 2000,
   "boardCacheLength": 3600000,
   "emojiRows": 4,
   "emojiCols": 4,

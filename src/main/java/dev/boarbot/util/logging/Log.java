@@ -83,8 +83,8 @@ public final class Log {
             return;
         }
 
-        DiscordLog.sendWarn(clazz, msg);
         lastWarn = TimeUtil.getCurMilli();
+        DiscordLog.sendWarn(clazz, msg);
     }
 
     public static void error(Class<?> clazz, String message, Throwable exception) {

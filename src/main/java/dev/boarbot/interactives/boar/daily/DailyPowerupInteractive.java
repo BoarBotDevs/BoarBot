@@ -116,20 +116,41 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
     @Override
     public void doSynchronizedAction(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
-            if (this.miraclesToUse <= boarUser.powQuery().getPowerupAmount(connection, "miracle")) {
-                this.stop(StopType.FINISHED);
-                boarUser.powQuery().activateMiracles(connection, this.miraclesToUse);
-                this.callingObj.execute();
+            int numMiracles = boarUser.powQuery().getPowerupAmount(connection, "miracle");
+
+            if (numMiracles == 0) {
+                this.currentImageUpload = new EmbedImageGenerator(
+                    STRS.getNoItem() + " <br> <br> " + STRS.getDailyPow()
+                ).generate().getFileUpload();
+
+                this.miraclesToUse = 0;
+
+                Log.debug(this.user, this.getClass(), "Failed to miracle: Has none");
+                this.sendResponse();
                 return;
             }
 
-            this.miraclesToUse = 0;
-            this.currentImageUpload = new EmbedImageGenerator(
-                STRS.getNoPow().formatted(POWS.get("miracle").getPluralName()) + " " + STRS.getDailyPow()
-            ).generate().getFileUpload();
-            this.sendResponse();
+            if (this.miraclesToUse > numMiracles) {
+                this.currentImageUpload = new EmbedImageGenerator(
+                    STRS.getSomePow().formatted(
+                        this.miraclesToUse,
+                        this.miraclesToUse == 1
+                            ? POWS.get("miracle").getName()
+                            : POWS.get("miracle").getPluralName(),
+                        numMiracles
+                    ) + " <br> <br> " + STRS.getDailyPow()
+                ).generate().getFileUpload();
 
-            Log.debug(this.user, this.getClass(), "Not enough of this powerup owned");
+                this.miraclesToUse = 0;
+
+                Log.debug(this.user, this.getClass(), "Failed to miracle: Not enough");
+                this.sendResponse();
+                return;
+            }
+
+            this.stop(StopType.FINISHED);
+            boarUser.powQuery().activateMiracles(connection, this.miraclesToUse);
+            this.callingObj.execute();
         } catch (SQLException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to query powerups", exception);
@@ -196,36 +217,56 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
             try (Connection connection = DataUtil.getConnection()) {
                 BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
 
-                int numMiraclesHas = boarUser.powQuery().getPowerupAmount(connection, "miracle");
-                String amountInput = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-                int amount = Math.min(Integer.parseInt(amountInput), numMiraclesHas);
+                int numMiracles = boarUser.powQuery().getPowerupAmount(connection, "miracle");
+                String inputStr = modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
+                int input = inputStr.isEmpty() ? numMiracles :  Integer.parseInt(inputStr);
 
-                if (amount == 0 && numMiraclesHas > 0) {
+                if (input == 0 && numMiracles > 0) {
                     throw new NumberFormatException();
                 }
 
-                if (amount > 0) {
-                    long blessings = boarUser.baseQuery().getBlessings(connection, amount);
-                    this.miraclesToUse = amount;
+                if (numMiracles == 0) {
+                    this.currentImageUpload = new EmbedImageGenerator(
+                        STRS.getNoItem() + " <br> <br> " + STRS.getDailyPow()
+                    ).generate().getFileUpload();
+                    this.miraclesToUse = 0;
 
-                    this.currentImageUpload = new EmbedImageGenerator(
-                        STRS.getMiracleAttempt().formatted(
-                            this.miraclesToUse,
-                            this.miraclesToUse == 1
-                                ? miracleConfig.getName()
-                                : miracleConfig.getPluralName(),
-                            STRS.getBlessingsPluralName(),
-                            TextUtil.getBlessHex(blessings, true),
-                            STRS.getBlessingsSymbol() + " ",
-                            blessings
-                        )
-                    ).generate().getFileUpload();
-                } else {
-                    this.currentImageUpload = new EmbedImageGenerator(
-                        STRS.getNoPow().formatted(miracleConfig.getPluralName()) + " " + STRS.getDailyPow()
-                    ).generate().getFileUpload();
-                    Log.debug(this.user, this.getClass(), "Modal input greater than owned");
+                    Log.debug(this.user, this.getClass(), "Failed to miracle: Has none");
+                    this.sendResponse();
+                    return;
                 }
+
+                if (input > numMiracles) {
+                    this.currentImageUpload = new EmbedImageGenerator(
+                        STRS.getSomePow().formatted(
+                            input,
+                            input == 1
+                                ? POWS.get("miracle").getName()
+                                : POWS.get("miracle").getPluralName(),
+                            numMiracles
+                        ) + " <br> <br> " + STRS.getDailyPow()
+                    ).generate().getFileUpload();
+
+                    Log.debug(this.user, this.getClass(), "Failed to miracle: Not enough");
+                    this.sendResponse();
+                    return;
+                }
+
+                long blessings = boarUser.baseQuery().getBlessings(connection, input);
+                this.miraclesToUse = input;
+
+                this.currentImageUpload = new EmbedImageGenerator(
+                    STRS.getMiracleAttempt().formatted(
+                        this.miraclesToUse,
+                        this.miraclesToUse == 1
+                            ? miracleConfig.getName()
+                            : miracleConfig.getPluralName(),
+                        STRS.getBlessingsPluralName(),
+                        TextUtil.getBlessHex(blessings, true),
+                        STRS.getBlessingsSymbol() + " ",
+                        blessings
+                    )
+                ).generate().getFileUpload();
             } catch (SQLException exception) {
                 this.stop(StopType.EXCEPTION);
                 Log.error(this.user, this.getClass(), "Failed to get powerup data", exception);

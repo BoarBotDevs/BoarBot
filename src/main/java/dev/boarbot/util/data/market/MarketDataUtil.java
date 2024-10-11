@@ -263,17 +263,11 @@ public class MarketDataUtil implements Configured {
             return MarketTransactionFail.STOCK;
         }
 
-        boolean noStorage = itemID.equals("transmute") &&
-            boarUser.powQuery().getPowerupAmount(connection, itemID) + amount > NUMS.getMaxTransmute();
-        if (noStorage) {
-            return MarketTransactionFail.STORAGE;
-        }
-
         marketData = new MarketData(buyData.stock(), buyData.sellPrice(), buyData.buyPrice());
 
         String updateQuery = """
             UPDATE market_values
-            SET stock = ?, sell_price = ?, buy_price = ?, last_purchase = ?
+            SET stock = ?, sell_price = ?, buy_price = ?, last_purchase = current_timestamp(3)
             WHERE item_id = ?;
         """;
 
@@ -299,8 +293,7 @@ public class MarketDataUtil implements Configured {
             statement.setInt(1, marketData.stock());
             statement.setLong(2, marketData.sellPrice());
             statement.setLong(3, marketData.buyPrice());
-            statement.setTimestamp(4, new Timestamp(TimeUtil.getCurMilli()));
-            statement.setString(5, itemID);
+            statement.setString(4, itemID);
             statement.executeUpdate();
         }
 
@@ -377,7 +370,7 @@ public class MarketDataUtil implements Configured {
 
         String updateQuery = """
             UPDATE market_values
-            SET stock = ?, sell_price = ?, buy_price = ?
+            SET stock = ?, sell_price = ?, buy_price = ?, last_sell = current_timestamp(3)
             WHERE item_id = ?;
         """;
 
@@ -460,18 +453,21 @@ public class MarketDataUtil implements Configured {
             : RARITIES.get(rarityKey).getTargetStock();
 
         int fixedAmount = Math.min(amount, marketData.stock());
+        int addedAmount = 0;
         int newStock = marketData.stock();
         long cost = 0;
         long prevSellPrice = marketData.sellPrice();
-        long newSellPrice = newStock < targetStock
-            ? (long) Math.ceil(prevSellPrice * (1 + 1.0/targetStock))
-            : marketData.sellPrice();
+        long newSellPrice = prevSellPrice;
         long prevBuyPrice = marketData.buyPrice();
-        long newBuyPrice = newStock < targetStock
-            ? (long) Math.ceil(prevBuyPrice * (1 + 1.0/targetStock))
-            : marketData.buyPrice();
+        long newBuyPrice = prevBuyPrice;
 
-        for (int i=0; i<fixedAmount; i++) {
+        if (newStock > targetStock) {
+            addedAmount = Math.min(fixedAmount, newStock - targetStock);
+            cost = prevBuyPrice * addedAmount;
+            newStock -= addedAmount;
+        }
+
+        for (int i=0; i<fixedAmount-addedAmount; i++) {
             newStock--;
             cost += newBuyPrice;
 

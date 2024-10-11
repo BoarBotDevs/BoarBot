@@ -67,7 +67,7 @@ public class ProfileImageGenerator extends MegaMenuGenerator {
             }
         }
 
-        this.maxUniques = maxUniques;
+        this.maxUniques = maxUniques + this.profileData.numNonResearch();
     }
 
     @Override

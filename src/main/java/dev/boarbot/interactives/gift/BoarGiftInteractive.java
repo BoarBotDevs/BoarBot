@@ -11,6 +11,7 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.UserInteractive;
+import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
@@ -128,6 +129,29 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
 
         compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(compEvent, this, e));
+
+        try (Connection connection = DataUtil.getConnection()) {
+            BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
+            long bannedTimestamp = boarUser.baseQuery().getBannedTime(connection);
+
+            if (bannedTimestamp > TimeUtil.getCurMilli()) {
+                String bannedStr = STRS.getBannedString().formatted(TimeUtil.getTimeDistance(bannedTimestamp, false));
+                FileUpload fileUpload = new EmbedImageGenerator(bannedStr, COLORS.get("error")).generate()
+                    .getFileUpload();
+
+                compEvent.getHook().sendFiles(fileUpload).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(compEvent.getHook(), this, e));
+                return;
+            }
+        } catch (SQLException exception) {
+            SpecialReply.sendErrorMessage(compEvent.getHook(), this);
+            Log.error(this.user, this.getClass(), "Failed to do ban check", exception);
+            return;
+        } catch (IOException exception) {
+            SpecialReply.sendErrorMessage(compEvent.getHook(), this);
+            Log.error(this.user, this.getClass(), "Failed to generate banned message", exception);
+            return;
+        }
 
         if (this.giftTimes.get(compEvent.getUser()) != null) {
             return;

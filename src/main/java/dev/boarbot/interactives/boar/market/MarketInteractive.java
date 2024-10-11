@@ -17,6 +17,7 @@ import dev.boarbot.util.interactive.StopType;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.modal.ModalUtil;
+import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.quests.QuestUtil;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -164,7 +165,6 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
                 this.curView = MarketView.ITEMS;
                 this.rarity = RARITIES.get(((StringSelectInteractionEvent) compEvent).getValues().getFirst());
                 this.setItemsFromRarity();
-                this.maxItemPage = Math.max((this.itemIDs.size()-1) / ITEMS_PER_PAGE, 0);
             }
 
             case "LEFT" -> this.itemPage--;
@@ -197,9 +197,13 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
                 this.boarUser.passSynchronizedAction(this);
             }
 
-            case "CANCEL" -> this.confirmOpen = false;
+            case "CANCEL" -> {
+                this.isBuying = false;
+                this.confirmOpen = false;
+            }
         }
 
+        this.itemPage = Math.min(Math.max(this.itemPage, 0), this.maxItemPage);
         this.sendResponse();
     }
 
@@ -214,7 +218,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
                 try {
                     String pageInput = pageInputRaw.replaceAll("[^0-9]+", "");
-                    this.itemPage = Math.min(Math.max(Integer.parseInt(pageInput)-1, 0), this.maxItemPage);
+                    this.itemPage = Integer.parseInt(pageInput)-1;
                 } catch (NumberFormatException exception) {
                     Log.debug(this.user, this.getClass(), "Invalid modal input");
                 }
@@ -232,7 +236,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
                 try (Connection connection = DataUtil.getConnection()) {
                     String buyInput = buyInputRaw.replaceAll("[^0-9]+", "");
-                    int input = Integer.parseInt(buyInput);
+                    int input = buyInput.isEmpty() ? Integer.MAX_VALUE : Integer.parseInt(buyInput);
 
                     if (input == 0) {
                         throw new NumberFormatException();
@@ -242,9 +246,59 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
                     MarketTransactionData buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
                     long userBucks = this.boarUser.baseQuery().getBucks(connection);
 
+                    if (input == Integer.MAX_VALUE) {
+                        int right = buyData.amount();
+                        int left = 0;
+
+                        if (this.focusedID.equals("transmute")) {
+                            right = NUMS.getMaxTransmute() -
+                                this.boarUser.powQuery().getPowerupAmount(connection, this.focusedID);
+                        }
+
+                        while (left <= right) {
+                            input = left + (right - left) / 2;
+                            buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
+
+                            if (buyData.cost() == userBucks) {
+                                break;
+                            }
+
+                            if (buyData.cost() < userBucks) {
+                                left = input + 1;
+                            } else {
+                                right = input - 1;
+                            }
+                        }
+
+                        if (buyData.cost() > userBucks && input > 0) {
+                            input--;
+                            buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
+                        }
+                    }
+
+                    if (this.focusedID.equals("transmute")) {
+                        int transmuteAmt = boarUser.powQuery().getPowerupAmount(connection, this.focusedID);
+
+                        if (transmuteAmt >= NUMS.getMaxTransmute()) {
+                            this.acknowledgeOpen = true;
+                            this.acknowledgeString = STRS.getMarketNoStorage();
+
+                            this.execute(null);
+                            return;
+                        } else if (transmuteAmt + input > NUMS.getMaxTransmute()) {
+                            this.acknowledgeOpen = true;
+                            this.acknowledgeString = STRS.getMarketSomeStorage()
+                                .formatted(NUMS.getMaxTransmute() - transmuteAmt);
+
+                            this.execute(null);
+                            return;
+                        }
+                    }
+
                     if (userBucks < buyData.cost()) {
                         this.acknowledgeOpen = true;
-                        this.acknowledgeString = STRS.getMarketNoBucks().formatted(buyData.cost(), userBucks);
+                        this.acknowledgeString = STRS.getMarketNoBucks()
+                            .formatted(buyData.amount(), buyData.cost(), userBucks);
 
                         this.execute(null);
                         return;
@@ -291,26 +345,31 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
                 try (Connection connection = DataUtil.getConnection()) {
                     String sellInput = sellInputRaw.replaceAll("[^0-9]+", "");
-                    int input = Integer.parseInt(sellInput);
-
-                    if (input == 0) {
-                        throw new NumberFormatException();
-                    }
-
                     boolean isPowerup = POWS.containsKey(this.focusedID);
                     int userAmount = isPowerup
                         ? this.boarUser.powQuery().getPowerupAmount(connection, this.focusedID)
                         : this.boarUser.boarQuery().getBoarAmount(this.focusedID, connection);
+                    int input = sellInput.isEmpty() ? userAmount : Integer.parseInt(sellInput);
+
+                    if (input == 0 && userAmount > 0) {
+                        throw new NumberFormatException();
+                    }
 
                     if (userAmount == 0) {
                         this.acknowledgeOpen = true;
-                        this.acknowledgeString = STRS.getMarketNoItems();
+                        this.acknowledgeString = STRS.getNoItem();
 
                         this.execute(null);
                         return;
                     }
 
-                    input = Math.min(input, userAmount);
+                    if (userAmount < input) {
+                        this.acknowledgeOpen = true;
+                        this.acknowledgeString = STRS.getMarketNoItems().formatted(input, userAmount);
+
+                        this.execute(null);
+                        return;
+                    }
 
                     MarketData marketData = MarketDataUtil.getMarketDataItem(this.focusedID, true, connection);
                     MarketTransactionData sellData = MarketDataUtil.calculateSellCost(
@@ -411,9 +470,21 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
         if (userBucks < this.cost) {
             this.acknowledgeOpen = true;
             this.acknowledgeString = STRS.getMarketNoBucks().formatted(this.cost, userBucks);
-
-            this.execute(null);
             return;
+        }
+
+        if (this.focusedID.equals("transmute")) {
+            int transmuteAmt = boarUser.powQuery().getPowerupAmount(connection, this.focusedID);
+
+            if (transmuteAmt >= NUMS.getMaxTransmute()) {
+                this.acknowledgeOpen = true;
+                this.acknowledgeString = STRS.getMarketNoStorage();
+                return;
+            } else if (transmuteAmt + this.amount > NUMS.getMaxTransmute()) {
+                this.acknowledgeOpen = true;
+                this.acknowledgeString = STRS.getMarketSomeStorage().formatted(NUMS.getMaxTransmute() - transmuteAmt);
+                return;
+            }
         }
 
         MarketTransactionFail failType = MarketDataUtil.updateMarket(
@@ -424,24 +495,12 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
             case STOCK -> {
                 this.acknowledgeOpen = true;
                 this.acknowledgeString = STRS.getMarketStockChange();
-
-                this.execute(null);
                 return;
             }
 
             case COST -> {
                 this.acknowledgeOpen = true;
                 this.acknowledgeString = STRS.getMarketCostChange();
-
-                this.execute(null);
-                return;
-            }
-
-            case STORAGE -> {
-                this.acknowledgeOpen = true;
-                this.acknowledgeString = STRS.getMarketNoStorage();
-
-                this.execute(null);
                 return;
             }
 
@@ -452,9 +511,17 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
             this.user, this.getClass(), "Purchased %,d %s for $%,d".formatted(this.amount, this.focusedID, this.cost)
         );
 
-        QuestUtil.sendQuestClaimMessage(
-            this.compEvent.getHook(), boarUser.questQuery().addProgress(QuestType.SPEND_BUCKS, this.cost, connection)
-        );
+        List<QuestInfo> questInfos = new ArrayList<>();
+        questInfos.add(boarUser.questQuery().addProgress(QuestType.SPEND_BUCKS, this.cost, connection));
+
+        if (!POWS.containsKey(this.focusedID)) {
+            List<String> boarIDs = new ArrayList<>();
+
+            boarIDs.add(this.focusedID);
+            questInfos.add(boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, boarIDs, connection));
+        }
+
+        QuestUtil.sendQuestClaimMessage(this.compEvent.getHook(), questInfos);
 
         String itemStr = POWS.containsKey(this.focusedID)
             ? "<>powerup<>" + (this.amount == 1
@@ -476,9 +543,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
         if (userAmount < this.amount) {
             this.acknowledgeOpen = true;
-            this.acknowledgeString = STRS.getMarketNoItems();
-
-            this.execute(null);
+            this.acknowledgeString = STRS.getMarketNoItems().formatted(this.amount, userAmount);
             return;
         }
 
@@ -490,8 +555,6 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
             case COST -> {
                 this.acknowledgeOpen = true;
                 this.acknowledgeString = STRS.getMarketCostChange();
-
-                this.execute(null);
                 return;
             }
 
@@ -597,6 +660,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
         }
 
         this.itemIDs = rarityItems;
+        this.maxItemPage = Math.max((this.itemIDs.size()-1) / ITEMS_PER_PAGE, 0);
     }
 
     private void setItemsPowerups() {
@@ -609,5 +673,6 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
         }
 
         this.itemIDs = powItems;
+        this.maxItemPage = Math.max((this.itemIDs.size()-1) / ITEMS_PER_PAGE, 0);
     }
 }

@@ -340,7 +340,7 @@ public class BaseQueries implements Configured {
 
                     int activesLeft = miraclesActive+extraActive;
                     for (; activesLeft>0; activesLeft--) {
-                        long amountToAdd = (long) Math.min(Math.ceil(blessings * 0.1), miracleIncreaseMax);
+                        long amountToAdd = (long) Math.min(Math.max(Math.ceil(blessings * 0.1), 1), miracleIncreaseMax);
 
                         if (amountToAdd == NUMS.getMiracleIncreaseMax()) {
                             break;
@@ -357,10 +357,24 @@ public class BaseQueries implements Configured {
         return blessings;
     }
 
+    public void updateHighestBlessings(Connection connection) throws SQLException {
+        String updateQuery = """
+            UPDATE users
+            SET highest_blessings = GREATEST(highest_blessings, ?)
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setLong(1, this.boarUser.baseQuery().getBlessings(connection));
+            statement.setString(2, this.boarUser.getUserID());
+            statement.executeUpdate();
+        }
+    }
+
     public void giveBadge(Connection connection, String badgeID, int tier) throws SQLException {
         String insertQuery = """
             INSERT INTO collected_badges (user_id, badge_id, first_obtained_timestamp)
-            SELECT ?, ?, ?
+            SELECT ?, ?, current_timestamp(3)
             WHERE NOT EXISTS (
                 SELECT 1
                 FROM collected_badges
@@ -370,7 +384,7 @@ public class BaseQueries implements Configured {
 
         String updateQuery = """
             UPDATE collected_badges
-            SET badge_tier = ?, obtained_timestamp = ?
+            SET badge_tier = ?, obtained_timestamp = current_timestamp(3)
             WHERE badge_id = ? AND user_id = ? AND badge_tier != ?;
         """;
 
@@ -380,28 +394,28 @@ public class BaseQueries implements Configured {
         ) {
             statement1.setString(1, this.boarUser.getUserID());
             statement1.setString(2, badgeID);
-            statement1.setTimestamp(3, new Timestamp(TimeUtil.getCurMilli()));
-            statement1.setString(4, badgeID);
-            statement1.setString(5, this.boarUser.getUserID());
+            statement1.setString(3, badgeID);
+            statement1.setString(4, this.boarUser.getUserID());
             statement1.executeUpdate();
 
             statement2.setInt(1, tier);
-            statement2.setTimestamp(2, new Timestamp(TimeUtil.getCurMilli()));
-            statement2.setString(3, badgeID);
-            statement2.setString(4, this.boarUser.getUserID());
-            statement2.setInt(5, tier);
+            statement2.setString(2, badgeID);
+            statement2.setString(3, this.boarUser.getUserID());
+            statement2.setInt(4, tier);
             statement2.executeUpdate();
         }
     }
 
-    public void deleteUser(Connection connection) throws SQLException {
+    public void wipeUser(Connection connection) throws SQLException {
         String deleteQuery = """
-            DELETE FROM users
-            WHERE user_id = ?;
+            UPDATE users
+            SET wipe_timestamp = ?
+            WHERE user_id = ? AND wipe_timestamp IS NULL;
         """;
 
         try (PreparedStatement statement1 = connection.prepareStatement(deleteQuery)) {
-            statement1.setString(1, this.boarUser.getUserID());
+            statement1.setTimestamp(1, new Timestamp(TimeUtil.getCurMilli() + TimeUtil.getOneDayMilli()));
+            statement1.setString(2, this.boarUser.getUserID());
             statement1.executeUpdate();
         }
     }

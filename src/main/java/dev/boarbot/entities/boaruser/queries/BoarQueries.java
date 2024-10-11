@@ -39,7 +39,10 @@ public class BoarQueries implements Configured {
         }
         this.boarUser.setFirstDaily(false);
 
+        int boarIndex = -1;
         for (String boarID : boarIDs) {
+            boarIndex++;
+
             String boarAddQuery = """
                 INSERT INTO collected_boars (user_id, boar_id, original_obtain_type)
                 VALUES (?, ?, ?)
@@ -52,15 +55,25 @@ public class BoarQueries implements Configured {
                 WHERE user_id = ? AND boar_id = ?;
             """;
 
+            String updateFirstJoined = """
+                UPDATE users
+                SET first_joined_timestamp = current_timestamp(3)
+                WHERE first_joined_timestamp = '0000-00-00 00:00:00' AND user_id = ?;
+            """;
+
             int curEdition;
 
             try (
                 PreparedStatement boarAddStatement = connection.prepareStatement(boarAddQuery);
-                PreparedStatement isFirstStatement = connection.prepareStatement(isFirstQuery)
+                PreparedStatement isFirstStatement = connection.prepareStatement(isFirstQuery);
+                PreparedStatement updateFirstStatement = connection.prepareStatement(updateFirstJoined)
             ) {
                 boarAddStatement.setString(1, this.boarUser.getUserID());
                 boarAddStatement.setString(2, boarID);
-                boarAddStatement.setString(3, obtainType);
+                boarAddStatement.setString(3, obtainType.equals("DAILY") && boarIndex > 0
+                    ? BoarObtainType.EXTRA.toString()
+                    : obtainType
+                );
 
                 isFirstStatement.setString(1, this.boarUser.getUserID());
                 isFirstStatement.setString(2, boarID);
@@ -82,6 +95,8 @@ public class BoarQueries implements Configured {
                             this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions, firstBoarIDs);
                         }
 
+                        this.boarUser.baseQuery().updateHighestBlessings(connection);
+
                         if (curEdition == 1 && RARITIES.get(rarityKey).getTargetStock() != null) {
                             MarketDataUtil.updateMarket(MarketUpdateType.ADD_ITEM, boarID, connection);
                         }
@@ -91,6 +106,9 @@ public class BoarQueries implements Configured {
                         firstBoarIDs.add(boarID);
                     }
                 }
+
+                updateFirstStatement.setString(1, this.boarUser.getUserID());
+                updateFirstStatement.executeUpdate();
             }
         }
 

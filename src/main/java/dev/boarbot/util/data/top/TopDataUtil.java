@@ -1,7 +1,5 @@
 package dev.boarbot.util.data.top;
 
-import dev.boarbot.util.time.TimeUtil;
-
 import java.sql.*;
 import java.util.*;
 
@@ -86,7 +84,7 @@ public class TopDataUtil {
 
         String deleteQuery = """
             UPDATE collected_badges
-            SET badge_tier = -1
+            SET badge_tier = -1, update_user = false
             WHERE
                 badge_id = 'athlete' AND
                 collected_badges.user_id NOT IN (
@@ -97,8 +95,8 @@ public class TopDataUtil {
         """.formatted(allSetStrs);
 
         String insertQuery = """
-            INSERT INTO collected_badges (user_id, badge_id, first_obtained_timestamp)
-            SELECT user_id, 'athlete', ?
+            INSERT INTO collected_badges (user_id, badge_id, first_obtained_timestamp, update_user)
+            SELECT user_id, 'athlete', current_timestamp(3), false
             FROM users
             WHERE username = ? AND NOT EXISTS (
                 SELECT 1
@@ -110,7 +108,7 @@ public class TopDataUtil {
 
         String updateQuery = """
             UPDATE collected_badges
-            SET badge_tier = ?, obtained_timestamp = ?
+            SET badge_tier = ?, obtained_timestamp = current_timestamp(3), update_user = false
             WHERE
                 badge_id = 'athlete' AND
                 badge_tier != ? AND
@@ -134,16 +132,14 @@ public class TopDataUtil {
                 PreparedStatement statement2 = connection.prepareStatement(updateQuery.formatted(setStr))
             ) {
                 for (String username : usernameSet) {
-                    statement1.setTimestamp(1, new Timestamp(TimeUtil.getCurMilli()));
-                    statement1.setString(2, username);
+                    statement1.setString(1, username);
                     statement1.addBatch();
                 }
 
                 statement1.executeBatch();
 
                 statement2.setInt(1, tier);
-                statement2.setTimestamp(2, new Timestamp(TimeUtil.getCurMilli()));
-                statement2.setInt(3, tier);
+                statement2.setInt(2, tier);
                 statement2.executeUpdate();
             }
 

@@ -86,6 +86,13 @@ class MegaMenuComponentHandler implements Configured {
             )
         );
 
+        if (this.interactive.curView == MegaMenuView.COMPENDIUM && this.interactive.curBoarEntry != null) {
+            this.interactive.mustBeExact = true;
+            this.interactive.boarPage = BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
+            this.interactive.page = this.interactive.getFindBoarPage(this.interactive.boarPage);
+            this.interactive.boarPage = null;
+        }
+
         switch (compID) {
             case "VIEW_SELECT" -> {
                 this.interactive.page = 0;
@@ -164,7 +171,14 @@ class MegaMenuComponentHandler implements Configured {
                 if (this.interactive.curView == MegaMenuView.EDITIONS) {
                     this.interactive.prevView = this.interactive.curView;
                     this.interactive.curView = MegaMenuView.COMPENDIUM;
-                    this.interactive.boarPage = this.interactive.curBoarEntry.getKey();
+
+                    String boarID = this.interactive.curBoarEntry.getKey();
+
+                    if (this.interactive.filteredBoars.containsKey(boarID)) {
+                        this.interactive.boarPage = this.interactive.curBoarEntry.getKey();
+                    } else {
+                        this.interactive.page = 0;
+                    }
                 }
             }
 
@@ -223,22 +237,65 @@ class MegaMenuComponentHandler implements Configured {
                         .getPowerupAmount(connection, "clone");
 
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-                    int input = Math.min(Integer.parseInt(inputStr), this.interactive.numClone);
+                    int input = inputStr.isEmpty() ? this.interactive.numClone : Integer.parseInt(inputStr);
 
                     if (input == 0 && this.interactive.numClone > 0) {
                         throw new NumberFormatException();
                     }
 
-                    boolean notCloneable = RARITIES.get(this.interactive.curRarityKey).getAvgClones() == 0 ||
-                        input > this.interactive.numClone;
+                    if (this.interactive.numClone == 0) {
+                        this.interactive.acknowledgeOpen = true;
+                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getNoItem());
 
-                    if (notCloneable) {
+                        Log.debug(this.user, this.getClass(), "Failed to clone: Has none");
+                        this.interactive.execute(null);
+                        return;
+                    }
+
+                    int avgClones = RARITIES.get(this.interactive.curRarityKey).getAvgClones();
+                    boolean tooMany = input / avgClones > 25 || input / avgClones == 25 && input % avgClones > 0;
+
+                    if (tooMany && !inputStr.isEmpty()) {
                         this.interactive.acknowledgeOpen = true;
                         this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                            null, STRS.getNoPow().formatted(POWS.get("clone").getPluralName())
+                            null, STRS.getCompCloneTooMany()
+                        );
+
+
+                        Log.debug(this.user, this.getClass(), "Failed to clone: Too many");
+                        this.interactive.execute(null);
+                        return;
+                    }
+
+                    if (tooMany) {
+                        input = avgClones * 25;
+                    }
+
+                    if (input > this.interactive.numClone) {
+                        this.interactive.acknowledgeOpen = true;
+                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                            null,
+                            STRS.getSomePow().formatted(
+                                input,
+                                input == 1
+                                    ? POWS.get("clone").getName()
+                                    : POWS.get("clone").getPluralName(),
+                                this.interactive.numClone
+                            )
                         );
 
                         Log.debug(this.user, this.getClass(), "Failed to clone: Not enough");
+                        this.interactive.execute(null);
+                        return;
+                    }
+
+                    if (RARITIES.get(this.interactive.curRarityKey).getAvgClones() == 0) {
+                        this.interactive.acknowledgeOpen = true;
+                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
+                            null, STRS.getBadPow().formatted(POWS.get("clone").getPluralName())
+                        );
+
+                        Log.debug(this.user, this.getClass(), "Failed to clone: Has none");
                         this.interactive.execute(null);
                         return;
                     }
@@ -284,16 +341,32 @@ class MegaMenuComponentHandler implements Configured {
                     int numMiracles = this.interactive.powData.powAmts().get("miracle");
 
                     String inputStr = this.modalEvent.getValues().getFirst().getAsString().replaceAll("[^0-9]+", "");
-                    int input = Math.min(Integer.parseInt(inputStr), numMiracles);
+                    int input = inputStr.isEmpty() ? numMiracles : Integer.parseInt(inputStr);
 
-                    if (input <= 0 && numMiracles > 0) {
+                    if (input == 0 && numMiracles > 0) {
                         throw new NumberFormatException();
                     }
 
                     if (numMiracles == 0) {
                         this.interactive.acknowledgeOpen = true;
+                        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getNoItem());
+
+                        Log.debug(this.user, this.getClass(), "Failed to miracle: Has none");
+                        this.interactive.execute(null);
+                        return;
+                    }
+
+                    if (input > numMiracles) {
+                        this.interactive.acknowledgeOpen = true;
                         this.interactive.acknowledgeImageGen = new OverlayImageGenerator(
-                            null, STRS.getNoPow().formatted(POWS.get("miracle").getPluralName())
+                            null,
+                            STRS.getSomePow().formatted(
+                                input,
+                                input == 1
+                                    ? POWS.get("miracle").getName()
+                                    : POWS.get("miracle").getPluralName(),
+                                numMiracles
+                            )
                         );
 
                         Log.debug(this.user, this.getClass(), "Failed to miracle: Not enough");
@@ -483,42 +556,33 @@ class MegaMenuComponentHandler implements Configured {
         RarityConfig rarity = RARITIES.get(this.interactive.curRarityKey);
         int avgClones = rarity.getAvgClones();
 
-        boolean tooMany = input / avgClones > 25 || input / avgClones == 25 && input % avgClones > 0;
-
-        if (tooMany) {
-            input = avgClones * 25;
-        }
-
         this.interactive.numTryClone = input;
         this.interactive.confirmOpen = true;
 
         double percentVal = ((double) (input % avgClones) / avgClones) * 100;
         NumberFormat percentFormat = new DecimalFormat("#.##");
 
-        if (input / avgClones <= 1) {
-            String boarName = BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
-            String cloneName = input == 1
-                ? POWS.get("clone").getName()
-                : POWS.get("clone").getPluralName();
-            String percentStr = percentVal == 0
-                ? percentFormat.format(percentVal + 100) + "%"
-                : percentFormat.format(percentVal) + "%";
+        String boarName = input / avgClones > 1
+            ? BOARS.get(this.interactive.curBoarEntry.getKey()).getPluralName()
+            : BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
+        String cloneName = input == 1
+            ? POWS.get("clone").getName()
+            : POWS.get("clone").getPluralName();
+        String percentStr = percentVal == 0
+            ? percentFormat.format(percentVal + 100) + "%"
+            : percentFormat.format(percentVal) + "%";
 
+        if (input % avgClones == 0) {
+            this.interactive.confirmString = STRS.getCompCloneConfirmClean().formatted(
+                input, cloneName, input / avgClones, "<>" + this.interactive.curRarityKey + "<>" + boarName
+            );
+        } else if (input / avgClones < 1) {
             this.interactive.confirmString = STRS.getCompCloneConfirmOne().formatted(
-                "%,d".formatted(input) + " " + cloneName,
-                percentStr,
-                "<>" + this.interactive.curRarityKey + "<>" + boarName
+                input, cloneName, percentStr, "<>" + this.interactive.curRarityKey + "<>" + boarName
             );
         } else {
-            String boarName = input / avgClones > 1
-                ? BOARS.get(this.interactive.curBoarEntry.getKey()).getPluralName()
-                : BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
-
             this.interactive.confirmString = STRS.getCompCloneConfirmMultiple().formatted(
-                "%,d".formatted(input) + " " + POWS.get("clone").getPluralName(),
-                (input / avgClones),
-                "<>" + this.interactive.curRarityKey + "<>" + boarName,
-                percentFormat.format(percentVal) + "%"
+                input, cloneName, input / avgClones, "<>" + this.interactive.curRarityKey + "<>" + boarName, percentStr
             );
         }
     }
