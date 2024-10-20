@@ -245,6 +245,13 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
         for (String boarID : filteredBoars.keySet()) {
             BoarItemConfig boar = BOARS.get(boarID);
 
+            for (String searchTerm : boar.getSearchTerms()) {
+                if (cleanInput.equals(searchTerm)) {
+                    Log.debug(this.user, this.getClass(), "Found boar: " + boarID);
+                    return newPage;
+                }
+            }
+
             if (boar.getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput)) {
                 Log.debug(this.user, this.getClass(), "Found boar: " + boarID);
                 return newPage;

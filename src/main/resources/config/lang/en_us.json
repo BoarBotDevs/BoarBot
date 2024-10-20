@@ -364,7 +364,7 @@
   "marketBuySuccess": "You successfully purchased %,d %s<>font<> for <>bucks<>$%,d<>font<>!",
   "marketSellSuccess": "You successfully sold %,d %s<>font<> for <>bucks<>$%,d<>font<>!",
   "marketClosed": "The market is currently closed!",
-  "notificationHalloween": "Boar-o-ween happens every year on Halloween anSd consists of a series of intricate hunts and unique rewards. Interested in playing? Join our Discord server: https://discord.boarbot.dev",
+  "notificationHalloween": "Boar-o-ween happens every year on Halloween (starting 9:00PM UTC) and consists of a series of intricate hunts and unique rewards. Interested in playing? Join our Discord server: https://discord.boarbot.dev",
   "notificationChristmas": "Boarmas is now active for the Holidays! Boar Gifts are more frequent from Powerup Events, there's new boars to obtain, and Boar Gifts have improved odds for getting rarer boars!",
   "somePow": "<>error<>You are trying to use <>silver<>%,d<>powerup<> %s<>error<>, but you only have <>silver<>%,d<>error<>.",
   "badPow": "<>error<>This item can not have <>powerup<>%s<>error<> used on it.",

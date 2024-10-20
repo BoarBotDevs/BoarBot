@@ -21,7 +21,8 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
     protected static final int[] IMAGE_SIZE = {1920, 1403};
     protected static final int[] USER_AVATAR_POS = {882, 25};
     protected static final int USER_AVATAR_WIDTH = 156;
-    protected static final int[] USER_TAG_POS = {959, 241};
+    private static final int USER_TAG_WIDTH = IMAGE_SIZE[0] - NUMS.getBorder()*4;
+    protected static final int[] USER_TAG_POS = {959, 218};
     protected static final int[] DATE_LABEL_POS = {1479, 81};
     protected static final int[] DATE_POS = {1479, 135};
     protected static final int[] NO_BADGE_POS = {442, 108};
@@ -68,9 +69,10 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         GraphicsUtil.drawCircleImage(g2d, userAvatar, USER_AVATAR_POS, USER_AVATAR_WIDTH);
 
         TextDrawer textDrawer = new TextDrawer(
-            g2d, userString, USER_TAG_POS, Align.CENTER, COLORS.get("font"), NUMS.getFontMedium()
+            g2d, userString, USER_TAG_POS, Align.CENTER, COLORS.get("font"), NUMS.getFontMedium(), USER_TAG_WIDTH
         );
         textDrawer.drawText();
+        textDrawer.setWidth(-1);
 
         textDrawer.setText(STRS.getMegaMenuDateLabel());
         textDrawer.setPos(DATE_LABEL_POS);

@@ -45,12 +45,12 @@ public final class TimeUtil {
     }
 
     public static long getQuestResetMilli() {
-        LocalDateTime dateTime = LocalDate.now(ZoneOffset.UTC).atStartOfDay().minusMinutes(1);
+        LocalDateTime dateTime = LocalDateTime.now(ZoneOffset.UTC).plusMinutes(1).toLocalDate().atStartOfDay();
         int dayOfWeek = dateTime.getDayOfWeek().getValue();
-        int daysToAdd = dayOfWeek >= 6
-            ? 7 - dayOfWeek + 6
-            : 6 - dayOfWeek;
-        dateTime = dateTime.plusDays(daysToAdd);
+        int daysToAdd = dayOfWeek == 7
+            ? dayOfWeek
+            : 7 - dayOfWeek;
+        dateTime = dateTime.plusDays(daysToAdd).minusMinutes(1);
 
         return dateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
     }

@@ -18,10 +18,10 @@ import java.nio.file.Paths;
 import java.util.*;
 
 class MigrationReader implements Configured {
-    private final static Path oldUsersPath = Paths.get("database/users/");
-    private final static Path oldLeaderboardPath = Paths.get("database/global/leaderboards.json");
-    private final static Path oldGuildsPath = Paths.get("database/guilds/");
-    private final static Path oldMarketPath = Paths.get("database/global/items.json");
+    private final static Path oldUsersPath = Paths.get("oldDatabase/users/");
+    private final static Path oldLeaderboardPath = Paths.get("oldDatabase/global/leaderboards.json");
+    private final static Path oldGuildsPath = Paths.get("oldDatabase/guilds/");
+    private final static Path oldMarketPath = Paths.get("oldDatabase/global/items.json");
 
     public static List<OldUserData> getOldUsers(Map<String, UserMarketData> userMarketData) {
         Log.debug(MigrationReader.class, "Getting old user data...");

@@ -248,7 +248,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
                     if (input == Integer.MAX_VALUE) {
                         int right = buyData.amount();
-                        int left = 0;
+                        int left = 1;
 
                         if (this.focusedID.equals("transmute")) {
                             right = NUMS.getMaxTransmute() -
@@ -270,7 +270,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
                             }
                         }
 
-                        if (buyData.cost() > userBucks && input > 0) {
+                        if (buyData.cost() > userBucks && input > 1) {
                             input--;
                             buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
                         }
@@ -617,12 +617,23 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
         while (!cleanInput.isEmpty()) {
             for (String powerupID : POWS.keySet()) {
-                boolean shouldAdd = !searchedItemIDs.contains(powerupID) &&
-                    POWS.get(powerupID).getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput) &&
-                    cachedMarketData.containsKey(powerupID);
+                boolean shouldAdd = !searchedItemIDs.contains(powerupID) &&cachedMarketData.containsKey(powerupID);
+                boolean foundSearch = false;
 
                 if (shouldAdd) {
-                    searchedItemIDs.add(powerupID);
+                    for (String searchTerm : POWS.get(powerupID).getSearchTerms()) {
+                        if (cleanInput.equals(searchTerm)) {
+                            foundSearch = true;
+                            searchedItemIDs.add(powerupID);
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldAdd && !foundSearch) {
+                    if (POWS.get(powerupID).getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput)) {
+                        searchedItemIDs.add(powerupID);
+                    }
                 }
             }
 
@@ -630,11 +641,23 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
                 for (String boarID : rarity.getBoars()) {
                     boolean shouldAdd = !BOARS.get(boarID).isBlacklisted() &&
                         !searchedItemIDs.contains(boarID) &&
-                        BOARS.get(boarID).getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput) &&
                         cachedMarketData.containsKey(boarID);
+                    boolean foundSearch = false;
 
                     if (shouldAdd) {
-                        searchedItemIDs.add(boarID);
+                        for (String searchTerm : BOARS.get(boarID).getSearchTerms()) {
+                            if (cleanInput.equals(searchTerm)) {
+                                foundSearch = true;
+                                searchedItemIDs.add(boarID);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (shouldAdd && !foundSearch) {
+                        if (BOARS.get(boarID).getName().replaceAll(" ", "").toLowerCase().startsWith(cleanInput)) {
+                            searchedItemIDs.add(boarID);
+                        }
                     }
                 }
             }

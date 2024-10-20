@@ -8,6 +8,7 @@ import dev.boarbot.interactives.Interactive;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.listeners.*;
 import dev.boarbot.modals.ModalHandler;
+import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -40,11 +41,12 @@ public class BoarBot implements Bot, Configured {
         Log.info(this.getClass(), "Starting up bot...");
 
         ConfigLoader.loadConfig();
+        DataUtil.setupDatabase();
         DatabaseLoader.loadIntoDatabase();
         CacheLoader.loadCache();
         CommandLoader.registerSubcommands();
 
-        this.jda = JDABuilder.createDefault(BoarBotApp.getEnv().get("TOKEN"))
+        this.jda = JDABuilder.createDefault(BoarBotApp.getEnv("TOKEN"))
             .addEventListeners(
                 new StopMessageListener(),
                 new CommandListener(),

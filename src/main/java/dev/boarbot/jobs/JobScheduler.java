@@ -4,6 +4,8 @@ import dev.boarbot.util.logging.Log;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
+import java.util.Set;
+
 public class JobScheduler {
     public static void scheduleJobs() {
         try {
@@ -24,6 +26,18 @@ public class JobScheduler {
             scheduler.scheduleJob(MarketCacheJob.getJob(), MarketCacheJob.getTrigger());
             scheduler.scheduleJob(MarketAdjustJob.getJob(), MarketAdjustJob.getTrigger());
             scheduler.scheduleJob(WipeJob.getJob(), WipeJob.getTrigger());
+
+            scheduler.scheduleJob(
+                SpookMessageJob.getJob(),
+                Set.of(
+                    SpookMessageJob.getTrigger1(),
+                    SpookMessageJob.getTrigger2(),
+                    SpookMessageJob.getTrigger3(),
+                    SpookMessageJob.getTrigger4(),
+                    SpookMessageJob.getTrigger5()
+                ),
+                true
+            );
 
             Log.debug(JobScheduler.class, "Jobs successfully scheduled");
         } catch (SchedulerException exception) {

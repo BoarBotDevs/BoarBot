@@ -54,7 +54,14 @@ public class BaseQueries implements Configured {
         }
 
         String query = """
-            SELECT username, last_daily_timestamp, last_streak_fix, first_joined_timestamp, boar_streak, streak_frozen
+            SELECT
+                username,
+                last_daily_timestamp,
+                last_streak_fix,
+                first_joined_timestamp,
+                boar_streak,
+                streak_frozen,
+                cur_dailies_missed
             FROM users
             WHERE user_id = ?;
         """;
@@ -64,6 +71,7 @@ public class BaseQueries implements Configured {
         long lastDailyLong = 0;
         long lastStreakLong = 0;
         long firstJoinedLong = 0;
+        int curDailiesMissed;
         int boarStreak;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -91,10 +99,11 @@ public class BaseQueries implements Configured {
                 }
 
                 if (firstJoinedTimestamp != null) {
-                    firstJoinedLong = firstJoinedTimestamp.getTime();
+                    firstJoinedLong = firstJoinedTimestamp.getTime() - TimeUtil.getOneDayMilli();
                 }
 
                 boarStreak = results.getInt("boar_streak");
+                curDailiesMissed = results.getInt("cur_dailies_missed");
             }
         }
 
@@ -112,42 +121,45 @@ public class BaseQueries implements Configured {
             }
         }
 
-        if (streakFrozen) {
+        if (streakFrozen || firstJoinedLong == 0) {
             return;
         }
 
         int newBoarStreak = boarStreak;
         long timeToReach = Math.max(Math.max(lastDailyLong, lastStreakLong), firstJoinedLong);
         long curTimeCheck = TimeUtil.getLastDailyResetMilli() - TimeUtil.getOneDayMilli();
-        int curRemove = 7;
-        int curDailiesMissed = 0;
+        int newDailiesMissed = 0;
 
         while (timeToReach < curTimeCheck) {
-            newBoarStreak = Math.max(newBoarStreak - curRemove, 0);
-            curTimeCheck -= TimeUtil.getOneDayMilli();
-
-            if (newBoarStreak != 0) {
-                curRemove *= 2;
+            if (newBoarStreak > 0) {
+                int curRemove = (int) Math.pow(7, curDailiesMissed + newDailiesMissed);
+                newBoarStreak = Math.max(newBoarStreak - curRemove, 0);
             }
 
-            curDailiesMissed++;
+            curTimeCheck -= TimeUtil.getOneDayMilli();
+            newDailiesMissed++;
         }
 
-        if (curDailiesMissed == 0) {
+        if (newDailiesMissed == 0) {
             return;
         }
 
         String updateQuery = """
             UPDATE users
-            SET boar_streak = ?, num_dailies_missed = num_dailies_missed + ?, last_streak_fix = ?
+            SET
+                boar_streak = ?,
+                num_dailies_missed = num_dailies_missed + ?,
+                cur_dailies_missed = cur_dailies_missed + ?,
+                last_streak_fix = ?
             WHERE user_id = ?
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
             statement.setInt(1, newBoarStreak);
-            statement.setInt(2, curDailiesMissed);
-            statement.setTimestamp(3, new Timestamp(TimeUtil.getLastDailyResetMilli()-1));
-            statement.setString(4, this.boarUser.getUserID());
+            statement.setInt(2, newDailiesMissed);
+            statement.setInt(3, newDailiesMissed);
+            statement.setTimestamp(4, new Timestamp(TimeUtil.getLastDailyResetMilli()-1));
+            statement.setString(5, this.boarUser.getUserID());
             statement.executeUpdate();
         }
 

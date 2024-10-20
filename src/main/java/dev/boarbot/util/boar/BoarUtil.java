@@ -21,7 +21,7 @@ public final class BoarUtil implements Configured {
             return rarityKey;
         }
 
-        throw new IllegalArgumentException("Boar ID input does not exist");
+        throw new IllegalArgumentException("Boar ID (%s) input does not exist".formatted(boarID));
     }
 
     public static String getPriorRarityKey(String rarityKey) {

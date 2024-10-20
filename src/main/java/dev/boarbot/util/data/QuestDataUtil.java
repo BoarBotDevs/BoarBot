@@ -111,7 +111,7 @@ public class QuestDataUtil implements Configured {
             }
         }
 
-        return questTimestamp == null || questTimestamp.getTime() < TimeUtil.getLastQuestResetMilli();
+        return questTimestamp == null || questTimestamp.getTime() <= TimeUtil.getLastQuestResetMilli();
     }
 
     public static int getQuestIndex(QuestType quest, Connection connection) throws SQLException {

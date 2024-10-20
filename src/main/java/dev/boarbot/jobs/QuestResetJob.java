@@ -14,7 +14,7 @@ public class QuestResetJob implements Job {
     @Getter
     private final static JobDetail job = JobBuilder.newJob(QuestResetJob.class).build();
     @Getter private final static Trigger trigger = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 59 23 ? * 6").inTimeZone(TimeZone.getTimeZone("UTC")))
+        .withSchedule(CronScheduleBuilder.cronSchedule("0 59 23 ? * 7").inTimeZone(TimeZone.getTimeZone("UTC")))
         .build();
 
     @Override

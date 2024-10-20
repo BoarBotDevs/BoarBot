@@ -169,7 +169,11 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     },
                     e -> {
                         this.stop(StopType.EXCEPTION);
-                        this.eventHandler.getFailedGuilds().add(this.channel.getGuild().getId());
+
+                        if (e instanceof InsufficientPermissionException) {
+                            this.eventHandler.getFailedGuilds().add(this.channel.getGuild().getId());
+                        }
+
                         this.eventHandler.decNumPotential();
                         ExceptionHandler.handle(this.getClass(), e);
                     }

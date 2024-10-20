@@ -2,6 +2,7 @@ package dev.boarbot.entities.boaruser.queries;
 
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.interactives.boar.market.MarketInteractive;
 import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.market.MarketDataUtil;
@@ -95,9 +96,10 @@ public class BoarQueries implements Configured {
                             this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions, firstBoarIDs);
                         }
 
-                        this.boarUser.baseQuery().updateHighestBlessings(connection);
+                        boolean addToMarket = RARITIES.get(rarityKey).getTargetStock() != null &&
+                            !MarketInteractive.cachedMarketData.containsKey(boarID);
 
-                        if (curEdition == 1 && RARITIES.get(rarityKey).getTargetStock() != null) {
+                        if (addToMarket) {
                             MarketDataUtil.updateMarket(MarketUpdateType.ADD_ITEM, boarID, connection);
                         }
                     }
@@ -110,6 +112,10 @@ public class BoarQueries implements Configured {
                 updateFirstStatement.setString(1, this.boarUser.getUserID());
                 updateFirstStatement.executeUpdate();
             }
+        }
+
+        if (!obtainType.equals("DAILY")) {
+            this.boarUser.baseQuery().updateHighestBlessings(connection);
         }
 
         boarIDs.clear();

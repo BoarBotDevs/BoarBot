@@ -21,6 +21,7 @@ public class ReadyListener extends ListenerAdapter implements Configured {
         TextChannel logChannel = event.getJDA().getTextChannelById(CONFIG.getMainConfig().getLogChannel());
         ForumChannel reportChannel = event.getJDA().getForumChannelById(CONFIG.getMainConfig().getReportsChannel());
         TextChannel pingChannel = event.getJDA().getTextChannelById(CONFIG.getMainConfig().getPingChannel());
+        TextChannel spookChannel = event.getJDA().getTextChannelById(CONFIG.getMainConfig().getSpookChannel());
 
         if (logChannel == null) {
             Log.warn(this.getClass(), "Invalid log channel ID. Channel logs are disabled!");
@@ -32,6 +33,10 @@ public class ReadyListener extends ListenerAdapter implements Configured {
 
         if (pingChannel == null) {
             Log.warn(this.getClass(), "Invalid ping channel ID. The legacy channel pinging system is disabled!");
+        }
+
+        if (spookChannel == null) {
+            Log.warn(this.getClass(), "Invalid spook channel ID. Boar-O-Ween messages are disabled!");
         }
 
         Log.info(this.getClass(), "Bot is online!", true);
