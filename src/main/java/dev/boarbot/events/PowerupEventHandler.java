@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
 public class PowerupEventHandler extends EventHandler implements Synchronizable, Configured {
     @Getter protected static final List<Message> curMessages = new ArrayList<>();
@@ -108,8 +109,12 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
     }
 
     private void removePriorEvent() {
+        Semaphore semaphore = new Semaphore(2);
+
         for (Message msg : priorMessages) {
+            semaphore.acquireUninterruptibly();
             msg.delete().queue(null, e -> ExceptionHandler.handle(this.getClass(), e));
+            semaphore.release();
         }
 
         Log.debug(this.getClass(), "Removed prior Powerup Event messages");
@@ -191,9 +196,13 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
             Log.error(this.getClass(), "Failed to generate Powerup Event end message", exception);
         }
 
+        Semaphore semaphore = new Semaphore(2);
+
         for (Message msg : curMessages) {
+            semaphore.acquireUninterruptibly();
             msg.editMessage(MessageEditData.fromCreateData(msgData))
                 .queue(null, e -> ExceptionHandler.handle(this.getClass(), e));
+            semaphore.release();
         }
 
         Log.debug(this.getClass(), "Edited all Powerup Event messages");

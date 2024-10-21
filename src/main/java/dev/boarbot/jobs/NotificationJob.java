@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
 public class NotificationJob implements Job, Configured {
     @Getter private final static JobDetail job = JobBuilder.newJob(NotificationJob.class).build();
@@ -52,6 +53,8 @@ public class NotificationJob implements Job, Configured {
             return;
         }
 
+        Semaphore semaphore = new Semaphore(2);
+
         for (String notifUserID : notifUserIDs) {
             try (Connection connection = DataUtil.getConnection()) {
                 if (notifUsers.containsKey(notifUserID)) {
@@ -64,8 +67,11 @@ public class NotificationJob implements Job, Configured {
                     continue;
                 }
 
+                semaphore.acquireUninterruptibly();
                 jda.retrieveUserById(notifUserID).queue(
                     user -> {
+                        semaphore.release();
+
                         if (user.getMutualGuilds().isEmpty()) {
                             return;
                         }
@@ -83,7 +89,10 @@ public class NotificationJob implements Job, Configured {
                             Log.error(NotificationJob.class, "Failed to get notification channel", exception);
                         }
                     },
-                    e -> ExceptionHandler.handle(NotificationJob.class, e)
+                    e -> {
+                        semaphore.release();
+                        ExceptionHandler.handle(NotificationJob.class, e);
+                    }
                 );
             } catch (SQLException exception) {
                 Log.error(NotificationJob.class, "Failed to get notification channel", exception);
