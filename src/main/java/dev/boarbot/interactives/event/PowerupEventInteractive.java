@@ -159,10 +159,13 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             return;
         }
 
+        semaphore.acquireUninterruptibly();
+
         if (this.msg == null) {
             try {
                 this.channel.sendMessage(MessageCreateData.fromEditData(editedMsg)).queue(
                     msg -> {
+                        semaphore.release();
                         this.msg = msg;
                         PowerupEventHandler.getCurMessages().add(this.msg);
                         this.eventHandler.decNumPotential();
@@ -189,7 +192,13 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             return;
         }
 
-        this.msg.editMessage(editedMsg).queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
+        this.msg.editMessage(editedMsg).queue(
+            m -> semaphore.release(),
+            e -> {
+                semaphore.release();
+                ExceptionHandler.messageHandle(this.msg, this, e);
+            }
+        );
     }
 
     public void doSynchronizedAction(BoarUser boarUser) {

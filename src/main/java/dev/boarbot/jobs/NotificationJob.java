@@ -34,6 +34,8 @@ public class NotificationJob implements Job, Configured {
     private final static Map<Integer, Integer> dynamicValues = new HashMap<>();
     private final static int streakIndex = 10;
 
+    private static final Semaphore semaphore = new Semaphore(1);
+
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         List<String> notifUserIDs;
@@ -53,8 +55,6 @@ public class NotificationJob implements Job, Configured {
             return;
         }
 
-        Semaphore semaphore = new Semaphore(2);
-
         for (String notifUserID : notifUserIDs) {
             try (Connection connection = DataUtil.getConnection()) {
                 if (notifUsers.containsKey(notifUserID)) {
@@ -63,15 +63,13 @@ public class NotificationJob implements Job, Configured {
                         connection, boarUser.baseQuery().getNotificationChannel(connection), boarUser
                     );
 
+                    semaphore.acquireUninterruptibly();
                     sendNotification(notifUsers.get(boarUser.getUserID()), notificationStr);
                     continue;
                 }
 
-                semaphore.acquireUninterruptibly();
                 jda.retrieveUserById(notifUserID).queue(
                     user -> {
-                        semaphore.release();
-
                         if (user.getMutualGuilds().isEmpty()) {
                             return;
                         }
@@ -89,10 +87,7 @@ public class NotificationJob implements Job, Configured {
                             Log.error(NotificationJob.class, "Failed to get notification channel", exception);
                         }
                     },
-                    e -> {
-                        semaphore.release();
-                        ExceptionHandler.handle(NotificationJob.class, e);
-                    }
+                    e -> ExceptionHandler.handle(NotificationJob.class, e)
                 );
             } catch (SQLException exception) {
                 Log.error(NotificationJob.class, "Failed to get notification channel", exception);
@@ -104,9 +99,17 @@ public class NotificationJob implements Job, Configured {
 
     private static void sendNotification(User user, String str) {
         user.openPrivateChannel().queue(
-            ch -> ch.sendMessage(str).setSuppressEmbeds(true)
-                .queue(null, e -> ExceptionHandler.handle(user, NotificationJob.class, e)),
-            e -> ExceptionHandler.handle(user, NotificationJob.class, e)
+            ch -> ch.sendMessage(str).setSuppressEmbeds(true).queue(
+                m -> semaphore.release(),
+                e -> {
+                    semaphore.release();
+                    ExceptionHandler.handle(user, NotificationJob.class, e);
+                }
+            ),
+            e -> {
+                semaphore.release();
+                ExceptionHandler.handle(user, NotificationJob.class, e);
+            }
         );
     }
 

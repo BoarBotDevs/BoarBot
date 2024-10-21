@@ -13,9 +13,13 @@ import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteract
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
+import java.util.concurrent.Semaphore;
+
 public abstract class EventInteractive extends Interactive {
     protected final TextChannel channel;
     @Getter protected Message msg;
+
+    public static final Semaphore semaphore = new Semaphore(1);
 
     protected EventInteractive(TextChannel channel) {
         super(channel.getId() + TimeUtil.getCurMilli(), channel.getGuild().getId());
@@ -45,7 +49,14 @@ public abstract class EventInteractive extends Interactive {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }
 
-        this.msg.editMessageComponents(rows).queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
+        semaphore.acquireUninterruptibly();
+        this.msg.editMessageComponents(rows).queue(
+            m -> semaphore.release(),
+            e -> {
+                semaphore.release();
+                ExceptionHandler.messageHandle(this.msg, this, e);
+            }
+        );
     }
 
     @Override
@@ -58,7 +69,14 @@ public abstract class EventInteractive extends Interactive {
             throw new IllegalStateException("The interactive hasn't been initialized yet!");
         }
 
-        this.msg.delete().queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
+        semaphore.acquireUninterruptibly();
+        this.msg.delete().queue(
+            m -> semaphore.release(),
+            e -> {
+                semaphore.release();
+                ExceptionHandler.messageHandle(this.msg, this, e);
+            }
+        );
     }
 
     @Override
@@ -70,14 +88,29 @@ public abstract class EventInteractive extends Interactive {
             return;
         }
 
+        if (semaphore.availablePermits() == 1) {
+            semaphore.acquireUninterruptibly();
+        }
+
         if (type.equals(StopType.EXCEPTION)) {
-            this.msg.editMessage(MessageEditData.fromCreateData(SpecialReply.getErrorMsgData()))
-                .queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
+            this.msg.editMessage(MessageEditData.fromCreateData(SpecialReply.getErrorMsgData())).queue(
+                m -> semaphore.release(),
+                e -> {
+                    semaphore.release();
+                    ExceptionHandler.messageHandle(this.msg, this, e);
+                }
+            );
             return;
         }
 
         Log.debug(this.getClass(), "Interactive expired");
-        this.msg.editMessageComponents().queue(null, e -> ExceptionHandler.messageHandle(this.msg, this, e));
+        this.msg.editMessageComponents().queue(
+            m -> semaphore.release(),
+            e -> {
+                semaphore.release();
+                ExceptionHandler.messageHandle(this.msg, this, e);
+            }
+        );
     }
 
     @Override

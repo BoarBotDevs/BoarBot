@@ -14,7 +14,6 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.Semaphore;
 
 public abstract class EventHandler {
     @Getter protected Set<String> failedGuilds = new HashSet<>();
@@ -44,12 +43,8 @@ public abstract class EventHandler {
 
         Log.debug(this.getClass(), "Gathered all guild channels");
 
-        Semaphore semaphore = new Semaphore(2);
-
         for (String guildID : channels.keySet()) {
             for (TextChannel channel : channels.get(guildID)) {
-                semaphore.acquireUninterruptibly();
-
                 try {
                     incNumPotential();
                     this.sendInteractive(channel);
@@ -57,8 +52,6 @@ public abstract class EventHandler {
                     this.decNumPotential();
                     Log.error(this.getClass(), "A problem occurred when sending event", exception);
                 }
-
-                semaphore.release();
             }
         }
 
