@@ -145,7 +145,7 @@ public class OverlayImageGenerator extends ImageGenerator {
             Gson g = new Gson();
 
             Process pythonProcess = new ProcessBuilder(
-                "python",
+                "python3",
                 PythonUtil.getTempPath(ResourceUtil.animOverlayScript),
                 g.toJson(NUMS),
                 "[%d, %d]".formatted(pos[0], pos[1]),

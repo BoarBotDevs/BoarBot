@@ -164,7 +164,7 @@ public class ItemImageGenerator extends ImageGenerator {
         byte[] animatedImage = GraphicsUtil.getImageBytes(this.filePath);
 
         Process pythonProcess = new ProcessBuilder(
-            "python",
+            "python3",
             PythonUtil.getTempPath(ResourceUtil.animItemScript),
             g.toJson(NUMS),
             Integer.toString(this.generatedImageBytes.length),
@@ -182,7 +182,7 @@ public class ItemImageGenerator extends ImageGenerator {
         byte[] userOverlayBytes = byteArrayOS.toByteArray();
 
         Process pythonProcess = new ProcessBuilder(
-            "python",
+            "python3",
             PythonUtil.getTempPath(ResourceUtil.userItemScript),
             Integer.toString(this.generatedImageBytes.length),
             Integer.toString(userOverlayBytes.length)
