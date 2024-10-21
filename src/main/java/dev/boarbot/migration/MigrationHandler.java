@@ -18,19 +18,19 @@ import java.util.PriorityQueue;
 public class MigrationHandler implements Configured {
     public static void doMigration() {
         try {
-            ConfigUpdater.setMaintenance(true);
-        } catch (IOException exception) {
-            Log.error(MigrationHandler.class, "Failed to enable maintenance mode", exception);
-            System.exit(-1);
-        }
-
-        try {
             if (DataUtil.databaseHasData()) {
                 Log.info(MigrationHandler.class, "Skipping migration. Database already initialized");
                 return;
             }
         } catch (SQLException exception) {
             Log.error(MigrationHandler.class, "Failed to check if database has data", exception);
+            System.exit(-1);
+        }
+
+        try {
+            ConfigUpdater.setMaintenance(true);
+        } catch (IOException exception) {
+            Log.error(MigrationHandler.class, "Failed to enable maintenance mode", exception);
             System.exit(-1);
         }
 
