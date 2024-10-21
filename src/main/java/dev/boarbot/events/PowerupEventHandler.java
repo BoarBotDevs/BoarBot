@@ -25,14 +25,15 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PowerupEventHandler extends EventHandler implements Synchronizable, Configured {
     @Getter protected static final List<Message> curMessages = new ArrayList<>();
     private static final Set<Message> priorMessages = new HashSet<>();
 
-    @Getter private final Map<String, Long> userTimes = new HashMap<>();
+    @Getter private final Map<String, Long> userTimes = new ConcurrentHashMap<>();
     private final List<String> sortedUsers = new ArrayList<>();
-    @Getter private final Map<String, Boolean> failUsers = new HashMap<>();
+    @Getter private final Map<String, Boolean> failUsers = new ConcurrentHashMap<>();
 
     @Getter private final PromptType promptType;
     @Getter private final String promptID;

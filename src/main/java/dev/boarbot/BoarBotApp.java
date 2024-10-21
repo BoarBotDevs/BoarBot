@@ -70,7 +70,7 @@ public class BoarBotApp {
             MigrationHandler.doMigration();
         }
 
-        if (args.length > 1 && Boolean.getBoolean(args[1])) {
+        if (environmentType != EnvironmentType.PROD && args.length > 1 && Boolean.getBoolean(args[1])) {
             bot.deployCommands();
         }
 

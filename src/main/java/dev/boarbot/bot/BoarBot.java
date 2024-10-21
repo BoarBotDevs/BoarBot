@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,10 +28,10 @@ public class BoarBot implements Bot, Configured {
     private final BotConfig config = new BotConfig();
     private Font font;
 
-    private final Map<String, byte[]> byteCacheMap = new HashMap<>();
-    private final Map<String, BufferedImage> imageCacheMap = new HashMap<>();
+    private final Map<String, byte[]> byteCacheMap = new ConcurrentHashMap<>();
+    private final Map<String, BufferedImage> imageCacheMap = new ConcurrentHashMap<>();
 
-    private final Map<String, Constructor<? extends Subcommand>> subcommands = new HashMap<>();
+    private final Map<String, Constructor<? extends Subcommand>> subcommands = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Interactive> interactives = new ConcurrentHashMap<>();
     private final Map<String, ModalHandler> modalHandlers = new ConcurrentHashMap<>();
 
@@ -63,7 +62,6 @@ public class BoarBot implements Bot, Configured {
                 GatewayIntent.GUILD_MESSAGES,
                 GatewayIntent.DIRECT_MESSAGES
             )
-            .setMemberCachePolicy(MemberCachePolicy.ALL)
             .build();
     }
 

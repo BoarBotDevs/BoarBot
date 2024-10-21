@@ -53,8 +53,8 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
     private boolean enabled = false;
     private long giftEnabledTimestamp = 0;
-    private final Map<User, Long> giftTimes = new HashMap<>();
-    private final Map<User, GenericComponentInteractionCreateEvent> giftInteractions = new HashMap<>();
+    private final Map<User, Long> giftTimes = new ConcurrentHashMap<>();
+    private final Map<User, GenericComponentInteractionCreateEvent> giftInteractions = new ConcurrentHashMap<>();
     private boolean givenGift = false;
     private User giftWinner;
     private long giftWinnerValue;

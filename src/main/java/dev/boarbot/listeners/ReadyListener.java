@@ -6,6 +6,7 @@ import dev.boarbot.util.logging.Log;
 import lombok.Getter;
 
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -21,7 +22,7 @@ public class ReadyListener extends ListenerAdapter implements Configured {
         TextChannel logChannel = event.getJDA().getTextChannelById(CONFIG.getMainConfig().getLogChannel());
         ForumChannel reportChannel = event.getJDA().getForumChannelById(CONFIG.getMainConfig().getReportsChannel());
         TextChannel pingChannel = event.getJDA().getTextChannelById(CONFIG.getMainConfig().getPingChannel());
-        TextChannel spookChannel = event.getJDA().getTextChannelById(CONFIG.getMainConfig().getSpookChannel());
+        NewsChannel spookChannel = event.getJDA().getNewsChannelById(CONFIG.getMainConfig().getSpookChannel());
 
         if (logChannel == null) {
             Log.warn(this.getClass(), "Invalid log channel ID. Channel logs are disabled!");

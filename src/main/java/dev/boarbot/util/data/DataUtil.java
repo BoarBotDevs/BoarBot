@@ -7,6 +7,8 @@ import dev.boarbot.bot.EnvironmentType;
 
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DataUtil {
@@ -28,5 +30,24 @@ public class DataUtil {
 
     public static Connection getConnection() throws SQLException {
         return ds.getConnection();
+    }
+
+    public static boolean databaseHasData() throws SQLException {
+        try (Connection connection = getConnection()) {
+            String query = """
+                SELECT 1
+                FROM users;
+            """;
+
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

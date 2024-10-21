@@ -18,8 +18,8 @@ import java.util.List;
 public class DeployProduction {
     private static final Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
-    private static final String predeployScript = "./deploy_scripts/predeploy.sh";
-    private static final String deployScript = "./deploy_scripts/deploy.sh";
+    private static final String predeployScript = "./deployment/predeploy.sh";
+    private static final String deployScript = "./deployment/deploy.sh";
 
     public static void deploy() throws IOException {
         Runtime.getRuntime().exec(new String[] {predeployScript});
@@ -57,7 +57,7 @@ public class DeployProduction {
             }
         }
 
-        mainConfig.setDevGuild(BoarBotApp.getEnv("PROD_DEV_GUILD"));
+        mainConfig.setDevGuild(BoarBotApp.getEnv("PROD_DEV_GUILD_ID"));
         mainConfig.setLogChannel(BoarBotApp.getEnv("PROD_LOG_CHANNEL"));
         mainConfig.setReportsChannel(BoarBotApp.getEnv("PROD_REPORTS_CHANNEL"));
         mainConfig.setPingChannel(BoarBotApp.getEnv("PROD_DEFAULT_CHANNEL"));

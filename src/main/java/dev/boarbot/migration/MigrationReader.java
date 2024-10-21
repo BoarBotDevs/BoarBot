@@ -18,13 +18,18 @@ import java.nio.file.Paths;
 import java.util.*;
 
 class MigrationReader implements Configured {
-    private final static Path oldUsersPath = Paths.get("oldDatabase/users/");
+    public final static Path oldUsersPath = Paths.get("oldDatabase/users/");
     private final static Path oldLeaderboardPath = Paths.get("oldDatabase/global/leaderboards.json");
     private final static Path oldGuildsPath = Paths.get("oldDatabase/guilds/");
     private final static Path oldMarketPath = Paths.get("oldDatabase/global/items.json");
 
     public static List<OldUserData> getOldUsers(Map<String, UserMarketData> userMarketData) {
         Log.debug(MigrationReader.class, "Getting old user data...");
+
+        if (!oldUsersPath.toFile().exists()) {
+            Log.debug(MigrationReader.class, "There is no old user data to migrate");
+            return null;
+        }
 
         List<OldUserData> oldUsers = new ArrayList<>();
         File[] oldUserFiles = oldUsersPath.toFile().listFiles();
@@ -88,20 +93,22 @@ class MigrationReader implements Configured {
         Map<String, String> usernameMap = new HashMap<>();
         File oldLeaderboardFile = oldLeaderboardPath.toFile();
 
-        if (oldLeaderboardFile.exists()) {
-            try {
-                Map<String, OldBoardData> boards = new Gson().fromJson(
-                    new FileReader(oldLeaderboardFile), new TypeToken<Map<String, OldBoardData>>(){}.getType()
-                );
+        if (!oldLeaderboardFile.exists()) {
+            return usernameMap;
+        }
 
-                for (OldBoardData boardData : boards.values()) {
-                    for (String userID : boardData.getUserData().keySet()) {
-                        usernameMap.put(userID, boardData.getUserData().get(userID).get(0).getAsString());
-                    }
+        try {
+            Map<String, OldBoardData> boards = new Gson().fromJson(
+                new FileReader(oldLeaderboardFile), new TypeToken<Map<String, OldBoardData>>(){}.getType()
+            );
+
+            for (OldBoardData boardData : boards.values()) {
+                for (String userID : boardData.getUserData().keySet()) {
+                    usernameMap.put(userID, boardData.getUserData().get(userID).get(0).getAsString());
                 }
-            } catch (FileNotFoundException exception) {
-                Log.error(MigrationReader.class, "Failed to find leaderboard data", exception);
             }
+        } catch (FileNotFoundException exception) {
+            Log.error(MigrationReader.class, "Failed to find leaderboard data", exception);
         }
 
         return usernameMap;
@@ -111,6 +118,11 @@ class MigrationReader implements Configured {
         List<OldUserData> oldUsers, Map<String, UserMarketData> userMarketData
     ) {
         Log.debug(MigrationReader.class, "Getting old boar data...");
+
+        if (oldUsers == null || userMarketData == null) {
+            Log.debug(MigrationReader.class, "There is no old boar data to migrate");
+            return null;
+        }
 
         Map<String, PriorityQueue<NewBoarData>> boars = new HashMap<>();
 
@@ -198,6 +210,11 @@ class MigrationReader implements Configured {
     public static List<OldGuildData> getOldGuilds() {
         Log.debug(MigrationReader.class, "Getting old guild data...");
 
+        if (!oldGuildsPath.toFile().exists()) {
+            Log.debug(MigrationReader.class, "There is no old guild data to migrate");
+            return null;
+        }
+
         List<OldGuildData> oldGuilds = new ArrayList<>();
         File[] oldGuildFiles = oldGuildsPath.toFile().listFiles();
 
@@ -227,6 +244,11 @@ class MigrationReader implements Configured {
 
         Map<String, UserMarketData> userMarketData = new HashMap<>();
         File oldMarketFile = oldMarketPath.toFile();
+
+        if (!oldMarketFile.exists()) {
+            Log.debug(MigrationReader.class, "There is no old market data to migrate");
+            return null;
+        }
 
         if (oldMarketFile.exists()) {
             try {

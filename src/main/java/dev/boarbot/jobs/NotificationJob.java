@@ -14,7 +14,6 @@ import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.quartz.*;
@@ -23,7 +22,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class NotificationJob implements Job, Configured {
     @Getter private final static JobDetail job = JobBuilder.newJob(NotificationJob.class).build();
@@ -141,27 +139,6 @@ public class NotificationJob implements Job, Configured {
     }
 
     public static void cacheNotifUsers() {
-        List<Guild> guilds = jda.getGuilds();
-        AtomicInteger numGuilds = new AtomicInteger(guilds.size());
-
-        for (Guild guild : guilds) {
-            guild.loadMembers()
-                .onSuccess(members -> {
-                    if (numGuilds.decrementAndGet() == 0) {
-                        doCache();
-                    }
-                })
-                .onError(e -> {
-                    ExceptionHandler.handle(NotificationJob.class, e);
-
-                    if (numGuilds.decrementAndGet() == 0) {
-                        doCache();
-                    }
-                });
-        }
-    }
-
-    private static void doCache() {
         try (Connection connection = DataUtil.getConnection()) {
             JDA jda = BoarBotApp.getBot().getJDA();
             List<String> notifUserIDs = UserDataUtil.getNotifUserIDs(connection);

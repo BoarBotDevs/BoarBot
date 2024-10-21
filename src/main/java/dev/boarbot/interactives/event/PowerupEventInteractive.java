@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PowerupEventInteractive extends EventInteractive implements Synchronizable {
     private final IndivPromptConfig promptConfig;
@@ -46,7 +47,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
     private final String powerupID;
     private final Map<String, Long> userTimes;
     private final Map<String, Boolean> failUsers;
-    private final Map<String, InteractionHook> userHooks = new HashMap<>();
+    private final Map<String, InteractionHook> userHooks = new ConcurrentHashMap<>();
     private long sentTimestamp;
 
     private final Set<String> failedSynchronized = new HashSet<>();
