@@ -9,6 +9,7 @@ import dev.boarbot.util.data.BoarDataUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
 import dev.boarbot.util.data.UserDataUtil;
+import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
@@ -24,6 +25,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class NotificationJob implements Job, Configured {
     @Getter private final static JobDetail job = JobBuilder.newJob(NotificationJob.class).build();
@@ -156,23 +158,33 @@ public class NotificationJob implements Job, Configured {
     }
 
     public static void cacheNotifUsers() {
-        cacheGuildMembers();
-        cacheUsers();
+        List<Guild> guilds = jda.getGuilds();
+        cacheMembersFromGuilds(guilds, 0);
     }
 
-    private static void cacheGuildMembers() {
-        for (Guild guild : jda.getGuilds()) {
-            guild.loadMembers().onError(e -> ExceptionHandler.handle(NotificationJob.class, e));
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException exception) {
-                Thread.currentThread().interrupt();
-            }
+    private static void cacheMembersFromGuilds(List<Guild> guilds, int index) {
+        if (index >= guilds.size()) {
+            cacheUsers();
+            return;
         }
+
+        Guild guild = guilds.get(index);
+
+        guild.loadMembers().onSuccess(
+            members -> InteractionUtil.scheduler.schedule(
+                () -> cacheMembersFromGuilds(guilds, index + 1), 5, TimeUnit.SECONDS
+            )
+        ).onError(
+            error -> {
+                Log.warn(NotificationJob.class, "Failed to cache members from guild", error);
+                InteractionUtil.scheduler.schedule(
+                    () -> cacheMembersFromGuilds(guilds, index + 1), 5, TimeUnit.SECONDS
+                );
+            }
+        );
     }
 
-    public static void cacheUsers() {
+    private static void cacheUsers() {
         try (Connection connection = DataUtil.getConnection()) {
             JDA jda = BoarBotApp.getBot().getJDA();
             List<String> notifUserIDs = UserDataUtil.getNotifUserIDs(connection);
