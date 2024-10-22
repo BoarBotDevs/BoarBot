@@ -50,6 +50,7 @@ public abstract class EventInteractive extends Interactive {
         }
 
         semaphore.acquireUninterruptibly();
+
         this.msg.editMessageComponents(rows).queue(
             m -> semaphore.release(),
             e -> {
@@ -70,6 +71,7 @@ public abstract class EventInteractive extends Interactive {
         }
 
         semaphore.acquireUninterruptibly();
+
         this.msg.delete().queue(
             m -> semaphore.release(),
             e -> {
@@ -84,15 +86,9 @@ public abstract class EventInteractive extends Interactive {
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 
-        if (interactive == null) {
-            return;
-        }
-
-        if (semaphore.availablePermits() == 1) {
-            semaphore.acquireUninterruptibly();
-        }
-
         if (type.equals(StopType.EXCEPTION)) {
+            semaphore.acquireUninterruptibly();
+
             this.msg.editMessage(MessageEditData.fromCreateData(SpecialReply.getErrorMsgData())).queue(
                 m -> semaphore.release(),
                 e -> {
@@ -100,8 +96,15 @@ public abstract class EventInteractive extends Interactive {
                     ExceptionHandler.messageHandle(this.msg, this, e);
                 }
             );
+
             return;
         }
+
+        if (interactive == null) {
+            return;
+        }
+
+        semaphore.acquireUninterruptibly();
 
         Log.debug(this.getClass(), "Interactive expired");
         this.msg.editMessageComponents().queue(

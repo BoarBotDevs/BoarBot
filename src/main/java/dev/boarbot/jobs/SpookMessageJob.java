@@ -8,28 +8,40 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.quartz.*;
 
+import java.util.TimeZone;
+
 public class SpookMessageJob implements Job, Configured {
     @Getter private final static JobDetail job = JobBuilder.newJob(SpookMessageJob.class)
         .withIdentity("spookJob").build();
 
     @Getter private final static Trigger trigger1 = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 16 31 10 ?"))
+        .withSchedule(
+            CronScheduleBuilder.cronSchedule("0 0 16 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
+        )
         .withIdentity("trigger1")
         .build();
     @Getter private final static Trigger trigger2 = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 18 31 10 ?"))
+        .withSchedule(
+            CronScheduleBuilder.cronSchedule("0 0 18 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
+        )
         .withIdentity("trigger2")
         .build();
     @Getter private final static Trigger trigger3 = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 20 31 10 ?"))
+        .withSchedule(
+            CronScheduleBuilder.cronSchedule("0 0 20 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
+        )
         .withIdentity("trigger3")
         .build();
     @Getter private final static Trigger trigger4 = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 21 31 10 ?"))
+        .withSchedule(
+            CronScheduleBuilder.cronSchedule("0 0 21 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
+        )
         .withIdentity("trigger4")
         .build();
     @Getter private final static Trigger trigger5 = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 22 31 10 ?"))
+        .withSchedule(
+            CronScheduleBuilder.cronSchedule("0 0 22 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
+        )
         .withIdentity("trigger5")
         .build();
 

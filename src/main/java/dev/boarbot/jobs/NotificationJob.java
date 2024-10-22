@@ -14,6 +14,7 @@ import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.quartz.*;
@@ -77,21 +78,25 @@ public class NotificationJob implements Job, Configured {
                         notifUsers.put(notifUserID, user);
 
                         try {
-                            BoarUser boarUser = BoarUserFactory.getBoarUser(notifUsers.get(notifUserID));
+                            BoarUser boarUser = BoarUserFactory.getBoarUser(user);
                             String notificationStr = getNotificationStr(
                                 connection, boarUser.baseQuery().getNotificationChannel(connection), boarUser
                             );
 
+                            semaphore.acquireUninterruptibly();
                             sendNotification(user, notificationStr);
                         } catch (SQLException exception) {
+                            semaphore.release();
                             Log.error(NotificationJob.class, "Failed to get notification channel", exception);
                         }
                     },
                     e -> ExceptionHandler.handle(NotificationJob.class, e)
                 );
             } catch (SQLException exception) {
+                semaphore.release();
                 Log.error(NotificationJob.class, "Failed to get notification channel", exception);
             } catch (RuntimeException exception) {
+                semaphore.release();
                 Log.error(NotificationJob.class, "A problem occurred while sending notifications", exception);
             }
         }
@@ -151,6 +156,23 @@ public class NotificationJob implements Job, Configured {
     }
 
     public static void cacheNotifUsers() {
+        cacheGuildMembers();
+        cacheUsers();
+    }
+
+    private static void cacheGuildMembers() {
+        for (Guild guild : jda.getGuilds()) {
+            guild.loadMembers().onError(e -> ExceptionHandler.handle(NotificationJob.class, e));
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    public static void cacheUsers() {
         try (Connection connection = DataUtil.getConnection()) {
             JDA jda = BoarBotApp.getBot().getJDA();
             List<String> notifUserIDs = UserDataUtil.getNotifUserIDs(connection);

@@ -2,6 +2,7 @@ package dev.boarbot.listeners;
 
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.jobs.JobScheduler;
+import dev.boarbot.jobs.NotificationJob;
 import dev.boarbot.util.logging.Log;
 import lombok.Getter;
 
@@ -43,5 +44,6 @@ public class ReadyListener extends ListenerAdapter implements Configured {
         Log.info(this.getClass(), "Bot is online!", true);
 
         JobScheduler.scheduleJobs();
+        NotificationJob.cacheNotifUsers();
     }
 }

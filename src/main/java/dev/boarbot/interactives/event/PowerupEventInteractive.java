@@ -172,6 +172,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                         this.eventHandler.incNumActive();
                     },
                     e -> {
+                        semaphore.release();
                         this.stop(StopType.EXCEPTION);
 
                         if (e instanceof InsufficientPermissionException) {
@@ -183,6 +184,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     }
                 );
             } catch (InsufficientPermissionException exception) {
+                semaphore.release();
                 this.stop(StopType.EXCEPTION);
                 this.eventHandler.decNumPotential();
                 this.eventHandler.getFailedGuilds().add(this.channel.getGuild().getId());
@@ -235,7 +237,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 
-        if (interactive == null) {
+        if (interactive == null || this.msg == null) {
             return;
         }
 

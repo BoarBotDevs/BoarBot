@@ -19,8 +19,6 @@ public class JobScheduler {
             scheduler.scheduleJob(QuestResetJob.getJob(), QuestResetJob.getTrigger());
             scheduler.scheduleJob(LogJob.getJob(), LogJob.getTrigger());
 
-            NotificationJob.cacheNotifUsers();
-
             scheduler.scheduleJob(NotificationJob.getJob(), NotificationJob.getTrigger());
             scheduler.scheduleJob(TopCacheJob.getJob(), TopCacheJob.getTrigger());
             scheduler.scheduleJob(MarketCacheJob.getJob(), MarketCacheJob.getTrigger());

@@ -8,13 +8,12 @@ import org.quartz.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.TimeZone;
 
 public class WipeJob implements Job {
     @Getter
     private final static JobDetail job = JobBuilder.newJob(WipeJob.class).build();
     @Getter private final static Trigger trigger = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 * ? * *").inTimeZone(TimeZone.getTimeZone("UTC")))
+        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 * ? * *"))
         .build();
 
     @Override
