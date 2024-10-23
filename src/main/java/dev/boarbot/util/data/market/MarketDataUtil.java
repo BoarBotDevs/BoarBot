@@ -208,7 +208,7 @@ public class MarketDataUtil implements Configured {
                     MarketData marketData = updateSellItems.get(itemID);
 
                     long potentialSell = (long) Math.max(
-                        marketData.sellPrice() / (1 + NUMS.getPriceAdjustPercent()), NUMS.getSellPriceMinimum()
+                        marketData.sellPrice() * (1 + NUMS.getPriceAdjustPercent()), NUMS.getSellPriceMinimum()
                     );
 
                     long maxSell = (long) Math.max(
@@ -240,7 +240,7 @@ public class MarketDataUtil implements Configured {
 
                 statement.setLong(1, newBuyPrice);
                 statement.setLong(2, newSellPrice);
-                statement.setInt(3, stock == 0 ? 1 : 0);
+                statement.setInt(3, stock == 0 && buyFix ? 1 : 0);
                 statement.setString(4, itemID);
                 statement.addBatch();
             }

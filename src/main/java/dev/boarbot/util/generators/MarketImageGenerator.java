@@ -255,15 +255,15 @@ public class MarketImageGenerator extends ImageGenerator {
     private String shortenValue(long value) {
         String valStr = Long.toString(value);
 
-        if (value / 1000000000000000L > 1) {
+        if (value / 1000000000000000L >= 1) {
             valStr = value/1000000000000000L + "q";
-        } else if (value / 1000000000000L > 1) {
+        } else if (value / 1000000000000L >= 1) {
             valStr = value/1000000000000L + "t";
-        } else if (value / 1000000000 > 1) {
+        } else if (value / 1000000000 >= 1) {
             valStr = value/1000000000 + "b";
-        } else if (value / 1000000 > 1) {
+        } else if (value / 1000000 >= 1) {
             valStr = value/1000000 + "m";
-        } else if (value / 1000 > 1) {
+        } else if (value / 1000 >= 1) {
             valStr = value/1000 + "k";
         }
 
