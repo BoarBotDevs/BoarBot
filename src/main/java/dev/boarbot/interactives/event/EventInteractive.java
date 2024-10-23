@@ -86,6 +86,10 @@ public abstract class EventInteractive extends Interactive {
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 
+        if (interactive == null) {
+            return;
+        }
+
         if (type.equals(StopType.EXCEPTION)) {
             semaphore.acquireUninterruptibly();
 
@@ -97,10 +101,6 @@ public abstract class EventInteractive extends Interactive {
                 }
             );
 
-            return;
-        }
-
-        if (interactive == null) {
             return;
         }
 

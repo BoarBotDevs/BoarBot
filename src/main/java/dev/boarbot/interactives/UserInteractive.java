@@ -138,6 +138,10 @@ public abstract class UserInteractive extends Interactive {
         Interactive interactive = this.removeInteractive();
         this.isStopped = true;
 
+        if (interactive == null) {
+            return;
+        }
+
         if (type.equals(StopType.EXCEPTION)) {
             MessageEditData msgData = MessageEditData.fromCreateData(SpecialReply.getErrorMsgData());
 
@@ -148,10 +152,6 @@ public abstract class UserInteractive extends Interactive {
 
             this.hook.editOriginal(msgData)
                 .queue(null, e -> ExceptionHandler.replyHandle((SlashCommandInteraction) this.interaction, this, e));
-            return;
-        }
-
-        if (interactive == null) {
             return;
         }
 

@@ -21,7 +21,6 @@ import lombok.Setter;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -247,10 +246,8 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
             return;
         }
 
-        try {
-            this.updateComponents(true, ActionRow.of(tabulatingBtn));
-            this.eventHandler.decNumActive();
-        } catch (ErrorResponseException ignored) {}
+        this.updateComponents(true, ActionRow.of(tabulatingBtn));
+        this.eventHandler.decNumActive();
     }
 
     @Override
