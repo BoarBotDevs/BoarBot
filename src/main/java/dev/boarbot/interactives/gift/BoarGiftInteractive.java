@@ -579,7 +579,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     public ActionRow[] getCurComponents() {
         List<ActionRow> rows = new ArrayList<>();
         int SIDE_LENGTH = 3;
-        int claimIndex = (int) (Math.random() * SIDE_LENGTH);
+        int claimIndex = (int) (Math.random() * SIDE_LENGTH * SIDE_LENGTH);
 
         for (int i=0; i<SIDE_LENGTH; i++) {
             List<ItemComponent> rowComponents = new ArrayList<>();
