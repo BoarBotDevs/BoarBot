@@ -56,15 +56,15 @@ public final class TimeUtil {
     }
 
     public static boolean isHalloween() {
-        LocalDateTime curDateTime = LocalDateTime.now();
+        ZonedDateTime curDateTime = LocalDateTime.now().atZone(ZoneId.of("America/Chicago"));
         return curDateTime.getMonth() == Month.OCTOBER && curDateTime.getDayOfMonth() >= 26 ||
             curDateTime.getMonth() == Month.NOVEMBER && curDateTime.getDayOfMonth() <= 2;
     }
 
     public static boolean isChristmas() {
-        LocalDateTime curDateTime = LocalDateTime.now();
-        return curDateTime.getMonth() == Month.DECEMBER && curDateTime.getDayOfMonth() >= 19 &&
-            curDateTime.getDayOfMonth() <= 26;
+        ZonedDateTime curDateTime = LocalDateTime.now().atZone(ZoneId.of("America/Chicago"));
+        return curDateTime.getMonth() == Month.DECEMBER &&
+            curDateTime.getDayOfMonth() >= 19 && curDateTime.getDayOfMonth() <= 26;
     }
 
     public static int getYear() {

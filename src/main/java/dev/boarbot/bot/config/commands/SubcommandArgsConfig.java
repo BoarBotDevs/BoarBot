@@ -20,7 +20,7 @@ public class SubcommandArgsConfig {
     private Boolean required = false;
     private Boolean autocomplete = false;
     private Integer max_value = Integer.MAX_VALUE;
-    private Integer max_length = 50;
+    private Integer max_length = 100;
     private ArgChoicesConfig<?>[] choices;
 
     @Override

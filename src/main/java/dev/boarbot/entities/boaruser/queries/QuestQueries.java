@@ -113,14 +113,15 @@ public class QuestQueries implements Configured {
         String updateQuery = """
             UPDATE user_quests
             SET
-                full_claimed = full_claimed + 1,
+                full_claimed = true,
+                num_full_completed = num_full_completed + 1,
                 fastest_full_millis = LEAST(fastest_full_millis, ?)
             WHERE user_id = ?;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
-            statement.setString(1, this.boarUser.getUserID());
-            statement.setLong(2, TimeUtil.getCurMilli() - TimeUtil.getLastQuestResetMilli());
+            statement.setLong(1, TimeUtil.getCurMilli() - TimeUtil.getLastQuestResetMilli());
+            statement.setString(2, this.boarUser.getUserID());
             statement.executeUpdate();
         }
 
@@ -250,6 +251,7 @@ public class QuestQueries implements Configured {
                 %s_progress = ?,
                 %s_claimed = (%s_claimed OR ?),
                 full_claimed = (full_claimed OR ?),
+                num_full_completed = num_full_completed + ?,
                 fastest_full_millis = LEAST(fastest_full_millis, ?)
             WHERE user_id = ?;
         """.formatted(columnNum, columnNum, columnNum);
@@ -258,11 +260,12 @@ public class QuestQueries implements Configured {
             statement.setLong(1, progress + val);
             statement.setBoolean(2, shouldClaim);
             statement.setBoolean(3, shouldClaimBonus);
-            statement.setLong(4, shouldClaimBonus
+            statement.setInt(4, shouldClaimBonus ? 1 : 0);
+            statement.setLong(5, shouldClaimBonus
                 ? TimeUtil.getCurMilli() - TimeUtil.getLastQuestResetMilli()
                 : Integer.MAX_VALUE
             );
-            statement.setString(5, this.boarUser.getUserID());
+            statement.setString(6, this.boarUser.getUserID());
             statement.executeUpdate();
         }
 

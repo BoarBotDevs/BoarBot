@@ -166,7 +166,7 @@ public class MarketDataUtil implements Configured {
                         updateBuyItems.put(itemID, new MarketData(stock, sellPrice, buyPrice));
                     }
 
-                    if (lastSell == null) {
+                    if (lastSell == null && lastPurchase != null) {
                         updateSellItems.put(itemID, new MarketData(stock, sellPrice, buyPrice));
                     }
 
@@ -208,11 +208,12 @@ public class MarketDataUtil implements Configured {
                     MarketData marketData = updateSellItems.get(itemID);
 
                     long potentialSell = (long) Math.max(
-                        marketData.sellPrice() * (1 + NUMS.getPriceAdjustPercent()), NUMS.getSellPriceMinimum()
+                        Math.ceil(marketData.sellPrice() * (1 + NUMS.getPriceAdjustPercent())),
+                        NUMS.getSellPriceMinimum()
                     );
 
                     long maxSell = (long) Math.max(
-                        newBuyPrice * (1-NUMS.getPriceDiffPercent()), NUMS.getSellPriceMinimum()
+                        marketData.buyPrice() * (1-NUMS.getPriceDiffPercent()), NUMS.getSellPriceMinimum()
                     );
 
                     newBuyPrice = marketData.buyPrice();
