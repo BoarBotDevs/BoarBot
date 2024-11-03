@@ -4,6 +4,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
   create-release:
     name: Create Release
@@ -24,7 +28,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.run_number }}
-          release_name: ${{ env.PR_TITLE }}
+          name: ${{ env.PR_TITLE }}
           body: ${{ env.PR_BODY }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
