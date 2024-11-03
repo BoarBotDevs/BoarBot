@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get the PR title and body
         id: pr_info
@@ -21,7 +21,7 @@ jobs:
           echo "PR_BODY=$(echo '${{ github.event.pull_request.body }}')" >> $GITHUB_ENV
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.run_number }}
           release_name: ${{ env.PR_TITLE }}
