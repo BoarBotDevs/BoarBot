@@ -4,7 +4,6 @@
     BoarBot - Discord Bot
     <br>
 </h1>
-
 <h4 align="center">Gacha, Powerups, Quests, and Economy</h4>
 
 <p align="center">
