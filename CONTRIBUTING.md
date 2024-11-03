@@ -41,5 +41,9 @@ The config file and assets that BoarBot uses are not public. In there future, a 
 ### Do Changes in the BoarBot Repository Automatically Apply to BoarBot?
 Currently they do not. Weslay needs to pull the changes into BoarBot for them to apply. There are plans for build and release pipelines to be created to automate the process.
 
+### Other Notes
+When the `dev` branch is pulled into the `main` branch it will look for a version number in the PR title. If it has one, it will create a release. If not, it won't.
+Additionally, whenever the `dev` branch is pulled into the `main` branch, the `dev` branch will forced to have a commit history to match main. This is to prevent weird instances where dev is ahead or behind of main despite having the same commit history.
+
 ## Setting Up
 This section is under construction until the repo is more fleshed out.
