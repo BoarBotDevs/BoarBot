@@ -15,9 +15,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Force push main to dev
+      - name: Sync dev with main
         run: |
-          git fetch origin dev
+          git checkout main
+          git pull origin main
           git checkout dev
           git reset --hard main
           git push origin dev --force
