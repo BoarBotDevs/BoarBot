@@ -23,8 +23,9 @@ jobs:
 
       - name: Sync dev with main
         run: |
+          git fetch origin
           git checkout dev
           git reset --hard main
-          git push dev --force
+          git push origin dev --force
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
