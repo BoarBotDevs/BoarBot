@@ -1,0 +1,30 @@
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  create-release:
+    name: Create Release
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get the PR title and body
+        id: pr_info
+        run: |
+          echo "PR_TITLE=$(echo '${{ github.event.pull_request.title }}')" >> $GITHUB_ENV
+          echo "PR_BODY=$(echo '${{ github.event.pull_request.body }}')" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: ${{ env.PR_TITLE }}
+          body: ${{ env.PR_BODY }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
