@@ -10,13 +10,17 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      deployments: write
-
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.ACTION_KEY }}
+    
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Get the PR title and body
         id: pr_info
@@ -24,11 +28,24 @@ jobs:
           echo "PR_TITLE=$(echo '${{ github.event.pull_request.title }}')" >> $GITHUB_ENV
           echo "PR_BODY=$(echo '${{ github.event.pull_request.body }}')" >> $GITHUB_ENV
 
+          if [[ "${{ env.PR_TITLE }}" =~ v?([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+            
+            if [[ ! "${{ env.PR_TITLE }}" =~ ^v ]]; then
+              VERSION="v$VERSION"
+            fi
+            
+            echo "Extracted version: $VERSION"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          else
+            echo "No valid version found in PR title."
+            echo "VERSION=" >> $GITHUB_ENV
+          fi
+
       - name: Create Release
+        if: env.VERSION != ''
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.run_number }}
+          tag_name: ${{ env.VERSION }}
           name: ${{ env.PR_TITLE }}
           body: ${{ env.PR_BODY }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACTION_SECRET }}
