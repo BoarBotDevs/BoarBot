@@ -25,8 +25,13 @@ jobs:
       - name: Get the PR title and body
         id: pr_info
         run: |
-          echo "PR_TITLE=$(echo '${{ github.event.pull_request.title }}')" >> $GITHUB_ENV
-          echo "PR_BODY=$(echo '${{ github.event.pull_request.body }}')" >> $GITHUB_ENV
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_TITLE_ESCAPED=$(echo "$PR_TITLE" | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "PR_TITLE=$PR_TITLE_ESCAPED" >> $GITHUB_ENV
+
+          PR_BODY="${{ github.event.pull_request.body }}"
+          PR_BODY_ESCAPED=$(echo "$PR_BODY" | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "PR_BODY=$PR_BODY_ESCAPED" >> $GITHUB_ENV
 
           if [[ "${{ github.event.pull_request.title }}" =~ v?([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             VERSION="${BASH_REMATCH[1]}"
