@@ -15,11 +15,6 @@ jobs:
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.ACTION_KEY }}
-    
-      - name: Checkout main branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Sync dev with main
         run: |
