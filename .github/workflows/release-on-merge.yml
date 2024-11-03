@@ -31,4 +31,4 @@ jobs:
           name: ${{ env.PR_TITLE }}
           body: ${{ env.PR_BODY }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACTION_SECRET }}
