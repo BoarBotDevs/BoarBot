@@ -1,0 +1,22 @@
+name: Sync Dev Branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Force push main to dev
+        run: |
+          git checkout dev
+          git reset --hard main
+          git push origin dev --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
