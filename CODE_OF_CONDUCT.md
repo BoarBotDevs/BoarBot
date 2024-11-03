@@ -23,7 +23,7 @@ Examples of breaking each rule includes:
 - Bullying or making ill-mannered inappropriate jokes about another person.
 - Saying someone is lesser simply because they have less experience than you.
 - Creating issues that do not pertain to the code or trolling in official communities.
-- Creating a PR and requesting an immediate merge without consulting other contributors.
+- Creating a PR and demanding approvals from other contributors instead of asking for review first.
 - Promising players that you'll implement a feature, but never taking the time to work on said feature.
 - Taking an idea from player, implementing it, and refusing to reference the user the idea came from.
 
