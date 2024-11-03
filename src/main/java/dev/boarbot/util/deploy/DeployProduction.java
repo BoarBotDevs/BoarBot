@@ -62,6 +62,7 @@ public class DeployProduction {
         mainConfig.setReportsChannel(BoarBotApp.getEnv("PROD_REPORTS_CHANNEL"));
         mainConfig.setPingChannel(BoarBotApp.getEnv("PROD_DEFAULT_CHANNEL"));
         mainConfig.setSpookChannel(BoarBotApp.getEnv("PROD_SPOOK_CHANNEL"));
+        mainConfig.setUnlimitedBoars(false);
 
         Files.write(prodMainConfigPath, List.of(g.toJson(mainConfig)));
     }
