@@ -28,7 +28,7 @@ Contributors can create and push to branches that match the following patterns:
 No other branches can be created or directly pushed to by Contributors. It is suggested that Contributors use these branches instead of using their own repo for easy visiblity, but that is their prerogative.
 
 ### What Is the `dev` Branch?
-The `dev` branch is where Pull Requests should be made. This is where code sits before a release and is used to verify that your code works when integrated with other Contributor code. For a Pull Request to be merged into `dev`, Weslay and one other Contributors must approve the changes. Early on, though, Weslay may bypass this and force merge a PR since there may not be many Contributors.
+The `dev` branch is where Pull Requests should be made. This is where code sits before a release and is used to verify that your code works when integrated with other Contributor code. For a Pull Request to be merged into `dev`, Weslay and one other Contributor must approve the changes. Early on, though, Weslay may bypass this and force merge a PR since there may not be many Contributors.
 > *Note: Contributors do not have to worry about accidentally pushing changes to this branch. It is not possible.*
 
 ### What Is the `main` Branch?
