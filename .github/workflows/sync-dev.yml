@@ -16,11 +16,15 @@ jobs:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.ACTION_KEY }}
 
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
       - name: Sync dev with main
         run: |
           git fetch origin
           git checkout dev
           git reset --hard main
           git push origin dev --force
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
