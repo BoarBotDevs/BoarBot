@@ -4,7 +4,7 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.util.logging.Log;
 import lombok.Getter;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.quartz.*;
 
@@ -49,8 +49,8 @@ public class SpookMessageJob implements Job, Configured {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         String triggerName = context.getTrigger().getKey().getName();
 
-        TextChannel spookChannel = BoarBotApp.getBot().getJDA()
-            .getTextChannelById(CONFIG.getMainConfig().getSpookChannel());
+        NewsChannel spookChannel = BoarBotApp.getBot().getJDA()
+            .getNewsChannelById(CONFIG.getMainConfig().getSpookChannel());
 
         if (spookChannel == null) {
             Log.warn(this.getClass(), "Failed to find spook channel");
