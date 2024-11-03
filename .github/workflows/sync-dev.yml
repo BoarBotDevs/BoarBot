@@ -10,11 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout main branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Force push main to dev
         run: |
+          git fetch origin dev
           git checkout dev
           git reset --hard main
           git push origin dev --force
