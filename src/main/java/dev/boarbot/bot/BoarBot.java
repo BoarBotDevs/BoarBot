@@ -48,7 +48,7 @@ public class BoarBot implements Bot, Configured {
 
         this.jda = JDABuilder.createDefault(BoarBotApp.getEnv("TOKEN"))
             .addEventListeners(
-                new StopMessageListener(),
+                new MessageListener(),
                 new CommandListener(),
                 new ComponentListener(),
                 new ModalListener(),

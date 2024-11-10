@@ -6,14 +6,11 @@ import dev.boarbot.bot.EnvironmentType;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.gift.BoarGiftInteractive;
 import dev.boarbot.jobs.PowerupEventJob;
-import dev.boarbot.migration.MigrationHandler;
-import dev.boarbot.util.deploy.DeployProduction;
 import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.logging.Log;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.Getter;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 
 /**
@@ -36,23 +33,11 @@ public class BoarBotApp {
         if (args.length > 0) {
             BoarBotApp.environmentType = switch (args[0]) {
                 case "test" -> EnvironmentType.TEST;
-                case "deploy" -> EnvironmentType.DEPLOY;
                 case "prod" -> EnvironmentType.PROD;
                 default -> EnvironmentType.DEV;
             };
         } else {
             BoarBotApp.environmentType = EnvironmentType.DEV;
-        }
-
-        if (BoarBotApp.environmentType == EnvironmentType.DEPLOY) {
-            try {
-                DeployProduction.deploy();
-            } catch (IOException exception) {
-                Log.error(BoarBotApp.class, "Failed to deploy production environment", exception);
-                System.exit(-1);
-            }
-
-            return;
         }
 
         bot = new BoarBot();
@@ -67,10 +52,10 @@ public class BoarBotApp {
 
         if (environmentType == EnvironmentType.PROD) {
             bot.deployCommands();
-            MigrationHandler.doMigration();
+
         }
 
-        if (environmentType != EnvironmentType.PROD && args.length > 1 && Boolean.parseBoolean(args[1])) {
+        if (environmentType == EnvironmentType.PROD || args.length > 1 && Boolean.parseBoolean(args[1])) {
             bot.deployCommands();
         }
 

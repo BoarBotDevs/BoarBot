@@ -34,9 +34,14 @@ public class MainConfig {
     private String pingChannel = "";
 
     /**
-     * The text channel ID the channel to send spook messages to
+     * The news channel ID the channel to send spook messages to
      */
     private String spookChannel = "";
+
+    /**
+     * The channel ID that releases are sent to
+     */
+    private String releaseChannel = "";
 
     /**
      * Boars can be obtained without waiting for the next day

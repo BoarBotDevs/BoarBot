@@ -56,6 +56,30 @@ class ConfigLoader {
 
             config.setMainConfig(getFromJson(mainPath, MainConfig.class));
 
+            if (BoarBotApp.getEnv("DEV_GUILD_ID") != null) {
+                config.getMainConfig().setDevGuild(BoarBotApp.getEnv("DEV_GUILD_ID"));
+            }
+
+            if (BoarBotApp.getEnv("LOG_CHANNEL") != null) {
+                config.getMainConfig().setLogChannel(BoarBotApp.getEnv("LOG_CHANNEL"));
+            }
+
+            if (BoarBotApp.getEnv("REPORTS_CHANNEL") != null) {
+                config.getMainConfig().setReportsChannel(BoarBotApp.getEnv("REPORTS_CHANNEL"));
+            }
+
+            if (BoarBotApp.getEnv("PING_CHANNEL") != null) {
+                config.getMainConfig().setPingChannel(BoarBotApp.getEnv("PING_CHANNEL"));
+            }
+
+            if (BoarBotApp.getEnv("SPOOK_CHANNEL") != null) {
+                config.getMainConfig().setSpookChannel(BoarBotApp.getEnv("SPOOK_CHANNEL"));
+            }
+
+            if (BoarBotApp.getEnv("RELEASE_CHANNEL") != null) {
+                config.getMainConfig().setReleaseChannel(BoarBotApp.getEnv("RELEASE_CHANNEL"));
+            }
+
             config.setStringConfig(getFromJson(strsPath, StringConfig.class));
 
             config.setColorConfig(getFromJson(colorsPath, new TypeToken<Map<String, String>>(){}.getType()));

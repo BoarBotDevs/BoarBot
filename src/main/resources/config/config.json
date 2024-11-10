@@ -8,6 +8,7 @@
   "reportsChannel": "0000000000000000000",
   "pingChannel": "0000000000000000000",
   "spookChannel": "0000000000000000000",
+  "releaseChannel": "0000000000000000000",
   "unlimitedBoars": false,
   "maintenanceMode": false,
   "marketOpen": true,
