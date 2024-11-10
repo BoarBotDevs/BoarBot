@@ -132,7 +132,7 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
 
                     boolean userHasSpooky = boarUser.boarQuery().hasYearlySpooky(connection);
                     boolean canGiveSpooky = !userHasSpooky &&
-                        UserDataUtil.isSpookyAvailable(connection, obtainType);        
+                        UserDataUtil.isSpookyAvailable(connection, obtainType);
 
                     if (canGiveSpooky) {
                         boarIDs.add("spooky");
