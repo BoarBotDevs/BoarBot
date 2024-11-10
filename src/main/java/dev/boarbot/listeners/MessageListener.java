@@ -1,6 +1,7 @@
 package dev.boarbot.listeners;
 
 import dev.boarbot.api.util.Configured;
+import dev.boarbot.bot.ConfigUpdater;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.util.data.DataUtil;
@@ -11,35 +12,78 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class StopMessageListener extends ListenerAdapter implements Runnable, Configured {
+public class MessageListener extends ListenerAdapter implements Runnable, Configured {
     private MessageReceivedEvent event = null;
 
-    public StopMessageListener() {
+    public MessageListener() {
         super();
     }
 
-    public StopMessageListener(MessageReceivedEvent event) {
+    public MessageListener(MessageReceivedEvent event) {
         this.event = event;
     }
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        new Thread(new StopMessageListener(event)).start();
+        new Thread(new MessageListener(event)).start();
     }
 
     @Override
     public void run() {
         boolean fromDM = this.event.getMessage().isFromType(ChannelType.PRIVATE);
-        boolean fromAuthor = this.event.getMessage().getAuthor().isBot();
-        boolean ignoreMsg = !fromDM || fromAuthor;
+        boolean fromBot = this.event.getMessage().getAuthor().isBot();
+        boolean isValidDM = fromDM && !fromBot;
 
-        if (ignoreMsg) {
+        boolean isReleaseMessage = this.event.getChannel().getId().equals(CONFIG.getMainConfig().getReleaseChannel());
+
+        if (!isValidDM && !isReleaseMessage) {
             return;
         }
 
+        if (isReleaseMessage) {
+            Log.info(this.getClass(), "Attempting to deploy release");
+            handleNewRelease();
+            return;
+        }
+
+        handleNotificationToggle();
+    }
+
+    private void handleNewRelease() {
+        File restartFile = Paths.get("trigger/delete_to_deploy").toFile();
+
+        if (!restartFile.exists()) {
+            Log.warn(this.getClass(), "Trigger file does not exist");
+            return;
+        }
+
+        try {
+            ConfigUpdater.setMaintenance(true);
+            Thread.sleep(5000);
+            Files.delete(restartFile.toPath());
+        } catch (IOException exception) {
+            Log.error(this.getClass(), "Failed to deploy release", exception);
+
+            try {
+                ConfigUpdater.setMaintenance(false);
+            } catch (IOException exception1) {
+                Log.error(this.getClass(), "Failed to update maintenance in file", exception);
+                CONFIG.getMainConfig().setMaintenanceMode(false);
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            handleNewRelease();
+        }
+    }
+
+    private void handleNotificationToggle() {
         BoarUser boarUser;
         boolean notificationsOn;
 
