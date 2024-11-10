@@ -47,11 +47,7 @@
     "update": "Alpha",
     "searchTerms": [
       "boarb",
-      "sphereboar",
-      "sphere",
-      "spher",
-      "sphe",
-      "sph"
+      "sphereboar"
     ]
   },
   "creepy": {
@@ -89,6 +85,7 @@
     "classification": "Underling",
     "update": "Alpha",
     "searchTerms": [
+      "rickastley",
       "astley"
     ]
   },
@@ -101,11 +98,7 @@
     "update": "v1.0.0",
     "searchTerms": [
       "supernova",
-      "supernov",
-      "superno",
-      "supern",
-      "nova",
-      "nov"
+      "nova"
     ]
   },
   "boargalos": {
@@ -117,9 +110,7 @@
     "classification": "Primordial",
     "update": "v1.1.22",
     "searchTerms": [
-      "galos",
-      "galo",
-      "gal"
+      "galos"
     ]
   },
   "bacteria": {
@@ -131,12 +122,7 @@
     "update": "v1.0.0",
     "searchTerms": [
       "bacterium",
-      "bacteriu",
-      "bacteria",
-      "bacteri",
-      "bacter",
-      "bacte",
-      "bact"
+      "bacteria"
     ]
   },
   "underwear": {
