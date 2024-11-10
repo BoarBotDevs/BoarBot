@@ -34,7 +34,7 @@ jobs:
           if [[ "${{ github.event.pull_request.title }}" =~ v?([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             VERSION="${BASH_REMATCH[1]}"
             
-            if [[ ! "${{ github.event.pull_request.title }}" =~ ^v ]]; then
+            if [[ ! "$VERSION" =~ ^v ]]; then
               VERSION="v$VERSION"
             fi
             
