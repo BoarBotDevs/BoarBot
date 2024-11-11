@@ -175,7 +175,7 @@ class MegaMenuComponentHandler implements Configured {
                     String boarID = this.interactive.curBoarEntry.getKey();
 
                     if (this.interactive.filteredBoars.containsKey(boarID)) {
-                        this.interactive.boarPage = this.interactive.curBoarEntry.getKey();
+                        this.interactive.boarPage = BOARS.get(this.interactive.curBoarEntry.getKey()).getName();
                     } else {
                         this.interactive.page = 0;
                     }
