@@ -140,7 +140,7 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
                         spookReply += " " + STRS.getSpookFirstExtraStr().formatted(
                             spookyBoarStr, halloweenBoarStrs.get(this.spookIndex), POWS.get("transmute").getName()
                         );
-                    } else if (userHasSpooky) {
+                    } else if (userHasSpooky && UserDataUtil.isSpookyAvailable(connection, obtainType)) {
                         boarUser.powQuery().addPowerup(connection, "transmute", 3);
                         spookReply += " " + STRS.getSpookHasExtraStr()
                             .formatted(halloweenBoarStrs.get(this.spookIndex), POWS.get("transmute").getPluralName());
