@@ -15,7 +15,7 @@ public class MarketDataUtil implements Configured {
         Map<String, MarketData> marketData = new LinkedHashMap<>();
 
         String query = """
-            SELECT item_id, stock, sell_price, buy_price
+            SELECT item_id, stock, sell_price, buy_price, last_purchase, last_sell
             FROM market_values;
         """;
 
@@ -27,7 +27,9 @@ public class MarketDataUtil implements Configured {
                         new MarketData(
                             resultSet.getInt("stock"),
                             resultSet.getLong("sell_price"),
-                            resultSet.getLong("buy_price")
+                            resultSet.getLong("buy_price"),
+                            resultSet.getTimestamp("last_purchase"),
+                            resultSet.getTimestamp("last_sell")
                         )
                     );
                 }
@@ -43,7 +45,7 @@ public class MarketDataUtil implements Configured {
         MarketData marketData = null;
 
         String query = """
-            SELECT stock, sell_price, buy_price
+            SELECT stock, sell_price, buy_price, last_purchase, last_sell
             FROM market_values
             WHERE item_id = ?;
         """;
@@ -56,7 +58,9 @@ public class MarketDataUtil implements Configured {
                     marketData = new MarketData(
                         resultSet.getInt("stock"),
                         resultSet.getLong("sell_price"),
-                        resultSet.getLong("buy_price")
+                        resultSet.getLong("buy_price"),
+                        resultSet.getTimestamp("last_purchase"),
+                        resultSet.getTimestamp("last_sell")
                     );
                 }
             }
@@ -134,7 +138,7 @@ public class MarketDataUtil implements Configured {
             statement.executeUpdate();
         }
 
-        MarketInteractive.cachedMarketData.put(itemID, new MarketData(targetStock, buyPrice, 1));
+        MarketInteractive.cachedMarketData.put(itemID, new MarketData(targetStock, buyPrice, 1, null, null));
     }
 
     private static void autoAdjustMarketData(Connection connection) throws SQLException {
@@ -145,7 +149,7 @@ public class MarketDataUtil implements Configured {
 
         String updateQuery = """
             UPDATE market_values
-            SET buy_price = ?, sell_price = ?, stock = stock + ?
+            SET buy_price = ?, sell_price = ?, stock = stock + ?, last_purchase = ?
             WHERE item_id = ?;
         """;
 
@@ -162,30 +166,32 @@ public class MarketDataUtil implements Configured {
                     long buyPrice = resultSet.getLong("buy_price");
                     long sellPrice = resultSet.getLong("sell_price");
 
+                    MarketData curMarketData = new MarketData(stock, sellPrice, buyPrice, lastPurchase, lastSell);
+
                     if (lastPurchase == null) {
-                        updateBuyItems.put(itemID, new MarketData(stock, sellPrice, buyPrice));
+                        updateBuyItems.put(itemID, curMarketData);
                     }
 
                     if (lastSell == null && lastPurchase != null) {
-                        updateSellItems.put(itemID, new MarketData(stock, sellPrice, buyPrice));
+                        updateSellItems.put(itemID, curMarketData);
                     }
 
                     if (lastPurchase == null || lastSell == null) {
                         continue;
                     }
 
-                    long waitTime = POWS.containsKey(itemID)
-                        ? POWS.get(itemID).getPriceAdjustWaitHours() * 1000 * 60 * 60
-                        : RARITIES.get(BoarUtil.findRarityKey(itemID)).getPriceAdjustWaitHours() * 1000 * 60 * 60;
+                    long waitTime = 1000L * 60 * 60 * (POWS.containsKey(itemID)
+                        ? POWS.get(itemID).getPriceAdjustWaitHours()
+                        : RARITIES.get(BoarUtil.findRarityKey(itemID)).getPriceAdjustWaitHours());
                     boolean shouldUpdateBuy = lastPurchase.getTime() + waitTime <= TimeUtil.getCurMilli();
                     boolean shouldUpdateSell = lastSell.getTime() + waitTime <= TimeUtil.getCurMilli();
 
                     if (shouldUpdateBuy) {
-                        updateBuyItems.put(itemID, new MarketData(stock, sellPrice, buyPrice));
+                        updateBuyItems.put(itemID, curMarketData);
                     }
 
                     if (shouldUpdateSell) {
-                        updateSellItems.put(itemID, new MarketData(stock, sellPrice, buyPrice));
+                        updateSellItems.put(itemID, curMarketData);
                     }
                 }
             }
@@ -204,8 +210,11 @@ public class MarketDataUtil implements Configured {
                 long newSellPrice = 0;
                 int stock = 0;
 
+                MarketData marketData = new MarketData();
+
                 if (sellFix) {
-                    MarketData marketData = updateSellItems.get(itemID);
+                    marketData = updateSellItems.get(itemID);
+                    stock = marketData.stock();
 
                     long potentialSell = (long) Math.max(
                         Math.ceil(marketData.sellPrice() * (1 + NUMS.getPriceAdjustPercent())),
@@ -218,31 +227,41 @@ public class MarketDataUtil implements Configured {
 
                     newBuyPrice = marketData.buyPrice();
                     newSellPrice = Math.min(potentialSell, maxSell);
-                    stock = marketData.stock();
                 }
 
                 if (buyFix) {
-                    MarketData marketData = updateBuyItems.get(itemID);
+                    marketData = updateBuyItems.get(itemID);
+                    stock = marketData.stock();
 
                     long curSellPrice = newSellPrice == 0
                         ? marketData.sellPrice()
                         : newSellPrice;
 
-                    newBuyPrice = (long) Math.max(
-                        marketData.buyPrice() / (1 + NUMS.getPriceAdjustPercent()), NUMS.getBuyPriceMinimum()
-                    );
+                    if (stock != 0) {
+                        newBuyPrice = (long) Math.max(
+                            marketData.buyPrice() / (1 + NUMS.getPriceAdjustPercent()), NUMS.getBuyPriceMinimum()
+                        );
+                    } else {
+                        newBuyPrice = marketData.buyPrice();
+                    }
 
                     newSellPrice = curSellPrice > newBuyPrice * (1-NUMS.getPriceDiffPercent())
                         ? (long) Math.max(newBuyPrice * (1-NUMS.getPriceDiffPercent()), NUMS.getSellPriceMinimum())
                         : curSellPrice;
-
-                    stock = marketData.stock();
                 }
 
                 statement.setLong(1, newBuyPrice);
                 statement.setLong(2, newSellPrice);
-                statement.setInt(3, stock == 0 && buyFix ? 1 : 0);
-                statement.setString(4, itemID);
+
+                if (buyFix && stock == 0) {
+                    statement.setInt(3, 1);
+                    statement.setTimestamp(4, new Timestamp(TimeUtil.getCurMilli()));
+                } else {
+                    statement.setInt(3, 0);
+                    statement.setTimestamp(4, marketData.lastPurchase());
+                }
+
+                statement.setString(5, itemID);
                 statement.addBatch();
             }
 
@@ -264,7 +283,13 @@ public class MarketDataUtil implements Configured {
             return MarketTransactionFail.STOCK;
         }
 
-        marketData = new MarketData(buyData.stock(), buyData.sellPrice(), buyData.buyPrice());
+        marketData = new MarketData(
+            buyData.stock(),
+            buyData.sellPrice(),
+            buyData.buyPrice(),
+            marketData.lastPurchase(),
+            marketData.lastSell()
+        );
 
         String updateQuery = """
             UPDATE market_values
@@ -367,7 +392,13 @@ public class MarketDataUtil implements Configured {
             return MarketTransactionFail.COST;
         }
 
-        marketData = new MarketData(sellData.stock(), sellData.sellPrice(), sellData.buyPrice());
+        marketData = new MarketData(
+            sellData.stock(),
+            sellData.sellPrice(),
+            sellData.buyPrice(),
+            marketData.lastPurchase(),
+            marketData.lastSell()
+        );
 
         String updateQuery = """
             UPDATE market_values
