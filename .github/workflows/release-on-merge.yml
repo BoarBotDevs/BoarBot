@@ -22,17 +22,9 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Get the PR title and body
+      - name: Get Version From PR Title
         id: pr_info
         run: |
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-
-          PR_BODY="${{ github.event.pull_request.body }}"
-          echo "PR_BODY<<EOF" >> $GITHUB_ENV
-          echo "$PR_BODY" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
           if [[ "${{ github.event.pull_request.title }}" =~ v?([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             VERSION="${BASH_REMATCH[1]}"
             
@@ -52,5 +44,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
-          name: ${{ env.PR_TITLE }}
-          body: ${{ env.PR_BODY }}
+          name: ${{ github.event.pull_request.title }}
+          body: ${{ github.event.pull_request.body }}
