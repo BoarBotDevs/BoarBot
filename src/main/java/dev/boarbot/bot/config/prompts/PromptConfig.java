@@ -18,5 +18,6 @@ import java.util.Map;
 public class PromptConfig {
     private String name = "";
     private String description = "";
+    private String baseEmoji;
     private Map<String, IndivPromptConfig> prompts = new HashMap<>();
 }

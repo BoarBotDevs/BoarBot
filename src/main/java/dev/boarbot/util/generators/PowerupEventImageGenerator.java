@@ -106,7 +106,7 @@ public class PowerupEventImageGenerator extends ImageGenerator {
         if (this.fastestStr != null && this.avgStr != null) {
             this.textDrawer.setFontSize(NUMS.getFontBig());
             this.textDrawer.setWidth(this.generatedImage.getWidth() - NUMS.getBorder() * 4);
-            this.textDrawer.setWrap(true);
+            this.textDrawer.setWrap(false);
 
             int[] fastestPos = {TEXT_X, END_START_Y};
             int[] avgPos = {TEXT_X, fastestPos[1] + END_LABEL_Y_SPACING};

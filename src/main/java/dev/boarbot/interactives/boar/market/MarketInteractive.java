@@ -218,7 +218,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
                 try {
                     String pageInput = pageInputRaw.replaceAll("[^0-9]+", "");
-                    this.itemPage = Integer.parseInt(pageInput)-1;
+                    this.itemPage = Math.min(Math.max(Integer.parseInt(pageInput)-1, 0), this.maxItemPage);
                 } catch (NumberFormatException exception) {
                     Log.debug(this.user, this.getClass(), "Invalid modal input");
                 }
