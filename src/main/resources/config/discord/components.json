@@ -385,7 +385,7 @@
   "gift": {
     "fillerBtn": {
       "custom_id": "FILLER",
-      "label": "️",
+      "label": "\u2754",
       "style": 2,
       "disabled": true
     },
