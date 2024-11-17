@@ -324,29 +324,29 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
     private void makeFast(List<ActionRow> rows) {
         final int FAST_MAX_LENGTH = 3;
 
-        int correctIndex = (int) (Math.random() * promptConfig.getNumButtons());
-        String label = STRS.getEmpty();
+        int correctIndex = (int) (Math.random() * this.promptConfig.getNumButtons());
+        Emoji emoji = InteractiveUtil.parseEmoji(CONFIG.getPromptConfig().get("fast").getBaseEmoji());
 
         for (int i=0; i<FAST_MAX_LENGTH; i++) {
             List<ItemComponent> rowComponents = new ArrayList<>();
 
-            if (i*FAST_MAX_LENGTH >= promptConfig.getNumButtons()) {
+            if (i*FAST_MAX_LENGTH >= this.promptConfig.getNumButtons()) {
                 break;
             }
 
             for (int j=0; j<FAST_MAX_LENGTH; j++) {
                 int curIndex = i*FAST_MAX_LENGTH+j;
 
-                if (curIndex >= promptConfig.getNumButtons()) {
+                if (curIndex >= this.promptConfig.getNumButtons()) {
                     break;
                 }
 
                 if (curIndex == correctIndex) {
-                    rowComponents.add(new ButtonImpl(CORRECT_ID, label, ButtonStyle.PRIMARY, false, null));
+                    rowComponents.add(new ButtonImpl(CORRECT_ID, null, ButtonStyle.PRIMARY, false, emoji));
                     continue;
                 }
 
-                rowComponents.add(new ButtonImpl(INCORRECT_ID + curIndex,label , ButtonStyle.SECONDARY, false, null));
+                rowComponents.add(new ButtonImpl(INCORRECT_ID + curIndex, null, ButtonStyle.SECONDARY, false, emoji));
             }
 
             rows.add(ActionRow.of(rowComponents));

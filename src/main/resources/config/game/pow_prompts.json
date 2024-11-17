@@ -173,6 +173,7 @@
   "fast": {
     "name": "Quick Click",
     "description": "Click the blue button!",
+    "baseEmoji": "<:nothing:1307760936987398357>",
     "prompts": {
       "oneBtn": {
         "name": "One",
