@@ -20,7 +20,7 @@ public class PowerupEventImageGenerator extends ImageGenerator {
     private final static int REWARD_Y = 1021;
     private final static int EVENT_LABEL_Y = 156;
     private final static int EVENT_DESC_Y = 561;
-    private final static int END_START_Y = 352;
+    private final static int END_START_Y = 322;
     private final static int END_VALUE_Y_OFFSET = 71;
     private final static int END_LABEL_Y_SPACING = 188;
 
