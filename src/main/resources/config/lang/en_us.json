@@ -139,6 +139,8 @@
   "badgeBlocked": "<>error<>This user has no badges!",
   "badgeObtainedLabel": "Badge Tier Obtained Date",
   "badgeFirstObtainedLabel": "Badge Type Obtained Date",
+  "adventBlocked": "<>error<>It is not currently December!",
+  "adventViewString": "Advent Calendar",
   "powEventLabel": "<>powerup<>POWERUP EVENT!",
   "powEventEndLabel": "<>powerup<>POWERUP EVENT ENDED!",
   "powEventReward": "Reward: <>powerup<>%d %s",

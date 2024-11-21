@@ -160,6 +160,18 @@
           }
         ]
       },
+      "advent": {
+        "name": "advent",
+        "description": "View a user's advent calendar",
+        "location": "dev.boarbot.commands.boar.megamenu.AdventSubcommand",
+        "options": [
+          {
+            "name": "user",
+            "type": 6,
+            "description": "View another user's advent calendar"
+          }
+        ]
+      },
       "leaderboard": {
         "name": "leaderboard",
         "description": "View leaderboards showcasing a ranking of player stats",

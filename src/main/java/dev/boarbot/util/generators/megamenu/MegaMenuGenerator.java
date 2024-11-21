@@ -58,9 +58,14 @@ public abstract class MegaMenuGenerator extends ImageGenerator {
         classViewMap.put(PowerupsImageGenerator.class, MegaMenuView.POWERUPS.toString());
         classViewMap.put(QuestsImageGenerator.class, MegaMenuView.QUESTS.toString());
         classViewMap.put(BadgesImageGenerator.class, MegaMenuView.BADGES.toString());
+        classViewMap.put(AdventImageGenerator.class, MegaMenuView.ADVENT.toString());
 
         String view = classViewMap.get(this.getClass());
         String viewString = Character.toUpperCase(view.charAt(0)) + view.substring(1);
+
+        if (view.equals(MegaMenuView.ADVENT.toString())) {
+            viewString = STRS.getAdventViewString();
+        }
 
         String userString = this.boarUser.getUser().getEffectiveName() + "'s " + viewString;
 
