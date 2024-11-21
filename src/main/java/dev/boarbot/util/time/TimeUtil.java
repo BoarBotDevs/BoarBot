@@ -69,7 +69,7 @@ public final class TimeUtil {
 
     public static boolean isDecember() {
         ZonedDateTime curDateTime = ZonedDateTime.now(ZoneId.of("America/Chicago"));
-        return curDateTime.getMonth() == Month.NOVEMBER;
+        return curDateTime.getMonth() == Month.DECEMBER;
     }
 
     public static int getYear() {
