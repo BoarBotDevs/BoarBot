@@ -9,6 +9,7 @@ import dev.boarbot.entities.boaruser.data.QuestData;
 import dev.boarbot.util.interactive.InteractiveUtil;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.quests.QuestUtil;
+import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -62,6 +63,7 @@ class MegaMenuComponentsGetter implements Configured {
             case MegaMenuView.EDITIONS -> this.getEditionsComponents();
             case MegaMenuView.POWERUPS -> this.getPowerupsComponents();
             case MegaMenuView.QUESTS -> this.getQuestsComponents();
+            case MegaMenuView.ADVENT -> this.getAdventComponents();
         };
     }
 
@@ -254,6 +256,10 @@ class MegaMenuComponentsGetter implements Configured {
         return new ActionRow[] {nav[0], nav[1], ActionRow.of(mainRow)};
     }
 
+    private ActionRow[] getAdventComponents() {
+        return this.getNav();
+    }
+
     private List<ItemComponent> getFilterRow() {
         if (this.filterOptions.isEmpty()) {
             this.makeSelectOptions(COMPONENTS.get("filterSelect"));
@@ -414,15 +420,21 @@ class MegaMenuComponentsGetter implements Configured {
             COMPONENTS.get("refreshBtn")
         );
 
-        for (int i=0; i<this.navOptions.size(); i++) {
-            SelectOption navOption = this.navOptions.get(i);
+        List<SelectOption> selectOptions = new ArrayList<>(this.navOptions);
+
+        if (!TimeUtil.isDecember()) {
+            selectOptions.removeFirst();
+        }
+
+        for (int i=0; i<selectOptions.size(); i++) {
+            SelectOption navOption = selectOptions.get(i);
 
             if (navOption.getValue().equals(this.interactive.curView.toString())) {
-                this.navOptions.set(i, navOption.withDefault(true));
+                selectOptions.set(i, navOption.withDefault(true));
                 continue;
             }
 
-            this.navOptions.set(i, navOption.withDefault(false));
+            selectOptions.set(i, navOption.withDefault(false));
         }
 
         Button leftBtn = ((Button) navBtns.getFirst()).asDisabled();
@@ -452,7 +464,7 @@ class MegaMenuComponentsGetter implements Configured {
             viewSelectMenu.getMinValues(),
             viewSelectMenu.getMaxValues(),
             viewSelectMenu.isDisabled(),
-            this.navOptions
+            selectOptions
         ));
 
         return new ActionRow[] {

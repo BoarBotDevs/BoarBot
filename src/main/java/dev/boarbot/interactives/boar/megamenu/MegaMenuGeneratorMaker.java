@@ -12,6 +12,7 @@ import dev.boarbot.util.data.QuestDataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
 import dev.boarbot.util.generators.megamenu.*;
 import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.time.TimeUtil;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -37,6 +38,7 @@ class MegaMenuGeneratorMaker implements Configured {
             case MegaMenuView.POWERUPS -> this.makePowerupsGen();
             case MegaMenuView.QUESTS -> this.makeQuestsGen();
             case MegaMenuView.BADGES -> this.makeBadgesGen();
+            case MegaMenuView.ADVENT -> this.makeAdventGen();
         };
     }
 
@@ -275,12 +277,44 @@ class MegaMenuGeneratorMaker implements Configured {
             return this.make();
         }
 
-        this.interactive.maxPage = this.interactive.getBadges().size()-1;
+        this.interactive.maxPage = 0;
         if (this.interactive.page > this.interactive.maxPage) {
             this.interactive.page = this.interactive.maxPage;
         }
 
         return new BadgesImageGenerator(
+            this.interactive.page,
+            this.interactive.getBoarUser(),
+            this.interactive.getBadges(),
+            this.interactive.getFirstJoinedDate()
+        );
+    }
+
+    private MegaMenuGenerator makeAdventGen() throws SQLException {
+        if (!TimeUtil.isDecember()) {
+            if (this.interactive.prevView == null || this.interactive.prevView.equals(MegaMenuView.ADVENT)) {
+                this.interactive.curView = MegaMenuView.PROFILE;
+            } else {
+                this.interactive.curView = this.interactive.prevView;
+            }
+
+            this.interactive.filterOpen = false;
+            this.interactive.sortOpen = false;
+            this.interactive.interactOpen = false;
+
+            this.interactive.acknowledgeOpen = true;
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getAdventBlocked());
+            Log.debug(this.interactive.getUser(), this.getClass(), "Advent not ongoing");
+
+            return this.make();
+        }
+
+        this.interactive.maxPage = this.interactive.getBadges().size()-1;
+        if (this.interactive.page > this.interactive.maxPage) {
+            this.interactive.page = this.interactive.maxPage;
+        }
+
+        return new AdventImageGenerator(
             this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),

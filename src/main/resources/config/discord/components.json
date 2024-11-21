@@ -102,6 +102,12 @@
       "placeholder": "Select view...",
       "options": [
         {
+          "label": "Advent Calendar",
+          "value": "advent",
+          "emoji": "\uD83C\uDF84",
+          "description": "View current advent calendar"
+        },
+        {
           "label": "Profile",
           "value": "profile",
           "emoji": "\uD83D\uDC64",

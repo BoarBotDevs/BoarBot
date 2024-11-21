@@ -168,6 +168,8 @@ public class StringConfig {
     private String badgeBlocked = "";
     private String badgeObtainedLabel = "";
     private String badgeFirstObtainedLabel = "";
+    private String adventBlocked = "";
+    private String adventViewString = "";
 
     // Event strings
 

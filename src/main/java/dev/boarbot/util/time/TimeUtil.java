@@ -67,6 +67,11 @@ public final class TimeUtil {
             curDateTime.getDayOfMonth() >= 19 && curDateTime.getDayOfMonth() <= 26;
     }
 
+    public static boolean isDecember() {
+        ZonedDateTime curDateTime = ZonedDateTime.now(ZoneId.of("America/Chicago"));
+        return curDateTime.getMonth() == Month.NOVEMBER;
+    }
+
     public static int getYear() {
         return LocalDate.now().getYear();
     }

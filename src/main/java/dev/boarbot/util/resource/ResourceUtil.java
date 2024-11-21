@@ -36,6 +36,7 @@ public class ResourceUtil {
     public static final String powAnomUnderlayPath = megaMenuAssetsPath + "PowerupsAnomalous.png";
     public static final String questUnderlayPath = megaMenuAssetsPath + "QuestsUnderlay.png";
     public static final String badgeUnderlayPath = megaMenuAssetsPath + "BadgesUnderlay.png";
+    public static final String adventUnderlayPath = megaMenuAssetsPath + "AdventUnderlay.png";
 
     public static final String powCellNonePath = megaMenuAssetsPath + "CellNoCharge.png";
     public static final String powCellCommonPath = megaMenuAssetsPath + "CellCommon.png";
