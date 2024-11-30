@@ -157,7 +157,7 @@ class MegaMenuComponentHandler implements Configured {
 
             case "SORT_SELECT" -> this.setSortVal();
 
-            case "CONFIRM" -> this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+            case "CONFIRM", "ADVENT_CLAIM" -> this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
 
             case "CANCEL" -> {
                 this.interactive.confirmOpen = false;

@@ -112,9 +112,9 @@ public class UserDataUtil {
             SET streak_frozen = ?;
         """;
 
-        try (PreparedStatement statement1 = connection.prepareStatement(query)) {
-            statement1.setBoolean(1, shouldFreeze);
-            statement1.executeUpdate();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setBoolean(1, shouldFreeze);
+            statement.executeUpdate();
         }
     }
 
@@ -218,6 +218,17 @@ public class UserDataUtil {
             }
 
             statement4.executeBatch();
+        }
+    }
+
+    public static void resetOtherBless(Connection connection) throws SQLException {
+        String query = """
+            UPDATE users
+            SET other_bless = 0;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.executeUpdate();
         }
     }
 }

@@ -56,24 +56,25 @@ public final class TimeUtil {
     }
 
     public static boolean isHalloween() {
-        ZonedDateTime curDateTime = ZonedDateTime.now(ZoneId.of("America/Chicago"));
-        return curDateTime.getMonth() == Month.OCTOBER && curDateTime.getDayOfMonth() >= 26 ||
-            curDateTime.getMonth() == Month.NOVEMBER && curDateTime.getDayOfMonth() <= 2;
+        LocalDateTime curDateTime = LocalDateTime.now(ZoneOffset.UTC);
+        return curDateTime.getMonth() == Month.OCTOBER && getDayOfMonth() >= 26 ||
+            curDateTime.getMonth() == Month.NOVEMBER && getDayOfMonth() <= 2;
     }
 
     public static boolean isChristmas() {
-        ZonedDateTime curDateTime = ZonedDateTime.now(ZoneId.of("America/Chicago"));
-        return curDateTime.getMonth() == Month.DECEMBER &&
-            curDateTime.getDayOfMonth() >= 19 && curDateTime.getDayOfMonth() <= 26;
+        return isDecember() && getDayOfMonth() >= 19 && getDayOfMonth() <= 26;
     }
 
     public static boolean isDecember() {
-        ZonedDateTime curDateTime = ZonedDateTime.now(ZoneId.of("America/Chicago"));
-        return curDateTime.getMonth() == Month.DECEMBER;
+        return LocalDate.now(ZoneOffset.UTC).getMonth() == Month.DECEMBER;
+    }
+
+    public static int getDayOfMonth() {
+        return LocalDate.now(ZoneOffset.UTC).getDayOfMonth();
     }
 
     public static int getYear() {
-        return LocalDate.now().getYear();
+        return LocalDate.now(ZoneOffset.UTC).getYear();
     }
 
     public static String getTimeDistance(long milli, boolean shortened) {

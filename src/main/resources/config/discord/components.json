@@ -386,6 +386,12 @@
       "custom_id": "QUEST_AUTO",
       "label": "Auto Claim: %s",
       "style": 3
+    },
+    "adventClaimBtn": {
+      "custom_id": "ADVENT_CLAIM",
+      "label": "Claim Advent Reward",
+      "style": 3,
+      "disabled": true
     }
   },
   "gift": {

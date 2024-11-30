@@ -583,4 +583,25 @@ public class MegaMenuQueries implements Configured {
 
         return badgeIDs;
     }
+
+    public AdventData getAdventData(Connection connection) throws SQLException {
+        AdventData adventData = new AdventData();
+        String query = """
+            SELECT advent_bits, advent_year
+            FROM users
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, this.boarUser.getUserID());
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return new AdventData(results.getInt("advent_bits"), results.getInt("advent_year"));
+                }
+            }
+        }
+
+        return adventData;
+    }
 }
