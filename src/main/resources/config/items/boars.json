@@ -4,16 +4,16 @@
     "file": "GhostBoar.png",
     "description": "This boar's love for karaoke combined with its terrible singing skills results in a terrifying experience. Headphones or deafness is recommended.",
     "classification": "Incorporeal",
-    "update": "Alpha"
+    "update": "Boar-O-Ween 2022"
   },
   "ice": {
     "name": "Icy Boar",
     "file": "IceBoar.png",
     "description": "Touching this boar will instantly give you frostbite. Wherever it goes, blizzard-like conditions follow. Found in the heart of glaciers.",
     "classification": "Energy Leecher",
-    "update": "v1.1.30",
+    "update": "Boarmas 2023",
     "searchTerms": [
-      "iceboar"
+      "ice"
     ]
   },
   "birthday": {
@@ -21,7 +21,7 @@
     "file": "BirthdayBoar.png",
     "description": "It is believed that this boar has been partying for eternity. Disturbingly, it has only ever done so by itself as its location is unknown.",
     "classification": "Unreachable",
-    "update": "v1.1.32"
+    "update": "1st Anniversary"
   },
   "normal": {
     "name": "Normal Boar",
@@ -155,6 +155,6 @@
     "file": "SantaBoar.png",
     "description": "Every <>christmas<>Boarmas<>font<>, this boar delivers gifts to both young and old! Questioning its identity is highly discouraged.",
     "classification": "Psychotic",
-    "update": "v1.1.30"
+    "update": "Boarmas 2023"
   }
 }

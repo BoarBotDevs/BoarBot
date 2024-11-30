@@ -12,6 +12,7 @@ import dev.boarbot.util.generators.PowerupEventImageGenerator;
 import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -56,7 +57,10 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
             }
         }
 
-        this.powerupID = validPowerupIDs.get((int) (Math.random() * validPowerupIDs.size()));
+        this.powerupID = TimeUtil.isChristmas() && Math.random() < 0.8
+            ? "gift"
+            : validPowerupIDs.get((int) (Math.random() * validPowerupIDs.size()));
+
         this.imageGenerator = new PowerupEventImageGenerator(this.promptType, this.promptID, this.powerupID);
     }
 

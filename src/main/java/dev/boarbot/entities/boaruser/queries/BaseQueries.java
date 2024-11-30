@@ -369,6 +369,20 @@ public class BaseQueries implements Configured {
         return blessings;
     }
 
+    public void giveOtherBless(Connection connection, long amount) throws SQLException {
+        String query = """
+            UPDATE users
+            SET other_bless = other_bless + ?
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setLong(1, amount);
+            statement.setString(2, this.boarUser.getUserID());
+            statement.executeUpdate();
+        }
+    }
+
     public void updateHighestBlessings(Connection connection) throws SQLException {
         String updateQuery = """
             UPDATE users

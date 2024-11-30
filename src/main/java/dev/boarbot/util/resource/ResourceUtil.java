@@ -36,6 +36,7 @@ public class ResourceUtil {
     public static final String powAnomUnderlayPath = megaMenuAssetsPath + "PowerupsAnomalous.png";
     public static final String questUnderlayPath = megaMenuAssetsPath + "QuestsUnderlay.png";
     public static final String badgeUnderlayPath = megaMenuAssetsPath + "BadgesUnderlay.png";
+    public static final String adventUnderlayPath = megaMenuAssetsPath + "AdventUnderlay.png";
 
     public static final String powCellNonePath = megaMenuAssetsPath + "CellNoCharge.png";
     public static final String powCellCommonPath = megaMenuAssetsPath + "CellCommon.png";
@@ -47,6 +48,14 @@ public class ResourceUtil {
     public static final String powCellDivinePath = megaMenuAssetsPath + "CellDivine.png";
     public static final String rarityBorderPath = megaMenuAssetsPath + "RarityBorder.png";
     public static final String favoritePath = megaMenuAssetsPath + "Favorite.png";
+    public static final String unavailableAdventPath = megaMenuAssetsPath + "UnavailableGift.png";
+    public static final String currentAdventPath = megaMenuAssetsPath + "CurrentGift.png";
+    public static final String eventAdventPath = megaMenuAssetsPath + "EventGift.png";
+    public static final String festiveAdventPath = megaMenuAssetsPath + "FestiveGift.png";
+    public static final String missedAdventPath = megaMenuAssetsPath + "MissedGift.png";
+    public static final String blessingAdventPath = megaMenuAssetsPath + "BlessingGift.png";
+    public static final String bucksAdventPath = megaMenuAssetsPath + "BucksGift.png";
+    public static final String celesticonAdventPath = megaMenuAssetsPath + "CelesticonGift.png";
 
     public static final String otherAssetsPath = imagesPath + "other/";
     public static final String bucksGiftPath = otherAssetsPath + "BucksGift.png";

@@ -157,9 +157,9 @@ public class StringConfig {
     private String questAmtLabel = "";
     private String questFullAmtLabel = "";
     private String questBonusLabel = "";
-    private String questNoBonusLabel = "";
-    private String questUnclaimedBonusLabel = "";
-    private String questClaimedBonusLabel = "";
+    private String noBonusLabel = "";
+    private String unclaimedBonusLabel = "";
+    private String claimedBonusLabel = "";
     private String questClaimed = "";
     private String questMultiClaimed = "";
     private String questBonusClaimed = "";
@@ -168,6 +168,19 @@ public class StringConfig {
     private String badgeBlocked = "";
     private String badgeObtainedLabel = "";
     private String badgeFirstObtainedLabel = "";
+    private String adventBlocked = "";
+    private String adventViewString = "";
+    private String adventClaimedLabel = "";
+    private String adventNextLabel = "";
+    private String adventBonusLabel = "";
+    private String adventBucksClaimed = "";
+    private String adventBlessingsClaimed = "";
+    private String adventCelesticonClaimed = "";
+    private String adventPowerupClaimed = "";
+    private String adventFestiveClaimed = "";
+    private String adventEventClaimed = "";
+    private String adventUnavailable = "";
+    private String adventTitle = "";
 
     // Event strings
 
@@ -198,6 +211,7 @@ public class StringConfig {
     private String notificationFailed = "";
     private String notificationSuccessReply = "";
     private String notificationEnding = "";
+    private String notificationAdventEnding = "";
     private String notificationDisabledStr = "";
     private String[] notificationExtras = {};
     private String notificationPingChannel = "";

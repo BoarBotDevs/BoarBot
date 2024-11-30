@@ -3,8 +3,10 @@ package dev.boarbot.interactives.boar.megamenu;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
+import dev.boarbot.commands.boar.megamenu.AdventSubcommand;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.data.AdventData;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
@@ -18,6 +20,7 @@ import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.quests.QuestUtil;
+import dev.boarbot.util.resource.ResourceUtil;
 import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.entities.User;
 
@@ -110,6 +113,13 @@ class MegaMenuActionHandler implements Configured {
             }
 
             this.interactive.questAction = null;
+        } else if (this.interactive.curView == MegaMenuView.ADVENT) {
+            try (Connection connection = DataUtil.getConnection()) {
+                this.doAdventClaim(boarUser, connection);
+            } catch (SQLException exception) {
+                this.interactive.stop(StopType.EXCEPTION);
+                Log.error(this.user, this.getClass(), "Failed to update advent data", exception);
+            }
         }
     }
 
@@ -242,19 +252,7 @@ class MegaMenuActionHandler implements Configured {
                     null, STRS.getCompCloneSuccess().formatted("<>" + this.curRarityKey + "<>" + boarName)
                 );
 
-                String title = STRS.getCompCloneTitle();
-
-                ItemInteractive.sendInteractive(
-                    newBoarIDs,
-                    bucksGotten,
-                    editions,
-                    firstBoarIDs,
-                    null,
-                    this.user,
-                    title,
-                    this.interactive.compEvent.getHook(),
-                    true
-                );
+                this.sendBoarItemInteractive(newBoarIDs, bucksGotten, editions, firstBoarIDs, STRS.getCompCloneTitle());
 
                 Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
             } catch (RuntimeException exception) {
@@ -366,18 +364,8 @@ class MegaMenuActionHandler implements Configured {
                     );
                 }
 
-                String title = STRS.getCompTransmuteTitle();
-
-                ItemInteractive.sendInteractive(
-                    newBoarIDs,
-                    bucksGotten,
-                    editions,
-                    firstBoarIDs,
-                    null,
-                    this.user,
-                    title,
-                    this.interactive.compEvent.getHook(),
-                    true
+                this.sendBoarItemInteractive(
+                    newBoarIDs, bucksGotten, editions, firstBoarIDs, STRS.getCompTransmuteTitle()
                 );
 
                 Log.debug(this.user, this.getClass(), "Sent ItemInteractive");
@@ -520,5 +508,177 @@ class MegaMenuActionHandler implements Configured {
 
     public void toggleQuestAuto(BoarUser boarUser, Connection connection) throws SQLException {
         boarUser.questQuery().toggleAutoClaim(connection);
+    }
+
+    public void doAdventClaim(BoarUser boarUser, Connection connection) throws SQLException {
+        this.interactive.adventData = boarUser.megaQuery().getAdventData(connection);
+
+        if (this.interactive.adventData.adventYear() != TimeUtil.getYear()) {
+            this.interactive.adventData = new AdventData(0, TimeUtil.getYear());
+        }
+
+        boolean isBonusClaim = this.interactive.adventData.adventBits() == MegaMenuInteractive.FULL_ADVENT_BITS;
+        boolean claimable = TimeUtil.getDayOfMonth() <= 25 &&
+            (this.interactive.adventData.adventBits() >> (TimeUtil.getDayOfMonth()-1)) % 2 == 0 &&
+            this.interactive.adventData.adventBits() < MegaMenuInteractive.FULL_ADVENT_BITS ||
+            isBonusClaim;
+
+        this.interactive.acknowledgeOpen = true;
+
+        if (!claimable) {
+            this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, STRS.getAdventUnavailable());
+            Log.debug(this.user, this.getClass(), "No advent rewards to claim");
+            return;
+        }
+
+        int newBits = this.interactive.adventData.adventBits() + (isBonusClaim
+            ? 1
+            : (int) Math.pow(2, TimeUtil.getDayOfMonth()-1));
+
+        boarUser.giftQuery().setAdventBits(connection, newBits);
+
+        AdventSubcommand.RewardType adventRewardType = isBonusClaim
+            ? AdventSubcommand.RewardType.EVENT
+            : AdventSubcommand.getBaseRewardType(TimeUtil.getDayOfMonth());
+
+        String claimStr;
+
+        switch (adventRewardType) {
+            case BUCKS -> {
+                claimStr = STRS.getAdventBucksClaimed()
+                    .formatted(BOARS.get("billionaire").getName(), STRS.getBucksPluralName());
+                int randBucks = (int) Math.round(Math.random() * (50 - 30) + 30);
+                boarUser.baseQuery().giveBucks(connection, randBucks);
+
+                QuestUtil.sendQuestClaimMessage(
+                    this.interactive.compEvent.getHook(),
+                    boarUser.questQuery().addProgress(QuestType.COLLECT_BUCKS, randBucks, connection)
+                );
+
+                CompletableFuture.runAsync(() ->
+                    ItemInteractive.sendInteractive(
+                        POWS.get("gift").getOutcomes().get("bucks").getRewardStr()
+                            .formatted(randBucks, STRS.getBucksPluralName()),
+                        ResourceUtil.bucksGiftPath,
+                        "bucks",
+                        null,
+                        this.user,
+                        STRS.getAdventTitle(),
+                        false,
+                        this.interactive.compEvent.getHook(),
+                        true
+                    )
+                );
+            }
+
+            case BLESSINGS -> {
+                int otherBlessAmt = 50;
+                claimStr = STRS.getAdventBlessingsClaimed()
+                    .formatted(BOARS.get("fairy").getName(), otherBlessAmt, STRS.getBlessingsPluralName());
+                boarUser.baseQuery().giveOtherBless(connection, otherBlessAmt);
+            }
+
+            case CELESTICON -> {
+                claimStr = STRS.getAdventCelesticonClaimed().formatted(BOARS.get("boarfadius").getName());
+
+                List<String> boarIDs = BoarUtil.getRandBoarIDs(10000, this.interactive.isSkyblockGuild());
+                List<Integer> bucksGotten = new ArrayList<>();
+                List<Integer> editions = new ArrayList<>();
+                Set<String> firstBoarIDs = new HashSet<>();
+
+                boarUser.boarQuery().addBoars(
+                    boarIDs, connection, BoarObtainType.GIFT.toString(), bucksGotten, editions, firstBoarIDs
+                );
+
+                QuestUtil.sendQuestClaimMessage(
+                    this.interactive.compEvent.getHook(),
+                    boarUser.questQuery().addProgress(QuestType.COLLECT_RARITY, boarIDs, connection)
+                );
+
+                CompletableFuture.runAsync(() ->
+                    this.sendBoarItemInteractive(boarIDs, bucksGotten, editions, firstBoarIDs, STRS.getAdventTitle())
+                );
+            }
+
+            case FESTIVE -> {
+                claimStr = STRS.getAdventFestiveClaimed()
+                    .formatted(BOARS.get("creator").getName(), RARITIES.get("christmas").getName());
+
+                int index = RARITIES.get("christmas").getBoars().length - 5 + (TimeUtil.getDayOfMonth()-1) / 5;
+                List<String> boarIDs = new ArrayList<>();
+                List<Integer> bucksGotten = new ArrayList<>();
+                List<Integer> editions = new ArrayList<>();
+                Set<String> firstBoarIDs = new HashSet<>();
+
+                boarIDs.add(RARITIES.get("christmas").getBoars()[index]);
+
+                boarUser.boarQuery().addBoars(
+                    boarIDs, connection, BoarObtainType.GIFT.toString(), bucksGotten, editions, firstBoarIDs
+                );
+
+                CompletableFuture.runAsync(() ->
+                    this.sendBoarItemInteractive(boarIDs, bucksGotten, editions, firstBoarIDs, STRS.getAdventTitle())
+                );
+            }
+
+            case EVENT -> {
+                claimStr = STRS.getAdventEventClaimed().formatted(BOARS.get("calendar").getName());
+
+                List<String> boarIDs = new ArrayList<>();
+                List<Integer> bucksGotten = new ArrayList<>();
+                List<Integer> editions = new ArrayList<>();
+                Set<String> firstBoarIDs = new HashSet<>();
+
+                boarIDs.add("calendar");
+
+                boarUser.boarQuery().addBoars(
+                    boarIDs, connection, BoarObtainType.GIFT.toString(), bucksGotten, editions, firstBoarIDs
+                );
+
+                CompletableFuture.runAsync(() ->
+                    this.sendBoarItemInteractive(boarIDs, bucksGotten, editions, firstBoarIDs, STRS.getAdventTitle())
+                );
+            }
+
+            default -> {
+                claimStr = STRS.getAdventPowerupClaimed()
+                    .formatted(BOARS.get("santa").getName(), POWS.get("gift").getPluralName());
+                int numGifts = 5;
+                boarUser.powQuery().addPowerup(connection, "gift", numGifts);
+
+                CompletableFuture.runAsync(() ->
+                    ItemInteractive.sendInteractive(
+                        POWS.get("gift").getOutcomes().get("powerup").getRewardStr()
+                            .formatted(numGifts, POWS.get("gift").getPluralName()),
+                        ResourceUtil.powerupAssetsPath + POWS.get("gift").getFile(),
+                        "powerup",
+                        null,
+                        this.user,
+                        STRS.getAdventTitle(),
+                        false,
+                        this.interactive.compEvent.getHook(),
+                        true
+                    )
+                );
+            }
+        }
+
+        this.interactive.acknowledgeImageGen = new OverlayImageGenerator(null, claimStr);
+    }
+
+    private void sendBoarItemInteractive(
+        List<String> boarIDs, List<Integer> bucksGotten, List<Integer> editions, Set<String> firstBoarIDs, String title
+    ) {
+        ItemInteractive.sendInteractive(
+            boarIDs,
+            bucksGotten,
+            editions,
+            firstBoarIDs,
+            null,
+            this.user,
+            title,
+            this.interactive.compEvent.getHook(),
+            true
+        );
     }
 }
