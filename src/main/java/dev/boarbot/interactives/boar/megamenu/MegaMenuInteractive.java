@@ -84,6 +84,10 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     List<QuestType> quests;
     QuestAction questAction;
 
+    AdventData adventData;
+    public static final int FULL_ADVENT_BITS = 33554431;
+    public static final int LAST_ADVENT_DAY = 25;
+
     public MegaMenuInteractive(SlashCommandInteractionEvent event, MegaMenuView curView) {
         super(event.getInteraction());
 

@@ -6,6 +6,7 @@ import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.entities.boaruser.BoarInfo;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
+import dev.boarbot.entities.boaruser.data.AdventData;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.QuestDataUtil;
@@ -309,6 +310,21 @@ class MegaMenuGeneratorMaker implements Configured {
             return this.make();
         }
 
+        boolean notUpdated = this.interactive.getViewsToUpdateData().get(this.view) == null ||
+            !this.interactive.getViewsToUpdateData().get(this.view);
+
+        if (notUpdated) {
+            try (Connection connection = DataUtil.getConnection()) {
+                this.interactive.adventData = this.interactive.getBoarUser().megaQuery().getAdventData(connection);
+
+                if (this.interactive.adventData.adventYear() != TimeUtil.getYear()) {
+                    this.interactive.adventData = new AdventData(0, TimeUtil.getYear());
+                }
+
+                this.interactive.getViewsToUpdateData().put(this.view, true);
+            }
+        }
+
         this.interactive.maxPage = this.interactive.getBadges().size()-1;
         if (this.interactive.page > this.interactive.maxPage) {
             this.interactive.page = this.interactive.maxPage;
@@ -318,7 +334,8 @@ class MegaMenuGeneratorMaker implements Configured {
             this.interactive.page,
             this.interactive.getBoarUser(),
             this.interactive.getBadges(),
-            this.interactive.getFirstJoinedDate()
+            this.interactive.getFirstJoinedDate(),
+            this.interactive.adventData
         );
     }
 

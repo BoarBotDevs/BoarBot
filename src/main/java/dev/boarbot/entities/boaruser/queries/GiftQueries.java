@@ -128,4 +128,21 @@ public class GiftQueries implements Configured {
             statement.executeUpdate();
         }
     }
+
+    public void setAdventBits(Connection connection, int bits) throws SQLException {
+        this.boarUser.baseQuery().addUser(connection);
+        this.boarUser.forceSynchronized();
+
+        String query = """
+            UPDATE users
+            SET advent_bits = ?, advent_year = year(utc_timestamp())
+            WHERE user_id = ?;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, bits);
+            statement.setString(2, this.boarUser.getUserID());
+            statement.executeUpdate();
+        }
+    }
 }

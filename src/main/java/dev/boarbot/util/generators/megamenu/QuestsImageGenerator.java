@@ -86,11 +86,11 @@ public class QuestsImageGenerator extends MegaMenuGenerator {
 
         int[] bonusLabelPos = {RIGHT_X, fullCompleteLabelPos[1] + RIGHT_Y_SPACING};
 
-        String bonusStr = STRS.getQuestNoBonusLabel();
+        String bonusStr = STRS.getNoBonusLabel();
         if (this.allQuestsDone && this.questData.fullClaimed()) {
-            bonusStr = STRS.getQuestClaimedBonusLabel();
+            bonusStr = STRS.getClaimedBonusLabel();
         } else if (this.allQuestsDone) {
-            bonusStr = STRS.getQuestUnclaimedBonusLabel();
+            bonusStr = STRS.getUnclaimedBonusLabel();
         }
 
         int[] bonusPos = {RIGHT_X, bonusLabelPos[1] + RIGHT_VALUE_Y_OFFSET};

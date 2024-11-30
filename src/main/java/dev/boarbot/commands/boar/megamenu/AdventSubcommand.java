@@ -9,6 +9,15 @@ import dev.boarbot.util.logging.Log;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class AdventSubcommand extends Subcommand {
+    public enum RewardType {
+        BUCKS,
+        BLESSINGS,
+        CELESTICON,
+        POWERUP,
+        FESTIVE,
+        EVENT
+    }
+
     public AdventSubcommand(SlashCommandInteractionEvent event) {
         super(event);
     }
@@ -24,5 +33,27 @@ public class AdventSubcommand extends Subcommand {
         Interactive interactive = InteractiveFactory.constructMegaMenuInteractive(this.event, MegaMenuView.ADVENT);
         interactive.execute(null);
         Log.debug(this.user, this.getClass(), "Sent MegaMenuInteractive (Advent)");
+    }
+
+    public static RewardType getBaseRewardType(int dayOfMonth) {
+        dayOfMonth -= 1;
+
+        if (dayOfMonth % 5 == 0 && dayOfMonth / 5 % 2 == 0 || dayOfMonth % 5 == 1 && dayOfMonth / 5 % 2 == 1) {
+            return RewardType.BUCKS;
+        }
+
+        if (dayOfMonth % 5 == 0 && dayOfMonth / 5 % 2 == 1 || dayOfMonth % 5 == 1 && dayOfMonth / 5 % 2 == 0) {
+            return RewardType.BLESSINGS;
+        }
+
+        if (dayOfMonth % 5 == 2) {
+            return RewardType.CELESTICON;
+        }
+
+        if (dayOfMonth % 5 == 4 && dayOfMonth / 5 % 2 == 0 || dayOfMonth % 5 == 3 && dayOfMonth / 5 % 2 == 1) {
+            return RewardType.FESTIVE;
+        }
+
+        return RewardType.POWERUP;
     }
 }

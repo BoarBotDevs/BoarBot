@@ -132,6 +132,10 @@ public class NotificationJob implements Job, Configured {
     ) throws SQLException {
         String notificationEnding = STRS.getNotificationEnding().formatted(channelID);
 
+        if (TimeUtil.isDecember() && TimeUtil.getDayOfMonth() <= 25) {
+            notificationEnding = STRS.getNotificationAdventEnding().formatted(channelID);
+        }
+
         if (TimeUtil.isHalloween()) {
             return "## " + STRS.getNotificationHalloween() + notificationEnding;
         }

@@ -36,8 +36,6 @@ public class CompendiumImageGenerator extends MegaMenuGenerator {
     private final BoarInfo boarInfo;
     private final boolean isFavorite;
 
-    private TextDrawer textDrawer;
-
     public CompendiumImageGenerator(
         int page,
         BoarUser boarUser,

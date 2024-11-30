@@ -257,7 +257,26 @@ class MegaMenuComponentsGetter implements Configured {
     }
 
     private ActionRow[] getAdventComponents() {
-        return this.getNav();
+        ActionRow[] nav = this.getNav();
+
+        List<ItemComponent> claimBtnRow = InteractiveUtil.makeComponents(
+            this.interactive.getInteractionID(), COMPONENTS.get("adventClaimBtn")
+        );
+
+        Button claimBtn = ((Button) claimBtnRow.getFirst());
+
+        boolean claimable = TimeUtil.getDayOfMonth() <= 25 &&
+            (this.interactive.adventData.adventBits() >> (TimeUtil.getDayOfMonth()-1)) % 2 == 0 &&
+            this.interactive.adventData.adventBits() < MegaMenuInteractive.FULL_ADVENT_BITS ||
+            this.interactive.adventData.adventBits() == MegaMenuInteractive.FULL_ADVENT_BITS;
+
+        if (claimable) {
+            claimBtn = claimBtn.withDisabled(false);
+        }
+
+        claimBtnRow.set(0, claimBtn);
+
+        return new ActionRow[] {nav[0], nav[1], ActionRow.of(claimBtnRow)};
     }
 
     private List<ItemComponent> getFilterRow() {

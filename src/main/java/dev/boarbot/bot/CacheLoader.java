@@ -38,6 +38,7 @@ public class CacheLoader implements Configured {
     private final static int[] BIG_SIZE = NUMS.getBigBoarSize();
     private final static int[] MEDIUM_BIG_SIZE = NUMS.getMediumBigBoarSize();
     private final static int[] MEDIUM_SIZE = NUMS.getMediumBoarSize();
+    private final static int[] SMALL_SIZE = NUMS.getSmallBoarSize();
 
     static void loadCache() {
         loadBoars();
@@ -146,11 +147,9 @@ public class CacheLoader implements Configured {
     private static void loadBorders() {
         Log.debug(CacheLoader.class, "Attempting to load rarity borders into cache...");
 
-        for (String rarityID : RARITIES.keySet()) {
-            putRarityBorder(rarityID);
+        for (String colorID : COLORS.keySet()) {
+            putRarityBorder(colorID);
         }
-
-        putRarityBorder("powerup");
 
         Log.debug(CacheLoader.class, "Successfully loaded all rarity borders into cache");
     }
@@ -163,12 +162,23 @@ public class CacheLoader implements Configured {
         );
         Graphics2D rarityMediumBorderG2D = rarityMediumBorderImage.createGraphics();
 
+        BufferedImage raritySmallBorderImage = new BufferedImage(
+            SMALL_SIZE[0], SMALL_SIZE[1], BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics2D raritySmallBorderG2D = raritySmallBorderImage.createGraphics();
+
         BufferedImage rarityMediumBigBorderImage = new BufferedImage(
             MEDIUM_BIG_SIZE[0], MEDIUM_BIG_SIZE[1], BufferedImage.TYPE_INT_ARGB
         );
         Graphics2D rarityMediumBigBorderG2D = rarityMediumBigBorderImage.createGraphics();
 
         try {
+            GraphicsUtil.drawRect(raritySmallBorderG2D, ORIGIN, SMALL_SIZE, color);
+            raritySmallBorderG2D.setComposite(AlphaComposite.DstIn);
+            GraphicsUtil.drawImage(raritySmallBorderG2D, ResourceUtil.rarityBorderPath, ORIGIN, SMALL_SIZE);
+            raritySmallBorderG2D.setComposite(AlphaComposite.SrcIn);
+            imageCacheMap.put("borderSmall" + colorKey, raritySmallBorderImage);
+
             GraphicsUtil.drawRect(rarityMediumBorderG2D, ORIGIN, MEDIUM_SIZE, color);
             rarityMediumBorderG2D.setComposite(AlphaComposite.DstIn);
             GraphicsUtil.drawImage(rarityMediumBorderG2D, ResourceUtil.rarityBorderPath, ORIGIN, MEDIUM_SIZE);
