@@ -259,6 +259,12 @@ class MegaMenuComponentsGetter implements Configured {
     private ActionRow[] getAdventComponents() {
         ActionRow[] nav = this.getNav();
 
+        boolean userSelf = this.interactive.getUser().getId().equals(this.interactive.getBoarUser().getUserID());
+
+        if (!userSelf) {
+            return nav;
+        }
+
         List<ItemComponent> claimBtnRow = InteractiveUtil.makeComponents(
             this.interactive.getInteractionID(), COMPONENTS.get("adventClaimBtn")
         );
