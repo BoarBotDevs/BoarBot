@@ -33,7 +33,7 @@
     "weight": 0,
     "baseBucks": 20,
     "researcherNeed": true,
-    "avgClones": 100,
+    "avgClones": 1000,
     "targetStock": 5,
     "priceAdjustWaitHours": 552,
     "boars": [
