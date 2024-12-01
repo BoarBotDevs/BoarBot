@@ -252,7 +252,7 @@
     "There are <>green<>3<>font<> rarities that only appear during certain times of the year. <br> <br>",
     "<>halloween<>Haunting<>font<> - Replaces Common Boars during <>halloween<>Boar-O-Ween<>font<>. Newest are only obtainable from <>halloween<>Boar-O-Ween<>font<> hunts. (<>green<>%,d<>font<>) <br> <br>",
     "<>christmas<>Festive<>font<> - Replaces Common Boars during <>christmas<>Boarmas<>font<>. (<>green<>%,d<>font<>) <br> <br>",
-    "<>event<>Event<>font<> - Currently only obtainable on BoarBot's anniversary on <>green<>June 30th<>font<>. This rarity is a catch-all for boars only obtainable at certain times. (<>green<>%,d<>font<>) <br> <br>",
+    "<>event<>Event<>font<> - This rarity is a catch-all for boars only obtainable at certain times, such as anniversaries, holiday events, and hunts. (<>green<>%,d<>font<>) <br> <br>",
     "<>halloween<>Haunting<>font<> and <>christmas<>Festive<>font<> are very heavily aligned with the western holidays Halloween and Christmas. We apologize to non-observers."
   ],
   "helpBadge1HL": "What are Badges?",
