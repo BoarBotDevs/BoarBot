@@ -58,7 +58,7 @@ public class InteractionUtil {
         }
 
         usersOnCooldown.put(user.getId(), TimeUtil.getCurMilli());
-        //sscheduler.schedule(() -> usersOnCooldown.remove(user.getId()), COOLDOWN_SLEEP_TIME, TimeUnit.MILLISECONDS);
+        scheduler.schedule(() -> usersOnCooldown.remove(user.getId()), COOLDOWN_SLEEP_TIME, TimeUnit.MILLISECONDS);
 
         return false;
     }
