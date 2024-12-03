@@ -5,6 +5,7 @@ import dev.boarbot.util.resource.ResourceUtil;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -58,20 +59,21 @@ public final class GraphicsUtil {
     }
 
     public static Image getImage(String path) throws URISyntaxException, IOException {
-        Image image;
-
-        if (path.startsWith("http")) {
-            image = ImageIO.read(new URI(path).toURL());
-        } else {
-            image = ImageIO.read(ResourceUtil.getResource(path));
-        }
-
-        return image;
+        return ImageIO.read(new ByteArrayInputStream(getImageBytes(path)));
     }
 
-    public static byte[] getImageBytes(String path) throws IOException {
-        InputStream is = ResourceUtil.getResourceStream(path);
-        return is.readAllBytes();
+    public static byte[] getImageBytes(String path) throws IOException, URISyntaxException {
+        InputStream stream;
+
+        if (path.startsWith("http")) {
+            stream = new URI(path).toURL().openStream();
+        } else {
+            stream = ResourceUtil.getResourceStream(path);
+        }
+
+        try (InputStream is = stream) {
+            return is.readAllBytes();
+        }
     }
 
     public static void drawCircleImage(

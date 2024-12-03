@@ -55,19 +55,19 @@ public class OverlayImageGenerator extends ImageGenerator {
 
     public OverlayImageGenerator(
         BufferedImage image, String path, int[] size, boolean darken
-    ) throws IOException {
+    ) throws IOException, URISyntaxException {
         this(image, path, size, null, darken);
     }
 
     public OverlayImageGenerator(
         BufferedImage image, String path, int[] size, int[] pos
-    ) throws IOException {
+    ) throws IOException, URISyntaxException {
         this(image, path, size, pos, true);
     }
 
     public OverlayImageGenerator(
         BufferedImage image, String path, int[] size, int[] pos, boolean darken
-    ) throws IOException {
+    ) throws IOException, URISyntaxException {
         this.generatedImage = image;
         this.animatedImage = GraphicsUtil.getImageBytes(path);
         this.animated = true;
