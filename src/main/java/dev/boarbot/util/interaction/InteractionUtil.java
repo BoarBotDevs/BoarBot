@@ -1,20 +1,31 @@
 package dev.boarbot.util.interaction;
 
+import dev.boarbot.util.time.TimeUtil;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class InteractionUtil {
     private final static int CORE_POOL_SIZE = 20;
     public final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
-    private final static Set<String> usersOnCooldown = new HashSet<>();
+    public final static Map<String, Long> usersOnCooldown = new HashMap<>();
 
     private final static int RUN_SLEEP_TIME = 2000;
-    private final static int COOLDOWN_SLEEP_TIME = 3000;
+    public final static int COOLDOWN_SLEEP_TIME = 3000;
+
+    static {
+        scheduler.schedule(() -> {
+            for (String user : usersOnCooldown.keySet()) {
+                if (usersOnCooldown.get(user) < TimeUtil.getCurMilli() - COOLDOWN_SLEEP_TIME) {
+                    usersOnCooldown.remove(user);
+                }
+            }
+        }, COOLDOWN_SLEEP_TIME, TimeUnit.MILLISECONDS);
+    }
 
     public static void runWhenEdited(SlashCommandInteraction interaction, Runnable runnable, int waitVal) {
         if (waitVal <= 0) {
@@ -42,12 +53,12 @@ public class InteractionUtil {
     }
 
     public synchronized static boolean isOnCooldown(User user) {
-        if (usersOnCooldown.contains(user.getId())) {
+        if (usersOnCooldown.containsKey(user.getId())) {
             return true;
         }
 
-        usersOnCooldown.add(user.getId());
-        scheduler.schedule(() -> usersOnCooldown.remove(user.getId()), COOLDOWN_SLEEP_TIME, TimeUnit.MILLISECONDS);
+        usersOnCooldown.put(user.getId(), TimeUtil.getCurMilli());
+        //sscheduler.schedule(() -> usersOnCooldown.remove(user.getId()), COOLDOWN_SLEEP_TIME, TimeUnit.MILLISECONDS);
 
         return false;
     }
