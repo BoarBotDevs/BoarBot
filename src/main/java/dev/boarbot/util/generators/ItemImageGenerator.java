@@ -158,7 +158,7 @@ public class ItemImageGenerator extends ImageGenerator {
         return this;
     }
 
-    private void generateAnimated() throws IOException {
+    private void generateAnimated() throws IOException, URISyntaxException {
         Gson g = new Gson();
 
         byte[] animatedImage = GraphicsUtil.getImageBytes(this.filePath);

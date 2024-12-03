@@ -6,7 +6,7 @@
     "baseBucks": 20,
     "researcherNeed": true,
     "givesFirstBoar": true,
-    "avgClones": 100,
+    "avgClones": 1000,
     "targetStock": 5,
     "priceAdjustWaitHours": 552,
     "boars": [
@@ -20,7 +20,7 @@
     "baseBucks": 20,
     "researcherNeed": true,
     "givesFirstBoar": true,
-    "avgClones": 100,
+    "avgClones": 1000,
     "targetStock": 5,
     "priceAdjustWaitHours": 552,
     "boars": [
