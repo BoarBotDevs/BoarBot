@@ -231,4 +231,15 @@ public class UserDataUtil {
             statement.executeUpdate();
         }
     }
+
+    public static void refreshUniques(Connection connection) throws SQLException {
+        String query = """
+            UPDATE users
+            SET unique_boars = 0;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.executeUpdate();
+        }
+    }
 }
