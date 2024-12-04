@@ -1,9 +1,9 @@
 /*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19-11.5.2-MariaDB, for Linux (x86_64)
+-- MariaDB dump 10.19-11.6.2-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: boarbot
 -- ------------------------------------------------------
--- Server version	11.5.2-MariaDB
+-- Server version	11.6.2-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -30,15 +30,6 @@ CREATE TABLE `boars_info` (
   PRIMARY KEY (`boar_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `boars_info`
---
-
-LOCK TABLES `boars_info` WRITE;
-/*!40000 ALTER TABLE `boars_info` DISABLE KEYS */;
-/*!40000 ALTER TABLE `boars_info` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -110,15 +101,6 @@ CREATE TABLE `clone_stats` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `clone_stats`
---
-
-LOCK TABLES `clone_stats` WRITE;
-/*!40000 ALTER TABLE `clone_stats` DISABLE KEYS */;
-/*!40000 ALTER TABLE `clone_stats` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `collected_badges`
 --
 
@@ -137,15 +119,6 @@ CREATE TABLE `collected_badges` (
   CONSTRAINT `FOREIGN_KEY_BADGE_USER` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `collected_badges`
---
-
-LOCK TABLES `collected_badges` WRITE;
-/*!40000 ALTER TABLE `collected_badges` DISABLE KEYS */;
-/*!40000 ALTER TABLE `collected_badges` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -224,15 +197,6 @@ CREATE TABLE `collected_boars` (
   CONSTRAINT `positive_edition` CHECK (`edition` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `collected_boars`
---
-
-LOCK TABLES `collected_boars` WRITE;
-/*!40000 ALTER TABLE `collected_boars` DISABLE KEYS */;
-/*!40000 ALTER TABLE `collected_boars` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -440,17 +404,8 @@ CREATE TABLE `collected_powerups` (
   CONSTRAINT `FOREIGN_KEY_POWERUP_USER` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `positive_amount` CHECK (`amount` >= 0),
   CONSTRAINT `positive_amount_used` CHECK (`amount_used` >= 0)
-) ENGINE=InnoDB AUTO_INCREMENT=642673 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=642678 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `collected_powerups`
---
-
-LOCK TABLES `collected_powerups` WRITE;
-/*!40000 ALTER TABLE `collected_powerups` DISABLE KEYS */;
-/*!40000 ALTER TABLE `collected_powerups` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -501,15 +456,6 @@ CREATE TABLE `guilds` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `guilds`
---
-
-LOCK TABLES `guilds` WRITE;
-/*!40000 ALTER TABLE `guilds` DISABLE KEYS */;
-/*!40000 ALTER TABLE `guilds` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `market_editions`
 --
 
@@ -521,15 +467,6 @@ CREATE TABLE `market_editions` (
   `edition` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `market_editions`
---
-
-LOCK TABLES `market_editions` WRITE;
-/*!40000 ALTER TABLE `market_editions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `market_editions` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `market_values`
@@ -550,15 +487,6 @@ CREATE TABLE `market_values` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `market_values`
---
-
-LOCK TABLES `market_values` WRITE;
-/*!40000 ALTER TABLE `market_values` DISABLE KEYS */;
-/*!40000 ALTER TABLE `market_values` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `prompt_stats`
 --
 
@@ -574,15 +502,6 @@ CREATE TABLE `prompt_stats` (
   CONSTRAINT `FOREIGN_KEY_PROMPT_USER` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `prompt_stats`
---
-
-LOCK TABLES `prompt_stats` WRITE;
-/*!40000 ALTER TABLE `prompt_stats` DISABLE KEYS */;
-/*!40000 ALTER TABLE `prompt_stats` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `quests`
@@ -603,15 +522,6 @@ CREATE TABLE `quests` (
   PRIMARY KEY (`quest_start_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `quests`
---
-
-LOCK TABLES `quests` WRITE;
-/*!40000 ALTER TABLE `quests` DISABLE KEYS */;
-/*!40000 ALTER TABLE `quests` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -669,15 +579,6 @@ CREATE TABLE `rarities_info` (
   CONSTRAINT `positive_score` CHECK (`base_bucks` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `rarities_info`
---
-
-LOCK TABLES `rarities_info` WRITE;
-/*!40000 ALTER TABLE `rarities_info` DISABLE KEYS */;
-/*!40000 ALTER TABLE `rarities_info` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -719,15 +620,6 @@ CREATE TABLE `transmute_stats` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transmute_stats`
---
-
-LOCK TABLES `transmute_stats` WRITE;
-/*!40000 ALTER TABLE `transmute_stats` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transmute_stats` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `user_quests`
 --
 
@@ -763,15 +655,6 @@ CREATE TABLE `user_quests` (
   CONSTRAINT `USER_ID` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_quests`
---
-
-LOCK TABLES `user_quests` WRITE;
-/*!40000 ALTER TABLE `user_quests` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_quests` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -900,6 +783,8 @@ CREATE TABLE `users` (
   `filter_bits` int(11) NOT NULL DEFAULT 1,
   `sort_value` int(11) NOT NULL DEFAULT 0,
   `streak_frozen` tinyint(1) NOT NULL DEFAULT 0,
+  `advent_bits` int(11) NOT NULL DEFAULT 0,
+  `advent_year` int(11) NOT NULL DEFAULT year(utc_timestamp()),
   PRIMARY KEY (`user_id`),
   KEY `USERNAME` (`username`),
   CONSTRAINT `positive_daily` CHECK (`num_dailies` >= 0),
@@ -915,15 +800,6 @@ CREATE TABLE `users` (
   CONSTRAINT `positive_blessings` CHECK (`blessings` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -960,6 +836,10 @@ DELIMITER ;;
     on users
     for each row
 begin
+    DECLARE force_uniques_update TINYINT(1);
+
+    SET force_uniques_update = OLD.unique_boars != NEW.unique_boars;
+
     SET NEW.last_changed_timestamp = current_timestamp(3);
     
     IF OLD.num_dailies < NEW.num_dailies THEN
@@ -990,7 +870,7 @@ begin
 
     SET NEW.streak_bless = LEAST(NEW.boar_streak, 250);
 
-    IF OLD.unique_boars != NEW.unique_boars THEN
+    IF OLD.unique_boars != NEW.unique_boars OR force_uniques_update THEN
         SET NEW.num_skyblock = (
             SELECT COUNT(DISTINCT collected_boars.boar_id)
             FROM collected_boars, boars_info
@@ -1198,4 +1078,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2024-10-19 10:51:19
+-- Dump completed on 2024-12-03 18:47:52

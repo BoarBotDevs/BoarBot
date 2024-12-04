@@ -5,6 +5,7 @@ import dev.boarbot.bot.config.items.BadgeItemConfig;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.QuestDataUtil;
+import dev.boarbot.util.data.UserDataUtil;
 import dev.boarbot.util.logging.Log;
 
 import java.sql.Connection;
@@ -100,6 +101,10 @@ class DatabaseLoader implements Configured {
                 statement2.executeBatch();
                 statement3.executeBatch();
                 statement4.executeBatch();
+            }
+
+            if (!fixBoarIDs.isEmpty() || !invalidBoarIDs.isEmpty() || !addBoarIDs.isEmpty()) {
+                UserDataUtil.refreshUniques(connection);
             }
         } catch (SQLException exception) {
             Log.error(DatabaseLoader.class, "Something went wrong when loading boars into database", exception);

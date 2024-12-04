@@ -1,6 +1,7 @@
 package dev.boarbot.util.graphics;
 
 import dev.boarbot.util.resource.ResourceUtil;
+import dev.boarbot.util.time.TimeUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -13,8 +14,11 @@ import java.net.URISyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class GraphicsUtil {
+    public static final ConcurrentHashMap<String, ImageCacheEntry> imageCache = new ConcurrentHashMap<>();
+
     public static void drawRect(Graphics2D g2d, int[] pos, int[] size, String color) {
         String[] gradStringColors = color.split(",");
 
@@ -59,19 +63,31 @@ public final class GraphicsUtil {
     }
 
     public static Image getImage(String path) throws URISyntaxException, IOException {
-        return ImageIO.read(new ByteArrayInputStream(getImageBytes(path)));
+        try {
+            return imageCache.computeIfAbsent(path, key -> {
+                try {
+                    return new ImageCacheEntry(ImageIO.read(new ByteArrayInputStream(getImageBytes(path))), TimeUtil.getCurMilli());
+                } catch (IOException | URISyntaxException exception) {
+                    throw new RuntimeException(exception);
+                }
+            }).image();
+        } catch (RuntimeException exception) {
+            if (exception.getCause() instanceof IOException) {
+                throw (IOException) exception.getCause();
+            } else if (exception.getCause() instanceof URISyntaxException) {
+                throw (URISyntaxException) exception.getCause();
+            } else {
+                throw exception;
+            }
+        }
     }
 
     public static byte[] getImageBytes(String path) throws IOException, URISyntaxException {
-        InputStream stream;
-
-        if (path.startsWith("http")) {
-            stream = new URI(path).toURL().openStream();
-        } else {
-            stream = ResourceUtil.getResourceStream(path);
-        }
-
-        try (InputStream is = stream) {
+        try (
+            InputStream is = path.startsWith("http")
+                ? new URI(path).toURL().openStream()
+                : ResourceUtil.getResourceStream(path)
+        ) {
             return is.readAllBytes();
         }
     }
