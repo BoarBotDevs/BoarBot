@@ -5,6 +5,8 @@ RUN apt update && \
     apt -y install python3 python3-pip && \
     pip3 install --force-reinstall "Pillow==10.4.0"
 
+ENV _JAVA_OPTIONS="-Xmx4g"
+
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
