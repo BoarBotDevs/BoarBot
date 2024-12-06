@@ -15,18 +15,21 @@ public class LogJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        String logString = "Interactives: %,d | ModalHandlers: %,d | Images: %,d | Bytearrays: %,d | " +
+            "BoarUsers: %,d | Memory Used: %,dMB/%,dMB | Threads: %,d";
+
         Log.debug(
             LogJob.class,
-            "Interactives: %,d | ModalHandlers: %,d | Images: %,d | Bytearrays: %,d | BoarUsers: %,d | Memory Used: %,dMB | Threads: %,d"
-                .formatted(
-                    bot.getInteractives().size(),
-                    bot.getModalHandlers().size(),
-                    bot.getImageCacheMap().size(),
-                    bot.getByteCacheMap().size(),
-                    BoarUserFactory.getNumBoarUsers(),
-                    (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024),
-                    Thread.activeCount()
-                )
+            logString.formatted(
+                bot.getInteractives().size(),
+                bot.getModalHandlers().size(),
+                bot.getImageCacheMap().size(),
+                bot.getByteCacheMap().size(),
+                BoarUserFactory.getNumBoarUsers(),
+                (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024),
+                (Runtime.getRuntime().maxMemory()) / (1024 * 1024),
+                Thread.activeCount()
+            )
         );
     }
 }
