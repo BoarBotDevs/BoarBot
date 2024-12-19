@@ -132,7 +132,7 @@ public class BaseQueries implements Configured {
 
         while (timeToReach < curTimeCheck) {
             if (newBoarStreak > 0) {
-                int curRemove = (int) Math.pow(7, curDailiesMissed + newDailiesMissed);
+                int curRemove = (int) Math.pow(7, (curDailiesMissed + newDailiesMissed) * 0.4);
                 newBoarStreak = Math.max(newBoarStreak - curRemove, 0);
             }
 
