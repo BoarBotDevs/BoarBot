@@ -57,7 +57,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
     private final Map<User, GenericComponentInteractionCreateEvent> giftInteractions = new ConcurrentHashMap<>();
     private boolean givenGift = false;
     private User giftWinner;
-    private long giftWinnerValue;
+    private long giftWinnerValue = NUMS.getGiftMaxHandicap();
     private boolean hasGift = false;
 
     private OutcomeType outcomeType;
