@@ -364,7 +364,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                        boarUser.giftQuery().getGiftHandicap(connection);
 
                     Log.debug(this.user, this.getClass(), "Handicapped Value: %,d".formatted(userVal));
-                    if (userVal > this.giftWinnerValue) {
+                    if (userVal < this.giftWinnerValue) {
                         this.giftWinner = boarUser.getUser();
                         this.giftWinnerValue = userVal;
                         Log.info(
