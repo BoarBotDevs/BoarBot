@@ -234,6 +234,12 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             }
         }
 
+        Log.info(
+            this.user,
+            this.getClass(),
+            "Gift opened by %s (%s)".formatted(this.giftWinner.getName(), this.giftWinner.getId())
+        );
+
         try {
             MessageCreateBuilder msg = new MessageCreateBuilder().setFiles(
                 new EmbedImageGenerator(STRS.getGiftOpened().formatted(
@@ -360,18 +366,13 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         try {
             if (this.outcomeType == null && this.giftWinner != null) {
                 try (Connection connection = DataUtil.getConnection()) {
-                    long userVal = this.giftTimes.get(boarUser.getUser()) -
+                    long userVal = this.giftTimes.get(boarUser.getUser()) +
                        boarUser.giftQuery().getGiftHandicap(connection);
 
-                    Log.debug(this.user, this.getClass(), "Handicapped Value: %,d".formatted(userVal));
+                    Log.debug(boarUser.getUser(), this.getClass(), "Handicapped Value: %,d".formatted(userVal));
                     if (userVal < this.giftWinnerValue) {
                         this.giftWinner = boarUser.getUser();
                         this.giftWinnerValue = userVal;
-                        Log.info(
-                            this.user,
-                            this.getClass(),
-                            "Gift opened by %s (%s)".formatted(this.giftWinner.getName(), this.giftWinner.getId())
-                        );
                     }
 
                     boarUser.giftQuery().updateGiftHandicap(connection, this.giftTimes.get(boarUser.getUser()));
