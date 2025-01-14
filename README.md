@@ -21,8 +21,6 @@
     </a>
 </p>
 
-<div align="center">
-
 # Commands
 Discord's command system is the main way that users can interact with the bot. Find out more about the main commands here!
 
@@ -120,7 +118,7 @@ Transmutation Charges allows a user to upgrade their boar to a random boar of a 
 
 <img src="https://github.com/user-attachments/assets/797c9025-1913-41fd-bae2-619a53674a38" alt="shows the confirmation screen for using transmutation charges. text in the middle says: Are you sure? This will completely drain your transmutation cell and will replace one of your Minimum Wage Boars with a random Mythic Boar.">
 
-### Hunts
+# Hunts
 BoarBot will sometimes have hunts in order to get special boars. Every year, there's scheduled hunts around Halloween, and may occur irregularrly at other times.
 
 # Other Commands
@@ -129,9 +127,9 @@ Along with the main commands listed above, BoarBot has a few more minor commands
 ### Help
 Details all the different features in Boarbot. If you're looking for more information, this is the place to go!
 
-<img src="https://github.com/user-attachments/assets/e3eb0af2-9e7b-4ef3-88ac-e062bb25f581" alt="The first page of the general section of the Boar Help menu. The text says: BoarBot is a game built entirely around collecting boars. Some are rarer than others, some are worth more than others, and some are more exclusive than others. Boars can be obtained in several ways, which are all listed below. /boar daily - The primary way to roll for boars. Only usable daily. Powerups - Some boars are only obtainable through powerups. Events - Some boars are only obtainable through hosted events. Holidays - Some boars are only obtainable on specific days/weeks." What else can I do? Powerup Events - These occur every two hours and yield powerups which can make collecting boars more interesting. Buy & Sell - Use your hard-earned Boar Bucks on the /boar market. Compete - Climb to the top spots on the /boar leaderboard. Quests - Complete quests of varying difficulty in /boar quests. Max Out - Reach peak potential by reaching 1,000 Boar Blessings. Make Friends - Come up with ideas and talk with other players in our Discord server! discord.boarbot.dev>
+<img src="https://github.com/user-attachments/assets/e3eb0af2-9e7b-4ef3-88ac-e062bb25f581" alt="The first page of the general section of the Boar Help menu. The text says: BoarBot is a game built entirely around collecting boars. Some are rarer than others, some are worth more than others, and some are more exclusive than others. Boars can be obtained in several ways, which are all listed below. /boar daily - The primary way to roll for boars. Only usable daily. Powerups - Some boars are only obtainable through powerups. Events - Some boars are only obtainable through hosted events. Holidays - Some boars are only obtainable on specific days/weeks. What else can I do? Powerup Events - These occur every two hours and yield powerups which can make collecting boars more interesting. Buy & Sell - Use your hard-earned Boar Bucks on the /boar market. Compete - Climb to the top spots on the /boar leaderboard. Quests - Complete quests of varying difficulty in /boar quests. Max Out - Reach peak potential by reaching 1,000 Boar Blessings. Make Friends - Come up with ideas and talk with other players in our Discord server! discord.boarbot.dev">
 
-### Boar-manage setup
+### Setup (Manage)
 Using this command allows a server admin to set up BoarBot to allows it's usage in the server.
 
 <img src="https://github.com/user-attachments/assets/48b1c051-0373-4fe5-8725-5a57e2f483f4" alt="text saying: Please choose the channels that I can be used in. It is recommended to use channels dedicated to running bot commands.">
@@ -150,4 +148,3 @@ Links to the BoarBot patreon. Subscribing to the Patreon does not give any useab
 
 ### Self-Wipe
 Can be used to completely delete your data from BoarBot. Your User ID may still be stored if you have violated the community guidelines. This is done to prevent players from continuing to abuse community features by deleting their data.
-</div>
