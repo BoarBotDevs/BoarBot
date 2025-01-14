@@ -1,5 +1,5 @@
 <h1 align="center">
-    <a href="https://github.com/BoarBotDevs/BoarBotJE"><img src="https://github.com/WeslayCodes/BoarBot/assets/60010287/ec7b2217-486c-44e5-b6a1-8814bcef9822" alt="a collage of many different boar cards"></a>
+    <a href="https://github.com/BoarBotDevs/BoarBotJE"><img src="https://github.com/user-attachments/assets/7c357f62-fdd3-4626-b139-15f730365e94" alt="a collage of many different boar cards"></a>
     <br><br>
     BoarBot - Discord Bot
     <br>
