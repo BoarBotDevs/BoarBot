@@ -3,20 +3,12 @@
     <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <!-- Main log file path -->
         <file>logs/latest.log</file>
-
-        <!-- Time-based rolling policy -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- Log file pattern, with compression -->
             <fileNamePattern>logs/%d{yyyy-MM-dd}.log.gz</fileNamePattern>
-            <!-- Keep logs for 30 days -->
             <maxHistory>60</maxHistory>
-            <!-- Clean up old logs when the application starts -->
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
-
-        <!-- Log message format -->
         <encoder>
             <pattern>[%level] [%d{dd/MM/yyyy HH:mm:ss}] [%logger{36}] [%thread] %n> %msg%n</pattern>
         </encoder>

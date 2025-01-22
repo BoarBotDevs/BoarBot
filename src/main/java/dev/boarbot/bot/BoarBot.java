@@ -42,6 +42,7 @@ public class BoarBot implements Bot, Configured {
 
         ConfigLoader.loadConfig();
         DataUtil.setupDatabase();
+        DatabaseUpdater.updateDatabase();
         DatabaseLoader.loadIntoDatabase();
         CacheLoader.loadCache();
         CommandLoader.registerSubcommands();

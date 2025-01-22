@@ -13,7 +13,6 @@ WORKDIR /app
 
 COPY ./src ./src
 COPY ./pom.xml .
-COPY ./resourcepac[k] ./resourcepack
 
 RUN mvn package
 
@@ -21,7 +20,8 @@ FROM base AS runtime
 
 WORKDIR /app
 COPY --from=build /app/target/BoarBotJE.jar .
-COPY --from=build /app/resourcepack ./resourcepack
+COPY ./resourcepac[k] ./resourcepack
+COPY ./database/scripts ./database/scripts
 RUN mkdir logs
 
 ENTRYPOINT ["java", "-jar", "BoarBotJE.jar", "prod"]
