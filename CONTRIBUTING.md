@@ -69,6 +69,8 @@ Like the previous section, but if you want to go through the hard work of instal
   - This is the tool BoarBot uses for bringing in external dependencies
 - Install the latest version of [MariaDB](https://mariadb.org/download)
   - This is the RDBMS that BoarBot uses for storing data
+- Install the latest version of [Python](https://www.python.org/downloads/)
+  - Also install the Pillow 10.4.0 module using PIP
 
 ### Step 2: Configurations
 
