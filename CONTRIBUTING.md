@@ -1,6 +1,6 @@
 # Contributing to BoarBot
 
-> Before making a PR, please create adequate unit tests in [src/test](src/test).
+> When you create a PR, please include details of how you tested the changed code. Show images or videos showing the functionality both before and after. If your changes require a beta testing team, say so in the PR.
 
 ## The Codebase
 BoarBotJE is entirely written in Java, although there are a few Python scripts used for animated image generation.
@@ -12,6 +12,98 @@ BoarBotJE is entirely written in Java, although there are a few Python scripts u
   - This makes the structure of the software much nicer and encourages code reuse!
 - Java is a language that's a nice middle ground. It does *some* of the lower-level work for you, but also gives 
 developers a lot of freedom.
+
+## Dockerized Setup (Slower Builds, Easier Setup)
+If you would like to contribute to the bot, these are the instructions you need to follow to get a local version running. These instructions are if you'd like to use Docker, which makes setup easier.
+
+### Step 0: Creating a Discord Bot
+
+- See [Discord Developer Portal](https://discord.com/developers/docs/intro)
+
+### Step 1: Installing Docker Desktop
+
+- Install the latest version of [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- Docker alone won't be enough on Windows since it doesn't support creation of Linux containers out of the box
+
+### Step 2: Configurations
+
+- Copy [config.json](/src/main/resources/config/config.json) into the `resourcepack/config/` directory
+- Add your Discord user ID to the `devs` property
+- Change the `devGuild` property to match the ID of your development Discord server
+- Change any `Channel` properties to use channel IDs that are in your development Discord server
+- Rename `.env_example` to `.env` and fill in `TOKEN` with your bot's token and `DB_PASS` with a password for your database
+
+### Step 3: Running the Bot
+
+- Open Docker Desktop and wait for it to start up
+- Open a terminal in the project root and run `docker compose up --build --force-recreate`
+  - If you want it to run in the background (detached mode), add `-d` to the end of the command
+- To stop the bot while in detached mode, run `docker compose down`
+
+### Step 4: Viewing Your Database
+
+- It is recommended to download a Database Management Tool. I recommend one of the following
+  - [SQL Server Management Studio](https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16)
+  - [MySQL Workbench](https://www.mysql.com/products/workbench/)
+  - [DBeaver](https://dbeaver.io/download/)
+- Use the following information when connecting to your database
+  - Host: `localhost`
+  - Username: `default`
+  - Password: What you used in your `.env` file
+  - Database: `boarbot`
+  - Port: `3307`
+
+## Normal Setup (Faster Builds, Harder Setup)
+Like the previous section, but if you want to go through the hard work of installing all needed software.
+
+### Step 0: Creating a Discord Bot
+
+- See [Discord Developer Portal](https://discord.com/developers/docs/intro)
+
+### Step 1: Installing Needed Software
+
+- Install [Java 21](https://www.oracle.com/java/technologies/downloads/#jdk21)
+  - If you have multiple Java version installed, make sure your `JAVA_HOME` environment variable is pointing to the Java 21 directory
+  - This version is absolutely needed as BoarBot takes advantage of newer Java features
+- Install the latest version of [Maven](https://maven.apache.org/install.html)
+  - This is the tool BoarBot uses for bringing in external dependencies
+- Install the latest version of [MariaDB](https://mariadb.org/download)
+  - This is the RDBMS that BoarBot uses for storing data
+- Install the latest version of [Python](https://www.python.org/downloads/)
+  - Also install the Pillow 10.4.0 module using PIP
+
+### Step 2: Configurations
+
+- Copy [config.json](/src/main/resources/config/config.json) into the `resourcepack/config/` directory
+- Add your Discord user ID to the `devs` property
+- Change the `devGuild` property to match the ID of your development Discord server
+- Change any `Channel` properties to use channel IDs that are in your development Discord server
+- Rename `.env_example` to `.env` and fill in `TOKEN` with your bot's token and `DB_PASS` with a password for your database
+
+### Step 3: Preparing the Database
+
+- In a terminal, run `mariadb -u root -p`
+- Enter the password you entered on installation of MariaDB
+- Run `CREATE USER 'default'@'localhost' IDENTIFIED BY '<password>';`
+  - Replace <password> with the `DB_PASS` value you used in Step 2
+- Run `GRANT ALL PRIVILEGES ON *.* TO 'default'@'localhost';`
+
+### Step 4: Running the Bot
+
+- Open a terminal in the project root and run `mvn install exec:java -Pdev-deploy`
+
+### Step 5: Viewing Your Database
+
+- It is recommended to download a Database Management Tool. I recommend one of the following
+  - [SQL Server Management Studio](https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16)
+  - [MySQL Workbench](https://www.mysql.com/products/workbench/)
+  - [DBeaver](https://dbeaver.io/download/)
+- Use the following information when connecting to your database
+  - Host: `localhost`
+  - Username: `default`
+  - Password: What you used in your `.env` file
+  - Database: `boarbot`
+  - Port: `3306`
 
 ## Contributing: The Dos and Don'ts
 
@@ -36,14 +128,10 @@ The `main` branch should not have Pull Requests made to it. This is the branch t
 > *Note: Contributors do not have to worry about accidentally pushing changes to this branch. It is not possible.*
 
 ### How Can Contributors Modify the Config File and Other Assets?
-The config file and assets that BoarBot uses are not public. In there future, a private repository will be made that Contributors can view and modify.
+The config files and assets used by BoarBot are not public. These are stored in a private repository that a select few Contributors have access to.
 
 ### Do Changes in the BoarBot Repository Automatically Apply to BoarBot?
-Currently they do not. Weslay needs to pull the changes into BoarBot for them to apply. There are plans for build and release pipelines to be created to automate the process.
+Yes, when a PR is merged into main with a version number in the title, a release is created which is detected by BoarBot, triggering it to deploy new changes.
 
 ### Other Notes
-When the `dev` branch is pulled into the `main` branch it will look for a version number in the PR title. If it has one, it will create a release. If not, it won't.
-Additionally, whenever the `dev` branch is pulled into the `main` branch, the `dev` branch will forced to have a commit history to match main. This is to prevent weird instances where dev is ahead or behind of main despite having the same commit history.
-
-## Setting Up
-This section is under construction until the repo is more fleshed out.
+Whenever the `dev` branch is pulled into the `main` branch, the `dev` branch's commit history will be modified to match the `main` branch. This is to prevent weird instances where dev is ahead or behind of main despite having the same commit history.
