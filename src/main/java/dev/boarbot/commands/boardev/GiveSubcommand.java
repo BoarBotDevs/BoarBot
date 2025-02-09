@@ -7,7 +7,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.ItemInteractive;
-import dev.boarbot.util.boar.BoarObtainType;
+import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.boar.ItemType;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.EmbedImageGenerator;
@@ -243,7 +243,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
                 boarUser.boarQuery().addBoars(
                     this.boarIDs,
                     connection,
-                    BoarObtainType.OTHER.toString(),
+                    BoarTag.GIVEN.toString(),
                     this.bucks,
                     this.editions,
                     this.firstBoarIDs

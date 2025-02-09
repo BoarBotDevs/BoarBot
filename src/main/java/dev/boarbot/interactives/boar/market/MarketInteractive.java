@@ -58,7 +58,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
     private final MarketComponentsGetter componentsGetter;
     private GenericComponentInteractionCreateEvent compEvent;
 
-    public final static Map<String, MarketData> cachedMarketData = new ConcurrentHashMap<>();
+    public final static Map<String, List<Long>> cachedMarketData = new ConcurrentHashMap<>();
 
     private final static Map<String, ModalConfig> MODALS = CONFIG.getModalConfig();
     private static final int ITEMS_PER_PAGE = 15;

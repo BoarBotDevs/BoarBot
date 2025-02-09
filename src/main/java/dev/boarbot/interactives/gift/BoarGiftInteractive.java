@@ -11,12 +11,12 @@ import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.UserInteractive;
+import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestUtil;
-import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
@@ -434,7 +434,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.boarQuery().addBoars(
-                this.boarIDs, connection, BoarObtainType.GIFT.toString(), bucksGotten, editions, firstBoarIDs
+                this.boarIDs, connection, BoarTag.GIFT.toString(), bucksGotten, editions, firstBoarIDs
             );
             this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
                 QuestType.COLLECT_RARITY, this.boarIDs, connection

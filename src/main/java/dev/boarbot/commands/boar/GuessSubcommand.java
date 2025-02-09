@@ -6,7 +6,7 @@ import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.ItemInteractive;
-import dev.boarbot.util.boar.BoarObtainType;
+import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.UserDataUtil;
@@ -116,23 +116,23 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
         List<Integer> bucksGotten = new ArrayList<>();
         List<Integer> editions = new ArrayList<>();
         Set<String> firstBoarIDs = new HashSet<>();
-        String obtainType = null;
+        String boarTag = null;
 
         try (Connection connection = DataUtil.getConnection()) {
             if (this.isTrophyGuess && isTrophyAvailable()) {
-                obtainType = BoarObtainType.OTHER.toString();
+                boarTag = BoarTag.REWARD.toString();
                 this.embedImageGenerator.setStr(STRS.getTrophyGuessReplyStr());
                 ConfigUpdater.clearTrophyGuessStr();
                 boarIDs.add("trophy");
             } else if (this.spookIndex != -1) {
-                obtainType = "SPOOK_%d_%d".formatted(this.spookIndex+1, TimeUtil.getYear());
+                boarTag = "SPOOK_%d_%d".formatted(this.spookIndex+1, TimeUtil.getYear());
 
-                if (!boarUser.boarQuery().hasCurrentHalloween(connection, obtainType)) {
+                if (!boarUser.boarQuery().hasCurrentHalloween(connection, boarTag)) {
                     String spookReply = spookReplies.get(this.spookIndex);
 
                     boolean userHasSpooky = boarUser.boarQuery().hasYearlySpooky(connection);
                     boolean canGiveSpooky = !userHasSpooky &&
-                        UserDataUtil.isSpookyAvailable(connection, obtainType);
+                        UserDataUtil.isSpookyAvailable(connection, boarTag);
 
                     if (canGiveSpooky) {
                         boarIDs.add("spooky");
@@ -140,7 +140,7 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
                         spookReply += " " + STRS.getSpookFirstExtraStr().formatted(
                             spookyBoarStr, halloweenBoarStrs.get(this.spookIndex), POWS.get("transmute").getName()
                         );
-                    } else if (userHasSpooky && UserDataUtil.isSpookyAvailable(connection, obtainType)) {
+                    } else if (userHasSpooky && UserDataUtil.isSpookyAvailable(connection, boarTag)) {
                         boarUser.powQuery().addPowerup(connection, "transmute", 3);
                         spookReply += " " + STRS.getSpookHasExtraStr()
                             .formatted(halloweenBoarStrs.get(this.spookIndex), POWS.get("transmute").getPluralName());
@@ -159,7 +159,7 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
             if (!boarIDs.isEmpty()) {
                 this.embedImageGenerator.setColor(COLORS.get("font"));
 
-                boarUser.boarQuery().addBoars(boarIDs, connection, obtainType, bucksGotten, editions, firstBoarIDs);
+                boarUser.boarQuery().addBoars(boarIDs, connection, boarTag, bucksGotten, editions, firstBoarIDs);
 
                 CompletableFuture.runAsync(() -> {
                     try {

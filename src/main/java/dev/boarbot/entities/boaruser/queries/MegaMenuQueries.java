@@ -257,7 +257,7 @@ public class MegaMenuQueries implements Configured {
                     FROM collected_boars
                     WHERE
                         collected_boars.user_id = ? AND
-                        collected_boars.original_obtain_type = 'TRANSMUTE' AND
+                        collected_boars.tag = 'TRANSMUTE' AND
                         collected_boars.exists = true AND
                         collected_boars.deleted = false
                     ORDER BY obtained_timestamp DESC LIMIT 1
@@ -267,7 +267,7 @@ public class MegaMenuQueries implements Configured {
                     FROM collected_boars
                     WHERE
                         collected_boars.user_id = ? AND
-                        collected_boars.original_obtain_type = 'CLONE' AND
+                        collected_boars.tag = 'CLONE' AND
                         collected_boars.exists = true AND
                         collected_boars.deleted = false
                     ORDER BY obtained_timestamp DESC LIMIT 1

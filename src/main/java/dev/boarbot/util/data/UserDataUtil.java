@@ -118,15 +118,15 @@ public class UserDataUtil {
         }
     }
 
-    public static synchronized boolean isSpookyAvailable(Connection connection, String obtainType) throws SQLException {
+    public static synchronized boolean isSpookyAvailable(Connection connection, String boarTag) throws SQLException {
         String query = """
             SELECT COUNT(*) < 3
             FROM collected_boars
-            WHERE boar_id = 'spooky' AND original_obtain_type = ?;
+            WHERE boar_id = 'spooky' AND tag = ?;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, obtainType);
+            statement.setString(1, boarTag);
 
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {

@@ -10,7 +10,7 @@ import dev.boarbot.entities.boaruser.data.AdventData;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
-import dev.boarbot.util.boar.BoarObtainType;
+import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.generators.OverlayImageGenerator;
@@ -233,7 +233,7 @@ class MegaMenuActionHandler implements Configured {
         boarUser.boarQuery().addBoars(
             newBoarIDs,
             connection,
-            BoarObtainType.CLONE.toString(),
+            BoarTag.CLONE.toString(),
             bucksGotten,
             editions,
             firstBoarIDs
@@ -326,7 +326,7 @@ class MegaMenuActionHandler implements Configured {
         boarUser.boarQuery().addBoars(
             newBoarIDs,
             connection,
-            BoarObtainType.TRANSMUTE.toString(),
+            BoarTag.TRANSMUTE.toString(),
             bucksGotten,
             editions,
             firstBoarIDs
@@ -587,7 +587,7 @@ class MegaMenuActionHandler implements Configured {
                 Set<String> firstBoarIDs = new HashSet<>();
 
                 boarUser.boarQuery().addBoars(
-                    boarIDs, connection, BoarObtainType.GIFT.toString(), bucksGotten, editions, firstBoarIDs
+                    boarIDs, connection, BoarTag.GIFT.toString(), bucksGotten, editions, firstBoarIDs
                 );
 
                 QuestUtil.sendQuestClaimMessage(
@@ -613,7 +613,7 @@ class MegaMenuActionHandler implements Configured {
                 boarIDs.add(RARITIES.get("christmas").getBoars()[index]);
 
                 boarUser.boarQuery().addBoars(
-                    boarIDs, connection, BoarObtainType.GIFT.toString(), bucksGotten, editions, firstBoarIDs
+                    boarIDs, connection, BoarTag.GIFT.toString(), bucksGotten, editions, firstBoarIDs
                 );
 
                 CompletableFuture.runAsync(() ->
@@ -632,7 +632,7 @@ class MegaMenuActionHandler implements Configured {
                 boarIDs.add("calendar");
 
                 boarUser.boarQuery().addBoars(
-                    boarIDs, connection, BoarObtainType.GIFT.toString(), bucksGotten, editions, firstBoarIDs
+                    boarIDs, connection, BoarTag.GIFT.toString(), bucksGotten, editions, firstBoarIDs
                 );
 
                 CompletableFuture.runAsync(() ->

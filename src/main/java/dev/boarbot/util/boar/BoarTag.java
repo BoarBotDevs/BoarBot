@@ -1,16 +1,18 @@
 package dev.boarbot.util.boar;
 
-public enum BoarObtainType {
+public enum BoarTag {
     DAILY("DAILY"),
     EXTRA("EXTRA"),
     CLONE("CLONE"),
     TRANSMUTE("TRANSMUTE"),
     GIFT("GIFT"),
-    OTHER("OTHER");
+    REWARD("REWARD"),
+    GIVEN("GIVEN"),
+    MARKET("MARKET");
 
     private final String type;
 
-    BoarObtainType(final String type) {
+    BoarTag(final String type) {
         this.type = type;
     }
 

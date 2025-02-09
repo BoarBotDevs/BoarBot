@@ -10,6 +10,7 @@ import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.boar.daily.DailyNotifyInteractive;
 import dev.boarbot.interactives.boar.daily.DailyPowerupInteractive;
+import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.interaction.InteractionUtil;
 import dev.boarbot.util.interaction.SpecialReply;
 import dev.boarbot.util.interactive.StopType;
@@ -17,7 +18,6 @@ import dev.boarbot.util.logging.ExceptionHandler;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.quests.QuestInfo;
 import dev.boarbot.util.quests.QuestUtil;
-import dev.boarbot.util.boar.BoarObtainType;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.quests.QuestType;
 import dev.boarbot.util.data.DataUtil;
@@ -147,7 +147,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             boarUser.boarQuery().addBoars(
                 this.boarIDs,
                 connection,
-                BoarObtainType.DAILY.toString(),
+                BoarTag.DAILY.toString(),
                 this.bucksGotten,
                 this.boarEditions,
                 this.firstBoarIDs

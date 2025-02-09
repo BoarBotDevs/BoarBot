@@ -3,7 +3,7 @@ package dev.boarbot.entities.boaruser.queries;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.interactives.boar.market.MarketInteractive;
-import dev.boarbot.util.boar.BoarObtainType;
+import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.boar.BoarUtil;
 import dev.boarbot.util.data.market.MarketDataUtil;
 import dev.boarbot.util.data.market.MarketUpdateType;
@@ -23,7 +23,7 @@ public class BoarQueries implements Configured {
     public void addBoars(
         List<String> boarIDs,
         Connection connection,
-        String obtainType,
+        String boarTag,
         List<Integer> bucksGotten,
         List<Integer> boarEditions,
         Set<String> firstBoarIDs
@@ -45,7 +45,7 @@ public class BoarQueries implements Configured {
             boarIndex++;
 
             String boarAddQuery = """
-                INSERT INTO collected_boars (user_id, boar_id, original_obtain_type)
+                INSERT INTO collected_boars (user_id, boar_id, tag)
                 VALUES (?, ?, ?)
                 RETURNING edition, bucks_gotten;
             """;
@@ -71,9 +71,9 @@ public class BoarQueries implements Configured {
             ) {
                 boarAddStatement.setString(1, this.boarUser.getUserID());
                 boarAddStatement.setString(2, boarID);
-                boarAddStatement.setString(3, obtainType.equals("DAILY") && boarIndex > 0
-                    ? BoarObtainType.EXTRA.toString()
-                    : obtainType
+                boarAddStatement.setString(3, boarTag.equals("DAILY") && boarIndex > 0
+                    ? BoarTag.EXTRA.toString()
+                    : boarTag
                 );
 
                 isFirstStatement.setString(1, this.boarUser.getUserID());
@@ -114,7 +114,7 @@ public class BoarQueries implements Configured {
             }
         }
 
-        if (!obtainType.equals("DAILY")) {
+        if (!boarTag.equals("DAILY")) {
             this.boarUser.baseQuery().updateHighestBlessings(connection);
         }
 
@@ -169,7 +169,7 @@ public class BoarQueries implements Configured {
         String query = """
             SELECT 1
             FROM collected_boars
-            WHERE user_id = ? AND boar_id = 'spooky' AND original_obtain_type IN (%s);
+            WHERE user_id = ? AND boar_id = 'spooky' AND tag IN (%s);
         """.formatted(joiner.toString());
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -185,16 +185,16 @@ public class BoarQueries implements Configured {
         return false;
     }
 
-    public boolean hasCurrentHalloween(Connection connection, String obtainType) throws SQLException {
+    public boolean hasCurrentHalloween(Connection connection, String boarTag) throws SQLException {
         String query = """
             SELECT 1
             FROM collected_boars
-            WHERE user_id = ? AND original_obtain_type = ?;
+            WHERE user_id = ? AND tag = ?;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, this.boarUser.getUserID());
-            statement.setString(2, obtainType);
+            statement.setString(2, boarTag);
 
             try (ResultSet results = statement.executeQuery()) {
                 if (results.next()) {
@@ -235,7 +235,7 @@ public class BoarQueries implements Configured {
         Set<String> firstBoarIDs
     ) throws SQLException {
         String insertFirstQuery = """
-            INSERT INTO collected_boars (user_id, boar_id, original_obtain_type)
+            INSERT INTO collected_boars (user_id, boar_id, tag)
             VALUES (?, ?, ?)
             RETURNING edition, (
                 SELECT COUNT(*)
@@ -261,7 +261,7 @@ public class BoarQueries implements Configured {
         ) {
             insertFirstStatement.setString(1, this.boarUser.getUserID());
             insertFirstStatement.setString(2, firstBoarID);
-            insertFirstStatement.setString(3, BoarObtainType.OTHER.toString());
+            insertFirstStatement.setString(3, BoarTag.EXTRA.toString());
             insertFirstStatement.setString(4, this.boarUser.getUserID());
             insertFirstStatement.setString(5, firstBoarID);
 
