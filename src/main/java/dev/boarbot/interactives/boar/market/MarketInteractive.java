@@ -4,7 +4,6 @@ import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.modals.ModalConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.modals.ModalHandler;
 import dev.boarbot.util.boar.BoarUtil;
@@ -36,7 +35,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MarketInteractive extends ModalInteractive implements Synchronizable {
+public class MarketInteractive extends ModalInteractive {
     MarketView curView = MarketView.OVERVIEW;
     List<String> itemIDs;
     int itemPage = 0;
@@ -58,7 +57,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
     private final MarketComponentsGetter componentsGetter;
     private GenericComponentInteractionCreateEvent compEvent;
 
-    public final static Map<String, List<Long>> cachedMarketData = new ConcurrentHashMap<>();
+    public final static Map<String, List<MarketData>> cachedMarketData = new ConcurrentHashMap<>();
 
     private final static Map<String, ModalConfig> MODALS = CONFIG.getModalConfig();
     private static final int ITEMS_PER_PAGE = 15;
@@ -194,7 +193,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
 
             case "CONFIRM" -> {
                 this.confirmOpen = false;
-                this.boarUser.passSynchronizedAction(this);
+                this.boarUser.passSynchronizedAction(() -> this.confirmTransaction(this.boarUser));
             }
 
             case "CANCEL" -> {
@@ -242,8 +241,8 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
                         throw new NumberFormatException();
                     }
 
-                    MarketData marketData = MarketDataUtil.getMarketDataItem(this.focusedID, true, connection);
-                    MarketTransactionData buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
+                    List<MarketData> marketData = MarketDataUtil.getItemData(this.focusedID, true, connection);
+                    MarketData buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
                     long userBucks = this.boarUser.baseQuery().getBucks(connection);
 
                     if (input == Integer.MAX_VALUE) {
@@ -371,8 +370,8 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
                         return;
                     }
 
-                    MarketData marketData = MarketDataUtil.getMarketDataItem(this.focusedID, true, connection);
-                    MarketTransactionData sellData = MarketDataUtil.calculateSellCost(
+                    List<MarketData> marketData = MarketDataUtil.getItemData(this.focusedID, true, connection);
+                    MarketData sellData = MarketDataUtil.calculateSellCost(
                         this.focusedID, marketData, input
                     );
 
@@ -442,8 +441,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
         }
     }
 
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
+    public void confirmTransaction(BoarUser boarUser) {
         if (this.isBuying) {
             try (Connection connection = DataUtil.getConnection()) {
                 this.doBuy(boarUser, connection);
@@ -487,24 +485,26 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
             }
         }
 
-        MarketTransactionFail failType = MarketDataUtil.updateMarket(
-            MarketUpdateType.BUY_ITEM, this.focusedID, this.amount, this.cost, boarUser, connection
-        );
+        try {
+            MarketDataUtil.buyItem(this.focusedID, this.amount, this.cost, boarUser, connection);
+        } catch (IllegalArgumentException exception) {
+            switch (exception.getMessage()) {
+                case "amount" -> {
+                    this.acknowledgeOpen = true;
+                    this.acknowledgeString = STRS.getMarketStockChange();
+                    return;
+                }
 
-        switch (failType) {
-            case STOCK -> {
-                this.acknowledgeOpen = true;
-                this.acknowledgeString = STRS.getMarketStockChange();
-                return;
+                case "price" -> {
+                    this.acknowledgeOpen = true;
+                    this.acknowledgeString = STRS.getMarketCostChange();
+                    return;
+                }
+
+                default -> {}
             }
 
-            case COST -> {
-                this.acknowledgeOpen = true;
-                this.acknowledgeString = STRS.getMarketCostChange();
-                return;
-            }
-
-            case null -> {}
+            return;
         }
 
         Log.info(
@@ -547,21 +547,7 @@ public class MarketInteractive extends ModalInteractive implements Synchronizabl
             return;
         }
 
-        MarketTransactionFail failType = MarketDataUtil.updateMarket(
-            MarketUpdateType.SELL_ITEM, this.focusedID, this.amount, this.cost, boarUser, connection
-        );
-
-        switch (failType) {
-            case COST -> {
-                this.acknowledgeOpen = true;
-                this.acknowledgeString = STRS.getMarketCostChange();
-                return;
-            }
-
-            case null -> {}
-
-            default -> {}
-        }
+        MarketDataUtil.sellOfferItem(this.focusedID, this.amount, this.cost, boarUser, connection);
 
         Log.info(this.user, this.getClass(), "Sold %,d %s for $%,d".formatted(this.amount, this.focusedID, this.cost));
 

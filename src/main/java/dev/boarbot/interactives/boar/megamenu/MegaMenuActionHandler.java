@@ -41,85 +41,93 @@ class MegaMenuActionHandler implements Configured {
         this.user = interactive.getUser();
     }
 
-    public void doAction(BoarUser boarUser) {
-        if (this.interactive.filterOpen) {
-            try (Connection connection = DataUtil.getConnection()) {
-                boarUser.megaQuery().setFilterBits(connection, this.interactive.filterBits);
-                Log.debug(boarUser.getUser(), this.getClass(), "Set filter bits to " + this.interactive.filterBits);
-            } catch (SQLException exception) {
-                this.interactive.stop(StopType.EXCEPTION);
-                Log.error(this.user, this.getClass(), "Failed to update filter bits", exception);
-            }
-        } else if (this.interactive.sortOpen) {
-            try (Connection connection = DataUtil.getConnection()) {
-                boarUser.megaQuery().setSortVal(connection, this.interactive.sortVal);
-                Log.debug(boarUser.getUser(), this.getClass(), "Set sort value to " + this.interactive.sortVal);
-            } catch (SQLException exception) {
-                this.interactive.stop(StopType.EXCEPTION);
-                Log.error(this.user, this.getClass(), "Failed to update sort value", exception);
-            }
-        } else if (this.interactive.interactType != null) {
-            this.curBoarEntry = this.interactive.curBoarEntry;
-            this.curRarityKey = this.interactive.curRarityKey;
+    public void setFilterBits(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            boarUser.megaQuery().setFilterBits(connection, this.interactive.filterBits);
+            Log.debug(boarUser.getUser(), this.getClass(), "Set filter bits to " + this.interactive.filterBits);
+        } catch (SQLException exception) {
+            this.interactive.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to update filter bits", exception);
+        }
+    }
 
-            try (Connection connection = DataUtil.getConnection()) {
-                switch (this.interactive.interactType) {
-                    case FAVORITE -> this.doFavorite(boarUser, connection);
-                    case CLONE -> this.doClone(boarUser, connection);
-                    case TRANSMUTE -> this.doTransmute(boarUser, connection);
-                }
-            } catch (SQLException exception) {
-                this.interactive.stop(StopType.EXCEPTION);
-                Log.error(
-                    this.user,
-                    this.getClass(),
-                    "Failed to perform %s due to database issue".formatted(this.interactive.interactType),
-                    exception
-                );
-            }
+    public void setSortVal(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            boarUser.megaQuery().setSortVal(connection, this.interactive.sortVal);
+            Log.debug(boarUser.getUser(), this.getClass(), "Set sort value to " + this.interactive.sortVal);
+        } catch (SQLException exception) {
+            this.interactive.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to update sort value", exception);
+        }
+    }
 
-            this.interactive.acknowledgeOpen = true;
-            this.interactive.interactType = null;
-            this.interactive.confirmOpen = false;
-        } else if (this.interactive.powerupUsing != null) {
-            try (Connection connection = DataUtil.getConnection()) {
-                switch (this.interactive.powerupUsing) {
-                    case "miracle" -> this.doCharm(boarUser, connection);
-                    case "gift" -> this.doGift(boarUser, connection);
-                }
-            } catch (SQLException exception) {
-                this.interactive.stop(StopType.EXCEPTION);
-                Log.error(
-                    this.user,
-                    this.getClass(),
-                    "Failed to use %s powerup due to database issue".formatted(this.interactive.powerupUsing),
-                    exception
-                );
-            }
+    public void doInteract(BoarUser boarUser) {
+        this.curBoarEntry = this.interactive.curBoarEntry;
+        this.curRarityKey = this.interactive.curRarityKey;
 
-            this.interactive.acknowledgeOpen = true;
-            this.interactive.powerupUsing = null;
-            this.interactive.confirmOpen = false;
-        } else if (this.interactive.questAction != null) {
-            try (Connection connection = DataUtil.getConnection()) {
-                switch (this.interactive.questAction) {
-                    case CLAIM -> this.doQuestClaim(boarUser, connection);
-                    case CLAIM_BONUS -> this.doQuestBonus(boarUser, connection);
-                    case AUTO_CLAIM -> this.toggleQuestAuto(boarUser, connection);
-                }
-            } catch (SQLException exception) {
-                this.interactive.stop(StopType.EXCEPTION);
-                Log.error(this.user, this.getClass(), "Failed to update quest data", exception);
+        try (Connection connection = DataUtil.getConnection()) {
+            switch (this.interactive.interactType) {
+                case FAVORITE -> this.doFavorite(boarUser, connection);
+                case CLONE -> this.doClone(boarUser, connection);
+                case TRANSMUTE -> this.doTransmute(boarUser, connection);
             }
+        } catch (SQLException exception) {
+            this.interactive.stop(StopType.EXCEPTION);
+            Log.error(
+                this.user,
+                this.getClass(),
+                "Failed to perform %s due to database issue".formatted(this.interactive.interactType),
+                exception
+            );
+        }
 
-            this.interactive.questAction = null;
-        } else if (this.interactive.curView == MegaMenuView.ADVENT) {
-            try (Connection connection = DataUtil.getConnection()) {
-                this.doAdventClaim(boarUser, connection);
-            } catch (SQLException exception) {
-                this.interactive.stop(StopType.EXCEPTION);
-                Log.error(this.user, this.getClass(), "Failed to update advent data", exception);
+        this.interactive.acknowledgeOpen = true;
+        this.interactive.interactType = null;
+        this.interactive.confirmOpen = false;
+    }
+
+    public void usePowerup(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            switch (this.interactive.powerupUsing) {
+                case "miracle" -> this.doCharm(boarUser, connection);
+                case "gift" -> this.doGift(boarUser, connection);
             }
+        } catch (SQLException exception) {
+            this.interactive.stop(StopType.EXCEPTION);
+            Log.error(
+                this.user,
+                this.getClass(),
+                "Failed to use %s powerup due to database issue".formatted(this.interactive.powerupUsing),
+                exception
+            );
+        }
+
+        this.interactive.acknowledgeOpen = true;
+        this.interactive.powerupUsing = null;
+        this.interactive.confirmOpen = false;
+    }
+
+    public void doQuestAction(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            switch (this.interactive.questAction) {
+                case CLAIM -> this.doQuestClaim(boarUser, connection);
+                case CLAIM_BONUS -> this.doQuestBonus(boarUser, connection);
+                case AUTO_CLAIM -> this.toggleQuestAuto(boarUser, connection);
+            }
+        } catch (SQLException exception) {
+            this.interactive.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to update quest data", exception);
+        }
+
+        this.interactive.questAction = null;
+    }
+
+    public void claimAdvent(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            this.doAdventClaim(boarUser, connection);
+        } catch (SQLException exception) {
+            this.interactive.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to update advent data", exception);
         }
     }
 

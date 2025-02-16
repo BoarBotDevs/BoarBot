@@ -4,7 +4,6 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.InteractiveFactory;
 import dev.boarbot.interactives.ItemInteractive;
@@ -32,7 +31,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-public class DailySubcommand extends Subcommand implements Synchronizable {
+public class DailySubcommand extends Subcommand {
     private List<String> boarIDs = new ArrayList<>();
     private final List<Integer> bucksGotten = new ArrayList<>();
     private final List<Integer> boarEditions = new ArrayList<>();
@@ -62,7 +61,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
 
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-            boarUser.passSynchronizedAction(this);
+            boarUser.passSynchronizedAction(() -> this.attemptDaily(boarUser));
         } catch (SQLException exception) {
             SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.user, this.getClass(), "Failed to update data", exception);
@@ -106,8 +105,7 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
         }
     }
 
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
+    public void attemptDaily(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             if (!boarUser.boarQuery().canUseDaily(connection) && !CONFIG.getMainConfig().isUnlimitedBoars()) {
                 Log.debug(this.user, this.getClass(), "Daily not available");

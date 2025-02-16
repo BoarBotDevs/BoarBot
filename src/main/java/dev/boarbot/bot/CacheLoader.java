@@ -12,7 +12,6 @@ import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.UserDataUtil;
 import dev.boarbot.util.data.market.MarketData;
 import dev.boarbot.util.data.market.MarketDataUtil;
-import dev.boarbot.util.data.market.MarketUpdateType;
 import dev.boarbot.util.data.top.TopData;
 import dev.boarbot.util.data.top.TopDataUtil;
 import dev.boarbot.util.data.top.TopType;
@@ -240,16 +239,10 @@ public class CacheLoader implements Configured {
 
     public synchronized static void reloadMarketCache() {
         try (Connection connection = DataUtil.getConnection()) {
-            Map<String, MarketData> marketData = MarketDataUtil.getMarketData(connection);
+            Map<String, List<MarketData>> marketData = MarketDataUtil.getAllItemData(connection);
 
             for (String itemID : marketData.keySet()) {
                 MarketInteractive.cachedMarketData.put(itemID, marketData.get(itemID));
-            }
-
-            for (String powerupID : POWS.keySet()) {
-                if (!MarketInteractive.cachedMarketData.containsKey(powerupID)) {
-                    MarketDataUtil.updateMarket(MarketUpdateType.ADD_ITEM, powerupID, connection);
-                }
             }
         } catch (SQLException exception) {
             Log.error(CacheLoader.class, "Failed to retrieve market data", exception);

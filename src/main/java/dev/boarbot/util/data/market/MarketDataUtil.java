@@ -2,10 +2,10 @@ package dev.boarbot.util.data.market;
 
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.entities.boaruser.BoarUserFactory;
 import dev.boarbot.interactives.boar.market.MarketInteractive;
 import dev.boarbot.util.boar.BoarTag;
-import dev.boarbot.util.boar.BoarUtil;
-import dev.boarbot.util.time.TimeUtil;
+import dev.boarbot.util.logging.Log;
 
 import java.sql.*;
 import java.util.*;
@@ -14,40 +14,36 @@ import java.util.concurrent.Semaphore;
 public class MarketDataUtil implements Configured {
     private static final Semaphore semaphore = new Semaphore(1);
 
-    public static Map<String, List<Long>> getAllItemPrices(Connection connection) throws SQLException {
-        Map<String, List<Long>> prices = new LinkedHashMap<>();
+    public static Map<String, List<MarketData>> getAllItemData(Connection connection) throws SQLException {
+        Map<String, List<MarketData>> allItemData = new HashMap<>();
 
         String query = """
-            SELECT item_id, price
-            FROM market
-            ORDER BY price, listed_timestamp;
+            SELECT item_id
+            FROM market;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    prices.putIfAbsent(
-                        resultSet.getString("item_id"),
-                        new ArrayList<>()
-                    );
-
-                    prices.get(resultSet.getString("item_id")).add(resultSet.getLong("price"));
+                    String itemID = resultSet.getString("item_id");
+                    allItemData.put(itemID, getItemData(itemID, false, connection));
                 }
             }
         }
 
-        return prices;
+        return allItemData;
     }
 
-    public static List<Long> getItemPrices(
+    public static List<MarketData> getItemData(
         String itemID, boolean updateCache, Connection connection
     ) throws SQLException {
-        List<Long> prices = new ArrayList<>();
+        List<MarketData> itemData = new ArrayList<>();
 
         String query = """
-            SELECT price,
+            SELECT user_id, amount, price, edition
             FROM market
-            WHERE item_id = ?;
+            WHERE item_id = ?
+            ORDER BY price, listed_timestamp;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -55,16 +51,25 @@ public class MarketDataUtil implements Configured {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    prices.add(resultSet.getLong("price"));
+                    itemData.add(new MarketData(
+                        resultSet.getString("user_id"),
+                        resultSet.getLong("amount"),
+                        resultSet.getLong("price"),
+                        resultSet.getLong("edition")
+                    ));
                 }
             }
         }
 
         if (updateCache) {
-            MarketInteractive.cachedMarketData.put(itemID, prices);
+            MarketInteractive.cachedMarketData.put(itemID, itemData);
         }
 
-        return prices;
+        return itemData;
+    }
+
+    private static void updateItemData(String itemID, Connection connection) throws SQLException {
+        getItemData(itemID, true, connection);
     }
 
     public static void sellOfferItem(
@@ -103,16 +108,16 @@ public class MarketDataUtil implements Configured {
 
         String removeBoarQuery = """
             UPDATE collected_boars
-            SET deleted = true, tag = %s
+            SET deleted = true
             WHERE boar_id = ? AND user_id = ? AND edition = ?;
-        """.formatted(BoarTag.MARKET.toString());
+        """;
 
         try {
             if (POWS.containsKey(itemID)) {
                 try (
                     PreparedStatement statement1 = connection.prepareStatement(powOfferQuery);
                     PreparedStatement statement2 = connection.prepareStatement(powOfferUpdate);
-                    PreparedStatement statement3 = connection.prepareStatement(powOfferInsert);
+                    PreparedStatement statement3 = connection.prepareStatement(powOfferInsert)
                 ) {
                     boolean addToExisting;
 
@@ -144,7 +149,7 @@ public class MarketDataUtil implements Configured {
                 try (
                     PreparedStatement statement1 = connection.prepareStatement(boarQuery);
                     PreparedStatement statement2 = connection.prepareStatement(boarAddQuery);
-                    PreparedStatement statement3 = connection.prepareStatement(removeBoarQuery);
+                    PreparedStatement statement3 = connection.prepareStatement(removeBoarQuery)
                 ) {
                     statement1.setString(1, itemID);
                     statement1.setString(2, boarUser.getUserID());
@@ -177,129 +182,119 @@ public class MarketDataUtil implements Configured {
                 }
             }
 
-            getItemPrices(itemID, true, connection);
+            updateItemData(itemID, connection);
         } finally {
             semaphore.release();
         }
     }
 
     public static void buyItem(
-        String itemID, int amount, BoarUser boarUser, Connection connection
-    ) throws SQLException {
+        String itemID, int amount, long price, BoarUser boarUser, Connection connection
+    ) throws SQLException, IllegalStateException {
         semaphore.acquireUninterruptibly();
 
-    }
-
-    private static MarketTransactionFail buyItem(
-        String itemID, int amount, long cost, BoarUser boarUser, Connection connection
-    ) throws SQLException {
-        MarketData marketData = getMarketDataItem(itemID, false, connection);
-        MarketTransactionData buyData = calculateBuyCost(itemID, marketData, amount);
-
-        if (buyData.cost() > cost) {
-            return MarketTransactionFail.COST;
-        }
-
-        if (buyData.stock() < 0) {
-            return MarketTransactionFail.STOCK;
-        }
-
-        marketData = new MarketData(
-            buyData.stock(),
-            buyData.sellPrice(),
-            buyData.buyPrice(),
-            marketData.lastPurchase(),
-            marketData.lastSell()
-        );
-
-        String updateQuery = """
-            UPDATE market_values
-            SET stock = ?, sell_price = ?, buy_price = ?, last_purchase = current_timestamp(3)
-            WHERE item_id = ?;
-        """;
-
-        String editionQuery = """
-            SELECT edition
-            FROM market_editions
-            WHERE item_id = ?
-            LIMIT ?;
-        """;
-
-        String editionRemoveQuery = """
-            DELETE FROM market_editions
-            WHERE item_id = ? AND edition = ?;
-        """;
-
-        String editionGiveQuery = """
+        String boarGiveQuery = """
             UPDATE collected_boars
-            SET user_id = ?, deleted = false
+            SET user_id = ?, deleted = false, tag = %s
             WHERE boar_id = ? AND edition = ?;
+        """.formatted(BoarTag.MARKET.toString());
+
+        String updateOffers = """
+            UPDATE market
+            SET amount = amount - ?
+            WHERE item_id = ? AND price = ? AND edition = ? AND user_id = ?;
         """;
 
-        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
-            statement.setInt(1, marketData.stock());
-            statement.setLong(2, marketData.sellPrice());
-            statement.setLong(3, marketData.buyPrice());
-            statement.setString(4, itemID);
-            statement.executeUpdate();
-        }
+        String deleteOffers = """
+            DELETE FROM market
+            WHERE amount <= 0;
+        """;
 
-        if (POWS.containsKey(itemID)) {
-            boarUser.powQuery().addPowerup(connection, itemID, amount);
-        } else {
-            List<Integer> editions = new ArrayList<>();
+        try {
+            List<MarketData> itemData = getItemData(itemID, false, connection);
+            List<MarketData> transactionItemData = new ArrayList<>();
+
+            long actualAmount = 0;
+            long actualPrice = 0;
+
+            for (MarketData marketData : itemData) {
+                if (actualAmount == amount) {
+                    break;
+                }
+
+                long curAmount = Math.min(marketData.amount(), amount - actualAmount);
+
+                actualAmount += curAmount;
+                actualPrice += curAmount * marketData.price();
+
+                if (marketData.amount() < curAmount) {
+                    transactionItemData.add(new MarketData(
+                        marketData.userID(), curAmount, marketData.price(), marketData.edition()
+                    ));
+                } else {
+                    transactionItemData.add(marketData);
+                }
+            }
+
+            if (actualAmount < amount) {
+                throw new IllegalStateException("amount");
+            }
+
+            if (actualPrice > price) {
+                throw new IllegalStateException("price");
+            }
+
+            if (POWS.containsKey(itemID)) {
+                boarUser.powQuery().addPowerup(connection, itemID, amount);
+            } else {
+                try (PreparedStatement statement = connection.prepareStatement(boarGiveQuery)) {
+                    for (MarketData marketData : transactionItemData) {
+                        statement.setString(1, boarUser.getUserID());
+                        statement.setString(2, itemID);
+                        statement.setLong(3, marketData.edition());
+                        statement.addBatch();
+                    }
+
+                    statement.executeBatch();
+                }
+            }
+
+            boarUser.baseQuery().useBucks(connection, actualPrice);
 
             try (
-                PreparedStatement statement1 = connection.prepareStatement(editionQuery);
-                PreparedStatement statement2 = connection.prepareStatement(editionRemoveQuery);
-                PreparedStatement statement3 = connection.prepareStatement(editionGiveQuery)
+                PreparedStatement statement1 = connection.prepareStatement(updateOffers);
+                PreparedStatement statement2 = connection.prepareStatement(deleteOffers)
             ) {
-                statement1.setString(1, itemID);
-                statement1.setInt(2, amount);
-
-                try (ResultSet resultSet = statement1.executeQuery()) {
-                    while (resultSet.next()) {
-                        editions.add(resultSet.getInt("edition"));
+                for (MarketData marketData : transactionItemData) {
+                    if (!boarUser.getUserID().equals(marketData.userID())) {
+                        BoarUser sellUser = BoarUserFactory.getBoarUser(marketData.userID());
+                        sellUser.passSynchronizedAction(() -> {
+                            try {
+                                sellUser.baseQuery().giveBucks(connection, marketData.price() * marketData.amount());
+                            } catch (SQLException exception) {
+                                Log.error(MarketData.class, "Failed to give bucks to " + sellUser.getUserID(), exception);
+                            }
+                        });
+                    } else {
+                        boarUser.baseQuery().giveBucks(connection, marketData.price() * marketData.amount());
                     }
+
+
+                    statement1.setLong(1, marketData.amount());
+                    statement1.setString(2, itemID);
+                    statement1.setLong(3, marketData.price());
+                    statement1.setLong(4, marketData.edition());
+                    statement1.setString(5, marketData.userID());
+                    statement1.addBatch();
                 }
 
-                for (Integer edition : editions) {
-                    statement2.setString(1, itemID);
-                    statement2.setInt(2, edition);
-                    statement2.addBatch();
-                }
-
-                statement2.executeBatch();
-
-                for (Integer edition : editions) {
-                    statement3.setString(1, boarUser.getUserID());
-                    statement3.setString(2, itemID);
-                    statement3.setInt(3, edition);
-                    statement3.addBatch();
-                }
-
-                statement3.executeBatch();
+                statement1.executeBatch();
+                statement2.executeUpdate();
             }
 
-            List<String> itemIDs = new ArrayList<>();
-
-            for (int i=0; i<amount-editions.size(); i++) {
-                itemIDs.add(itemID);
-            }
-
-            boarUser.boarQuery().addBoars(
-                itemIDs,
-                connection,
-                BoarTag.MARKET.toString(),
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new HashSet<>()
-            );
+            updateItemData(itemID, connection);
+        } finally {
+            semaphore.release();
         }
-
-        boarUser.baseQuery().useBucks(connection, buyData.cost());
-
-        MarketInteractive.cachedMarketData.put(itemID, marketData);
-        return null;
     }
 }

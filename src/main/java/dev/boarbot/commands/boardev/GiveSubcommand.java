@@ -5,7 +5,6 @@ import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.boar.ItemType;
@@ -24,7 +23,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-public class GiveSubcommand extends Subcommand implements Synchronizable {
+public class GiveSubcommand extends Subcommand {
     private final User giftedUser;
     private final ItemType itemType;
     private String itemID;
@@ -103,7 +102,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
 
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
-            boarUser.passSynchronizedAction(this);
+            boarUser.passSynchronizedAction(() -> this.processBoars(boarUser));
         } catch (SQLException exception) {
             SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.giftedUser, this.getClass(), "Failed to update data", exception);
@@ -140,7 +139,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
 
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
-            boarUser.passSynchronizedAction(this);
+            boarUser.passSynchronizedAction(() -> this.processBadge(boarUser));
         } catch (SQLException exception) {
             SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.giftedUser, this.getClass(), "Failed to update data", exception);
@@ -174,7 +173,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
 
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
-            boarUser.passSynchronizedAction(this);
+            boarUser.passSynchronizedAction(() -> this.processPowerups(boarUser));
         } catch (SQLException exception) {
             SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.giftedUser, this.getClass(), "Failed to update data", exception);
@@ -208,7 +207,7 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
 
         try {
             BoarUser boarUser = BoarUserFactory.getBoarUser(this.giftedUser);
-            boarUser.passSynchronizedAction(this);
+            boarUser.passSynchronizedAction(() -> this.processBucks(boarUser));
         } catch (SQLException exception) {
             SpecialReply.sendErrorMessage(this.interaction, this);
             Log.error(this.giftedUser, this.getClass(), "Failed to update data", exception);
@@ -236,47 +235,50 @@ public class GiveSubcommand extends Subcommand implements Synchronizable {
         );
     }
 
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
-        if (!this.boarIDs.isEmpty()) {
-            try (Connection connection = DataUtil.getConnection()) {
-                boarUser.boarQuery().addBoars(
-                    this.boarIDs,
-                    connection,
-                    BoarTag.GIVEN.toString(),
-                    this.bucks,
-                    this.editions,
-                    this.firstBoarIDs
-                );
-            } catch (SQLException exception) {
-                this.failedSynchronized = true;
-                SpecialReply.sendErrorMessage(this.interaction, this);
-                Log.error(this.user, this.getClass(), "Failed to add boars", exception);
-            }
-        } else if (this.itemType == ItemType.BADGE) {
-            try (Connection connection = DataUtil.getConnection()) {
-                boarUser.baseQuery().giveBadge(connection, this.itemID, this.tier);
-            } catch (SQLException exception) {
-                this.failedSynchronized = true;
-                SpecialReply.sendErrorMessage(this.interaction, this);
-                Log.error(this.user, this.getClass(), "Failed to add badge", exception);
-            }
-        } else if (this.itemType == ItemType.POWERUP) {
-            try (Connection connection = DataUtil.getConnection()) {
-                boarUser.powQuery().addPowerup(connection, this.itemID, this.amount, true);
-            } catch (SQLException exception) {
-                this.failedSynchronized = true;
-                SpecialReply.sendErrorMessage(this.interaction, this);
-                Log.error(this.user, this.getClass(), "Failed to add powerup", exception);
-            }
-        } else if (this.itemType == ItemType.BUCKS) {
-            try (Connection connection = DataUtil.getConnection()) {
-                boarUser.baseQuery().giveBucks(connection, this.amount);
-            } catch (SQLException exception) {
-                this.failedSynchronized = true;
-                SpecialReply.sendErrorMessage(this.interaction, this);
-                Log.error(this.user, this.getClass(), "Failed to add bucks", exception);
-            }
+    public void processBoars(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            boarUser.boarQuery().addBoars(
+                this.boarIDs,
+                connection,
+                BoarTag.GIVEN.toString(),
+                this.bucks,
+                this.editions,
+                this.firstBoarIDs
+            );
+        } catch (SQLException exception) {
+            this.failedSynchronized = true;
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.user, this.getClass(), "Failed to add boars", exception);
+        }
+    }
+
+    public void processBadge(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            boarUser.baseQuery().giveBadge(connection, this.itemID, this.tier);
+        } catch (SQLException exception) {
+            this.failedSynchronized = true;
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.user, this.getClass(), "Failed to add badge", exception);
+        }
+    }
+
+    public void processPowerups(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            boarUser.powQuery().addPowerup(connection, this.itemID, this.amount, true);
+        } catch (SQLException exception) {
+            this.failedSynchronized = true;
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.user, this.getClass(), "Failed to add powerup", exception);
+        }
+    }
+
+    public void processBucks(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            boarUser.baseQuery().giveBucks(connection, this.amount);
+        } catch (SQLException exception) {
+            this.failedSynchronized = true;
+            SpecialReply.sendErrorMessage(this.interaction, this);
+            Log.error(this.user, this.getClass(), "Failed to add bucks", exception);
         }
     }
 

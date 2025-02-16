@@ -5,7 +5,6 @@ import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.commands.boar.DailySubcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.modals.ModalHandler;
@@ -33,7 +32,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-public class DailyPowerupInteractive extends ModalInteractive implements Synchronizable {
+public class DailyPowerupInteractive extends ModalInteractive {
     private ModalHandler modalHandler = null;
     private int miraclesToUse = 0;
     private boolean firstMsg = true;
@@ -80,7 +79,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
 
                 try {
                     BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-                    boarUser.passSynchronizedAction(this);
+                    boarUser.passSynchronizedAction(() -> this.usePowerups(boarUser));
                 } catch (SQLException exception) {
                     this.stop(StopType.EXCEPTION);
                     Log.error(this.user, this.getClass(), "Failed to update data", exception);
@@ -113,8 +112,7 @@ public class DailyPowerupInteractive extends ModalInteractive implements Synchro
         }
     }
 
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
+    public void usePowerups(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             int numMiracles = boarUser.powQuery().getPowerupAmount(connection, "miracle");
 

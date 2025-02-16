@@ -4,7 +4,6 @@ import dev.boarbot.bot.ConfigUpdater;
 import dev.boarbot.commands.Subcommand;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.boar.BoarUtil;
@@ -25,7 +24,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class GuessSubcommand extends Subcommand implements Synchronizable {
+public class GuessSubcommand extends Subcommand {
     private static final List<String> superSecretGuesses = Arrays.asList(STRS.getGuessStrs());
     private static final List<String> superSecretReplies = Arrays.asList(STRS.getGuessReplyStrs());
 
@@ -85,7 +84,7 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
         if (this.spookIndex != -1 || this.isTrophyGuess) {
             try {
                 BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
-                boarUser.passSynchronizedAction(this);
+                boarUser.passSynchronizedAction(() -> this.giveGuessRewards(boarUser));
             } catch (SQLException exception) {
                 SpecialReply.sendErrorMessage(this.interaction, this);
                 Log.error(this.user, this.getClass(), "Failed to update data", exception);
@@ -110,8 +109,7 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
             .queue(null, e -> ExceptionHandler.replyHandle(this.interaction, this, e));
     }
 
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
+    public void giveGuessRewards(BoarUser boarUser) {
         List<String> boarIDs = new ArrayList<>();
         List<Integer> bucksGotten = new ArrayList<>();
         List<Integer> editions = new ArrayList<>();

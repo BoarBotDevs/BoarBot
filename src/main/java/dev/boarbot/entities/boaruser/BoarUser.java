@@ -82,9 +82,9 @@ public class BoarUser {
         return this.questQuery;
     }
 
-    public synchronized void passSynchronizedAction(Synchronizable callingObject) {
+    public synchronized void passSynchronizedAction(Runnable runnable) {
         this.isSynchronized = true;
-        callingObject.doSynchronizedAction(this);
+        runnable.run();
         this.isSynchronized = false;
     }
 

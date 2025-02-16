@@ -7,7 +7,6 @@ import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.bot.config.items.SubOutcomeConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ItemInteractive;
 import dev.boarbot.interactives.UserInteractive;
@@ -44,7 +43,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class BoarGiftInteractive extends UserInteractive implements Synchronizable {
+public class BoarGiftInteractive extends UserInteractive {
     private final PowerupItemConfig giftConfig = POWS.get("gift");
 
     private FileUpload giftImage;
@@ -210,7 +209,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         try {
             boarUser = BoarUserFactory.getBoarUser(this.user);
-            boarUser.passSynchronizedAction(this);
+            boarUser.passSynchronizedAction(() -> this.processUseGift(boarUser));
         } catch (SQLException exception) {
             this.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to update data", exception);
@@ -228,7 +227,7 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         for (User user : this.giftTimes.keySet()) {
             try {
                 BoarUser openUser = BoarUserFactory.getBoarUser(user);
-                openUser.passSynchronizedAction(this);
+                openUser.passSynchronizedAction(() -> this.updateGiftHandicap(openUser));
             } catch (SQLException exception) {
                 Log.error(user, this.getClass(), "Failed to update data", exception);
             }
@@ -292,14 +291,14 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
 
         try {
             BoarUser openUser = BoarUserFactory.getBoarUser(this.giftWinner);
-            openUser.passSynchronizedAction(this);
+            openUser.passSynchronizedAction(() -> this.processGiveItem(openUser));
         } catch (SQLException exception) {
             Log.error(this.giftWinner, this.getClass(), "Failed to update gift winner data", exception);
         }
 
         try {
             BoarUser sendUser = BoarUserFactory.getBoarUser(this.user);
-            sendUser.passSynchronizedAction(this);
+            sendUser.passSynchronizedAction(() -> this.processGiveItem(sendUser));
         } catch (SQLException exception) {
             Log.error(this.giftWinner, this.getClass(), "Failed to update gifter data", exception);
         }
@@ -361,65 +360,33 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         return arr.size()-1;
     }
 
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
-        try {
-            if (this.outcomeType == null && this.giftWinner != null) {
-                try (Connection connection = DataUtil.getConnection()) {
-                    long userVal = this.giftTimes.get(boarUser.getUser()) +
-                       boarUser.giftQuery().getGiftHandicap(connection);
+    private void updateGiftHandicap(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            long userVal = this.giftTimes.get(boarUser.getUser()) + boarUser.giftQuery().getGiftHandicap(connection);
 
-                    Log.debug(boarUser.getUser(), this.getClass(), "Handicapped Value: %,d".formatted(userVal));
-                    if (userVal < this.giftWinnerValue) {
-                        this.giftWinner = boarUser.getUser();
-                        this.giftWinnerValue = userVal;
-                    }
-
-                    boarUser.giftQuery().updateGiftHandicap(connection, this.giftTimes.get(boarUser.getUser()));
-                }
-            } else if (this.outcomeType == null) {
-                try (Connection connection = DataUtil.getConnection()) {
-                    this.hasGift = boarUser.powQuery().getPowerupAmount(connection, "gift") > 0;
-
-                    if (this.hasGift) {
-                        boarUser.powQuery().usePowerup(connection, "gift", 1, true);
-                        boarUser.powQuery().setLastGiftSent(connection, 0);
-                        this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
-                            QuestType.SEND_GIFTS, 1, connection
-                        ));
-                    }
-                }
-            } else if (this.outcomeType == OutcomeType.SPECIAL || this.outcomeType == OutcomeType.BOAR) {
-                this.giveBoar(boarUser);
-            } else if (this.outcomeType == OutcomeType.BUCKS) {
-                this.giveBucks(boarUser);
-            } else if (this.outcomeType == OutcomeType.POWERUP) {
-                this.givePowerup(boarUser);
+            Log.debug(boarUser.getUser(), this.getClass(), "Handicapped Value: %,d".formatted(userVal));
+            if (userVal < this.giftWinnerValue) {
+                this.giftWinner = boarUser.getUser();
+                this.giftWinnerValue = userVal;
             }
 
-            if (this.outcomeType != null) {
-                try (Connection connection = DataUtil.getConnection()) {
-                    List<String> rarityKeys = new ArrayList<>();
+            boarUser.giftQuery().updateGiftHandicap(connection, this.giftTimes.get(boarUser.getUser()));
+        } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to fully perform gift open", exception);
+        }
+    }
 
-                    for (String boarID : this.boarIDs) {
-                        rarityKeys.add(BoarUtil.findRarityKey(boarID));
-                    }
+    private void processUseGift(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            this.hasGift = boarUser.powQuery().getPowerupAmount(connection, "gift") > 0;
 
-                    boarUser.giftQuery().openGift(
-                        connection, this.numBucks, rarityKeys, this.giftWinner.getId().equals(boarUser.getUserID())
-                    );
-
-                    if (this.giftWinner.getId().equals(boarUser.getUserID())) {
-                        this.openerQuestInfos.add(boarUser.questQuery().addProgress(
-                            QuestType.OPEN_GIFTS, 1, connection
-                        ));
-                        QuestUtil.sendQuestClaimMessage(
-                            this.giftInteractions.get(this.giftWinner).getHook(), this.openerQuestInfos
-                        );
-                    } else {
-                        QuestUtil.sendQuestClaimMessage(this.hook, this.senderQuestInfos);
-                    }
-                }
+            if (this.hasGift) {
+                boarUser.powQuery().usePowerup(connection, "gift", 1, true);
+                boarUser.powQuery().setLastGiftSent(connection, 0);
+                this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
+                    QuestType.SEND_GIFTS, 1, connection
+                ));
             }
         } catch (SQLException exception) {
             this.stop(StopType.EXCEPTION);
@@ -427,7 +394,17 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         }
     }
 
-    private void giveBoar(BoarUser boarUser) throws SQLException {
+    private void processGiveItem(BoarUser boarUser) {
+        switch (this.outcomeType) {
+            case SPECIAL, BOAR -> this.giveBoar(boarUser);
+            case BUCKS -> this.giveBucks(boarUser);
+            case POWERUP -> this.givePowerup(boarUser);
+        }
+
+        this.processOpenGift(boarUser);
+    }
+
+    private void giveBoar(BoarUser boarUser) {
         List<Integer> bucksGotten = new ArrayList<>();
         List<Integer> editions = new ArrayList<>();
         Set<String> firstBoarIDs = new HashSet<>();
@@ -439,6 +416,9 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
             this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
                 QuestType.COLLECT_RARITY, this.boarIDs, connection
             ));
+        } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to fully perform gift open", exception);
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {
@@ -467,12 +447,15 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         });
     }
 
-    private void giveBucks(BoarUser boarUser) throws SQLException {
+    private void giveBucks(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.baseQuery().giveBucks(connection, this.numBucks);
             this.getQuestInfos(boarUser).add(boarUser.questQuery().addProgress(
                 QuestType.COLLECT_BUCKS, this.numBucks, connection
             ));
+        } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to fully perform gift open", exception);
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {
@@ -510,11 +493,14 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
         });
     }
 
-    private void givePowerup(BoarUser boarUser) throws SQLException {
+    private void givePowerup(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.powQuery().addPowerup(
                 connection, this.subOutcomeType.toString(), this.subOutcomeConfig.getRewardAmt(), true
             );
+        } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to fully perform gift open", exception);
         }
 
         if (boarUser.getUserID().equals(this.user.getId())) {
@@ -553,6 +539,34 @@ public class BoarGiftInteractive extends UserInteractive implements Synchronizab
                 Log.error(this.user, this.getClass(), "A problem occurred when sending gift interactive", exception);
             }
         });
+    }
+
+    private void processOpenGift(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            List<String> rarityKeys = new ArrayList<>();
+
+            for (String boarID : this.boarIDs) {
+                rarityKeys.add(BoarUtil.findRarityKey(boarID));
+            }
+
+            boarUser.giftQuery().openGift(
+                connection, this.numBucks, rarityKeys, this.giftWinner.getId().equals(boarUser.getUserID())
+            );
+
+            if (this.giftWinner.getId().equals(boarUser.getUserID())) {
+                this.openerQuestInfos.add(boarUser.questQuery().addProgress(
+                    QuestType.OPEN_GIFTS, 1, connection
+                ));
+                QuestUtil.sendQuestClaimMessage(
+                    this.giftInteractions.get(this.giftWinner).getHook(), this.openerQuestInfos
+                );
+            } else {
+                QuestUtil.sendQuestClaimMessage(this.hook, this.senderQuestInfos);
+            }
+        } catch (SQLException exception) {
+            this.stop(StopType.EXCEPTION);
+            Log.error(this.user, this.getClass(), "Failed to fully perform gift open", exception);
+        }
     }
 
     @Override

@@ -4,7 +4,6 @@ import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.event.PowerupEventInteractive;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.GuildDataUtil;
@@ -29,7 +28,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
-public class PowerupEventHandler extends EventHandler implements Synchronizable, Configured {
+public class PowerupEventHandler extends EventHandler implements Configured {
     @Getter protected static final List<Message> curMessages = new ArrayList<>();
     private static final Set<Message> priorMessages = new HashSet<>();
 
@@ -166,7 +165,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
                 for (String userID : this.userTimes.keySet()) {
                     try {
                         BoarUser boarUser = BoarUserFactory.getBoarUser(userID);
-                        boarUser.passSynchronizedAction(this);
+                        boarUser.passSynchronizedAction(() -> this.updatePowerupStats(boarUser));
                     } catch (SQLException exception) {
                         Log.error(this.getClass(), "Failed to update user data", exception);
                     }
@@ -178,8 +177,7 @@ public class PowerupEventHandler extends EventHandler implements Synchronizable,
         }
     }
 
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
+    public void updatePowerupStats(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             if (boarUser.getUserID().equals(this.sortedUsers.getFirst())) {
                 boarUser.eventQuery().addPerfectPowerup(connection);

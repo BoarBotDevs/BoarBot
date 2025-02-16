@@ -2,7 +2,6 @@ package dev.boarbot.interactives.boar;
 
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.interactives.Interactive;
 import dev.boarbot.interactives.ModalInteractive;
 import dev.boarbot.modals.ModalHandler;
@@ -24,7 +23,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class WipeInteractive extends ModalInteractive implements Synchronizable {
+public class WipeInteractive extends ModalInteractive {
     private final SlashCommandInteraction interaction;
 
     public WipeInteractive(SlashCommandInteractionEvent event) {
@@ -88,7 +87,7 @@ public class WipeInteractive extends ModalInteractive implements Synchronizable 
             }
 
             BoarUser boarUser = BoarUserFactory.getBoarUser(modalEvent.getUser());
-            boarUser.passSynchronizedAction(this);
+            boarUser.passSynchronizedAction(() -> this.processWipe(boarUser));
 
             msg.setFiles(
                 new EmbedImageGenerator(STRS.getWipeSuccess(), COLORS.get("green")).generate().getFileUpload()
@@ -106,8 +105,7 @@ public class WipeInteractive extends ModalInteractive implements Synchronizable 
         }
     }
 
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
+    public void processWipe(BoarUser boarUser) {
         try (Connection connection = DataUtil.getConnection()) {
             boarUser.baseQuery().wipeUser(connection);
             Log.info(this.user, this.getClass(), "Wiped their data");

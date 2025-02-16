@@ -3,7 +3,6 @@ package dev.boarbot.interactives.event;
 import dev.boarbot.bot.config.prompts.IndivPromptConfig;
 import dev.boarbot.entities.boaruser.BoarUser;
 import dev.boarbot.entities.boaruser.BoarUserFactory;
-import dev.boarbot.entities.boaruser.Synchronizable;
 import dev.boarbot.events.PowerupEventHandler;
 import dev.boarbot.events.PromptType;
 import dev.boarbot.interactives.Interactive;
@@ -39,7 +38,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PowerupEventInteractive extends EventInteractive implements Synchronizable {
+public class PowerupEventInteractive extends EventInteractive {
     private final IndivPromptConfig promptConfig;
 
     private final PowerupEventHandler eventHandler;
@@ -99,7 +98,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 this.userTimes.put(userID, TimeUtil.getCurMilli() - this.sentTimestamp);
 
                 BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
-                boarUser.passSynchronizedAction(this);
+                boarUser.passSynchronizedAction(() -> this.processWin(boarUser));
 
                 if (this.failedSynchronized.contains(boarUser.getUserID())) {
                     return;
@@ -122,7 +121,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 this.failUsers.put(userID, true);
 
                 BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
-                boarUser.passSynchronizedAction(this);
+                boarUser.passSynchronizedAction(() -> this.processFail(boarUser));
 
                 embedGen.setStr(STRS.getPowEventFail()).setColor(COLORS.get("font"));
                 compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
@@ -202,32 +201,34 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
         );
     }
 
-    public void doSynchronizedAction(BoarUser boarUser) {
-        String userID = boarUser.getUserID();
+    public void processWin(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            boarUser.eventQuery().applyPowEventWin(
+                connection,
+                this.powerupID,
+                POWS.get(this.powerupID).getEventAmt(),
+                this.userTimes.get(boarUser.getUserID())
+            );
+            QuestUtil.sendQuestClaimMessage(
+                this.userHooks.get(boarUser.getUserID()),
+                boarUser.questQuery().addProgress(QuestType.POW_WIN, 1, connection),
+                boarUser.questQuery()
+                    .addProgress(QuestType.POW_FAST, this.userTimes.get(boarUser.getUserID()), connection)
+            );
+        } catch (SQLException exception) {
+            this.failedSynchronized.add(boarUser.getUserID());
+            SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
+            Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event win", exception);
+        }
+    }
 
-        if (this.userTimes.containsKey(userID)) {
-            try (Connection connection = DataUtil.getConnection()) {
-                boarUser.eventQuery().applyPowEventWin(
-                    connection, this.powerupID, POWS.get(this.powerupID).getEventAmt(), this.userTimes.get(userID)
-                );
-                QuestUtil.sendQuestClaimMessage(
-                    this.userHooks.get(boarUser.getUserID()),
-                    boarUser.questQuery().addProgress(QuestType.POW_WIN, 1, connection),
-                    boarUser.questQuery().addProgress(QuestType.POW_FAST, this.userTimes.get(userID), connection)
-                );
-            } catch (SQLException exception) {
-                this.failedSynchronized.add(boarUser.getUserID());
-                SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
-                Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event win", exception);
-            }
-        } else if (this.failUsers.containsKey(userID) && this.failUsers.get(userID)) {
-            try (Connection connection = DataUtil.getConnection()) {
-                boarUser.eventQuery().applyPowEventFail(connection);
-            } catch (SQLException exception) {
-                this.failedSynchronized.add(boarUser.getUserID());
-                SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
-                Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);
-            }
+    public void processFail(BoarUser boarUser) {
+        try (Connection connection = DataUtil.getConnection()) {
+            boarUser.eventQuery().applyPowEventFail(connection);
+        } catch (SQLException exception) {
+            this.failedSynchronized.add(boarUser.getUserID());
+            SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
+            Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);
         }
     }
 

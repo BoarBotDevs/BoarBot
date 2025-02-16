@@ -36,12 +36,14 @@ class MegaMenuComponentHandler implements Configured {
     protected static final Map<String, ModalConfig> MODALS = CONFIG.getModalConfig();
 
     private final MegaMenuInteractive interactive;
+    private final MegaMenuActionHandler actionHandler;
     private GenericComponentInteractionCreateEvent compEvent;
     private ModalInteractionEvent modalEvent;
     private final User user;
 
     public MegaMenuComponentHandler(GenericComponentInteractionCreateEvent compEvent, MegaMenuInteractive interactive) {
         this.interactive = interactive;
+        this.actionHandler = new MegaMenuActionHandler(interactive);
         this.compEvent = compEvent;
         this.interactive.compEvent = compEvent;
         this.user = compEvent.getUser();
@@ -49,6 +51,7 @@ class MegaMenuComponentHandler implements Configured {
 
     public MegaMenuComponentHandler(ModalInteractionEvent modalEvent, MegaMenuInteractive interactive) {
         this.interactive = interactive;
+        this.actionHandler = new MegaMenuActionHandler(interactive);
         this.modalEvent = modalEvent;
         this.interactive.modalEvent = modalEvent;
         this.user = modalEvent.getUser();
@@ -157,7 +160,13 @@ class MegaMenuComponentHandler implements Configured {
 
             case "SORT_SELECT" -> this.setSortVal();
 
-            case "CONFIRM", "ADVENT_CLAIM" -> this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+            case "CONFIRM", "ADVENT_CLAIM" -> this.interactive.getBoarUser().passSynchronizedAction(() -> {
+                if (this.interactive.curView == MegaMenuView.ADVENT) {
+                    this.actionHandler.claimAdvent(this.interactive.getBoarUser());
+                } else if (this.interactive.powerupUsing != null) {
+                    this.actionHandler.usePowerup(this.interactive.getBoarUser());
+                }
+            });
 
             case "CANCEL" -> {
                 this.interactive.confirmOpen = false;
@@ -186,17 +195,20 @@ class MegaMenuComponentHandler implements Configured {
 
             case "QUEST_CLAIM" -> {
                 this.interactive.questAction = QuestAction.CLAIM;
-                this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+                this.interactive.getBoarUser()
+                    .passSynchronizedAction(() -> this.actionHandler.doQuestAction(this.interactive.getBoarUser()));
             }
 
             case "QUEST_BONUS" -> {
                 this.interactive.questAction = QuestAction.CLAIM_BONUS;
-                this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+                this.interactive.getBoarUser()
+                    .passSynchronizedAction(() -> this.actionHandler.doQuestAction(this.interactive.getBoarUser()));
             }
 
             case "QUEST_AUTO" -> {
                 this.interactive.questAction = QuestAction.AUTO_CLAIM;
-                this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+                this.interactive.getBoarUser()
+                    .passSynchronizedAction(() -> this.actionHandler.doQuestAction(this.interactive.getBoarUser()));
             }
         }
     }
@@ -413,7 +425,8 @@ class MegaMenuComponentHandler implements Configured {
         switch (this.interactive.interactType) {
             case FAVORITE -> {
                 this.compEvent.deferEdit().queue(null, e -> ExceptionHandler.deferHandle(this.compEvent, this, e));
-                this.interactive.getBoarUser().passSynchronizedAction(this.interactive);
+                this.interactive.getBoarUser()
+                    .passSynchronizedAction(() -> this.actionHandler.doInteract(this.interactive.getBoarUser()));
             }
 
             case CLONE -> {
@@ -529,7 +542,7 @@ class MegaMenuComponentHandler implements Configured {
 
         try {
             BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
-            interBoarUser.passSynchronizedAction(this.interactive);
+            interBoarUser.passSynchronizedAction(() -> this.actionHandler.setFilterBits(interBoarUser));
         } catch (SQLException exception) {
             this.interactive.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to update data", exception);
@@ -545,7 +558,7 @@ class MegaMenuComponentHandler implements Configured {
 
         try {
             BoarUser interBoarUser = BoarUserFactory.getBoarUser(this.interactive.getUser());
-            interBoarUser.passSynchronizedAction(this.interactive);
+            interBoarUser.passSynchronizedAction(() -> this.actionHandler.setSortVal(interBoarUser));
         } catch (SQLException exception) {
             this.interactive.stop(StopType.EXCEPTION);
             Log.error(this.user, this.getClass(), "Failed to update data", exception);

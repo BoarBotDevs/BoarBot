@@ -28,7 +28,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
 
-public class MegaMenuInteractive extends ModalInteractive implements Synchronizable {
+public class MegaMenuInteractive extends ModalInteractive {
     int page;
     int maxPage;
     String boarPage;
@@ -42,7 +42,6 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
 
     private final MegaMenuComponentsGetter componentsGetter = new MegaMenuComponentsGetter(this);
     private final MegaMenuGeneratorMaker generatorMaker = new MegaMenuGeneratorMaker(this);
-    private final MegaMenuActionHandler actionHandler = new MegaMenuActionHandler(this);
     private ImageGenerator currentImageGen;
     private FileUpload currentImageUpload;
 
@@ -185,11 +184,6 @@ public class MegaMenuInteractive extends ModalInteractive implements Synchroniza
     @Override
     public void modalExecute(ModalInteractionEvent modalEvent) {
         new MegaMenuComponentHandler(modalEvent, this).handleModalEvent();
-    }
-
-    @Override
-    public void doSynchronizedAction(BoarUser boarUser) {
-        this.actionHandler.doAction(boarUser);
     }
 
     private void sendResponse() {
