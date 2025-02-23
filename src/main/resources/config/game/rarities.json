@@ -7,8 +7,7 @@
     "researcherNeed": true,
     "givesFirstBoar": true,
     "avgClones": 1000,
-    "targetStock": 5,
-    "priceAdjustWaitHours": 552,
+    "marketable": true,
     "boars": [
       "ghost"
     ]
@@ -21,8 +20,7 @@
     "researcherNeed": true,
     "givesFirstBoar": true,
     "avgClones": 1000,
-    "targetStock": 5,
-    "priceAdjustWaitHours": 552,
+    "marketable": true,
     "boars": [
       "ice"
     ]
@@ -34,8 +32,7 @@
     "baseBucks": 20,
     "researcherNeed": true,
     "avgClones": 1000,
-    "targetStock": 5,
-    "priceAdjustWaitHours": 552,
+    "marketable": true,
     "boars": [
       "birthday"
     ]
@@ -50,8 +47,7 @@
     "givesFirstBoar": true,
     "chargesNeeded": 1,
     "avgClones": 1,
-    "targetStock": 50,
-    "priceAdjustWaitHours": 24,
+    "marketable": true,
     "boars": [
       "normal"
     ]
@@ -66,8 +62,7 @@
     "givesFirstBoar": true,
     "chargesNeeded": 2,
     "avgClones": 2,
-    "targetStock": 30,
-    "priceAdjustWaitHours": 48,
+    "marketable": true,
     "boars": [
       "carrot"
     ]
@@ -82,8 +77,7 @@
     "givesFirstBoar": true,
     "chargesNeeded": 3,
     "avgClones": 5,
-    "targetStock": 20,
-    "priceAdjustWaitHours": 72,
+    "marketable": true,
     "boars": [
       "sphere"
     ]
@@ -98,8 +92,7 @@
     "givesFirstBoar": true,
     "chargesNeeded": 5,
     "avgClones": 10,
-    "targetStock": 15,
-    "priceAdjustWaitHours": 120,
+    "marketable": true,
     "boars": [
       "creepy"
     ]
@@ -115,8 +108,7 @@
     "givesFirstBoar": true,
     "chargesNeeded": 10,
     "avgClones": 20,
-    "targetStock": 10,
-    "priceAdjustWaitHours": 192,
+    "marketable": true,
     "boars": [
       "minimumwage"
     ]
@@ -131,8 +123,7 @@
     "givesFirstBoar": true,
     "chargesNeeded": 18,
     "avgClones": 50,
-    "targetStock": 5,
-    "priceAdjustWaitHours": 288,
+    "marketable": true,
     "boars": [
       "cowboy"
     ]
@@ -147,8 +138,7 @@
     "givesFirstBoar": true,
     "chargesNeeded": 30,
     "avgClones": 200,
-    "targetStock": 3,
-    "priceAdjustWaitHours": 408,
+    "marketable": true,
     "boars": [
       "rickroll"
     ]
@@ -162,8 +152,7 @@
     "givesFirstBoar": true,
     "showEdition": true,
     "avgClones": 500,
-    "targetStock": 1,
-    "priceAdjustWaitHours": 552,
+    "marketable": true,
     "boars": [
       "supernova"
     ]

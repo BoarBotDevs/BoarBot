@@ -241,39 +241,39 @@ public class MarketInteractive extends ModalInteractive {
                         throw new NumberFormatException();
                     }
 
-                    List<MarketData> marketData = MarketDataUtil.getItemData(this.focusedID, true, connection);
-                    MarketData buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
-                    long userBucks = this.boarUser.baseQuery().getBucks(connection);
-
-                    if (input == Integer.MAX_VALUE) {
-                        int right = buyData.amount();
-                        int left = 1;
-
-                        if (this.focusedID.equals("transmute")) {
-                            right = NUMS.getMaxTransmute() -
-                                this.boarUser.powQuery().getPowerupAmount(connection, this.focusedID);
-                        }
-
-                        while (left <= right) {
-                            input = left + (right - left) / 2;
-                            buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
-
-                            if (buyData.cost() == userBucks) {
-                                break;
-                            }
-
-                            if (buyData.cost() < userBucks) {
-                                left = input + 1;
-                            } else {
-                                right = input - 1;
-                            }
-                        }
-
-                        if (buyData.cost() > userBucks && input > 1) {
-                            input--;
-                            buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
-                        }
-                    }
+//                    List<MarketData> marketData = MarketDataUtil.getItemData(this.focusedID, true, connection);
+//                    MarketData buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
+//                    long userBucks = this.boarUser.baseQuery().getBucks(connection);
+//
+//                    if (input == Integer.MAX_VALUE) {
+//                        int right = buyData.amount();
+//                        int left = 1;
+//
+//                        if (this.focusedID.equals("transmute")) {
+//                            right = NUMS.getMaxTransmute() -
+//                                this.boarUser.powQuery().getPowerupAmount(connection, this.focusedID);
+//                        }
+//
+//                        while (left <= right) {
+//                            input = left + (right - left) / 2;
+//                            buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
+//
+//                            if (buyData.cost() == userBucks) {
+//                                break;
+//                            }
+//
+//                            if (buyData.cost() < userBucks) {
+//                                left = input + 1;
+//                            } else {
+//                                right = input - 1;
+//                            }
+//                        }
+//
+//                        if (buyData.cost() > userBucks && input > 1) {
+//                            input--;
+//                            buyData = MarketDataUtil.calculateBuyCost(this.focusedID, marketData, input);
+//                        }
+//                    }
 
                     if (this.focusedID.equals("transmute")) {
                         int transmuteAmt = boarUser.powQuery().getPowerupAmount(connection, this.focusedID);
@@ -294,39 +294,39 @@ public class MarketInteractive extends ModalInteractive {
                         }
                     }
 
-                    if (userBucks < buyData.cost()) {
-                        this.acknowledgeOpen = true;
-                        this.acknowledgeString = STRS.getMarketNoBucks()
-                            .formatted(buyData.amount(), buyData.cost(), userBucks);
-
-                        this.execute(null);
-                        return;
-                    }
-
-                    String itemStr = POWS.containsKey(this.focusedID)
-                        ? "<>powerup<>" + (buyData.amount() == 1
-                            ? POWS.get(this.focusedID).getName()
-                            : POWS.get(this.focusedID).getPluralName())
-                        : "<>" + BoarUtil.findRarityKey(this.focusedID) + "<>" + (buyData.amount() == 1
-                            ? BOARS.get(this.focusedID).getName()
-                            : BOARS.get(this.focusedID).getPluralName());
-
-                    this.isBuying = true;
-                    this.cost = buyData.cost();
-                    this.amount = buyData.amount();
-
-                    this.confirmOpen = true;
-                    this.confirmString = STRS.getMarketBuyConfirm().formatted(
-                        buyData.amount(),
-                        itemStr,
-                        buyData.cost(),
-                        marketData.stock(),
-                        buyData.stock(),
-                        marketData.sellPrice(),
-                        buyData.sellPrice(),
-                        marketData.buyPrice(),
-                        buyData.buyPrice()
-                    );
+//                    if (userBucks < buyData.cost()) {
+//                        this.acknowledgeOpen = true;
+//                        this.acknowledgeString = STRS.getMarketNoBucks()
+//                            .formatted(buyData.amount(), buyData.cost(), userBucks);
+//
+//                        this.execute(null);
+//                        return;
+//                    }
+//
+//                    String itemStr = POWS.containsKey(this.focusedID)
+//                        ? "<>powerup<>" + (buyData.amount() == 1
+//                            ? POWS.get(this.focusedID).getName()
+//                            : POWS.get(this.focusedID).getPluralName())
+//                        : "<>" + BoarUtil.findRarityKey(this.focusedID) + "<>" + (buyData.amount() == 1
+//                            ? BOARS.get(this.focusedID).getName()
+//                            : BOARS.get(this.focusedID).getPluralName());
+//
+//                    this.isBuying = true;
+//                    this.cost = buyData.cost();
+//                    this.amount = buyData.amount();
+//
+//                    this.confirmOpen = true;
+//                    this.confirmString = STRS.getMarketBuyConfirm().formatted(
+//                        buyData.amount(),
+//                        itemStr,
+//                        buyData.cost(),
+//                        marketData.stock(),
+//                        buyData.stock(),
+//                        marketData.sellPrice(),
+//                        buyData.sellPrice(),
+//                        marketData.buyPrice(),
+//                        buyData.buyPrice()
+//                    );
                 } catch (NumberFormatException exception) {
                     this.acknowledgeOpen = true;
                     this.acknowledgeString = STRS.getInvalidInput();
@@ -370,34 +370,34 @@ public class MarketInteractive extends ModalInteractive {
                         return;
                     }
 
-                    List<MarketData> marketData = MarketDataUtil.getItemData(this.focusedID, true, connection);
-                    MarketData sellData = MarketDataUtil.calculateSellCost(
-                        this.focusedID, marketData, input
-                    );
-
-                    String itemStr = isPowerup
-                        ? "<>powerup<>" + (sellData.amount() == 1
-                            ? POWS.get(this.focusedID).getName()
-                            : POWS.get(this.focusedID).getPluralName())
-                        : "<>" + BoarUtil.findRarityKey(this.focusedID) + "<>" + (sellData.amount() == 1
-                            ? BOARS.get(this.focusedID).getName()
-                            : BOARS.get(this.focusedID).getPluralName());
-
-                    this.cost = sellData.cost();
-                    this.amount = sellData.amount();
-
-                    this.confirmOpen = true;
-                    this.confirmString = STRS.getMarketSellConfirm().formatted(
-                        sellData.amount(),
-                        itemStr,
-                        sellData.cost(),
-                        marketData.stock(),
-                        sellData.stock(),
-                        marketData.sellPrice(),
-                        sellData.sellPrice(),
-                        marketData.buyPrice(),
-                        sellData.buyPrice()
-                    );
+//                    List<MarketData> marketData = MarketDataUtil.getItemData(this.focusedID, true, connection);
+//                    MarketData sellData = MarketDataUtil.calculateSellCost(
+//                        this.focusedID, marketData, input
+//                    );
+//
+//                    String itemStr = isPowerup
+//                        ? "<>powerup<>" + (sellData.amount() == 1
+//                            ? POWS.get(this.focusedID).getName()
+//                            : POWS.get(this.focusedID).getPluralName())
+//                        : "<>" + BoarUtil.findRarityKey(this.focusedID) + "<>" + (sellData.amount() == 1
+//                            ? BOARS.get(this.focusedID).getName()
+//                            : BOARS.get(this.focusedID).getPluralName());
+//
+//                    this.cost = sellData.cost();
+//                    this.amount = sellData.amount();
+//
+//                    this.confirmOpen = true;
+//                    this.confirmString = STRS.getMarketSellConfirm().formatted(
+//                        sellData.amount(),
+//                        itemStr,
+//                        sellData.cost(),
+//                        marketData.stock(),
+//                        sellData.stock(),
+//                        marketData.sellPrice(),
+//                        sellData.sellPrice(),
+//                        marketData.buyPrice(),
+//                        sellData.buyPrice()
+//                    );
                 } catch (NumberFormatException exception) {
                     this.acknowledgeOpen = true;
                     this.acknowledgeString = STRS.getInvalidInput();

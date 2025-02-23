@@ -159,7 +159,7 @@ public class MarketComponentsGetter implements Configured {
         Button buyBtn = ((Button) buySellRow.getFirst()).asDisabled();
 
         boolean canPurchase = MarketInteractive.cachedMarketData.get(this.interactive.focusedID) != null &&
-            MarketInteractive.cachedMarketData.get(this.interactive.focusedID).stock() > 0;
+            !MarketInteractive.cachedMarketData.get(this.interactive.focusedID).isEmpty();
         if (canPurchase) {
             buyBtn = buyBtn.withDisabled(false);
         }

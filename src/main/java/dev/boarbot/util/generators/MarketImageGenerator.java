@@ -5,6 +5,7 @@ import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.interactives.boar.market.MarketInteractive;
 import dev.boarbot.interactives.boar.market.MarketView;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.data.market.MarketData;
 import dev.boarbot.util.graphics.Align;
 import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.graphics.TextDrawer;
@@ -16,6 +17,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class MarketImageGenerator extends ImageGenerator {
@@ -31,20 +33,20 @@ public class MarketImageGenerator extends ImageGenerator {
     private static final int ITEMS_START_X = 25;
     private static final int ITEMS_START_Y = 266;
     private static final int AMOUNT_LEFT_X_OFFSET = 15;
-    private static final int AMOUNT_RIGHT_X_OFFSET = 9;
     private static final int AMOUNT_TOP_Y_OFFSET = 49;
-    private static final int AMOUNT_BOT_Y_OFFSET = 10;
     private static final int AMOUNT_BOX_WIDTH_OFFSET = 30;
     private static final int AMOUNT_BOX_HEIGHT = 64;
 
-    private static final int[] FOCUSED_ITEM_POS = {640, 449};
-    private static final int[] FOCUSED_RARITY_POS = {960, 399};
-    private static final int[] FOCUSED_NAME_POS = {960, 1192};
-    private static final int FOCUSED_TEXT_LEFT_X = 323;
-    private static final int FOCUSED_TEXT_RIGHT_X = 1603;
-    private static final int FOCUSED_TEXT_Y = 670;
-    private static final int VALUE_Y_OFFSET = 78;
-    private static final int LABEL_Y_SPACING = 198;
+    private static final int[] FOCUSED_ITEM_POS = {174, 455};
+    private static final int FOCUSED_TEXT_LEFT_X = 497;
+    private static final int FOCUSED_RARITY_Y = 350;
+    private static final int FOCUSED_NAME_Y = 415;
+    private static final int FOCUSED_PRICE_LABEL_Y = 1174;
+    private static final int FOCUSED_PRICE_VALUE_Y_OFFSET = 78;
+    private static final int FOCUSED_TEXT_RIGHT_X = 1371;
+    private static final int FOCUSED_LIST_TITLE_Y = 474;
+    private static final int FOCUSED_LIST_START_Y = 553;
+    private static final int FOCUSED_LIST_Y_OFFSET = 64;
 
     private final int page;
     private final MarketView curView;
@@ -133,24 +135,19 @@ public class MarketImageGenerator extends ImageGenerator {
                 ITEMS_START_Y + (relativeIndex / ITEMS_PER_ROW) * (itemImageSize[1] + border)
             };
 
-            String buyStr = shortenValue(MarketInteractive.cachedMarketData.get(itemID).buyPrice());
-            String sellStr = shortenValue(MarketInteractive.cachedMarketData.get(itemID).sellPrice());
+            String priceStr = MarketInteractive.cachedMarketData.get(itemID).isEmpty()
+                ? STRS.getUnavailable()
+                : "$" + shortenValue(MarketInteractive.cachedMarketData.get(itemID).getFirst().price(), false);
+            String priceColor = MarketInteractive.cachedMarketData.get(itemID).isEmpty() ? "silver" : "bucks";
 
             this.textDrawer.setFontSize(NUMS.getFontMedium());
 
             FontMetrics fm = g2d.getFontMetrics();
             int[] buyRectSize = new int[] {
-                fm.stringWidth(buyStr) + AMOUNT_BOX_WIDTH_OFFSET + border, AMOUNT_BOX_HEIGHT + border
-            };
-            int[] sellRectSize = new int[] {
-                fm.stringWidth(sellStr) + AMOUNT_BOX_WIDTH_OFFSET + border, AMOUNT_BOX_HEIGHT + border
+                fm.stringWidth(priceStr) + AMOUNT_BOX_WIDTH_OFFSET + border, AMOUNT_BOX_HEIGHT + border
             };
 
             int[] buyPos = new int[] {itemPos[0] + AMOUNT_LEFT_X_OFFSET, itemPos[1] + AMOUNT_TOP_Y_OFFSET};
-            int[] sellPos = new int[] {
-                itemPos[0] + itemImageSize[0] - AMOUNT_RIGHT_X_OFFSET,
-                itemPos[1] + itemImageSize[1] - AMOUNT_BOT_Y_OFFSET
-            };
 
             BufferedImage itemImage = BoarBotApp.getBot().getImageCacheMap().get("medium" + itemID);
             g2d.drawImage(itemImage, itemPos[0], itemPos[1], null);
@@ -169,25 +166,10 @@ public class MarketImageGenerator extends ImageGenerator {
                 NUMS.getBorder() * 2
             ));
 
-            g2d.fill(new RoundRectangle2D.Double(
-                itemPos[0]+itemImageSize[0]+border-sellRectSize[0],
-                itemPos[1]+itemImageSize[1]+border-sellRectSize[1],
-                sellRectSize[0],
-                sellRectSize[1],
-                NUMS.getBorder() * 2,
-                NUMS.getBorder() * 2
-            ));
-
-            this.textDrawer.setText(buyStr);
+            this.textDrawer.setText(priceStr);
             this.textDrawer.setPos(buyPos);
             this.textDrawer.setAlign(Align.LEFT);
-            this.textDrawer.setColorVal(COLORS.get("green"));
-            this.textDrawer.drawText();
-
-            this.textDrawer.setText(sellStr);
-            this.textDrawer.setPos(sellPos);
-            this.textDrawer.setAlign(Align.RIGHT);
-            this.textDrawer.setColorVal(COLORS.get("error"));
+            this.textDrawer.setColorVal(COLORS.get(priceColor));
             this.textDrawer.drawText();
         }
     }
@@ -203,9 +185,6 @@ public class MarketImageGenerator extends ImageGenerator {
         String itemName = isPowerup
             ? POWS.get(this.focusedID).getName()
             : BOARS.get(this.focusedID).getName();
-        int targetStock = isPowerup
-            ? POWS.get(this.focusedID).getTargetStock()
-            : RARITIES.get(colorKey).getTargetStock();
 
         BufferedImage itemImage = BoarBotApp.getBot().getImageCacheMap().get("mediumBig" + this.focusedID);
         g2d.drawImage(itemImage, FOCUSED_ITEM_POS[0], FOCUSED_ITEM_POS[1], null);
@@ -213,58 +192,100 @@ public class MarketImageGenerator extends ImageGenerator {
         BufferedImage rarityBorderImage = BoarBotApp.getBot().getImageCacheMap().get("borderMediumBig" + colorKey);
         g2d.drawImage(rarityBorderImage, FOCUSED_ITEM_POS[0], FOCUSED_ITEM_POS[1], null);
 
-        int[] buyLabelPos = {FOCUSED_TEXT_LEFT_X, FOCUSED_TEXT_Y};
-        String buyStr = "<>bucks<>$%,d".formatted(MarketInteractive.cachedMarketData.get(this.focusedID).buyPrice());
-        int[] buyPos = {FOCUSED_TEXT_LEFT_X, buyLabelPos[1] + VALUE_Y_OFFSET};
+        int[] rarityPos = {FOCUSED_TEXT_LEFT_X, FOCUSED_RARITY_Y};
+        int[] namePos = {FOCUSED_TEXT_LEFT_X, FOCUSED_NAME_Y};
 
-        int[] sellLabelPos = {FOCUSED_TEXT_LEFT_X, buyLabelPos[1] + LABEL_Y_SPACING};
-        String sellStr = "<>bucks<>$%,d".formatted(MarketInteractive.cachedMarketData.get(this.focusedID).sellPrice());
-        int[] sellPos = {FOCUSED_TEXT_LEFT_X, sellLabelPos[1] + VALUE_Y_OFFSET};
+        int[] priceLabelPos = {FOCUSED_TEXT_LEFT_X, FOCUSED_PRICE_LABEL_Y};
+        String priceStr = MarketInteractive.cachedMarketData.get(this.focusedID).isEmpty()
+            ? "<>silver<>" + STRS.getUnavailable()
+            : "<>bucks<>$" + shortenValue(
+                MarketInteractive.cachedMarketData.get(this.focusedID).getFirst().price(), true
+            );
+        int[] pricePos = {FOCUSED_TEXT_LEFT_X, priceLabelPos[1] + FOCUSED_PRICE_VALUE_Y_OFFSET};
 
-        int[] targetLabelPos = {FOCUSED_TEXT_RIGHT_X, FOCUSED_TEXT_Y};
-        String targetStr = "%,d".formatted(targetStock);
-        int[] targetPos = {FOCUSED_TEXT_RIGHT_X, targetLabelPos[1] + VALUE_Y_OFFSET};
+        int[] listTitlePos = {FOCUSED_TEXT_RIGHT_X, FOCUSED_LIST_TITLE_Y};
+        int[] curListPos = {FOCUSED_TEXT_RIGHT_X, FOCUSED_LIST_START_Y};
+        long curPrice = 0;
+        long curAmount = 0;
+        int marketIndex = 0;
 
-        int[] stockLabelPos = {FOCUSED_TEXT_RIGHT_X, targetLabelPos[1] + LABEL_Y_SPACING};
-        String stockStr = "%,d".formatted(MarketInteractive.cachedMarketData.get(this.focusedID).stock());
-        int[] stockPos = {FOCUSED_TEXT_RIGHT_X, stockLabelPos[1] + VALUE_Y_OFFSET};
+        this.textDrawer.setAlign(Align.CENTER);
+        this.textDrawer.setFontSize(NUMS.getFontMedium());
+        this.textDrawer.setColorVal(COLORS.get("silver"));
 
-        this.textDrawer.setText(rarityStr);
-        this.textDrawer.setPos(FOCUSED_RARITY_POS);
+        for (int i=0; i<10; i++) {
+            this.textDrawer.setPos(curListPos);
+
+            if (MarketInteractive.cachedMarketData.get(this.focusedID).size() <= marketIndex) {
+                this.textDrawer.setText(curPrice == 0
+                    ? STRS.getMarketBlankListValue()
+                    : STRS.getMarketListValue().formatted(shortenValue(curPrice, true), curAmount)
+                );
+                this.textDrawer.drawText();
+
+                curListPos[1] += FOCUSED_LIST_Y_OFFSET;
+                curPrice = 0;
+                curAmount = 0;
+
+                continue;
+            }
+
+            MarketData marketData = MarketInteractive.cachedMarketData.get(this.focusedID).get(marketIndex);
+
+            if (curPrice != 0 && curPrice != marketData.price()) {
+                this.textDrawer.setText(STRS.getMarketListValue().formatted(shortenValue(curPrice, true), curAmount));
+                this.textDrawer.drawText();
+
+                curListPos[1] += FOCUSED_LIST_Y_OFFSET;
+                curPrice = marketData.price();
+                curAmount = marketData.amount();
+            } else if (curPrice == 0) {
+                curPrice = marketData.price();
+                curAmount = marketData.amount();
+                i--;
+            } else {
+                curAmount += marketData.amount();
+                i--;
+            }
+
+            marketIndex++;
+        }
+
+        this.textDrawer.setText(STRS.getMarketListTitle());
+        this.textDrawer.setPos(listTitlePos);
         this.textDrawer.setAlign(Align.CENTER);
         this.textDrawer.setFontSize(NUMS.getFontBig());
+        this.textDrawer.setColorVal(COLORS.get("font"));
+        this.textDrawer.drawText();
+
+        this.textDrawer.setText(rarityStr);
+        this.textDrawer.setPos(rarityPos);
+        this.textDrawer.setAlign(Align.CENTER);
+        this.textDrawer.setFontSize(NUMS.getFontMedium());
         this.textDrawer.drawText();
 
         this.textDrawer.setText(itemName);
-        this.textDrawer.setPos(FOCUSED_NAME_POS);
+        this.textDrawer.setPos(namePos);
         this.textDrawer.drawText();
 
-        TextUtil.drawLabel(this.textDrawer, STRS.getMarketBuyLabel(), buyLabelPos);
-        TextUtil.drawValue(this.textDrawer, buyStr, buyPos);
-
-        TextUtil.drawLabel(this.textDrawer, STRS.getMarketSellLabel(), sellLabelPos);
-        TextUtil.drawValue(this.textDrawer, sellStr, sellPos);
-
-        TextUtil.drawLabel(this.textDrawer, STRS.getMarketTargetStockLabel(), targetLabelPos);
-        TextUtil.drawValue(this.textDrawer, targetStr, targetPos);
-
-        TextUtil.drawLabel(this.textDrawer, STRS.getMarketStockLabel(), stockLabelPos);
-        TextUtil.drawValue(this.textDrawer, stockStr, stockPos);
+        TextUtil.drawLabel(this.textDrawer, STRS.getMarketPriceLabel(), priceLabelPos);
+        TextUtil.drawValue(this.textDrawer, priceStr, pricePos);
     }
 
-    private String shortenValue(long value) {
-        String valStr = Long.toString(value);
+    private String shortenValue(long value, boolean focused) {
+        DecimalFormat decFormat = new DecimalFormat("#,###.#");
+        String valStr = decFormat.format(value);
 
-        if (value / 1000000000000000L >= 1) {
-            valStr = value/1000000000000000L + "q";
-        } else if (value / 1000000000000L >= 1) {
-            valStr = value/1000000000000L + "t";
-        } else if (value / 1000000000 >= 1) {
-            valStr = value/1000000000 + "b";
-        } else if (value / 1000000 >= 1) {
-            valStr = value/1000000 + "m";
-        } else if (value / 1000 >= 1) {
-            valStr = value/1000 + "k";
+        if (value >= 1000000000000000L) {
+            valStr = decFormat.format((value / 1000000000000000.0)) + "q";
+        } else if (value >= 1000000000000L) {
+            valStr = decFormat.format((value / 1000000000000.0)) + "t";
+        } else if (value >= 1000000000) {
+            valStr = decFormat.format((value / 1000000000.0)) + "b";
+        } else if (value >= 1000000) {
+            valStr = decFormat.format((value / 1000000.0)) + "m";
+        } else if (value >= 1000 && !focused) {
+            valStr = decFormat.format((value / 1000.0)) + "k";
         }
 
         return valStr;

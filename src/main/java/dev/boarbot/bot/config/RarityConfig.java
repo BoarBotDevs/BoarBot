@@ -28,7 +28,6 @@ public class RarityConfig {
     private boolean givesFirstBoar = false;
     private boolean hidden = false;
     private boolean showEdition = false;
-    private Integer targetStock;
-    private Integer priceAdjustWaitHours;
+    private boolean marketable = false;
     private String[] boars = {};
 }

@@ -2,8 +2,10 @@ package dev.boarbot.entities.boaruser.queries;
 
 import dev.boarbot.api.util.Configured;
 import dev.boarbot.entities.boaruser.BoarUser;
+import dev.boarbot.interactives.boar.market.MarketInteractive;
 import dev.boarbot.util.boar.BoarTag;
 import dev.boarbot.util.boar.BoarUtil;
+import dev.boarbot.util.data.market.MarketDataUtil;
 import dev.boarbot.util.logging.Log;
 import dev.boarbot.util.time.TimeUtil;
 
@@ -91,6 +93,13 @@ public class BoarQueries implements Configured {
 
                         if (curEdition == 1 && RARITIES.get(rarityKey).isGivesFirstBoar()) {
                             this.addFirstBoar(newBoarIDs, connection, bucksGotten, boarEditions, firstBoarIDs);
+                        }
+
+                        boolean addToMarket = RARITIES.get(rarityKey).isMarketable() &&
+                            !MarketInteractive.cachedMarketData.containsKey(boarID);
+
+                        if (addToMarket) {
+                            MarketDataUtil.addNewItem(boarID);
                         }
                     }
 

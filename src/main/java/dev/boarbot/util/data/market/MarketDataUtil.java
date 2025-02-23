@@ -14,9 +14,7 @@ import java.util.concurrent.Semaphore;
 public class MarketDataUtil implements Configured {
     private static final Semaphore semaphore = new Semaphore(1);
 
-    public static Map<String, List<MarketData>> getAllItemData(Connection connection) throws SQLException {
-        Map<String, List<MarketData>> allItemData = new HashMap<>();
-
+    public static void updateAllItemData(Connection connection) throws SQLException {
         String query = """
             SELECT item_id
             FROM market;
@@ -26,17 +24,13 @@ public class MarketDataUtil implements Configured {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     String itemID = resultSet.getString("item_id");
-                    allItemData.put(itemID, getItemData(itemID, false, connection));
+                    updateItemData(itemID, connection);
                 }
             }
         }
-
-        return allItemData;
     }
 
-    public static List<MarketData> getItemData(
-        String itemID, boolean updateCache, Connection connection
-    ) throws SQLException {
+    public static List<MarketData> getItemData(String itemID, Connection connection) throws SQLException {
         List<MarketData> itemData = new ArrayList<>();
 
         String query = """
@@ -61,15 +55,23 @@ public class MarketDataUtil implements Configured {
             }
         }
 
-        if (updateCache) {
-            MarketInteractive.cachedMarketData.put(itemID, itemData);
-        }
-
         return itemData;
     }
 
-    private static void updateItemData(String itemID, Connection connection) throws SQLException {
-        getItemData(itemID, true, connection);
+    public static void addNewItem(String itemID){
+        MarketInteractive.cachedMarketData.putIfAbsent(itemID, new ArrayList<>());
+    }
+
+    public static List<MarketData> updateItemData(String itemID, Connection connection) throws SQLException {
+        semaphore.acquireUninterruptibly();
+
+        try {
+            List<MarketData> itemData = getItemData(itemID, connection);
+            MarketInteractive.cachedMarketData.put(itemID, itemData);
+            return itemData;
+        } finally {
+            semaphore.release();
+        }
     }
 
     public static void sellOfferItem(
@@ -181,10 +183,9 @@ public class MarketDataUtil implements Configured {
                     statement3.executeBatch();
                 }
             }
-
-            updateItemData(itemID, connection);
         } finally {
             semaphore.release();
+            updateItemData(itemID, connection);
         }
     }
 
@@ -211,7 +212,7 @@ public class MarketDataUtil implements Configured {
         """;
 
         try {
-            List<MarketData> itemData = getItemData(itemID, false, connection);
+            List<MarketData> itemData = getItemData(itemID, connection);
             List<MarketData> transactionItemData = new ArrayList<>();
 
             long actualAmount = 0;
@@ -291,10 +292,9 @@ public class MarketDataUtil implements Configured {
                 statement1.executeBatch();
                 statement2.executeUpdate();
             }
-
-            updateItemData(itemID, connection);
         } finally {
             semaphore.release();
+            updateItemData(itemID, connection);
         }
     }
 }

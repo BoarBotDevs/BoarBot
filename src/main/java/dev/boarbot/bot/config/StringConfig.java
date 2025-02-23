@@ -270,10 +270,10 @@ public class StringConfig {
 
     // Market strings
 
-    private String marketBuyLabel = "";
-    private String marketSellLabel = "";
-    private String marketTargetStockLabel = "";
-    private String marketStockLabel = "";
+    private String marketPriceLabel = "";
+    private String marketListTitle = "";
+    private String marketListValue = "";
+    private String marketBlankListValue = "";
     private String marketBuyConfirm = "";
     private String marketSellConfirm = "";
     private String marketNoBucks = "";

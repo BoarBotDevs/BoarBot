@@ -3,14 +3,15 @@ package dev.boarbot.bot;
 import dev.boarbot.BoarBotApp;
 import dev.boarbot.api.util.Configured;
 
+import dev.boarbot.bot.config.RarityConfig;
 import dev.boarbot.bot.config.items.BoarItemConfig;
 import dev.boarbot.bot.config.items.PowerupItemConfig;
 import dev.boarbot.interactives.boar.TopInteractive;
 import dev.boarbot.interactives.boar.market.MarketInteractive;
 import dev.boarbot.listeners.ReadyListener;
+import dev.boarbot.util.data.BoarDataUtil;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.UserDataUtil;
-import dev.boarbot.util.data.market.MarketData;
 import dev.boarbot.util.data.market.MarketDataUtil;
 import dev.boarbot.util.data.top.TopData;
 import dev.boarbot.util.data.top.TopDataUtil;
@@ -239,10 +240,30 @@ public class CacheLoader implements Configured {
 
     public synchronized static void reloadMarketCache() {
         try (Connection connection = DataUtil.getConnection()) {
-            Map<String, List<MarketData>> marketData = MarketDataUtil.getAllItemData(connection);
+            MarketDataUtil.updateAllItemData(connection);
 
-            for (String itemID : marketData.keySet()) {
-                MarketInteractive.cachedMarketData.put(itemID, marketData.get(itemID));
+            for (String powerupID : POWS.keySet()) {
+                boolean addToMarket = POWS.get(powerupID).isMarketable() &&
+                    !MarketInteractive.cachedMarketData.containsKey(powerupID);
+
+                if (addToMarket) {
+                    MarketDataUtil.addNewItem(powerupID);
+                }
+            }
+
+            for (RarityConfig rarity : RARITIES.values()) {
+                if (!rarity.isMarketable()) {
+                    continue;
+                }
+
+                for (String boarID : rarity.getBoars()) {
+                    boolean addToMarket = !MarketInteractive.cachedMarketData.containsKey(boarID) &&
+                        BoarDataUtil.boarExists(boarID, connection);
+
+                    if (addToMarket) {
+                        MarketDataUtil.addNewItem(boarID);
+                    }
+                }
             }
         } catch (SQLException exception) {
             Log.error(CacheLoader.class, "Failed to retrieve market data", exception);
