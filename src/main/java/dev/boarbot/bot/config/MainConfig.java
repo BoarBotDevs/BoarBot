@@ -34,9 +34,9 @@ public class MainConfig {
     private String pingChannel = "";
 
     /**
-     * The news channel ID the channel to send spook messages to
+     * The news channel ID the channel to send hunt messages to
      */
-    private String spookChannel = "";
+    private String huntChannel = "";
 
     /**
      * The channel ID that releases are sent to
