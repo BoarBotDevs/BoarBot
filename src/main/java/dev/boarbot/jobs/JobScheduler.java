@@ -41,6 +41,8 @@ public class JobScheduler {
                 true
             );
 
+            scheduler.scheduleJob(EasterMessageJob.getJob(), EasterMessageJob.getTrigger());
+
             Log.debug(JobScheduler.class, "Jobs successfully scheduled");
         } catch (SchedulerException exception) {
             Log.error(JobScheduler.class, "Failed to schedule one or more jobs", exception);
