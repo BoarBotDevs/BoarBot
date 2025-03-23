@@ -28,13 +28,11 @@ for frame in ImageSequence.Iterator(main_image):
     frame = frame.copy().resize(item_size).convert('RGBA')
     new_frame.paste(frame, item_pos)
 
+    new_frame.info['duration'] = frame.info['duration']
     frames.append(new_frame)
-    durations.append(frame.info['duration'])
 
 output = BytesIO()
-frames[0].save(
-    output, format='GIF', save_all=True, append_images=frames[1:], duration=durations, loop=0, disposal=2
-)
+frames[0].save(output, format='WEBP', save_all=True, append_images=frames[1:], loop=0, lossless=True)
 img_data = output.getvalue()
 
 print(str(base64.b64encode(img_data))[2:-1])
