@@ -24,9 +24,7 @@ public class JobScheduler {
             scheduler.scheduleJob(MarketCacheJob.getJob(), MarketCacheJob.getTrigger());
             scheduler.scheduleJob(MarketAdjustJob.getJob(), MarketAdjustJob.getTrigger());
             scheduler.scheduleJob(WipeJob.getJob(), WipeJob.getTrigger());
-            scheduler.scheduleJob(
-                BlessResetJob.getJob(), Set.of(BlessResetJob.getTrigger1(), BlessResetJob.getTrigger2()), true
-            );
+            scheduler.scheduleJob(BlessResetJob.getJob(), BlessResetJob.getTrigger());
             scheduler.scheduleJob(CleanupJob.getJob(), CleanupJob.getTrigger());
 
             scheduler.scheduleJob(
