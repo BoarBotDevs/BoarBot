@@ -3,6 +3,7 @@ package dev.boarbot.jobs;
 import dev.boarbot.util.data.DataUtil;
 import dev.boarbot.util.data.UserDataUtil;
 import dev.boarbot.util.logging.Log;
+import dev.boarbot.util.time.TimeUtil;
 import lombok.Getter;
 import org.quartz.*;
 
@@ -12,18 +13,16 @@ import java.util.TimeZone;
 
 public class BlessResetJob implements Job {
     @Getter private final static JobDetail job = JobBuilder.newJob(BlessResetJob.class).build();
-
-    @Getter private final static Trigger trigger1 = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 55 23 30 11 ?").inTimeZone(TimeZone.getTimeZone("UTC")))
-        .withIdentity("trigger1")
-        .build();
-    @Getter private final static Trigger trigger2 = TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 55 23 31 12 ?").inTimeZone(TimeZone.getTimeZone("UTC")))
-        .withIdentity("trigger2")
+    @Getter private final static Trigger trigger = TriggerBuilder.newTrigger()
+        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 ? * *").inTimeZone(TimeZone.getTimeZone("UTC")))
         .build();
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
+        if (TimeUtil.isDecember()) {
+            return;
+        }
+
         try (Connection connection = DataUtil.getConnection()) {
             UserDataUtil.resetOtherBless(connection);
         } catch (SQLException exception) {
