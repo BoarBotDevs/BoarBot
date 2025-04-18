@@ -69,6 +69,37 @@ public final class TimeUtil {
         return LocalDate.now(ZoneOffset.UTC).getMonth() == Month.DECEMBER;
     }
 
+    public static boolean isEaster() {
+        return isEaster(LocalDate.now(ZoneOffset.UTC));
+    }
+
+    public static boolean isFirstDayEaster() {
+        return !isEaster(LocalDate.now(ZoneOffset.UTC).minusDays(1));
+    }
+
+    private static boolean isEaster(LocalDate date) {
+        int day = date.getDayOfMonth();
+        int month = date.getMonth().getValue();
+        int year = date.getYear();
+
+        int goldenNumber = year % 19;
+        int century = year / 100;
+        int skippedLeapYears = century / 4;
+        int correctionFactor = (century - (century + 8) / 25 + 1) / 3;
+        int epact = (19 * goldenNumber + century - skippedLeapYears - correctionFactor + 15) % 30;
+        int leapYearCorrection = (year % 100) / 4;
+        int dayOfWeekCorrection = (32 + 2 * (century % 4) + 2 * leapYearCorrection - epact - (year % 4)) % 7;
+        int monthOffset = (goldenNumber + 11 * epact + 22 * dayOfWeekCorrection) / 451;
+
+        int easterMonth = (epact + dayOfWeekCorrection - 7 * monthOffset + 114) / 31;
+        int easterDay = ((epact + dayOfWeekCorrection - 7 * monthOffset + 114) % 31) + 1;
+
+        int nextMonth = (easterDay == 31 && easterMonth == 3) ? 4 : easterMonth;
+        int nextDay = (easterDay == 31) ? 1 : easterDay + 1;
+
+        return (month == easterMonth && day == easterDay) || (month == nextMonth && day == nextDay);
+    }
+
     public static int getDayOfMonth() {
         return LocalDate.now(ZoneOffset.UTC).getDayOfMonth();
     }

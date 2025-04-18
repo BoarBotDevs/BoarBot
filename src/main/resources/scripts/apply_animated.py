@@ -26,13 +26,11 @@ for frame in ImageSequence.Iterator(overlay_image):
     frame = frame.copy().resize(overlay_size).convert('RGBA')
     new_frame.paste(frame, overlay_pos, mask=frame)
 
+    new_frame.info['duration'] = frame.info['duration']
     frames.append(new_frame)
-    durations.append(frame.info['duration'])
 
 output = BytesIO()
-frames[0].save(
-    output, format='GIF', save_all=True, append_images=frames[1:], duration=durations, loop=0, disposal=2
-)
+frames[0].save(output, format='WEBP', save_all=True, append_images=frames[1:], loop=0)
 img_data = output.getvalue()
 
 print(str(base64.b64encode(img_data))[2:-1])

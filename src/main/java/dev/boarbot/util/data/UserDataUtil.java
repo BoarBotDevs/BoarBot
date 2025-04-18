@@ -224,7 +224,8 @@ public class UserDataUtil {
     public static void resetOtherBless(Connection connection) throws SQLException {
         String query = """
             UPDATE users
-            SET other_bless = 0;
+            SET other_bless = 0
+            WHERE other_bless != 0;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
