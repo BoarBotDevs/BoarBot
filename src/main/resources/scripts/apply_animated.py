@@ -30,7 +30,7 @@ for frame in ImageSequence.Iterator(overlay_image):
     frames.append(new_frame)
 
 output = BytesIO()
-frames[0].save(output, format='WEBP', save_all=True, append_images=frames[1:], loop=0, lossless=True)
+frames[0].save(output, format='WEBP', save_all=True, append_images=frames[1:], loop=0)
 img_data = output.getvalue()
 
 print(str(base64.b64encode(img_data))[2:-1])

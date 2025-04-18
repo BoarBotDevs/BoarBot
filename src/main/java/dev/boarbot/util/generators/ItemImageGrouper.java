@@ -86,7 +86,7 @@ public final class ItemImageGrouper implements Configured {
             );
         }
 
-        if (extension.equals("gif")) {
+        if (extension.equals("webp")) {
             ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             ImageIO.write(groupedImage, "png", byteArrayOS);
             resultByteArray = byteArrayOS.toByteArray();
