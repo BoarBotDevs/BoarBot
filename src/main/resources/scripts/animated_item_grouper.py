@@ -29,11 +29,11 @@ for frame in ImageSequence.Iterator(middle_image):
     frame = frame.copy()
     new_frame.paste(frame, (horiz_padding, 0))
 
+    new_frame.info['duration'] = frame.info['duration']
     frames.append(new_frame)
-    durations.append(frame.info['duration'])
 
 output = BytesIO()
-frames[0].save(output, format='GIF', save_all=True, append_images=frames[1:], loop=0, disposal=2, duration=durations)
+frames[0].save(output, format='WEBP', save_all=True, append_images=frames[1:], loop=0)
 img_data = output.getvalue()
 
 print(str(base64.b64encode(img_data))[2:-1])

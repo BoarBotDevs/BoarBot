@@ -118,7 +118,7 @@ public class ItemImageGenerator extends ImageGenerator {
     public ItemImageGenerator generate(boolean forceStatic) throws IOException, URISyntaxException {
         String extension = this.filePath.split("[.]")[1];
 
-        if (extension.equals("gif") && !forceStatic) {
+        if (extension.equals("webp") && !forceStatic) {
             this.generatedImageBytes = BoarBotApp.getBot().getByteCacheMap().get(
                 "animitem" + this.title.toLowerCase().replaceAll("[^a-z]+", "") + this.itemName + this.colorKey
             );
