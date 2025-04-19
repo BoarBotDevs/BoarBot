@@ -39,7 +39,7 @@ public class ReadyListener extends ListenerAdapter implements Configured {
         }
 
         if (huntChannel == null) {
-            Log.warn(this.getClass(), "Invalid spook channel ID. Boar-O-Ween messages are disabled!");
+            Log.warn(this.getClass(), "Invalid hunt channel ID. Boar-O-Ween messages are disabled!");
         }
 
         Log.info(this.getClass(), "Bot is online!", true);

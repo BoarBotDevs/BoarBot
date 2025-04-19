@@ -74,7 +74,7 @@ public final class TimeUtil {
     }
 
     public static boolean isFirstDayEaster() {
-        return !isEaster(LocalDate.now(ZoneOffset.UTC).minusDays(1));
+        return !isEaster(LocalDate.now(ZoneOffset.UTC).minusDays(1)) && isEaster();
     }
 
     private static boolean isEaster(LocalDate date) {
