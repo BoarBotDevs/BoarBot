@@ -144,6 +144,10 @@ public class DailySubcommand extends Subcommand implements Synchronizable {
             );
             this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
 
+            if (TimeUtil.isAnniversary()) {
+                this.boarIDs.add("birthday");
+            }
+
             boarUser.boarQuery().addBoars(
                 this.boarIDs,
                 connection,
