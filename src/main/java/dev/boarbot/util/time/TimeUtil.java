@@ -100,6 +100,10 @@ public final class TimeUtil {
         return (month == easterMonth && day == easterDay) || (month == nextMonth && day == nextDay);
     }
 
+    public static boolean isAnniversary() {
+        return LocalDate.now(ZoneOffset.UTC).getMonth() == Month.JULY && getDayOfMonth() == 1;
+    }
+
     public static int getDayOfMonth() {
         return LocalDate.now(ZoneOffset.UTC).getDayOfMonth();
     }
