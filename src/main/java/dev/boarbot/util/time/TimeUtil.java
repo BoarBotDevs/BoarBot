@@ -101,7 +101,7 @@ public final class TimeUtil {
     }
 
     public static boolean isAnniversary() {
-        return LocalDate.now(ZoneOffset.UTC).getMonth() == Month.JULY && getDayOfMonth() == 1;
+        return LocalDate.now(ZoneOffset.UTC).getMonth() == Month.JULY && getDayOfMonth() <= 2;
     }
 
     public static int getDayOfMonth() {
