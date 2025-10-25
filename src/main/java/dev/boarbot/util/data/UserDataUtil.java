@@ -120,7 +120,7 @@ public class UserDataUtil {
 
     public static synchronized boolean isSpookyAvailable(Connection connection, String obtainType) throws SQLException {
         String query = """
-            SELECT COUNT(*) < 3
+            SELECT COUNT(*) < 5
             FROM collected_boars
             WHERE boar_id = 'spooky' AND original_obtain_type = ?;
         """;
