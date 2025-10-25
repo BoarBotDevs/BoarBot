@@ -22,27 +22,9 @@ public class SpookMessageJob implements Job, Configured {
         .build();
     @Getter private final static Trigger trigger2 = TriggerBuilder.newTrigger()
         .withSchedule(
-            CronScheduleBuilder.cronSchedule("0 0 18 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
+            CronScheduleBuilder.cronSchedule("0 0 19 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
         )
         .withIdentity("trigger2")
-        .build();
-    @Getter private final static Trigger trigger3 = TriggerBuilder.newTrigger()
-        .withSchedule(
-            CronScheduleBuilder.cronSchedule("0 0 20 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
-        )
-        .withIdentity("trigger3")
-        .build();
-    @Getter private final static Trigger trigger4 = TriggerBuilder.newTrigger()
-        .withSchedule(
-            CronScheduleBuilder.cronSchedule("0 0 21 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
-        )
-        .withIdentity("trigger4")
-        .build();
-    @Getter private final static Trigger trigger5 = TriggerBuilder.newTrigger()
-        .withSchedule(
-            CronScheduleBuilder.cronSchedule("0 0 22 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
-        )
-        .withIdentity("trigger5")
         .build();
 
     @Override
@@ -63,9 +45,6 @@ public class SpookMessageJob implements Job, Configured {
             messageStr = switch (triggerName) {
                 case "trigger1" -> STRS.getSpookMessages()[0];
                 case "trigger2" -> STRS.getSpookMessages()[1];
-                case "trigger3" -> STRS.getSpookMessages()[2];
-                case "trigger4" -> STRS.getSpookMessages()[3];
-                case "trigger5" -> STRS.getSpookMessages()[4];
                 default -> null;
             };
         } catch (IndexOutOfBoundsException exception) {
