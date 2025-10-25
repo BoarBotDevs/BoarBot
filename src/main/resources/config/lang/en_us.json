@@ -396,7 +396,7 @@
   "unavailable": "N/A",
   "pullLink": "https:<>api.github.com/repos/BoarBotDevs/BoarBot/pulls?state=closed&base=main",
   "githubImg": "https:<>github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-  "supportStr": "## As BoarBot is not pay-to-win, we rely on donations to support the servers and contributors. Become a member on our Patreon to help out!\nhttps://www.patreon.com/BoarBotDevs\n-# Note: This monetization method is temporary! It will be replaced when cosmetics are added sometime in future.",
+  "supportStr": "## As BoarBot is not pay-to-win, we rely on donations to support the servers and contributors. Become a member on our Patreon to help out!\nhttps://www.patreon.com/BoarBotDevs\n-# Note: This monetization method is temporary! It will be replaced when cosmetics are added in the near future.",
   "guessStrs": [
     "weslayisverycool",
     "nobodywilleverguessthis",
