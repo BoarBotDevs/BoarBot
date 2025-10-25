@@ -31,10 +31,7 @@ public class JobScheduler {
                 SpookMessageJob.getJob(),
                 Set.of(
                     SpookMessageJob.getTrigger1(),
-                    SpookMessageJob.getTrigger2(),
-                    SpookMessageJob.getTrigger3(),
-                    SpookMessageJob.getTrigger4(),
-                    SpookMessageJob.getTrigger5()
+                    SpookMessageJob.getTrigger2()
                 ),
                 true
             );
