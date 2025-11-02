@@ -126,6 +126,9 @@ public class MarketDataUtil implements Configured {
             return;
         }
 
+        // TEMPORARY: Prevent edition stealing by removing initial stock
+        targetStock = 0;
+
         long buyPrice = isPowerup || RARITIES.get(rarityKey).getBaseBucks() == 0
             ? NUMS.getBuyPriceStart()
             : RARITIES.get(rarityKey).getBaseBucks() * 100;
