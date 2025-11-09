@@ -1,4 +1,4 @@
-FROM openjdk:21-bullseye AS base
+FROM openjdk:26-ea-21-bookworm AS base
 
 RUN apt update && \
     apt -y upgrade && \
