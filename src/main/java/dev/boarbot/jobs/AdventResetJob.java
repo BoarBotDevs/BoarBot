@@ -11,8 +11,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.TimeZone;
 
-public class BlessResetJob implements Job {
-    @Getter private final static JobDetail job = JobBuilder.newJob(BlessResetJob.class).build();
+public class AdventResetJob implements Job {
+    @Getter private final static JobDetail job = JobBuilder.newJob(AdventResetJob.class).build();
     @Getter private final static Trigger trigger = TriggerBuilder.newTrigger()
         .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 ? * *").inTimeZone(TimeZone.getTimeZone("UTC")))
         .build();
@@ -25,6 +25,7 @@ public class BlessResetJob implements Job {
 
         try (Connection connection = DataUtil.getConnection()) {
             UserDataUtil.resetOtherBless(connection);
+            UserDataUtil.resetAdventBits(connection);
         } catch (SQLException exception) {
             Log.error(this.getClass(), "Failed to reset blessings", exception);
         }

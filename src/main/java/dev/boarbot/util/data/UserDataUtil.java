@@ -233,6 +233,18 @@ public class UserDataUtil {
         }
     }
 
+    public static void resetAdventBits(Connection connection) throws SQLException {
+        String query = """
+            UPDATE users
+            SET advent_bits = 0
+            WHERE advent_bits != 0;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.executeUpdate();
+        }
+    }
+
     public static void refreshUniques(Connection connection) throws SQLException {
         String query = """
             UPDATE users

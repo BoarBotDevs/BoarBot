@@ -45,6 +45,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
     private final PowerupEventHandler eventHandler;
     private final String powerupID;
     private final Map<String, Long> userTimes;
+    private final Set<String> bannedUsers = new HashSet<>();
     private final Map<String, Boolean> failUsers;
     private final Map<String, InteractionHook> userHooks = new ConcurrentHashMap<>();
     private long sentTimestamp;
@@ -101,7 +102,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                 BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
                 boarUser.passSynchronizedAction(this);
 
-                if (this.failedSynchronized.contains(boarUser.getUserID())) {
+                if (this.failedSynchronized.contains(boarUser.getUserID()) || this.bannedUsers.contains(userID)) {
                     return;
                 }
 
@@ -123,6 +124,10 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
 
                 BoarUser boarUser = BoarUserFactory.getBoarUser(compEvent.getUser());
                 boarUser.passSynchronizedAction(this);
+
+                if (this.bannedUsers.contains(userID)) {
+                    return;
+                }
 
                 embedGen.setStr(STRS.getPowEventFail()).setColor(COLORS.get("font"));
                 compEvent.getHook().sendFiles(embedGen.generate().getFileUpload()).setEphemeral(true)
@@ -205,8 +210,22 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
     public void doSynchronizedAction(BoarUser boarUser) {
         String userID = boarUser.getUserID();
 
-        if (this.userTimes.containsKey(userID)) {
-            try (Connection connection = DataUtil.getConnection()) {
+        try (Connection connection = DataUtil.getConnection()) {
+            long bannedTimestamp = boarUser.baseQuery().getBannedTime(connection);
+
+            if (bannedTimestamp > TimeUtil.getCurMilli()) {
+                this.bannedUsers.add(userID);
+
+                String bannedStr = STRS.getBannedString().formatted(TimeUtil.getTimeDistance(bannedTimestamp, false));
+                FileUpload fileUpload = new EmbedImageGenerator(bannedStr, COLORS.get("error")).generate()
+                    .getFileUpload();
+
+                this.userHooks.get(boarUser.getUserID()).sendFiles(fileUpload).setEphemeral(true)
+                    .queue(null, e -> ExceptionHandler.replyHandle(this.userHooks.get(boarUser.getUserID()), this, e));
+                return;
+            }
+
+            if (this.userTimes.containsKey(userID)) {
                 boarUser.eventQuery().applyPowEventWin(
                     connection, this.powerupID, POWS.get(this.powerupID).getEventAmt(), this.userTimes.get(userID)
                 );
@@ -215,19 +234,16 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
                     boarUser.questQuery().addProgress(QuestType.POW_WIN, 1, connection),
                     boarUser.questQuery().addProgress(QuestType.POW_FAST, this.userTimes.get(userID), connection)
                 );
-            } catch (SQLException exception) {
-                this.failedSynchronized.add(boarUser.getUserID());
-                SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
-                Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event win", exception);
-            }
-        } else if (this.failUsers.containsKey(userID) && this.failUsers.get(userID)) {
-            try (Connection connection = DataUtil.getConnection()) {
+            } else if (this.failUsers.containsKey(userID) && this.failUsers.get(userID)) {
                 boarUser.eventQuery().applyPowEventFail(connection);
-            } catch (SQLException exception) {
-                this.failedSynchronized.add(boarUser.getUserID());
-                SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
-                Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);
             }
+        } catch (SQLException exception) {
+            this.failedSynchronized.add(boarUser.getUserID());
+            SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
+            Log.error(boarUser.getUser(), this.getClass(), "Failed to give Powerup Event fail", exception);
+        } catch (IOException exception) {
+            SpecialReply.sendErrorMessage(this.userHooks.get(boarUser.getUserID()), this);
+            Log.error(boarUser.getUser(), this.getClass(), "Failed to generate banned message", exception);
         }
     }
 
