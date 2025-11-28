@@ -215,6 +215,7 @@ public class PowerupEventInteractive extends EventInteractive implements Synchro
 
             if (bannedTimestamp > TimeUtil.getCurMilli()) {
                 this.bannedUsers.add(userID);
+                this.userTimes.remove(userID);
 
                 String bannedStr = STRS.getBannedString().formatted(TimeUtil.getTimeDistance(bannedTimestamp, false));
                 FileUpload fileUpload = new EmbedImageGenerator(bannedStr, COLORS.get("error")).generate()
