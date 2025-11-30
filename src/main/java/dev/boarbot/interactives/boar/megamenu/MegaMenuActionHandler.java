@@ -604,7 +604,15 @@ class MegaMenuActionHandler implements Configured {
                 claimStr = STRS.getAdventFestiveClaimed()
                     .formatted(BOARS.get("creator").getName(), RARITIES.get("christmas").getName());
 
-                int index = RARITIES.get("christmas").getBoars().length - 5 + (TimeUtil.getDayOfMonth()-1) / 5;
+                List<String> festiveBoars = Arrays.asList(RARITIES.get("christmas").getBoars());
+                int numCurFestive = (int) BOARS.entrySet().stream()
+                    .filter(boar -> festiveBoars.contains(boar.getKey()) && boar.getValue().isSecret())
+                    .count();
+
+                // Hackily estimates the current festive index based on the number available for the current year
+                int curFestiveIndex = (TimeUtil.getDayOfMonth()-1) / (25 / numCurFestive + 1);
+
+                int index = festiveBoars.size() - numCurFestive + curFestiveIndex;
                 List<String> boarIDs = new ArrayList<>();
                 List<Integer> bucksGotten = new ArrayList<>();
                 List<Integer> editions = new ArrayList<>();
