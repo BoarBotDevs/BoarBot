@@ -184,7 +184,7 @@ public class BoarQueries implements Configured {
         return false;
     }
 
-    public boolean hasCurrentHalloween(Connection connection, String boarTag) throws SQLException {
+    public boolean hasBoarWithTag(Connection connection, String boarTag) throws SQLException {
         String query = """
             SELECT 1
             FROM collected_boars

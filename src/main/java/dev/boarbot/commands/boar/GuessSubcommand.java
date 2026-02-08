@@ -37,6 +37,7 @@ public class GuessSubcommand extends Subcommand {
 
     private boolean isTrophyGuess = false;
     private int spookIndex = -1;
+    private boolean isEasterGuess = false;
     private boolean failedSynchronized = false;
 
     private final EmbedImageGenerator embedImageGenerator = new EmbedImageGenerator(
@@ -77,11 +78,15 @@ public class GuessSubcommand extends Subcommand {
             this.spookIndex = spookGuesses.indexOf(input);
         }
 
+        if (TimeUtil.isEaster() && input.equals(STRS.getEasterGuessStr())) {
+            this.isEasterGuess = true;
+        }
+
         if (input.equals(STRS.getTrophyGuessStr())) {
             this.isTrophyGuess = true;
         }
 
-        if (this.spookIndex != -1 || this.isTrophyGuess) {
+        if (this.spookIndex != -1 || this.isEasterGuess || this.isTrophyGuess) {
             try {
                 BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
                 boarUser.passSynchronizedAction(() -> this.giveGuessRewards(boarUser));
@@ -125,7 +130,7 @@ public class GuessSubcommand extends Subcommand {
             } else if (this.spookIndex != -1) {
                 boarTag = "SPOOK_%d_%d".formatted(this.spookIndex+1, TimeUtil.getYear());
 
-                if (!boarUser.boarQuery().hasCurrentHalloween(connection, boarTag)) {
+                if (!boarUser.boarQuery().hasBoarWithTag(connection, boarTag)) {
                     String spookReply = spookReplies.get(this.spookIndex);
 
                     boolean userHasSpooky = boarUser.boarQuery().hasYearlySpooky(connection);
@@ -151,6 +156,14 @@ public class GuessSubcommand extends Subcommand {
                     boarIDs.add(halloweenBoarIDs.get(this.spookIndex));
 
                     this.embedImageGenerator.setStr(spookReply);
+                }
+            } else if (this.isEasterGuess) {
+                boarTag = "EASTER_%d".formatted(TimeUtil.getYear());
+
+                if (!boarUser.boarQuery().hasBoarWithTag(connection, boarTag)) {
+                    boarIDs.add("egg");
+                    boarUser.powQuery().addPowerup(connection, "transmute", 1);
+                    this.embedImageGenerator.setStr(STRS.getEasterGuessReplyStr());
                 }
             }
 
