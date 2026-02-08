@@ -120,7 +120,7 @@ public class UserDataUtil {
 
     public static synchronized boolean isSpookyAvailable(Connection connection, String boarTag) throws SQLException {
         String query = """
-            SELECT COUNT(*) < 3
+            SELECT COUNT(*) < 5
             FROM collected_boars
             WHERE boar_id = 'spooky' AND tag = ?;
         """;
@@ -224,7 +224,20 @@ public class UserDataUtil {
     public static void resetOtherBless(Connection connection) throws SQLException {
         String query = """
             UPDATE users
-            SET other_bless = 0;
+            SET other_bless = 0
+            WHERE other_bless != 0;
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.executeUpdate();
+        }
+    }
+
+    public static void resetAdventBits(Connection connection) throws SQLException {
+        String query = """
+            UPDATE users
+            SET advent_bits = 0
+            WHERE advent_bits != 0;
         """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {

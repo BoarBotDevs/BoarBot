@@ -63,7 +63,7 @@ public class CacheLoader implements Configured {
                     ? ResourceUtil.boarAssetsPath + boarInfo.getStaticFile()
                     : ResourceUtil.boarAssetsPath + boarInfo.getFile();
 
-                if (filePath.endsWith(".gif")) {
+                if (filePath.endsWith(".webp")) {
                     throw new IllegalArgumentException("Animated file is missing a static version");
                 }
 

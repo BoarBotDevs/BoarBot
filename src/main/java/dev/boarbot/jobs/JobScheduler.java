@@ -23,22 +23,19 @@ public class JobScheduler {
             scheduler.scheduleJob(TopCacheJob.getJob(), TopCacheJob.getTrigger());
             scheduler.scheduleJob(MarketCacheJob.getJob(), MarketCacheJob.getTrigger());
             scheduler.scheduleJob(WipeJob.getJob(), WipeJob.getTrigger());
-            scheduler.scheduleJob(
-                BlessResetJob.getJob(), Set.of(BlessResetJob.getTrigger1(), BlessResetJob.getTrigger2()), true
-            );
+            scheduler.scheduleJob(AdventResetJob.getJob(), AdventResetJob.getTrigger());
             scheduler.scheduleJob(CleanupJob.getJob(), CleanupJob.getTrigger());
 
             scheduler.scheduleJob(
                 SpookMessageJob.getJob(),
                 Set.of(
                     SpookMessageJob.getTrigger1(),
-                    SpookMessageJob.getTrigger2(),
-                    SpookMessageJob.getTrigger3(),
-                    SpookMessageJob.getTrigger4(),
-                    SpookMessageJob.getTrigger5()
+                    SpookMessageJob.getTrigger2()
                 ),
                 true
             );
+
+            scheduler.scheduleJob(EasterMessageJob.getJob(), EasterMessageJob.getTrigger());
 
             Log.debug(JobScheduler.class, "Jobs successfully scheduled");
         } catch (SchedulerException exception) {

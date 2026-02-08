@@ -1,9 +1,9 @@
-FROM openjdk:21-bullseye AS base
+FROM openjdk:26-ea-21-bookworm AS base
 
 RUN apt update && \
     apt -y upgrade && \
     apt -y install python3 python3-pip && \
-    pip3 install --force-reinstall "Pillow==10.4.0"
+    pip3 install --break-system-packages --force-reinstall "Pillow==10.4.0"
 
 ENV _JAVA_OPTIONS="-Xmx4g"
 

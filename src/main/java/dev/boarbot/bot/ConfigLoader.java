@@ -72,8 +72,8 @@ class ConfigLoader {
                 config.getMainConfig().setPingChannel(BoarBotApp.getEnv("PING_CHANNEL"));
             }
 
-            if (BoarBotApp.getEnv("SPOOK_CHANNEL") != null) {
-                config.getMainConfig().setSpookChannel(BoarBotApp.getEnv("SPOOK_CHANNEL"));
+            if (BoarBotApp.getEnv("HUNT_CHANNEL") != null) {
+                config.getMainConfig().setHuntChannel(BoarBotApp.getEnv("HUNT_CHANNEL"));
             }
 
             if (BoarBotApp.getEnv("RELEASE_CHANNEL") != null) {

@@ -46,11 +46,11 @@ public class AdventSubcommand extends Subcommand {
             return RewardType.BLESSINGS;
         }
 
-        if (dayOfMonth % 5 == 2) {
+        if (dayOfMonth % 5 == 2 || dayOfMonth % 5 == 3 && dayOfMonth / 5 % 2 == 1) {
             return RewardType.CELESTICON;
         }
 
-        if (dayOfMonth % 5 == 4 && dayOfMonth / 5 % 2 == 0 || dayOfMonth % 5 == 3 && dayOfMonth / 5 % 2 == 1) {
+        if (dayOfMonth % 5 == 4 && dayOfMonth / 5 % 2 == 0) {
             return RewardType.FESTIVE;
         }
 

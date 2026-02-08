@@ -4,7 +4,7 @@
     BoarBot - Discord Bot
     <br>
 </h1>
-<h4 align="center">Gacha, Powerups, Quests, and Economy</h4>
+<h4 align="center">Item Pulls, Powerups, Quests, and Economy</h4>
 
 <p align="center">
     <a href="https://discord.gg/DXSwKHYrCa">

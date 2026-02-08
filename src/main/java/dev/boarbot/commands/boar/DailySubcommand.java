@@ -140,7 +140,12 @@ public class DailySubcommand extends Subcommand {
             boolean isSkyblockGuild = GuildDataUtil.isSkyblockGuild(
                 connection, Objects.requireNonNull(this.interaction.getGuild()).getId()
             );
+
             this.boarIDs = BoarUtil.getRandBoarIDs(blessings, isSkyblockGuild);
+
+            if (TimeUtil.isAnniversary()) {
+                this.boarIDs.addFirst("birthday");
+            }
 
             boarUser.boarQuery().addBoars(
                 this.boarIDs,

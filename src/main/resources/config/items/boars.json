@@ -39,7 +39,7 @@
   },
   "sphere": {
     "name": "Crystal Boarb",
-    "file": "Boarb.gif",
+    "file": "Boarb.webp",
     "staticFile": "BoarbSTATIC.png",
     "description": "This boar inside this orb is said to have time-warping abilities. Encased in crystals, its powers are limited to telling others their future.",
     "classification": "Time Bender",
@@ -78,7 +78,7 @@
   },
   "rickroll": {
     "name": "Rickroll Boar",
-    "file": "RickrollBoar.gif",
+    "file": "RickrollBoar.webp",
     "staticFile": "RickrollBoarSTATIC.png",
     "description": "Spreads the word of <>immaculate<>Creator Boar<>font<>. It'll never give you up, nor will it let you down. It certainly won't run around and... desert you.",
     "classification": "Underling",
@@ -103,7 +103,7 @@
   "boargalos": {
     "name": "Boargalos",
     "pluralName": "Boargaloses",
-    "file": "Boargalos.gif",
+    "file": "Boargalos.webp",
     "staticFile": "BoargalosSTATIC.png",
     "description": "An embodiment of pure entropy. Rarely ever seen in its physical form. This <>truth<>Celesticon<>font<> dictates the randomness of events and items.",
     "classification": "Primordial",

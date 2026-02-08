@@ -55,6 +55,6 @@ public abstract class ImageGenerator implements Configured {
             throw new IllegalStateException("No image has been generated");
         }
 
-        return FileUpload.fromData(this.getBytes(), "unknown" + (this.animated ? ".gif" : ".png"));
+        return FileUpload.fromData(this.getBytes(), "unknown" + (this.animated ? ".webp" : ".png"));
     }
 }
