@@ -22,25 +22,22 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Get Version From PR Title
-        id: pr_info
+      - name: Get Version From Branch Name
+        id: branch_info
         run: |
-          if [[ "${{ github.event.pull_request.title }}" =~ v?([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          echo "Branch: $BRANCH"
+          
+          if [[ "$BRANCH" =~ ^release\/(v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             VERSION="${BASH_REMATCH[1]}"
-            
-            if [[ ! "$VERSION" =~ ^v ]]; then
-              VERSION="v$VERSION"
-            fi
-            
             echo "Extracted version: $VERSION"
             echo "VERSION=$VERSION" >> $GITHUB_ENV
           else
-            echo "No valid version found in PR title."
-            echo "VERSION=" >> $GITHUB_ENV
+            echo "Branch must be release/vX.X.X.X (example: release/v1.2.3.4)"
+            exit 1
           fi
 
       - name: Create Release
-        if: env.VERSION != ''
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
