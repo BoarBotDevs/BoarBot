@@ -36,7 +36,7 @@
 # Commands
 
 ### /boar-manage setup
-Configures details pertaining to your server. 
+Configures details pertaining to your server.
 
 <div align="center">
     <img src="https://github.com/WeslayCodes/BoarBot/assets/60010287/44557f18-f86c-4bb5-ba62-5838f08af25b" alt="Setup command response with three select fields for choosing channels" width="600">
