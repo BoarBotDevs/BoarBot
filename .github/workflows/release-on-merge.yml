@@ -41,5 +41,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
-          name: ${{ github.event.pull_request.title }}
+          name: "${{env.VERSION}} - ${{ github.event.pull_request.title }}"
           body: ${{ github.event.pull_request.body }}
