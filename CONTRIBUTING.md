@@ -115,23 +115,16 @@ Contributors can create and push to branches that match the following patterns:
 
 - feat/*
 - fix/*
-- hotfix/*
 
 No other branches can be created or directly pushed to by Contributors. It is suggested that Contributors use these branches instead of using their own repo for easy visiblity, but that is their prerogative.
 
-### What Is the `dev` Branch?
-The `dev` branch is where Pull Requests should be made. This is where code sits before a release and is used to verify that your code works when integrated with other Contributor code. For a Pull Request to be merged into `dev`, Weslay and one other Contributor must approve the changes. Early on, though, Weslay may bypass this and force merge a PR since there may not be many Contributors.
-> *Note: Contributors do not have to worry about accidentally pushing changes to this branch. It is not possible.*
+### What Is a `release` Branch?
+A `release` branch is where Pull Requests should be made for changes that are targetting a specific release. This is where code sits before a release and is used to verify that your code works when integrated with other Contributor code. For a Pull Request to be merged into a `release` branch, Weslay and one other Contributor must approve the changes.
+> *Note: Contributors do not have to worry about accidentally pushing changes to release branches. It is not possible.*
 
 ### What Is the `main` Branch?
-The `main` branch should not have Pull Requests made to it. This is the branch that contains code that BoarBot is currently running under. Any Pull Requests merged into `main` must be from `dev` and must result in a release.
+The `main` branch should not have Pull Requests made to it. BoarBot automatically updates itself when a new release is merged/created/finalized. Any Pull Requests merged into `main` must be from a `release` branch.
 > *Note: Contributors do not have to worry about accidentally pushing changes to this branch. It is not possible.*
 
 ### How Can Contributors Modify the Config File and Other Assets?
 The config files and assets used by BoarBot are not public. These are stored in a private repository that a select few Contributors have access to.
-
-### Do Changes in the BoarBot Repository Automatically Apply to BoarBot?
-Yes, when a PR is merged into main with a version number in the title, a release is created which is detected by BoarBot, triggering it to deploy new changes.
-
-### Other Notes
-Whenever the `dev` branch is pulled into the `main` branch, the `dev` branch's commit history will be modified to match the `main` branch. This is to prevent weird instances where dev is ahead or behind of main despite having the same commit history.
