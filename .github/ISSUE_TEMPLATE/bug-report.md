@@ -10,13 +10,17 @@ assignees: ''
 ## Platform
 
 I see this issue on:
-[ ] iOS App
-[ ] Android App
-[ ] Windows App
-[ ] Linux App
-[ ] Mac App
-[ ] Chrome Browser
-[ ] Firefox Browser
+[ ] iOS
+[ ] Android
+[ ] Windows
+[ ] Linux
+[ ] macOS
+[ ] Chrome
+[ ] Firefox
+[ ] Safari
+[ ] Edge
+[ ] Opera
+[ ] Brave
 
 ## Current Behavior
 
