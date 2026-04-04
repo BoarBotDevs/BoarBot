@@ -423,8 +423,12 @@
   "spookHasExtraStr": "You received %s<>font<> and <>powerup<>3 %s<>font<>!",
   "spookTitle": "Boar-O-Ween Hunt!",
   "easterMessage": "PLACEHOLDER",
-  "easterGuessStr": "PLACEHOLDER",
-  "easterGuessReplyStr": "PLACEHOLDER",
+  "easterGuessStrs": [
+    "PLACEHOLDER"
+  ],
+  "easterGuessReplyStrs": [
+    "PLACEHOLDER"
+  ],
   "easterTitle": "Egg Hunt!",
   "incorrectGuess": "Your guess didn't match any secret phrases!"
 }
