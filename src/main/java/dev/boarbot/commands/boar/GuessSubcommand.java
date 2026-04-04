@@ -35,10 +35,14 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
     private static final List<String> halloweenBoarStrs = new ArrayList<>();
     private static final String spookyBoarStr = "<>%s<>%s"
         .formatted(BoarUtil.findRarityKey("spooky"), BOARS.get("spooky").getName());
+    private static final List<String> easterGuesses = Arrays.asList(STRS.getEasterGuessStrs());
+    private static final List<String> easterReplies = Arrays.asList(STRS.getEasterGuessReplyStrs());
+    private static final List<String> easterBoarIDs = new ArrayList<>();
+    private static final List<String> easterBoarStrs = new ArrayList<>();
 
     private boolean isTrophyGuess = false;
     private int spookIndex = -1;
-    private boolean isEasterGuess = false;
+    private int easterIndex = -1;
     private boolean failedSynchronized = false;
 
     private final EmbedImageGenerator embedImageGenerator = new EmbedImageGenerator(
@@ -47,9 +51,17 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
 
     static {
         String[] curHalloweenBoarIDs = RARITIES.get("halloween").getBoars();
+
         for (int i=curHalloweenBoarIDs.length-spookGuesses.size(); i<curHalloweenBoarIDs.length; i++) {
             halloweenBoarStrs.add("<>halloween<>" + BOARS.get(curHalloweenBoarIDs[i]).getName());
             halloweenBoarIDs.add(curHalloweenBoarIDs[i]);
+        }
+
+        for (String eventBoarID : RARITIES.get("event").getBoars()) {
+            if (BOARS.get(eventBoarID).getName().toLowerCase().contains("egg")) {
+                easterBoarStrs.add("<>event<>" + BOARS.get(eventBoarID).getName());
+                easterBoarIDs.add(eventBoarID);
+            }
         }
     }
 
@@ -79,15 +91,15 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
             this.spookIndex = spookGuesses.indexOf(input);
         }
 
-        if (TimeUtil.isEaster() && input.equals(STRS.getEasterGuessStr())) {
-            this.isEasterGuess = true;
+        if (TimeUtil.isEaster() && easterGuesses.contains(input)) {
+            this.easterIndex = easterGuesses.indexOf(input);
         }
 
         if (input.equals(STRS.getTrophyGuessStr())) {
             this.isTrophyGuess = true;
         }
 
-        if (this.spookIndex != -1 || this.isEasterGuess || this.isTrophyGuess) {
+        if (this.spookIndex != -1 || this.easterIndex != -1 || this.isTrophyGuess) {
             try {
                 BoarUser boarUser = BoarUserFactory.getBoarUser(this.user);
                 boarUser.passSynchronizedAction(this);
@@ -159,13 +171,16 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
 
                     this.embedImageGenerator.setStr(spookReply);
                 }
-            } else if (this.isEasterGuess) {
-                obtainType = "EASTER_%d".formatted(TimeUtil.getYear());
+            } else if (this.easterIndex != -1) {
+                obtainType = "EASTER_%d_%d".formatted(this.easterIndex+1, TimeUtil.getYear());
 
                 if (!boarUser.boarQuery().hasBoarWithTag(connection, obtainType)) {
-                    boarIDs.add("egg");
+                    String easterReply = easterReplies.get(this.easterIndex) + " " + STRS.getSpookExtraStr()
+                        .formatted(easterBoarStrs.get(this.easterIndex), POWS.get("transmute").getName());
+
+                    boarIDs.add(easterBoarIDs.get(this.easterIndex));
                     boarUser.powQuery().addPowerup(connection, "transmute", 1);
-                    this.embedImageGenerator.setStr(STRS.getEasterGuessReplyStr());
+                    this.embedImageGenerator.setStr(easterReply);
                 }
             }
 

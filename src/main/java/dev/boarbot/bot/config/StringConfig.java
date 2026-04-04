@@ -319,8 +319,8 @@ public class StringConfig {
     private String trophyGuessReplyStr;
     private String trophyTitle;
     private String easterMessage = "";
-    private String easterGuessStr = "";
-    private String easterGuessReplyStr = "";
+    private String[] easterGuessStrs = {};
+    private String[] easterGuessReplyStrs = {};
     private String easterTitle = "";
     private String incorrectGuess = "";
     private String activityStatus = "";
