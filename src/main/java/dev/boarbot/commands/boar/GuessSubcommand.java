@@ -87,9 +87,9 @@ public class GuessSubcommand extends Subcommand implements Synchronizable {
             this.embedImageGenerator.setColor(COLORS.get("font"));
         }
 
-        if (TimeUtil.isHalloween() && spookGuesses.contains(input)) {
-            this.spookIndex = spookGuesses.indexOf(input);
-        }
+//        if (TimeUtil.isHalloween() && spookGuesses.contains(input)) {
+//            this.spookIndex = spookGuesses.indexOf(input);
+//        }
 
         if (TimeUtil.isEaster() && easterGuesses.contains(input)) {
             this.easterIndex = easterGuesses.indexOf(input);

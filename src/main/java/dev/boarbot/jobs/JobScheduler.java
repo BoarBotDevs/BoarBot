@@ -26,16 +26,7 @@ public class JobScheduler {
             scheduler.scheduleJob(WipeJob.getJob(), WipeJob.getTrigger());
             scheduler.scheduleJob(AdventResetJob.getJob(), AdventResetJob.getTrigger());
             scheduler.scheduleJob(CleanupJob.getJob(), CleanupJob.getTrigger());
-
-            scheduler.scheduleJob(
-                SpookMessageJob.getJob(),
-                Set.of(
-                    SpookMessageJob.getTrigger1(),
-                    SpookMessageJob.getTrigger2()
-                ),
-                true
-            );
-
+//            scheduler.scheduleJob(SpookMessageJob.getJob(), SpookMessageJob.getTrigger1());
             scheduler.scheduleJob(EasterMessageJob.getJob(), EasterMessageJob.getTrigger());
 
             Log.debug(JobScheduler.class, "Jobs successfully scheduled");
