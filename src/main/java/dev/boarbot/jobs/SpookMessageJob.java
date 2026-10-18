@@ -20,12 +20,6 @@ public class SpookMessageJob implements Job, Configured {
         )
         .withIdentity("trigger1")
         .build();
-    @Getter private final static Trigger trigger2 = TriggerBuilder.newTrigger()
-        .withSchedule(
-            CronScheduleBuilder.cronSchedule("0 0 19 31 10 ?").inTimeZone(TimeZone.getTimeZone("America/Chicago"))
-        )
-        .withIdentity("trigger2")
-        .build();
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -42,11 +36,7 @@ public class SpookMessageJob implements Job, Configured {
         String messageStr = null;
 
         try {
-            messageStr = switch (triggerName) {
-                case "trigger1" -> STRS.getSpookMessages()[0];
-                case "trigger2" -> STRS.getSpookMessages()[1];
-                default -> null;
-            };
+            messageStr = STRS.getSpookMessages()[0];
         } catch (IndexOutOfBoundsException exception) {
             Log.error(this.getClass(), "Failed to find Boar-O-Ween message to send", exception);
         }
