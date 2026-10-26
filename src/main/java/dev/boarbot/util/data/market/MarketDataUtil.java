@@ -278,12 +278,12 @@ public class MarketDataUtil implements Configured {
         MarketData marketData = getMarketDataItem(itemID, false, connection);
         MarketTransactionData buyData = calculateBuyCost(itemID, marketData, amount);
 
-        if (buyData.cost() > cost) {
-            return MarketTransactionFail.COST;
+        if (buyData.amount() < amount) {
+            return MarketTransactionFail.STOCK;
         }
 
-        if (buyData.stock() < 0) {
-            return MarketTransactionFail.STOCK;
+        if (buyData.cost() > cost) {
+            return MarketTransactionFail.COST;
         }
 
         marketData = new MarketData(
