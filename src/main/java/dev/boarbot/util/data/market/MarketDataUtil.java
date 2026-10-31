@@ -282,7 +282,7 @@ public class MarketDataUtil implements Configured {
             return MarketTransactionFail.COST;
         }
 
-        if (buyData.stock() < 0) {
+        if (buyData.amount() < amount) {
             return MarketTransactionFail.STOCK;
         }
 
