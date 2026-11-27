@@ -63,6 +63,12 @@ public final class GraphicsUtil {
     }
 
     public static Image getImage(String path) throws URISyntaxException, IOException {
+        ImageCacheEntry cacheEntry = imageCache.get(path);
+
+        if (cacheEntry != null) {
+            return imageCache.put(path, new ImageCacheEntry(cacheEntry.image(), TimeUtil.getCurMilli())).image();
+        }
+
         try {
             return imageCache.computeIfAbsent(path, key -> {
                 try {
