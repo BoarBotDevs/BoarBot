@@ -5,7 +5,6 @@ import dev.boarbot.util.graphics.GraphicsUtil;
 import dev.boarbot.util.python.PythonUtil;
 
 import dev.boarbot.util.resource.ResourceUtil;
-import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -19,26 +18,30 @@ public final class ItemImageGrouper implements Configured {
     private static final int HORIZ_PADDING = 135;
     private static final int SHADOW_WIDTH = 35;
 
-    public static FileUpload groupItems(
+    public static String getFileName(List<ItemImageGenerator> itemGens, int page) {
+        return "unknown." + itemGens.get(page).getFilePath().split("[.]")[1];
+    }
+
+    public static byte[] groupItems(
         List<ItemImageGenerator> itemGens, int page
     ) throws IOException, URISyntaxException {
-        byte[] leftImageBytes = null;
-        byte[] middleImageBytes = itemGens.get(page).generate().getBytes();
-        byte[] rightImageBytes = null;
+        BufferedImage leftImage = null;
+        ItemImageGenerator middleGen = itemGens.get(page).generate();
+        BufferedImage rightImage = null;
         byte[] resultByteArray;
 
         String extension = itemGens.get(page).getFilePath().split("[.]")[1];
 
         if (page != 0) {
-            leftImageBytes = itemGens.get(page-1).generate(true).getBytes();
+            leftImage = itemGens.get(page-1).generate(true).getImage();
         }
 
         if (page != itemGens.size()-1) {
-            rightImageBytes = itemGens.get(page+1).generate(true).getBytes();
+            rightImage = itemGens.get(page+1).generate(true).getImage();
         }
 
-        if (leftImageBytes == null && rightImageBytes == null) {
-            return FileUpload.fromData(middleImageBytes, "unknown." + extension);
+        if (leftImage == null && rightImage == null) {
+            return middleGen.getBytes();
         }
 
         int[] smallImageSize = {(int) (IMAGE_SIZE[0] * .9), (int) (IMAGE_SIZE[1] * .9)};
@@ -49,13 +52,8 @@ public final class ItemImageGrouper implements Configured {
         );
         Graphics2D g2d = groupedImage.createGraphics();
 
-        ByteArrayInputStream byteArrayIS;
-
-        if (leftImageBytes != null) {
-            byteArrayIS = new ByteArrayInputStream(leftImageBytes);
-            BufferedImage firstImage = ImageIO.read(byteArrayIS);
-
-            g2d.drawImage(firstImage, 0, smallYPos, smallImageSize[0], smallImageSize[1], null);
+        if (leftImage != null) {
+            g2d.drawImage(leftImage, 0, smallYPos, smallImageSize[0], smallImageSize[1], null);
 
             int[] shadowPos = {HORIZ_PADDING-SHADOW_WIDTH, smallYPos};
             int[] shadowSize = {SHADOW_WIDTH, smallImageSize[1]};
@@ -65,12 +63,9 @@ public final class ItemImageGrouper implements Configured {
             );
         }
 
-        if (rightImageBytes != null) {
-            byteArrayIS = new ByteArrayInputStream(rightImageBytes);
-            BufferedImage lastImage = ImageIO.read(byteArrayIS);
-
+        if (rightImage != null) {
             g2d.drawImage(
-                lastImage,
+                rightImage,
                 IMAGE_SIZE[0] + HORIZ_PADDING*2 - smallImageSize[0],
                 smallYPos,
                 smallImageSize[0],
@@ -87,6 +82,8 @@ public final class ItemImageGrouper implements Configured {
         }
 
         if (extension.equals("webp")) {
+            byte[] middleImageBytes = middleGen.getBytes();
+
             ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             ImageIO.write(groupedImage, "png", byteArrayOS);
             resultByteArray = byteArrayOS.toByteArray();
@@ -100,16 +97,13 @@ public final class ItemImageGrouper implements Configured {
 
             resultByteArray = PythonUtil.getResult(pythonProcess, resultByteArray, middleImageBytes);
         } else {
-            byteArrayIS = new ByteArrayInputStream(middleImageBytes);
-            BufferedImage mainImage = ImageIO.read(byteArrayIS);
-
-            g2d.drawImage(mainImage, HORIZ_PADDING, 0, IMAGE_SIZE[0], IMAGE_SIZE[1], null);
+            g2d.drawImage(middleGen.getImage(), HORIZ_PADDING, 0, IMAGE_SIZE[0], IMAGE_SIZE[1], null);
 
             ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             ImageIO.write(groupedImage, "png", byteArrayOS);
             resultByteArray = byteArrayOS.toByteArray();
         }
 
-        return FileUpload.fromData(resultByteArray, "unknown." + extension);
+        return resultByteArray;
     }
 }

@@ -117,6 +117,7 @@ public class ItemImageGenerator extends ImageGenerator {
 
     public ItemImageGenerator generate(boolean forceStatic) throws IOException, URISyntaxException {
         String extension = this.filePath.split("[.]")[1];
+        this.generatedImage = null;
 
         if (extension.equals("webp") && !forceStatic) {
             this.generatedImageBytes = BoarBotApp.getBot().getByteCacheMap().get(
@@ -240,9 +241,8 @@ public class ItemImageGenerator extends ImageGenerator {
 
         g2d.drawImage(this.generateUserImageData(), ORIGIN[0], ORIGIN[1], null);
 
-        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
-        ImageIO.write(generatedImage, "png", byteArrayOS);
-        this.generatedImageBytes = byteArrayOS.toByteArray();
+        this.generatedImage = generatedImage;
+        this.generatedImageBytes = null;
     }
 
     private BufferedImage generateUserImageData() throws IOException, URISyntaxException {
