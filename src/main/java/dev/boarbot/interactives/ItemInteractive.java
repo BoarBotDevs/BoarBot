@@ -23,25 +23,14 @@ import net.dv8tion.jda.internal.interactions.component.StringSelectMenuImpl;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ItemInteractive extends UserInteractive {
-    private final static int MAX_CACHED_PAGES = 5;
-
     private int page = 0;
     private final List<ItemImageGenerator> itemGens;
     private List<SelectOption> selectableBoars;
 
-    private final Map<Integer, byte[]> pageImageCache = new LinkedHashMap<>(16, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<Integer, byte[]> eldest) {
-            return this.size() > MAX_CACHED_PAGES;
-        }
-    };
+    private final Map<Integer, byte[]> pageImageCache = new HashMap<>();
 
     private final List<String> boarIDs;
     private final List<Integer> boarEditions;

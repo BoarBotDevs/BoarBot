@@ -66,8 +66,7 @@ public final class GraphicsUtil {
         ImageCacheEntry cacheEntry = imageCache.get(path);
 
         if (cacheEntry != null) {
-            imageCache.put(path, new ImageCacheEntry(cacheEntry.image(), TimeUtil.getCurMilli()));
-            return cacheEntry.image();
+            return imageCache.put(path, new ImageCacheEntry(cacheEntry.image(), TimeUtil.getCurMilli())).image();
         }
 
         try {
